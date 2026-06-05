@@ -10,416 +10,453 @@
 html { scroll-behavior: smooth; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  color: #1a1a2e; line-height: 1.7; background: #fff;
+  color: #e4e4e7; line-height: 1.7; background: #09090b; overflow-x: hidden;
 }
 a { text-decoration: none; color: inherit; }
 img { max-width: 100%; display: block; }
 
 /* ===== CSS Variables ===== */
 :root {
-  --primary: #4f46e5;
+  --bg: #09090b;
+  --bg2: #131320;
+  --bg3: #1a1a2e;
+  --card: rgba(255,255,255,0.03);
+  --card-hover: rgba(255,255,255,0.06);
+  --border: rgba(255,255,255,0.06);
+  --border-active: rgba(255,255,255,0.12);
+  --primary: #6366f1;
   --primary-light: #818cf8;
-  --primary-dark: #3730a3;
-  --accent: #06b6d4;
+  --primary-glow: rgba(99,102,241,0.2);
+  --accent: #22d3ee;
   --accent2: #f59e0b;
-  --bg: #f8fafc;
-  --bg2: #eef2ff;
-  --text: #1e293b;
-  --text2: #64748b;
+  --green: #22c55e;
+  --text: #e4e4e7;
+  --text2: #71717a;
+  --text3: #52525b;
   --white: #ffffff;
   --radius: 16px;
-  --shadow: 0 4px 24px rgba(0,0,0,0.08);
-  --shadow-lg: 0 12px 48px rgba(0,0,0,0.12);
+  --radius-sm: 10px;
 }
+::selection { background: rgba(99,102,241,0.3); color: #fff; }
 
 /* ===== Utility ===== */
 .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-.section { padding: 100px 0; }
+.section { padding: 120px 0; }
+.section-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 16px; border-radius: 50px; font-size: 0.8rem; font-weight: 600;
+  letter-spacing: 0.5px; text-transform: uppercase;
+  background: rgba(99,102,241,0.1); color: var(--primary-light);
+  border: 1px solid rgba(99,102,241,0.15); margin-bottom: 20px;
+}
+.section-tag::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
 .section-title {
-  font-size: 2.4rem; font-weight: 800; text-align: center; margin-bottom: 16px;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  font-size: 2.8rem; font-weight: 800; text-align: center;
+  background: linear-gradient(180deg, #fff 0%, #a1a1aa 100%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 16px; letter-spacing: -0.5px;
 }
-.section-sub {
-  font-size: 1.15rem; color: var(--text2); text-align: center;
-  max-width: 680px; margin: 0 auto 60px;
-}
+.section-sub { font-size: 1.1rem; color: var(--text2); text-align: center; max-width: 640px; margin: 0 auto 80px; }
 .btn {
   display: inline-flex; align-items: center; gap: 8px;
-  padding: 14px 36px; border-radius: 50px; font-size: 1rem; font-weight: 600;
-  border: none; cursor: pointer; transition: all 0.3s;
+  padding: 14px 32px; border-radius: 50px; font-size: 0.95rem; font-weight: 600;
+  border: none; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;
 }
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary), var(--primary-light));
-  color: #fff; box-shadow: 0 4px 20px rgba(79,70,229,0.35);
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff; box-shadow: 0 4px 24px rgba(99,102,241,0.35);
 }
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(79,70,229,0.45); }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 36px rgba(99,102,241,0.5); }
 .btn-outline {
-  background: transparent; color: var(--primary);
-  border: 2px solid var(--primary);
+  background: transparent; color: #a1a1aa;
+  border: 1.5px solid rgba(255,255,255,0.1);
 }
-.btn-outline:hover { background: var(--primary); color: #fff; }
-.btn-white {
-  background: rgba(255,255,255,0.15); color: #fff;
-  border: 2px solid rgba(255,255,255,0.4); backdrop-filter: blur(4px);
+.btn-outline:hover { border-color: var(--primary-light); color: #fff; background: rgba(99,102,241,0.08); }
+.btn-ghost {
+  background: rgba(255,255,255,0.04); color: #a1a1aa;
+  border: 1px solid rgba(255,255,255,0.06);
 }
-.btn-white:hover { background: #fff; color: var(--primary); }
+.btn-ghost:hover { background: rgba(255,255,255,0.08); color: #fff; }
 
 /* ===== Nav ===== */
 .nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-  background: rgba(255,255,255,0.92); backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(0,0,0,0.06); transition: all 0.3s;
+  background: rgba(9,9,11,0.8); backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(255,255,255,0.04); transition: all 0.3s;
 }
 .nav-inner {
   max-width: 1200px; margin: 0 auto; padding: 0 24px;
-  display: flex; align-items: center; justify-content: space-between; height: 68px;
+  display: flex; align-items: center; justify-content: space-between; height: 64px;
 }
-.nav-logo { font-size: 1.15rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 10px; }
-.nav-logo img { height: 34px; width: auto; }
+.nav-logo { font-size: 1.05rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px; }
+.nav-logo img { height: 30px; width: auto; }
 .nav-logo .brand-text { display: flex; flex-direction: column; line-height: 1.15; }
-.nav-logo .brand-name { font-size: 1.1rem; font-weight: 700; color: #1e293b; }
-.nav-logo .brand-sub { font-size: 0.68rem; color: var(--text2); font-weight: 400; }
-.nav-links { display: flex; gap: 32px; list-style: none; }
-.nav-links a { font-size: 0.95rem; color: var(--text2); font-weight: 500; transition: color 0.2s; }
-.nav-links a:hover { color: var(--primary); }
-.nav-cta .btn { padding: 10px 24px; font-size: 0.9rem; }
+.nav-logo .brand-name { font-size: 1rem; font-weight: 700; color: #fff; }
+.nav-logo .brand-sub { font-size: 0.62rem; color: var(--text3); font-weight: 400; letter-spacing: 0.5px; }
+.nav-links { display: flex; gap: 36px; list-style: none; }
+.nav-links a { font-size: 0.88rem; color: var(--text2); font-weight: 500; transition: color 0.2s; position: relative; }
+.nav-links a::after {
+  content: ''; position: absolute; bottom: -4px; left: 0; right: 0; height: 2px;
+  background: var(--primary); transform: scaleX(0); transition: transform 0.2s;
+}
+.nav-links a:hover { color: #fff; }
+.nav-links a:hover::after { transform: scaleX(1); }
+.nav-cta .btn { padding: 8px 22px; font-size: 0.85rem; }
 
 /* ===== Hero ===== */
 .hero {
   min-height: 100vh; display: flex; align-items: center;
-  background: linear-gradient(160deg, #0f172a 0%, #1e1b4b 40%, #312e81 100%);
-  position: relative; overflow: hidden; padding-top: 68px;
+  background: #09090b; position: relative; overflow: hidden; padding-top: 64px;
 }
-.hero::before {
-  content: ''; position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 20% 50%, rgba(79,70,229,0.25) 0%, transparent 60%),
-              radial-gradient(ellipse at 80% 20%, rgba(6,182,212,0.2) 0%, transparent 50%);
+.hero-glow {
+  position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.3;
 }
-.hero-particles {
-  position: absolute; inset: 0; overflow: hidden;
-}
-.particle {
-  position: absolute; border-radius: 50%; opacity: 0.15;
-  animation: float linear infinite;
-}
-@keyframes float {
-  0% { transform: translateY(100vh) scale(0); opacity: 0; }
-  10% { opacity: 0.15; }
-  90% { opacity: 0.15; }
-  100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+.hero-glow.g1 { width: 600px; height: 600px; background: var(--primary); top: -200px; right: -100px; }
+.hero-glow.g2 { width: 400px; height: 400px; background: var(--accent); bottom: -100px; left: -50px; animation: glowPulse 8s ease-in-out infinite; }
+@keyframes glowPulse { 0%,100% { opacity: 0.2; transform: scale(1); } 50% { opacity: 0.35; transform: scale(1.15); } }
+.hero-grid {
+  position: absolute; inset: 0; opacity: 0.03;
+  background-image: linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+  background-size: 60px 60px; mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
 }
 .hero-inner {
   position: relative; z-index: 2; max-width: 1200px; margin: 0 auto;
-  padding: 80px 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+  padding: 80px 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
 }
 .hero-badge {
   display: inline-flex; align-items: center; gap: 8px;
-  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 50px; padding: 8px 20px; font-size: 0.85rem; color: rgba(255,255,255,0.8);
-  margin-bottom: 28px; backdrop-filter: blur(4px);
+  background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.15);
+  border-radius: 50px; padding: 8px 20px; font-size: 0.82rem; color: var(--primary-light);
+  margin-bottom: 28px;
 }
-.hero-badge .dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite; }
-@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
-.hero-slogan {
-  font-size: 1.05rem; color: rgba(255,255,255,0.55);
-  margin-bottom: 8px; font-weight: 400; letter-spacing: 0.5px;
-}
+.hero-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; box-shadow: 0 0 8px var(--green); } 50% { opacity: 0.4; box-shadow: 0 0 2px var(--green); } }
 .hero h1 {
-  font-size: 3.5rem; font-weight: 900; color: #fff; line-height: 1.15; margin-bottom: 24px;
+  font-size: 3.8rem; font-weight: 900; color: #fff; line-height: 1.1; margin-bottom: 24px; letter-spacing: -1px;
 }
 .hero h1 .gradient {
-  background: linear-gradient(90deg, #818cf8, #06b6d4, #f59e0b);
+  background: linear-gradient(135deg, #818cf8, #22d3ee, #f59e0b);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
-.hero-desc { font-size: 1.2rem; color: rgba(255,255,255,0.65); margin-bottom: 40px; line-height: 1.8; max-width: 520px; }
-.hero-btns { display: flex; gap: 16px; flex-wrap: wrap; }
+.hero-desc { font-size: 1.1rem; color: var(--text2); margin-bottom: 40px; line-height: 1.8; max-width: 480px; }
+.hero-btns { display: flex; gap: 14px; flex-wrap: wrap; }
 .hero-stats {
-  display: flex; gap: 40px; margin-top: 56px; padding-top: 40px;
-  border-top: 1px solid rgba(255,255,255,0.1);
+  display: flex; gap: 48px; margin-top: 56px; padding-top: 40px;
+  border-top: 1px solid var(--border);
 }
-.hero-stat strong { display: block; font-size: 2rem; color: #fff; font-weight: 800; }
-.hero-stat span { font-size: 0.9rem; color: rgba(255,255,255,0.5); }
-.hero-visual {
-  position: relative; display: flex; justify-content: center; align-items: center;
-}
+.hero-stat { text-align: left; }
+.hero-stat strong { display: block; font-size: 2.2rem; color: #fff; font-weight: 800; letter-spacing: -1px; }
+.hero-stat span { font-size: 0.85rem; color: var(--text2); }
+.hero-visual { position: relative; display: flex; justify-content: center; align-items: center; }
 .hero-card {
-  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 20px; padding: 32px; backdrop-filter: blur(16px);
-  width: 100%; max-width: 480px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  border: 1px solid var(--border); border-radius: 24px; padding: 36px;
+  backdrop-filter: blur(20px); width: 100%; max-width: 460px;
+  box-shadow: 0 0 60px rgba(99,102,241,0.08);
   animation: cardFloat 6s ease-in-out infinite;
 }
-@keyframes cardFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+@keyframes cardFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 .hero-card-header {
-  display: flex; align-items: center; gap: 12px; margin-bottom: 24px;
-  padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: flex; align-items: center; gap: 14px; margin-bottom: 24px;
+  padding-bottom: 20px; border-bottom: 1px solid var(--border);
 }
 .hero-card-avatar {
-  width: 44px; height: 44px; border-radius: 12px;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+  width: 48px; height: 48px; border-radius: 14px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
 }
-.hero-card-header h4 { color: #fff; font-size: 1rem; }
-.hero-card-header p { color: rgba(255,255,255,0.45); font-size: 0.82rem; }
-.hero-card-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.hero-card-header h4 { color: #fff; font-size: 1rem; font-weight: 600; }
+.hero-card-header p { color: var(--text2); font-size: 0.8rem; }
+.hero-card-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
 .metric-item {
-  background: rgba(255,255,255,0.04); border-radius: 12px; padding: 16px; text-align: center;
+  background: rgba(255,255,255,0.02); border-radius: 12px; padding: 18px; text-align: center;
+  border: 1px solid var(--border);
 }
 .metric-item .val { font-size: 1.5rem; font-weight: 800; color: var(--accent); }
-.metric-item .lbl { font-size: 0.78rem; color: rgba(255,255,255,0.45); margin-top: 4px; }
-.hero-card-bar { margin-top: 20px; }
-.bar-label { display: flex; justify-content: space-between; font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-bottom: 8px; }
-.bar-track { height: 8px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; }
+.metric-item .lbl { font-size: 0.75rem; color: var(--text3); margin-top: 4px; }
+.hero-card-bar { margin-top: 18px; }
+.bar-label { display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--text2); margin-bottom: 6px; }
+.bar-track { height: 6px; background: rgba(255,255,255,0.04); border-radius: 3px; overflow: hidden; }
 .bar-fill {
-  height: 100%; border-radius: 4px;
+  height: 100%; border-radius: 3px;
   background: linear-gradient(90deg, var(--primary), var(--accent));
   animation: barGrow 2s ease-out;
 }
 @keyframes barGrow { from { width: 0 !important; } }
-.hero-card-roles { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
+.hero-card-roles { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
 .role-tag {
-  padding: 6px 14px; border-radius: 20px; font-size: 0.78rem;
-  background: rgba(129,140,248,0.15); color: var(--primary-light); border: 1px solid rgba(129,140,248,0.2);
+  padding: 5px 12px; border-radius: 20px; font-size: 0.75rem;
+  background: rgba(129,140,248,0.1); color: var(--primary-light);
+  border: 1px solid rgba(129,140,248,0.15);
 }
 
 /* ===== Pain Points ===== */
 .pain { background: var(--bg); }
-.pain-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.pain-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .pain-card {
-  background: var(--white); border-radius: var(--radius); padding: 36px 28px;
-  border: 1px solid #e2e8f0; transition: all 0.3s; position: relative; overflow: hidden;
+  background: var(--card); border-radius: var(--radius); padding: 32px 28px;
+  border: 1px solid var(--border); transition: all 0.3s; position: relative; overflow: hidden;
 }
 .pain-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
-  background: linear-gradient(90deg, #ef4444, #f59e0b);
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, #ef4444, transparent); opacity: 0;
+  transition: opacity 0.3s;
 }
-.pain-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
+.pain-card:hover::before { opacity: 1; }
+.pain-card:hover { border-color: var(--border-active); background: var(--card-hover); transform: translateY(-2px); }
 .pain-icon {
-  width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center;
-  font-size: 1.6rem; margin-bottom: 20px;
-  background: #fef2f2;
+  width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem; margin-bottom: 20px; background: rgba(239,68,68,0.08);
 }
-.pain-card h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 12px; color: var(--text); }
-.pain-card p { font-size: 0.95rem; color: var(--text2); line-height: 1.7; }
+.pain-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; color: var(--text); }
+.pain-card p { font-size: 0.9rem; color: var(--text2); line-height: 1.7; }
 .pain-card .pain-badge {
-  display: inline-block; margin-top: 16px; padding: 4px 12px; border-radius: 20px;
-  font-size: 0.78rem; font-weight: 600;
-  background: #fef2f2; color: #ef4444;
+  display: inline-flex; margin-top: 14px; padding: 4px 12px; border-radius: 20px;
+  font-size: 0.75rem; font-weight: 600;
+  background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.15);
 }
 
 /* ===== Solution ===== */
-.solution { background: var(--white); }
+.solution { background: var(--bg2); }
 .solution-flow {
   display: flex; align-items: center; justify-content: center; gap: 0;
-  margin: 0 auto 60px; max-width: 900px; flex-wrap: wrap;
+  margin: 0 auto 60px; max-width: 960px; flex-wrap: wrap;
 }
 .flow-step {
-  background: var(--bg2); border: 2px solid #c7d2fe; border-radius: 20px;
-  padding: 28px 24px; text-align: center; width: 180px; position: relative;
+  background: linear-gradient(135deg, rgba(99,102,241,0.05), rgba(99,102,241,0.02));
+  border: 1px solid rgba(99,102,241,0.1); border-radius: 20px;
+  padding: 28px 20px; text-align: center; width: 170px; position: relative;
   transition: all 0.3s;
 }
-.flow-step:hover { border-color: var(--primary); transform: translateY(-4px); box-shadow: var(--shadow); }
+.flow-step:hover { border-color: rgba(99,102,241,0.3); transform: translateY(-4px); background: rgba(99,102,241,0.08); }
 .flow-step .step-num {
   width: 36px; height: 36px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary), var(--primary-light));
-  color: #fff; font-weight: 800; font-size: 0.9rem;
-  display: flex; align-items: center; justify-content: center; margin: 0 auto 14px;
+  background: linear-gradient(135deg, var(--primary), #8b5cf6);
+  color: #fff; font-weight: 800; font-size: 0.85rem;
+  display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;
 }
-.flow-step h4 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
-.flow-step p { font-size: 0.82rem; color: var(--text2); }
+.flow-step h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+.flow-step p { font-size: 0.78rem; color: var(--text2); }
 .flow-arrow {
-  font-size: 1.8rem; color: var(--primary-light); padding: 0 12px;
+  font-size: 1.5rem; color: rgba(99,102,241,0.3); padding: 0 10px;
   animation: arrowBlink 1.5s infinite;
 }
-@keyframes arrowBlink { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
+@keyframes arrowBlink { 0%,100% { opacity: 0.2; } 50% { opacity: 0.7; } }
 .solution-detail {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;
-  background: var(--bg2); border-radius: 24px; padding: 48px; margin-top: 40px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
+  background: linear-gradient(135deg, rgba(99,102,241,0.04), rgba(34,211,238,0.04));
+  border-radius: 24px; padding: 48px; border: 1px solid var(--border); margin-top: 40px;
 }
-.solution-detail h3 { font-size: 1.6rem; font-weight: 800; margin-bottom: 20px; }
-.solution-detail p { color: var(--text2); margin-bottom: 16px; line-height: 1.8; }
+.solution-detail h3 { font-size: 1.5rem; font-weight: 800; margin-bottom: 16px; color: var(--text); }
+.solution-detail p { color: var(--text2); margin-bottom: 14px; line-height: 1.8; font-size: 0.95rem; }
 .solution-detail ul { list-style: none; }
 .solution-detail li {
-  padding: 10px 0; font-size: 0.95rem; color: var(--text);
+  padding: 8px 0; font-size: 0.9rem; color: var(--text2);
   display: flex; align-items: center; gap: 12px;
 }
 .solution-detail li::before {
-  content: '✓'; display: flex; align-items: center; justify-content: center;
-  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
-  background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; font-size: 0.8rem; font-weight: 700;
+  content: ''; display: flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2322c55e' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E") center no-repeat;
+  background-size: 14px;
 }
 .solution-visual {
-  background: var(--white); border-radius: 16px; padding: 28px;
-  box-shadow: var(--shadow);
+  background: var(--card); border-radius: 20px; padding: 32px;
+  border: 1px solid var(--border);
 }
 .solution-visual .sv-header {
-  display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
-  padding-bottom: 16px; border-bottom: 1px solid #e2e8f0;
+  display: flex; align-items: center; gap: 10px; margin-bottom: 24px;
+  padding-bottom: 16px; border-bottom: 1px solid var(--border);
 }
-.sv-dot { width: 12px; height: 12px; border-radius: 50%; }
+.sv-dot { width: 10px; height: 10px; border-radius: 50%; }
 .sv-dot.r { background: #ef4444; }
 .sv-dot.y { background: #f59e0b; }
 .sv-dot.g { background: #22c55e; }
-.sv-bar { display: flex; flex-direction: column; gap: 14px; }
+.sv-bar { display: flex; flex-direction: column; gap: 16px; }
 .sv-row { display: flex; align-items: center; gap: 12px; }
-.sv-row .label { width: 80px; font-size: 0.82rem; color: var(--text2); text-align: right; }
-.sv-row .track { flex: 1; height: 10px; background: #f1f5f9; border-radius: 5px; overflow: hidden; }
-.sv-row .fill { height: 100%; border-radius: 5px; transition: width 1.5s ease; }
-.sv-row .pct { width: 44px; font-size: 0.82rem; font-weight: 700; color: var(--text); }
+.sv-row .label { width: 72px; font-size: 0.8rem; color: var(--text2); text-align: right; }
+.sv-row .track { flex: 1; height: 8px; background: rgba(255,255,255,0.04); border-radius: 4px; overflow: hidden; }
+.sv-row .fill { height: 100%; border-radius: 4px; transition: width 1.5s ease; }
+.sv-row .pct { width: 48px; font-size: 0.8rem; font-weight: 700; color: var(--text); }
 
 /* ===== Features ===== */
 .features { background: var(--bg); }
-.features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px; }
+.features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .feature-card {
-  background: var(--white); border-radius: 20px; padding: 36px;
-  border: 1px solid #e2e8f0; transition: all 0.3s; position: relative; overflow: hidden;
+  background: var(--card); border-radius: 20px; padding: 32px;
+  border: 1px solid var(--border); transition: all 0.3s; position: relative; overflow: hidden;
 }
-.feature-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--primary-light); }
+.feature-card:hover { border-color: var(--border-active); background: var(--card-hover); transform: translateY(-2px); }
 .feature-card .feat-icon {
-  width: 60px; height: 60px; border-radius: 16px; display: flex; align-items: center; justify-content: center;
-  font-size: 1.8rem; margin-bottom: 20px;
+  width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; margin-bottom: 20px;
 }
-.feature-card h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 12px; }
-.feature-card p { font-size: 0.93rem; color: var(--text2); line-height: 1.7; }
-.feature-card .feat-tags { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+.feature-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; color: var(--text); }
+.feature-card p { font-size: 0.88rem; color: var(--text2); line-height: 1.7; }
+.feature-card .feat-tags { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
 .feat-tag {
-  padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
-  background: var(--bg2); color: var(--primary);
+  padding: 4px 12px; border-radius: 20px; font-size: 0.73rem; font-weight: 600;
+  background: rgba(99,102,241,0.08); color: var(--primary-light);
+  border: 1px solid rgba(99,102,241,0.12);
+}
+
+/* ===== Industries ===== */
+.industries { background: var(--bg2); }
+.industries-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+.industry-card {
+  background: var(--card); border-radius: 20px; padding: 28px 20px; text-align: center;
+  border: 1px solid var(--border); transition: all 0.3s; cursor: pointer;
+}
+.industry-card:hover { border-color: var(--border-active); background: var(--card-hover); transform: translateY(-3px); }
+.industry-card .ind-icon {
+  width: 64px; height: 64px; border-radius: 18px; display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem; margin: 0 auto 16px; transition: transform 0.3s;
+}
+.industry-card:hover .ind-icon { transform: scale(1.1); }
+.industry-card h4 { font-size: 1rem; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+.industry-card .ind-desc { font-size: 0.8rem; color: var(--text2); }
+.industry-card .ind-scenarios { display: flex; gap: 6px; margin-top: 14px; flex-wrap: wrap; justify-content: center; }
+.ind-tag {
+  padding: 3px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 500;
+  background: rgba(255,255,255,0.03); color: var(--text3); border: 1px solid var(--border);
 }
 
 /* ===== Roles ===== */
-.roles { background: var(--white); }
-.roles-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; }
+.roles { background: var(--bg); }
+.roles-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
 .role-card {
-  background: var(--bg); border-radius: 20px; padding: 32px 20px; text-align: center;
-  border: 2px solid transparent; transition: all 0.3s;
+  background: var(--card); border-radius: 20px; padding: 28px 18px; text-align: center;
+  border: 1px solid var(--border); transition: all 0.3s;
 }
-.role-card:hover { border-color: var(--primary-light); transform: translateY(-4px); box-shadow: var(--shadow); }
+.role-card:hover { border-color: var(--border-active); background: var(--card-hover); transform: translateY(-3px); }
 .role-card .role-icon {
-  width: 72px; height: 72px; border-radius: 20px; display: flex; align-items: center; justify-content: center;
-  font-size: 2rem; margin: 0 auto 18px;
+  width: 64px; height: 64px; border-radius: 18px; display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem; margin: 0 auto 16px;
 }
-.role-card h4 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
-.role-card .role-courses { font-size: 0.82rem; color: var(--text2); margin-bottom: 14px; }
+.role-card h4 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; color: var(--text); }
+.role-card .role-courses { font-size: 0.78rem; color: var(--text2); margin-bottom: 14px; }
 .role-card .role-list { text-align: left; list-style: none; }
 .role-card .role-list li {
-  font-size: 0.85rem; color: var(--text2); padding: 6px 0; padding-left: 18px; position: relative;
+  font-size: 0.82rem; color: var(--text2); padding: 5px 0; padding-left: 16px; position: relative;
 }
 .role-card .role-list li::before {
-  content: '•'; position: absolute; left: 4px; color: var(--primary-light); font-weight: 700;
+  content: ''; position: absolute; left: 0; top: 11px;
+  width: 6px; height: 6px; border-radius: 50%; background: var(--primary);
 }
 
 /* ===== Advantages ===== */
-.advantages { background: linear-gradient(160deg, #0f172a 0%, #1e1b4b 100%); color: #fff; }
-.advantages .section-title {
-  background: linear-gradient(135deg, #fff, var(--primary-light));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-}
-.advantages .section-sub { color: rgba(255,255,255,0.5); }
-.adv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.advantages { background: var(--bg2); }
+.adv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .adv-card {
-  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 20px; padding: 36px 28px; transition: all 0.3s;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 32px 28px; transition: all 0.3s;
 }
-.adv-card:hover { background: rgba(255,255,255,0.1); transform: translateY(-4px); }
+.adv-card:hover { border-color: var(--border-active); background: var(--card-hover); transform: translateY(-2px); }
 .adv-card .adv-icon {
-  width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center;
-  font-size: 1.5rem; margin-bottom: 20px;
-  background: linear-gradient(135deg, rgba(79,70,229,0.3), rgba(6,182,212,0.3));
-  border: 1px solid rgba(129,140,248,0.3);
+  width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem; margin-bottom: 18px;
+  background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.15);
 }
-.adv-card h4 { font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; }
-.adv-card p { font-size: 0.93rem; color: rgba(255,255,255,0.55); line-height: 1.7; }
+.adv-card h4 { font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; color: var(--text); }
+.adv-card p { font-size: 0.88rem; color: var(--text2); line-height: 1.7; }
 .adv-card .adv-num {
-  font-size: 3rem; font-weight: 900; background: linear-gradient(135deg, var(--primary-light), var(--accent));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; opacity: 0.3;
-  margin-bottom: 12px; line-height: 1;
+  font-size: 2.5rem; font-weight: 900; background: linear-gradient(135deg, rgba(99,102,241,0.4), rgba(34,211,238,0.3));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 8px; line-height: 1; opacity: 0.6;
 }
 
-/* ===== Case Studies / Social Proof ===== */
+/* ===== Social Proof ===== */
 .proof { background: var(--bg); }
-.proof-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.proof-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .proof-card {
-  background: var(--white); border-radius: 20px; padding: 36px 28px;
-  border: 1px solid #e2e8f0; transition: all 0.3s;
+  background: var(--card); border-radius: 20px; padding: 32px 28px;
+  border: 1px solid var(--border); transition: all 0.3s;
 }
-.proof-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
-.proof-stars { color: #f59e0b; font-size: 1rem; margin-bottom: 16px; letter-spacing: 2px; }
-.proof-card blockquote { font-size: 0.95rem; color: var(--text); line-height: 1.8; margin-bottom: 20px; font-style: italic; }
+.proof-card:hover { border-color: var(--border-active); background: var(--card-hover); }
+.proof-stars { color: #f59e0b; font-size: 0.95rem; margin-bottom: 16px; letter-spacing: 1px; }
+.proof-card blockquote { font-size: 0.9rem; color: var(--text); line-height: 1.8; margin-bottom: 20px; font-style: italic; }
 .proof-card .proof-author { display: flex; align-items: center; gap: 12px; }
 .proof-avatar {
   width: 44px; height: 44px; border-radius: 12px;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 0.9rem;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 0.85rem;
 }
-.proof-card .proof-name { font-size: 0.95rem; font-weight: 700; }
-.proof-card .proof-title { font-size: 0.82rem; color: var(--text2); }
+.proof-card .proof-name { font-size: 0.9rem; font-weight: 700; color: var(--text); }
+.proof-card .proof-title { font-size: 0.78rem; color: var(--text2); }
 
-/* ===== Pricing / CTA ===== */
-.pricing { background: var(--white); }
-.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; max-width: 960px; margin: 0 auto; }
+/* ===== Pricing ===== */
+.pricing { background: var(--bg2); }
+.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 960px; margin: 0 auto; }
 .price-card {
-  background: var(--bg); border-radius: 24px; padding: 40px 32px; text-align: center;
-  border: 2px solid transparent; transition: all 0.3s; position: relative;
+  background: var(--card); border-radius: 24px; padding: 40px 32px; text-align: center;
+  border: 1px solid var(--border); transition: all 0.3s; position: relative;
 }
 .price-card.featured {
-  border-color: var(--primary); background: var(--bg2);
-  box-shadow: 0 8px 40px rgba(79,70,229,0.15);
+  border-color: rgba(99,102,241,0.3);
+  background: linear-gradient(135deg, rgba(99,102,241,0.06), rgba(99,102,241,0.02));
+  box-shadow: 0 0 40px rgba(99,102,241,0.08);
 }
 .price-card .price-badge {
   position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
-  background: linear-gradient(135deg, var(--primary), var(--primary-light));
-  color: #fff; padding: 6px 20px; border-radius: 20px; font-size: 0.82rem; font-weight: 700;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff; padding: 6px 20px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
 }
-.price-card h3 { font-size: 1.3rem; font-weight: 800; margin-bottom: 8px; }
-.price-card .price-desc { font-size: 0.9rem; color: var(--text2); margin-bottom: 24px; }
-.price-card .price-val { font-size: 3rem; font-weight: 900; color: var(--primary); margin-bottom: 4px; }
-.price-card .price-unit { font-size: 0.9rem; color: var(--text2); margin-bottom: 28px; }
+.price-card h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 6px; color: var(--text); }
+.price-card .price-desc { font-size: 0.85rem; color: var(--text2); margin-bottom: 24px; }
+.price-card .price-val { font-size: 2.8rem; font-weight: 900; color: #fff; margin-bottom: 4px; }
+.price-card .price-unit { font-size: 0.85rem; color: var(--text2); margin-bottom: 28px; }
 .price-card .price-features { list-style: none; text-align: left; margin-bottom: 32px; }
 .price-card .price-features li {
-  padding: 10px 0; font-size: 0.93rem; color: var(--text);
+  padding: 10px 0; font-size: 0.88rem; color: var(--text2);
   display: flex; align-items: center; gap: 10px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--border);
 }
 .price-card .price-features li:last-child { border-bottom: none; }
-.price-card .price-features li::before { content: '✓'; color: #22c55e; font-weight: 700; }
+.price-card .price-features li::before {
+  content: ''; width: 16px; height: 16px; flex-shrink: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2322c55e' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E") center no-repeat;
+}
 
 /* ===== Final CTA ===== */
 .cta {
-  background: linear-gradient(135deg, var(--primary-dark), var(--primary), #3730a3);
-  padding: 100px 0; text-align: center; position: relative; overflow: hidden;
+  background: var(--bg); padding: 120px 0; text-align: center; position: relative; overflow: hidden;
 }
 .cta::before {
-  content: ''; position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 30% 50%, rgba(6,182,212,0.2), transparent 60%);
+  content: ''; position: absolute; width: 500px; height: 500px; border-radius: 50%;
+  background: rgba(99,102,241,0.15); filter: blur(150px);
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  animation: glowPulse 6s ease-in-out infinite;
 }
-.cta h2 { font-size: 2.6rem; font-weight: 900; color: #fff; margin-bottom: 20px; position: relative; }
-.cta p { font-size: 1.15rem; color: rgba(255,255,255,0.65); margin-bottom: 40px; position: relative; }
-.cta-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; position: relative; }
+.cta h2 { font-size: 2.4rem; font-weight: 900; color: #fff; margin-bottom: 16px; position: relative; }
+.cta p { font-size: 1.05rem; color: var(--text2); margin-bottom: 40px; position: relative; }
+.cta-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; position: relative; }
 .cta-trust {
-  margin-top: 40px; position: relative; display: flex; align-items: center;
-  justify-content: center; gap: 32px; flex-wrap: wrap;
+  margin-top: 48px; position: relative; display: flex; align-items: center;
+  justify-content: center; gap: 24px; flex-wrap: wrap;
 }
-.cta-trust span { font-size: 0.85rem; color: rgba(255,255,255,0.4); }
-.cta-trust-logos { display: flex; gap: 24px; align-items: center; }
+.cta-trust span { font-size: 0.82rem; color: var(--text3); }
+.cta-trust-logos { display: flex; gap: 16px; align-items: center; }
 .cta-trust-logos .logo-placeholder {
-  padding: 8px 20px; background: rgba(255,255,255,0.08); border-radius: 8px;
-  font-size: 0.82rem; color: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.08);
+  padding: 8px 18px; background: var(--card); border-radius: 8px;
+  font-size: 0.78rem; color: var(--text3); border: 1px solid var(--border);
 }
 
 /* ===== Login Modal ===== */
 .login-overlay {
   position: fixed; inset: 0; z-index: 9999;
-  background: rgba(0,0,0,0.55); backdrop-filter: blur(6px);
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);
   display: none; align-items: center; justify-content: center;
   animation: fadeIn .2s ease;
 }
 .login-overlay.show { display: flex; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 .login-modal {
-  background: #fff; border-radius: 20px; padding: 48px 40px 40px;
+  background: linear-gradient(135deg, #1a1a2e, #131320);
+  border-radius: 24px; padding: 48px 40px 40px;
   width: 440px; max-width: 92vw; position: relative;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.2); animation: modalSlideIn .35s ease;
+  border: 1px solid var(--border);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.5); animation: modalSlideIn .35s ease;
 }
 @keyframes modalSlideIn {
   from { opacity: 0; transform: translateY(24px) scale(0.96); }
@@ -427,87 +464,92 @@ img { max-width: 100%; display: block; }
 }
 .login-close {
   position: absolute; top: 16px; right: 20px;
-  background: none; border: none; font-size: 24px;
+  background: none; border: none; font-size: 22px;
   color: var(--text2); cursor: pointer; padding: 4px 8px; line-height: 1;
   transition: color .2s; border-radius: 8px;
 }
-.login-close:hover { color: var(--text); background: var(--bg); }
+.login-close:hover { color: #fff; background: var(--card); }
 .login-modal h2 {
-  font-size: 1.6rem; font-weight: 800; text-align: center; margin-bottom: 6px;
-  color: var(--text);
+  font-size: 1.5rem; font-weight: 800; text-align: center; margin-bottom: 4px;
+  color: #fff;
 }
 .login-modal .login-sub {
-  font-size: 0.9rem; color: var(--text2); text-align: center; margin-bottom: 28px;
+  font-size: 0.85rem; color: var(--text2); text-align: center; margin-bottom: 28px;
 }
-.login-tabs { display: flex; gap: 0; margin-bottom: 28px; border: 1px solid var(--border, #e5e5ea); border-radius: 12px; overflow: hidden; }
+.login-tabs {
+  display: flex; gap: 0; margin-bottom: 28px;
+  border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+}
 .login-tab {
-  flex: 1; padding: 12px 0; text-align: center; font-size: 0.9rem; font-weight: 600;
-  background: var(--bg, #f8fafc); color: var(--text2); cursor: pointer;
+  flex: 1; padding: 12px 0; text-align: center; font-size: 0.88rem; font-weight: 600;
+  background: rgba(255,255,255,0.02); color: var(--text2); cursor: pointer;
   border: none; transition: all .2s;
 }
-.login-tab.active { background: var(--primary); color: #fff; }
-.login-tab:first-child { border-right: 1px solid var(--border, #e5e5ea); }
-.login-field { margin-bottom: 18px; }
+.login-tab.active { background: rgba(99,102,241,0.15); color: #fff; }
+.login-tab:first-child { border-right: 1px solid var(--border); }
+.login-field { margin-bottom: 16px; }
 .login-field label {
-  display: block; font-size: 0.85rem; font-weight: 600; color: var(--text); margin-bottom: 6px;
+  display: block; font-size: 0.82rem; font-weight: 600; color: var(--text2); margin-bottom: 6px;
 }
 .login-field input {
-  width: 100%; padding: 13px 16px; border: 1.5px solid var(--border, #e5e5ea);
-  border-radius: 12px; font-size: 0.95rem; outline: none;
-  transition: border .2s; background: var(--bg, #f8fafc);
+  width: 100%; padding: 13px 16px; border: 1px solid var(--border);
+  border-radius: 12px; font-size: 0.92rem; outline: none; color: #fff;
+  transition: border .2s; background: rgba(255,255,255,0.03);
 }
-.login-field input:focus { border-color: var(--primary); background: #fff; }
+.login-field input::placeholder { color: var(--text3); }
+.login-field input:focus { border-color: var(--primary); background: rgba(99,102,241,0.05); }
 .login-error {
-  background: #fef2f2; color: #dc2626; padding: 10px 14px;
-  border-radius: 10px; font-size: 0.85rem; margin-bottom: 16px; display: none;
+  background: rgba(239,68,68,0.08); color: #f87171; padding: 10px 14px;
+  border-radius: 10px; font-size: 0.82rem; margin-bottom: 14px; display: none;
+  border: 1px solid rgba(239,68,68,0.15);
 }
 .login-error.show { display: block; }
 .login-submit {
-  width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary), var(--primary-light));
-  color: #fff; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700;
+  width: 100%; padding: 14px; background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff; border: none; border-radius: 12px; font-size: 0.95rem; font-weight: 700;
   cursor: pointer; transition: all .3s; margin-top: 4px;
 }
-.login-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(79,70,229,0.35); }
+.login-submit:hover { transform: translateY(-1px); box-shadow: 0 8px 30px rgba(99,102,241,0.4); }
 .login-guest {
   text-align: center; margin-top: 16px; padding-top: 16px;
-  border-top: 1px solid var(--border, #e5e5ea);
+  border-top: 1px solid var(--border);
 }
 .login-guest a {
-  font-size: 0.85rem; color: var(--text2); cursor: pointer;
-  transition: color .2s;
+  font-size: 0.82rem; color: var(--text2); cursor: pointer; transition: color .2s;
 }
-.login-guest a:hover { color: var(--primary); }
+.login-guest a:hover { color: var(--primary-light); }
 .login-role-select {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 18px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px;
 }
 .login-role-opt {
-  padding: 10px 12px; border: 1.5px solid var(--border, #e5e5ea);
-  border-radius: 10px; text-align: center; font-size: 0.85rem; font-weight: 500;
-  cursor: pointer; transition: all .2s; background: var(--bg, #f8fafc);
+  padding: 10px 12px; border: 1px solid var(--border);
+  border-radius: 10px; text-align: center; font-size: 0.82rem; font-weight: 500;
+  cursor: pointer; transition: all .2s; background: rgba(255,255,255,0.02);
   color: var(--text2);
 }
 .login-role-opt.selected {
-  border-color: var(--primary); background: #eef2ff; color: var(--primary);
+  border-color: var(--primary); background: rgba(99,102,241,0.1); color: #fff;
   font-weight: 700;
 }
 .login-role-opt:hover { border-color: var(--primary-light); }
 
 /* ===== Footer ===== */
 .footer {
-  background: #0f172a; padding: 60px 0 30px; color: rgba(255,255,255,0.5);
+  background: #060608; padding: 60px 0 30px; border-top: 1px solid var(--border);
 }
 .footer-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
 .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 40px; }
-.footer-brand h3 { font-size: 1.3rem; font-weight: 800; color: #fff; margin-bottom: 12px; }
-.footer-brand p { font-size: 0.9rem; line-height: 1.7; }
-.footer-col h4 { font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 16px; }
+.footer-brand h3 { font-size: 1.2rem; font-weight: 800; color: #fff; margin-bottom: 12px; }
+.footer-brand p { font-size: 0.85rem; line-height: 1.7; color: var(--text2); }
+.footer-col h4 { font-size: 0.88rem; font-weight: 700; color: #fff; margin-bottom: 14px; }
 .footer-col ul { list-style: none; }
-.footer-col li { padding: 6px 0; }
-.footer-col a { font-size: 0.88rem; color: rgba(255,255,255,0.5); transition: color 0.2s; }
+.footer-col li { padding: 5px 0; }
+.footer-col a { font-size: 0.83rem; color: var(--text3); transition: color 0.2s; }
 .footer-col a:hover { color: var(--primary-light); }
 .footer-bottom {
-  border-top: 1px solid rgba(255,255,255,0.08); padding-top: 24px;
-  display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem;
+  border-top: 1px solid var(--border); padding-top: 24px;
+  display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem;
+  color: var(--text3);
 }
 
 /* ===== Responsive ===== */
@@ -517,10 +559,8 @@ img { max-width: 100%; display: block; }
   .hero-btns { justify-content: center; }
   .hero-stats { justify-content: center; }
   .hero-visual { display: none; }
-  .pain-grid { grid-template-columns: 1fr 1fr; }
-  .features-grid { grid-template-columns: 1fr; }
-  .roles-grid { grid-template-columns: repeat(3, 1fr); }
-  .adv-grid { grid-template-columns: 1fr 1fr; }
+  .pain-grid, .features-grid, .adv-grid { grid-template-columns: 1fr 1fr; }
+  .roles-grid, .industries-grid { grid-template-columns: repeat(3, 1fr); }
   .proof-grid { grid-template-columns: 1fr; }
   .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
   .solution-detail { grid-template-columns: 1fr; }
@@ -529,17 +569,16 @@ img { max-width: 100%; display: block; }
   .footer-grid { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 640px) {
-  .section { padding: 64px 0; }
-  .section-title { font-size: 1.8rem; }
-  .hero h1 { font-size: 2.2rem; }
+  .section { padding: 80px 0; }
+  .section-title { font-size: 2rem; }
+  .hero h1 { font-size: 2.4rem; }
   .nav-links { display: none; }
-  .pain-grid { grid-template-columns: 1fr; }
-  .roles-grid { grid-template-columns: 1fr 1fr; }
-  .adv-grid { grid-template-columns: 1fr; }
+  .pain-grid, .features-grid, .adv-grid { grid-template-columns: 1fr; }
+  .roles-grid, .industries-grid { grid-template-columns: 1fr 1fr; }
   .footer-grid { grid-template-columns: 1fr; }
 }
 
-/* ===== Animations ===== */
+/* ===== Scroll Animations ===== */
 .fade-up {
   opacity: 0; transform: translateY(30px);
   transition: opacity 0.6s ease, transform 0.6s ease;
@@ -561,10 +600,11 @@ img { max-width: 100%; display: block; }
     </a>
     <ul class="nav-links">
       <li><a href="#pain">痛点</a></li>
-      <li><a href="#solution">解决方案</a></li>
-      <li><a href="#features">核心功能</a></li>
-      <li><a href="#roles">适用岗位</a></li>
-      <li><a href="#pricing">服务方案</a></li>
+      <li><a href="#solution">方案</a></li>
+      <li><a href="#features">功能</a></li>
+      <li><a href="#industries">行业</a></li>
+      <li><a href="#roles">岗位</a></li>
+      <li><a href="#pricing">价格</a></li>
     </ul>
     <div class="nav-cta">
       <a href="#" class="btn btn-primary" onclick="event.preventDefault();openLogin()">立即体验</a>
@@ -574,71 +614,60 @@ img { max-width: 100%; display: block; }
 
 <!-- ===== Hero ===== -->
 <section class="hero">
-  <div class="hero-particles" id="particles"></div>
+  <div class="hero-glow g1"></div>
+  <div class="hero-glow g2"></div>
+  <div class="hero-grid"></div>
   <div class="hero-inner">
     <div>
       <div class="hero-badge">
         <span class="dot"></span>
-        企业AI学习一站式服务 · 已服务100+企业
+        企业AI学习一站式服务 · 已服务 100+ 企业
       </div>
-      <p class="hero-slogan">AI达学 AIDAX — 企业AI学习一站式服务</p>
       <h1>让每位员工<br>都成为<span class="gradient">AI高手</span></h1>
       <p class="hero-desc">
-        基于AI能力测评 → 个性化课程推荐 → 实战陪练 → 学习成果验证的闭环体系，
-        帮助企业快速提升全员AI应用能力，让AI真正落地到每个岗位。
+        基于能力测评的个性化AI培训闭环 —— 先诊断短板，再精准推荐课程，
+        配合实战陪练与成果验证，让AI能力真正落地到每个岗位。
       </p>
       <div class="hero-btns">
-        <a href="#" class="btn btn-primary" onclick="event.preventDefault();openLogin()">🚀 免费体验系统</a>
-        <a href="#solution" class="btn btn-white">📖 了解方案</a>
+        <a href="#" class="btn btn-primary" onclick="event.preventDefault();openLogin()">免费体验系统</a>
+        <a href="#solution" class="btn btn-ghost">了解方案</a>
       </div>
       <div class="hero-stats">
-        <div class="hero-stat">
-          <strong>100+</strong>
-          <span>服务企业</span>
-        </div>
-        <div class="hero-stat">
-          <strong>26</strong>
-          <span>专业课程</span>
-        </div>
-        <div class="hero-stat">
-          <strong>5</strong>
-          <span>核心岗位</span>
-        </div>
-        <div class="hero-stat">
-          <strong>95%</strong>
-          <span>满意度</span>
-        </div>
+        <div class="hero-stat"><strong>100+</strong><span>服务企业</span></div>
+        <div class="hero-stat"><strong>30+</strong><span>精品课程</span></div>
+        <div class="hero-stat"><strong>5</strong><span>行业场景</span></div>
+        <div class="hero-stat"><strong>95%</strong><span>满意度</span></div>
       </div>
     </div>
     <div class="hero-visual">
       <div class="hero-card">
         <div class="hero-card-header">
-          <div class="hero-card-avatar">🤖</div>
+          <div class="hero-card-avatar">⟐</div>
           <div>
-            <h4>AI培训管理系统</h4>
+            <h4>AI Training Dashboard</h4>
             <p>实时学习数据看板</p>
           </div>
         </div>
         <div class="hero-card-metrics">
-          <div class="metric-item"><div class="val">87%</div><div class="lbl">平均完成率</div></div>
-          <div class="metric-item"><div class="val">92</div><div class="lbl">平均测评分</div></div>
-          <div class="metric-item"><div class="val">5</div><div class="lbl">覆盖岗位</div></div>
-          <div class="metric-item"><div class="val">26</div><div class="lbl">课程体系</div></div>
+          <div class="metric-item"><div class="val">87%</div><div class="lbl">完成率</div></div>
+          <div class="metric-item"><div class="val">92</div><div class="lbl">平均分</div></div>
+          <div class="metric-item"><div class="val">5</div><div class="lbl">行业场景</div></div>
+          <div class="metric-item"><div class="val">30</div><div class="lbl">课程库</div></div>
         </div>
         <div class="hero-card-bar">
-          <div class="bar-label"><span>研发岗 AI能力达标率</span><span>87%</span></div>
+          <div class="bar-label"><span>研发岗 AI 达标率</span><span>87%</span></div>
           <div class="bar-track"><div class="bar-fill" style="width:87%"></div></div>
         </div>
-        <div class="hero-card-bar" style="margin-top:12px">
-          <div class="bar-label"><span>产品岗 AI能力达标率</span><span>91%</span></div>
+        <div class="hero-card-bar" style="margin-top:10px">
+          <div class="bar-label"><span>产品岗 AI 达标率</span><span>91%</span></div>
           <div class="bar-track"><div class="bar-fill" style="width:91%"></div></div>
         </div>
         <div class="hero-card-roles">
-          <span class="role-tag">研发工程师</span>
-          <span class="role-tag">产品经理</span>
-          <span class="role-tag">运营专员</span>
-          <span class="role-tag">销售顾问</span>
-          <span class="role-tag">HR专家</span>
+          <span class="role-tag">研发</span>
+          <span class="role-tag">产品</span>
+          <span class="role-tag">运营</span>
+          <span class="role-tag">销售</span>
+          <span class="role-tag">HR</span>
         </div>
       </div>
     </div>
@@ -648,43 +677,46 @@ img { max-width: 100%; display: block; }
 <!-- ===== Pain Points ===== -->
 <section class="pain section" id="pain">
   <div class="container">
-    <h2 class="section-title fade-up">企业AI培训面临的核心痛点</h2>
-    <p class="section-sub fade-up">传统培训方式无法解决企业AI落地难题，员工学了大量理论却依然不会用AI提效</p>
+    <div style="text-align:center;margin-bottom:16px">
+      <span class="section-tag">The Problem</span>
+    </div>
+    <h2 class="section-title fade-up">企业 AI 培训面临的核心痛点</h2>
+    <p class="section-sub fade-up">传统培训方式无法解决 AI 落地难题 —— 员工学了理论，却不会实际应用</p>
     <div class="pain-grid">
       <div class="pain-card fade-up">
-        <div class="pain-icon">📚</div>
-        <h3>课程内容千篇一律</h3>
-        <p>所有员工上同样的AI通识课，不懂编程的运营听不懂，懂技术的研发觉得太浅，培训效果极差。</p>
+        <div class="pain-icon">⊡</div>
+        <h3>千人一面，岗位错配</h3>
+        <p>所有员工上同样的 AI 通识课，运营听不懂技术术语，研发觉得内容太浅。</p>
         <span class="pain-badge">岗位适配度低</span>
       </div>
       <div class="pain-card fade-up">
-        <div class="pain-icon">📊</div>
-        <h3>学习效果无法量化</h3>
-        <p>培训完了不知道员工到底掌握了多少，无法评估AI工具对工作效率的实际提升效果。</p>
+        <div class="pain-icon">⊟</div>
+        <h3>效果黑洞，无法量化</h3>
+        <p>培训结束不知道员工掌握了多少，更无法评估 AI 工具对效率的实际提升。</p>
         <span class="pain-badge">缺乏评估体系</span>
       </div>
       <div class="pain-card fade-up">
-        <div class="pain-icon">⏱️</div>
-        <h3>培训周期长见效慢</h3>
-        <p>传统培训需要数周甚至数月，员工学到一半就忘记了，无法快速形成生产力。</p>
+        <div class="pain-icon">⊞</div>
+        <h3>周期漫长，转化率低</h3>
+        <p>数周培训周期，员工边学边忘。据统计，传统培训的知识留存率不足 15%。</p>
         <span class="pain-badge">学习效率低</span>
       </div>
       <div class="pain-card fade-up">
-        <div class="pain-icon">🎯</div>
-        <h3>缺乏实战场景</h3>
-        <p>培训内容与实际工作脱节，员工学完后不知道如何在日常工作中应用AI工具提效。</p>
+        <div class="pain-icon">⊕</div>
+        <h3>脱离实战，学用断层</h3>
+        <p>培训内容与实际工作场景脱节，员工不知道如何将 AI 融入日常工作流。</p>
         <span class="pain-badge">理论与实践脱节</span>
       </div>
       <div class="pain-card fade-up">
-        <div class="pain-icon">👥</div>
-        <h3>个性化程度不足</h3>
-        <p>无法根据每位员工的现有能力水平定制学习路径，导致有人"吃不饱"、有人"跟不上"。</p>
+        <div class="pain-icon">⊗</div>
+        <h3>缺乏个性，"一刀切"</h3>
+        <p>无法根据每个人的现有水平定制学习路径，导致有人"吃不饱"，有人"跟不上"。</p>
         <span class="pain-badge">缺乏个性化</span>
       </div>
       <div class="pain-card fade-up">
-        <div class="pain-icon">💰</div>
-        <h3>培训成本高昂</h3>
-        <p>线下培训需要大量讲师资源，线上课程质量参差不齐，采购成本高且效果难以保障。</p>
+        <div class="pain-icon">⊘</div>
+        <h3>高成本，难持续</h3>
+        <p>外聘讲师、采购课程、组织培训，人均成本数千元，效果却难以持续追踪。</p>
         <span class="pain-badge">投入产出比低</span>
       </div>
     </div>
@@ -694,82 +726,63 @@ img { max-width: 100%; display: block; }
 <!-- ===== Solution ===== -->
 <section class="solution section" id="solution">
   <div class="container">
-    <h2 class="section-title fade-up">颠覆性解决方案</h2>
-    <p class="section-sub fade-up">基于测评的个性化AI培训闭环，让每位员工都能高效掌握AI应用能力</p>
+    <div style="text-align:center;margin-bottom:16px">
+      <span class="section-tag">How it Works</span>
+    </div>
+    <h2 class="section-title fade-up">测评驱动的 AI 培训闭环</h2>
+    <p class="section-sub fade-up">不是"学了什么"而是"能用什么"——先诊断、再对症、后验证</p>
 
     <div class="solution-flow fade-up">
-      <div class="flow-step">
-        <div class="step-num">1</div>
-        <h4>能力测评</h4>
-        <p>5分钟AI能力测评<br>精准定位能力短板</p>
-      </div>
+      <div class="flow-step"><div class="step-num">1</div><h4>能力测评</h4><p>5 分钟定位短板<br>6 维雷达图</p></div>
       <div class="flow-arrow">→</div>
-      <div class="flow-step">
-        <div class="step-num">2</div>
-        <h4>个性推荐</h4>
-        <p>AI分析短板<br>生成专属学习路径</p>
-      </div>
+      <div class="flow-step"><div class="step-num">2</div><h4>智能推荐</h4><p>AI 分析短板<br>生成学习路径</p></div>
       <div class="flow-arrow">→</div>
-      <div class="flow-step">
-        <div class="step-num">3</div>
-        <h4>课程学习</h4>
-        <p>图文+视频课程<br>AI语音陪读</p>
-      </div>
+      <div class="flow-step"><div class="step-num">3</div><h4>课程学习</h4><p>图文+视频<br>数字人讲解</p></div>
       <div class="flow-arrow">→</div>
-      <div class="flow-step">
-        <div class="step-num">4</div>
-        <h4>实战陪练</h4>
-        <p>逐关解锁任务<br>AI提供步骤提示</p>
-      </div>
+      <div class="flow-step"><div class="step-num">4</div><h4>实战陪练</h4><p>逐关解锁任务<br>分步 AI 提示</p></div>
       <div class="flow-arrow">→</div>
-      <div class="flow-step">
-        <div class="step-num">5</div>
-        <h4>成果验证</h4>
-        <p>综合测评考核<br>量化学习成果</p>
-      </div>
+      <div class="flow-step"><div class="step-num">5</div><h4>成果验证</h4><p>综合测评<br>量化培训 ROI</p></div>
     </div>
 
     <div class="solution-detail fade-up">
       <div>
-        <h3>为什么我们的方案更有效？</h3>
-        <p>传统培训是"一刀切"的灌输式教学，而我们的系统基于<span style="color:var(--primary);font-weight:700">能力测评</span>，
-           先识别每位员工的AI能力短板，再<span style="color:var(--primary);font-weight:700">个性化推荐</span>最需要的课程，
-           配合<span style="color:var(--primary);font-weight:700">实战陪练</span>和<span style="color:var(--primary);font-weight:700">成果验证</span>，
-           确保学习效果可量化、可落地。</p>
+        <h3>Why it works</h3>
+        <p>传统培训是"一刀切"式灌输。我们的系统先通过<span style="color:var(--accent);font-weight:700">科学测评</span>
+           精准识别每位员工的 AI 能力短板，再由<span style="color:var(--accent);font-weight:700">AI 引擎</span>
+           生成个性化学习路径，配合<span style="color:var(--accent);font-weight:700">实战关卡</span>和
+           <span style="color:var(--accent);font-weight:700">成果测验</span>，形成完整的能力提升闭环。</p>
         <ul>
-          <li>适配5大核心岗位，每岗5-6门专属课程</li>
-          <li>课程含图文详解+AI配音视频PPT双模式</li>
-          <li>主观题+客观题混合测评，含答案模板与解题提示</li>
-          <li>实时学习数据看板，管理员一目了然</li>
-          <li>支持企业微信/钉钉/飞书集成，快速部署</li>
+          <li>覆盖 5 大核心岗位 × 5 大行业场景，30+ 精品课程</li>
+          <li>图文详解 + 数字人视频讲解，多模态学习体验</li>
+          <li>主客观混合测评，含答案模板与分步解题提示</li>
+          <li>实时管理数据看板，一键导出培训报告</li>
+          <li>支持企业微信 / 钉钉 / 飞书集成，极速部署</li>
         </ul>
       </div>
       <div class="solution-visual">
         <div class="sv-header">
-          <div class="sv-dot r"></div>
-          <div class="sv-dot y"></div>
-          <div class="sv-dot g"></div>
-          <span style="margin-left:8px;font-size:0.85rem;color:#64748b">企业AI培训数据看板</span>
+          <div class="sv-dot r"></div><div class="sv-dot y"></div><div class="sv-dot g"></div>
+          <span style="margin-left:8px;font-size:0.8rem;color:var(--text2)">企业 AI 培训数据看板</span>
         </div>
         <div class="sv-bar">
           <div class="sv-row">
             <div class="label">参训人数</div>
-            <div class="track"><div class="fill" style="width:100%;background:linear-gradient(90deg,#4f46e5,#818cf8);"></div></div>
-            <div class="pct">128人</div>
+            <div class="track"><div class="fill" style="width:100%;background:linear-gradient(90deg,#6366f1,#818cf8)"></div></div>
+            <div class="pct">128</div>
           </div>
           <div class="sv-row">
             <div class="label">完成率</div>
-            <div class="track"><div class="fill" style="width:87%;background:linear-gradient(90deg,#06b6d4,#22d3ee);"></div></div>
+            <div class="track"><div class="fill" style="width:87%;background:linear-gradient(90deg,#22d3ee,#67e8f9)"></div></div>
             <div class="pct">87%</div>
           </div>
           <div class="sv-row">
             <div class="label">平均分</div>
-            <div class="track"><div class="fill" style="width:92%;background:linear-gradient(90deg,#f59e0b,#fbbf24);"></div></div>
-            <div class="pct">92分</div>
+            <div class="track"><div class="fill" style="width:92%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div></div>
+            <div class="pct">92</div>
           </div>
           <div class="sv-row">
-            <div class="label">能力达标</div>
-            <div class="track"><div class="fill" style="width:78%;background:linear-gradient(90deg,#22c55e,#4ade80);"></div></div>
+            <div class="label">达标率</div>
+            <div class="track"><div class="fill" style="width:78%;background:linear-gradient(90deg,#22c55e,#4ade80)"></div></div>
             <div class="pct">78%</div>
           </div>
         </div>
@@ -781,67 +794,99 @@ img { max-width: 100%; display: block; }
 <!-- ===== Features ===== -->
 <section class="features section" id="features">
   <div class="container">
-    <h2 class="section-title fade-up">六大核心功能</h2>
-    <p class="section-sub fade-up">覆盖培训全流程，打造完整的企业AI能力提升闭环</p>
+    <div style="text-align:center;margin-bottom:16px">
+      <span class="section-tag">Core Features</span>
+    </div>
+    <h2 class="section-title fade-up">六大核心能力</h2>
+    <p class="section-sub fade-up">从诊断到验证，覆盖 AI 培训全链路</p>
     <div class="features-grid">
       <div class="feature-card fade-up">
-        <div class="feat-icon" style="background:#eef2ff">🎯</div>
+        <div class="feat-icon" style="background:rgba(99,102,241,0.1)">🎯</div>
         <h3>智能能力测评</h3>
-        <p>基于5大岗位分别设计测评题目，5分钟快速定位员工在Prompt工程、AI工具使用、数据分析、自动化等维度的能力短板，生成6维能力雷达图。</p>
-        <div class="feat-tags">
-          <span class="feat-tag">5岗位×5题</span>
-          <span class="feat-tag">6维雷达图</span>
-          <span class="feat-tag">即时出结果</span>
-        </div>
+        <p>5 岗位差异化题目，5 分钟精准定位 Prompt 工程、工具使用、数据分析等 6 维能力短板，生成雷达图。</p>
+        <div class="feat-tags"><span class="feat-tag">5岗位×5题</span><span class="feat-tag">6维雷达图</span><span class="feat-tag">即时出结果</span></div>
       </div>
       <div class="feature-card fade-up">
-        <div class="feat-icon" style="background:#ecfdf5">📚</div>
+        <div class="feat-icon" style="background:rgba(34,211,238,0.1)">📚</div>
         <h3>个性化课程推荐</h3>
-        <p>根据测评结果，AI自动分析能力短板，按优先级推荐最需要学习的课程。每门课程含完整图文内容和视频PPT，支持AI语音朗读。</p>
-        <div class="feat-tags">
-          <span class="feat-tag">26门课程</span>
-          <span class="feat-tag">智能排序</span>
-          <span class="feat-tag">语音陪读</span>
-        </div>
+        <p>AI 引擎分析测评结果，按优先级推荐最需要补强的课程。图文+视频双模式，支持数字人讲解。</p>
+        <div class="feat-tags"><span class="feat-tag">30+门课程</span><span class="feat-tag">智能排序</span><span class="feat-tag">数字人讲师</span></div>
       </div>
       <div class="feature-card fade-up">
-        <div class="feat-icon" style="background:#fefce8">🎬</div>
-        <h3>视频PPT课程</h3>
-        <p>每门视频课程含5张专业幻灯片，AI自动生成讲解语音，支持字幕显示、语速调节、自动播放，学习体验媲美真实课堂。</p>
-        <div class="feat-tags">
-          <span class="feat-tag">AI配音</span>
-          <span class="feat-tag">实时字幕</span>
-          <span class="feat-tag">PPT动画</span>
-        </div>
+        <div class="feat-icon" style="background:rgba(245,158,11,0.1)">🎬</div>
+        <h3>数字人视频课程</h3>
+        <p>数字人讲师自然讲解，实时字幕、语速调节、自动播放。学习体验媲美真人课堂，可无限回看。</p>
+        <div class="feat-tags"><span class="feat-tag">AI数字人</span><span class="feat-tag">实时字幕</span><span class="feat-tag">PPT动画</span></div>
       </div>
       <div class="feature-card fade-up">
-        <div class="feat-icon" style="background:#f0f9ff">🏋️</div>
+        <div class="feat-icon" style="background:rgba(34,197,94,0.1)">🏋️</div>
         <h3>实战关卡陪练</h3>
-        <p>每门课程配备2-3个实战任务关卡，逐关解锁。AI提供分步提示和参考答案，让员工在实操中真正掌握AI应用技能。</p>
-        <div class="feat-tags">
-          <span class="feat-tag">逐关解锁</span>
-          <span class="feat-tag">步骤提示</span>
-          <span class="feat-tag">参考答案</span>
-        </div>
+        <p>每门课配备 2-3 个实战任务关卡，逐关解锁。AI 提供分步提示和参考答案，学以致用。</p>
+        <div class="feat-tags"><span class="feat-tag">逐关解锁</span><span class="feat-tag">步骤提示</span><span class="feat-tag">参考答案</span></div>
       </div>
       <div class="feature-card fade-up">
-        <div class="feat-icon" style="background:#fdf2f8">✅</div>
+        <div class="feat-icon" style="background:rgba(236,72,153,0.1)">✅</div>
         <h3>综合成果测验</h3>
-        <p>培训结束后进行综合测评，含3道客观选择题+2道主观题，主观题提供答案模板和分步解题提示，全面验证学习成果。</p>
-        <div class="feat-tags">
-          <span class="feat-tag">混合题型</span>
-          <span class="feat-tag">答案模板</span>
-          <span class="feat-tag">自动评分</span>
-        </div>
+        <p>3 道客观选择题 + 2 道主观实操题，主观题提供答案模板和分步解题提示，全面验证学习成果。</p>
+        <div class="feat-tags"><span class="feat-tag">混合题型</span><span class="feat-tag">答案模板</span><span class="feat-tag">自动评分</span></div>
       </div>
       <div class="feature-card fade-up">
-        <div class="feat-icon" style="background:#f5f3ff">📊</div>
+        <div class="feat-icon" style="background:rgba(99,102,241,0.1)">📊</div>
         <h3>管理数据看板</h3>
-        <p>管理员可实时查看全员参训数据：参训人数、课程完成率、测评平均分、各岗位分布等，学习成果一目了然，方便汇报与优化。</p>
-        <div class="feat-tags">
-          <span class="feat-tag">实时数据</span>
-          <span class="feat-tag">岗位分析</span>
-          <span class="feat-tag">导出报告</span>
+        <p>实时全员参训数据：完成率、测评分数、岗位分布。一键导出报告，方便管理层汇报与策略优化。</p>
+        <div class="feat-tags"><span class="feat-tag">实时数据</span><span class="feat-tag">岗位分析</span><span class="feat-tag">导出报告</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Industries ===== -->
+<section class="industries section" id="industries">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:16px">
+      <span class="section-tag">Industry Scenarios</span>
+    </div>
+    <h2 class="section-title fade-up">覆盖 5 大行业场景</h2>
+    <p class="section-sub fade-up">每个行业配备专属 AI 应用场景课程，与岗位角色形成"场景 × 岗位"矩阵式培训体系</p>
+    <div class="industries-grid">
+      <div class="industry-card fade-up">
+        <div class="ind-icon" style="background:rgba(99,102,241,0.1)">🏦</div>
+        <h4>金融数字化场景</h4>
+        <div class="ind-desc">银行 · 保险 · 证券</div>
+        <div class="ind-scenarios">
+          <span class="ind-tag">智能风控</span><span class="ind-tag">AI投研</span><span class="ind-tag">合规审查</span>
+        </div>
+      </div>
+      <div class="industry-card fade-up">
+        <div class="ind-icon" style="background:rgba(34,211,238,0.1)">🚗</div>
+        <h4>智能汽车场景</h4>
+        <div class="ind-desc">整车 · 智驾 · 供应链</div>
+        <div class="ind-scenarios">
+          <span class="ind-tag">智能座舱</span><span class="ind-tag">自动驾驶</span><span class="ind-tag">车联网</span>
+        </div>
+      </div>
+      <div class="industry-card fade-up">
+        <div class="ind-icon" style="background:rgba(245,158,11,0.1)">⚙️</div>
+        <h4>先进制造场景</h4>
+        <div class="ind-desc">半导体 · 精密制造 · IoT</div>
+        <div class="ind-scenarios">
+          <span class="ind-tag">质量检测</span><span class="ind-tag">预测维护</span><span class="ind-tag">数字孪生</span>
+        </div>
+      </div>
+      <div class="industry-card fade-up">
+        <div class="ind-icon" style="background:rgba(34,197,94,0.1)">📱</div>
+        <h4>消费电子场景</h4>
+        <div class="ind-desc">手机 · 家电 · 可穿戴</div>
+        <div class="ind-scenarios">
+          <span class="ind-tag">产品创新</span><span class="ind-tag">用户体验</span><span class="ind-tag">供应链</span>
+        </div>
+      </div>
+      <div class="industry-card fade-up">
+        <div class="ind-icon" style="background:rgba(236,72,153,0.1)">🛒</div>
+        <h4>日化快消场景</h4>
+        <div class="ind-desc">个护 · 食品 · 零售</div>
+        <div class="ind-scenarios">
+          <span class="ind-tag">精准营销</span><span class="ind-tag">消费者洞察</span><span class="ind-tag">渠道优化</span>
         </div>
       </div>
     </div>
@@ -851,68 +896,75 @@ img { max-width: 100%; display: block; }
 <!-- ===== Roles ===== -->
 <section class="roles section" id="roles">
   <div class="container">
-    <h2 class="section-title fade-up">覆盖5大核心岗位</h2>
-    <p class="section-sub fade-up">每个岗位配备专属AI课程体系，确保内容贴合实际工作场景</p>
+    <div style="text-align:center;margin-bottom:16px">
+      <span class="section-tag">Role-based Training</span>
+    </div>
+    <h2 class="section-title fade-up">覆盖 5 大核心岗位</h2>
+    <p class="section-sub fade-up">每个岗位配备专属 AI 课程体系，匹配行业场景，确保内容与实际工作紧密结合</p>
     <div class="roles-grid">
       <div class="role-card fade-up">
-        <div class="role-icon" style="background:#eef2ff">💻</div>
+        <div class="role-icon" style="background:rgba(99,102,241,0.1)">💻</div>
         <h4>研发工程师</h4>
-        <div class="role-courses">6门课程</div>
+        <div class="role-courses">6 门课程</div>
         <ul class="role-list">
-          <li>AI辅助代码生成</li>
-          <li>AI代码审查与优化</li>
-          <li>AI自动化测试</li>
-          <li>AI辅助技术文档</li>
-          <li>AI驱动需求分析</li>
-          <li>AI运维与监控</li>
+          <li>AI 辅助代码生成与重构</li>
+          <li>AI 代码审查与安全优化</li>
+          <li>AI 自动化测试策略</li>
+          <li>AI 技术文档与知识管理</li>
+          <li>AI 驱动需求分析</li>
+          <li>AI 运维与异常监控</li>
         </ul>
       </div>
       <div class="role-card fade-up">
-        <div class="role-icon" style="background:#ecfdf5">📋</div>
+        <div class="role-icon" style="background:rgba(34,211,238,0.1)">📋</div>
         <h4>产品经理</h4>
-        <div class="role-courses">5门课程</div>
+        <div class="role-courses">6 门课程</div>
         <ul class="role-list">
-          <li>AI产品需求分析</li>
-          <li>AI竞品分析方法</li>
-          <li>AI产品原型设计</li>
-          <li>AI数据驱动决策</li>
-          <li>AI用户体验优化</li>
+          <li>AI 赋能需求挖掘与分析</li>
+          <li>AI 竞品与市场分析方法</li>
+          <li>AI 辅助产品原型设计</li>
+          <li>AI 数据驱动决策</li>
+          <li>AI 用户体验与增长策略</li>
+          <li>AI 产品 Roadmap 规划</li>
         </ul>
       </div>
       <div class="role-card fade-up">
-        <div class="role-icon" style="background:#fefce8">📣</div>
+        <div class="role-icon" style="background:rgba(245,158,11,0.1)">📣</div>
         <h4>运营专员</h4>
-        <div class="role-courses">5门课程</div>
+        <div class="role-courses">6 门课程</div>
         <ul class="role-list">
-          <li>AI内容创作与编辑</li>
-          <li>AI社交媒体运营</li>
-          <li>AI用户增长策略</li>
-          <li>AI数据分析与洞察</li>
-          <li>AI活动策划执行</li>
+          <li>AI 内容创作与多平台分发</li>
+          <li>AI 社交媒体与私域运营</li>
+          <li>AI 用户增长与留存策略</li>
+          <li>AI 数据洞察与运营分析</li>
+          <li>AI 活动策划与效果评估</li>
+          <li>AI 客服与智能对话设计</li>
         </ul>
       </div>
       <div class="role-card fade-up">
-        <div class="role-icon" style="background:#f0f9ff">🤝</div>
+        <div class="role-icon" style="background:rgba(34,197,94,0.1)">💼</div>
         <h4>销售顾问</h4>
-        <div class="role-courses">5门课程</div>
+        <div class="role-courses">6 门课程</div>
         <ul class="role-list">
-          <li>AI客户画像构建</li>
-          <li>AI销售话术优化</li>
-          <li>AI销售数据分析</li>
-          <li>AI CRM与自动化</li>
-          <li>AI谈判策略辅助</li>
+          <li>AI 客户画像与精准营销</li>
+          <li>AI 销售话术智能优化</li>
+          <li>AI 销售漏斗与预测分析</li>
+          <li>AI CRM 自动化工作流</li>
+          <li>AI 谈判与异议处理策略</li>
+          <li>AI 销售复盘与经验沉淀</li>
         </ul>
       </div>
       <div class="role-card fade-up">
-        <div class="role-icon" style="background:#fdf2f8">👥</div>
-        <h4>HR专家</h4>
-        <div class="role-courses">5门课程</div>
+        <div class="role-icon" style="background:rgba(236,72,153,0.1)">👥</div>
+        <h4>HR 专家</h4>
+        <div class="role-courses">6 门课程</div>
         <ul class="role-list">
-          <li>AI招聘与简历筛选</li>
-          <li>AI人才画像与评估</li>
-          <li>AI培训需求分析</li>
-          <li>AI员工关怀与沟通</li>
-          <li>AI人力资源数据分析</li>
+          <li>AI 招聘与智能筛选</li>
+          <li>AI 人才评估与发展规划</li>
+          <li>AI 培训需求分析与设计</li>
+          <li>AI 员工体验与关怀</li>
+          <li>AI 人效数据分析</li>
+          <li>AI 组织诊断与文化洞察</li>
         </ul>
       </div>
     </div>
@@ -922,45 +974,18 @@ img { max-width: 100%; display: block; }
 <!-- ===== Advantages ===== -->
 <section class="advantages section" id="advantages">
   <div class="container">
-    <h2 class="section-title fade-up">为什么选择我们</h2>
-    <p class="section-sub fade-up">四大核心优势，让企业AI培训真正落地见效</p>
+    <div style="text-align:center;margin-bottom:16px">
+      <span class="section-tag">Why AIDAX</span>
+    </div>
+    <h2 class="section-title fade-up">为什么选择 AI 达学</h2>
+    <p class="section-sub fade-up">六大差异化优势，让企业 AI 培训不再是成本中心</p>
     <div class="adv-grid">
-      <div class="adv-card fade-up">
-        <div class="adv-num">01</div>
-        <div class="adv-icon">🎯</div>
-        <h4>真正个性化</h4>
-        <p>不是简单的"选课式"学习，而是通过科学测评精准识别能力短板，为每位员工生成专属学习路径，确保学的都是最需要的。</p>
-      </div>
-      <div class="adv-card fade-up">
-        <div class="adv-num">02</div>
-        <div class="adv-icon">🏋️</div>
-        <h4>实战导向</h4>
-        <p>每门课程都配备实战任务关卡，员工在"做"中"学"，AI提供实时提示和参考答案，确保学以致用、即学即用。</p>
-      </div>
-      <div class="adv-card fade-up">
-        <div class="adv-num">03</div>
-        <div class="adv-icon">📊</div>
-        <h4>数据驱动</h4>
-        <p>从能力测评到学习过程再到成果验证，全流程数据化。管理员可实时查看学习数据，量化培训ROI，优化培训策略。</p>
-      </div>
-      <div class="adv-card fade-up">
-        <div class="adv-num">04</div>
-        <div class="adv-icon">🚀</div>
-        <h4>极速部署</h4>
-        <p>纯前端系统，无需服务器部署，浏览器直接打开即用。支持企业微信/钉钉/飞书集成，1天内完成全员开通。</p>
-      </div>
-      <div class="adv-card fade-up">
-        <div class="adv-num">05</div>
-        <div class="adv-icon">🎬</div>
-        <h4>沉浸式学习</h4>
-        <p>视频课程含AI配音、实时字幕、PPT幻灯片，学习体验媲美真实课堂。支持语速调节和自动播放，学习更高效。</p>
-      </div>
-      <div class="adv-card fade-up">
-        <div class="adv-num">06</div>
-        <div class="adv-icon">💰</div>
-        <h4>高性价比</h4>
-        <p>相比线下培训和外部采购，我们的方案成本降低70%以上，且效果可量化、可追踪，投入产出比极高。</p>
-      </div>
+      <div class="adv-card fade-up"><div class="adv-num">01</div><div class="adv-icon">🎯</div><h4>精准个性化</h4><p>不是"选课"式学习，而是通过科学测评精准诊断短板，为每位员工生成专属学习路径。学你真正需要的。</p></div>
+      <div class="adv-card fade-up"><div class="adv-num">02</div><div class="adv-icon">🏭</div><h4>行业场景化</h4><p>5 大行业场景 × 5 大核心岗位，形成 25 个细分培训方向。金融怎么做 AI 风控？汽车怎么做智能座舱？都有答案。</p></div>
+      <div class="adv-card fade-up"><div class="adv-num">03</div><div class="adv-icon">🎬</div><h4>数字人讲师</h4><p>AI 数字人自然讲解，声音流畅、表情生动。支持字幕、语速调节、无限回看。学习体验远超传统录播。</p></div>
+      <div class="adv-card fade-up"><div class="adv-num">04</div><div class="adv-icon">🏋️</div><h4>实战驱动</h4><p>每门课配 2-3 个实战关卡，逐关解锁。AI 教练提供分步提示和参考答案，确保"学完即用、即用即会"。</p></div>
+      <div class="adv-card fade-up"><div class="adv-num">05</div><div class="adv-icon">📊</div><h4>全链路数据化</h4><p>测评→学习→陪练→验证，全流程数据可追踪。量化每个岗位的 AI 能力成长曲线，培训 ROI 一目了然。</p></div>
+      <div class="adv-card fade-up"><div class="adv-num">06</div><div class="adv-icon">⚡</div><h4>极速部署</h4><p>纯 Web 系统，无需安装，浏览器即开即用。支持 SSO 集成，1 天内完成全员开通。比传统方案快 10 倍。</p></div>
     </div>
   </div>
 </section>
@@ -968,41 +993,26 @@ img { max-width: 100%; display: block; }
 <!-- ===== Social Proof ===== -->
 <section class="proof section" id="proof">
   <div class="container">
+    <div style="text-align:center;margin-bottom:16px">
+      <span class="section-tag">Testimonials</span>
+    </div>
     <h2 class="section-title fade-up">客户好评</h2>
-    <p class="section-sub fade-up">来自真实企业培训负责人的反馈</p>
+    <p class="section-sub fade-up">来自不同行业企业培训负责人的真实反馈</p>
     <div class="proof-grid">
       <div class="proof-card fade-up">
         <div class="proof-stars">★★★★★</div>
-        <blockquote>"这套系统帮助我们快速完成了全员AI能力摸底，个性化推荐的课程让员工学习效率提升了3倍。特别是实战关卡设计，员工反馈'终于知道怎么用AI提效了'。"</blockquote>
-        <div class="proof-author">
-          <div class="proof-avatar">陈</div>
-          <div>
-            <div class="proof-name">陈女士</div>
-            <div class="proof-title">某互联网公司 L&D总监</div>
-          </div>
-        </div>
+        <blockquote>"行业场景 + 岗位角色的矩阵设计非常实用。我们的金融风控团队通过场景化课程，AI 应用水平提升了 3 倍。"</blockquote>
+        <div class="proof-author"><div class="proof-avatar">陈</div><div><div class="proof-name">陈女士</div><div class="proof-title">某股份制银行 L&D 总监</div></div></div>
       </div>
       <div class="proof-card fade-up">
         <div class="proof-stars">★★★★★</div>
-        <blockquote>"之前采购的AI培训课程员工满意度不到60%，用了这套系统后满意度提升到95%。关键是课程真的贴合各岗位实际工作，学完就能用。"</blockquote>
-        <div class="proof-author">
-          <div class="proof-avatar">王</div>
-          <div>
-            <div class="proof-name">王先生</div>
-            <div class="proof-title">某制造企业 HR负责人</div>
-          </div>
-        </div>
+        <blockquote>"数字人讲师的体验出乎意料地好。员工反馈比传统录播课有趣多了，课程完成率从 40% 提升到 87%。"</blockquote>
+        <div class="proof-author"><div class="proof-avatar">王</div><div><div class="proof-name">王先生</div><div class="proof-title">某新能源车企 HR 负责人</div></div></div>
       </div>
       <div class="proof-card fade-up">
         <div class="proof-stars">★★★★★</div>
-        <blockquote>"管理看板功能太实用了，一眼就能看到各部门的AI培训进度和能力达标情况，给管理层汇报也有了数据支撑。强烈推荐给有AI培训需求的企业。"</blockquote>
-        <div class="proof-author">
-          <div class="proof-avatar">李</div>
-          <div>
-            <div class="proof-name">李女士</div>
-            <div class="proof-title">某金融科技公司 培训经理</div>
-          </div>
-        </div>
+        <blockquote>"管理看板让培训效果可视化，给 CEO 汇报时第一次有了硬数据支撑。我们已把 AI 培训纳入全员 KPI。"</blockquote>
+        <div class="proof-author"><div class="proof-avatar">李</div><div><div class="proof-name">李女士</div><div class="proof-title">某上市科技公司 培训经理</div></div></div>
       </div>
     </div>
   </div>
@@ -1011,55 +1021,36 @@ img { max-width: 100%; display: block; }
 <!-- ===== Pricing ===== -->
 <section class="pricing section" id="pricing">
   <div class="container">
+    <div style="text-align:center;margin-bottom:16px">
+      <span class="section-tag">Pricing</span>
+    </div>
     <h2 class="section-title fade-up">灵活的服务方案</h2>
-    <p class="section-sub fade-up">根据企业规模和需求，提供三种灵活方案，支持定制化服务</p>
+    <p class="section-sub fade-up">根据企业规模和需求，选择最适合的方案</p>
     <div class="pricing-grid">
       <div class="price-card fade-up">
-        <h3>基础版</h3>
-        <div class="price-desc">适合中小企业快速启动AI培训</div>
-        <div class="price-val">¥9,800</div>
-        <div class="price-unit">/年 · 最多100人</div>
+        <h3>基础版</h3><div class="price-desc">适合中小企业快速启动</div>
+        <div class="price-val">¥9,800</div><div class="price-unit">/年 · 最多 100 人</div>
         <ul class="price-features">
-          <li>5岗位 × 26门课程全量接入</li>
-          <li>能力测评 + 个性化推荐</li>
-          <li>视频PPT + AI语音课程</li>
-          <li>实战关卡陪练系统</li>
-          <li>综合成果测验</li>
-          <li>管理数据看板</li>
-          <li>邮件技术支持</li>
+          <li>5 行业 × 5 岗位 × 30+ 课程</li><li>能力测评 + 个性化推荐</li>
+          <li>数字人视频课程</li><li>实战关卡陪练</li><li>综合成果测验</li><li>管理数据看板</li><li>邮件技术支持</li>
         </ul>
         <a href="#" class="btn btn-outline" style="width:100%;justify-content:center">联系销售</a>
       </div>
       <div class="price-card featured fade-up">
         <div class="price-badge">最受欢迎</div>
-        <h3>专业版</h3>
-        <div class="price-desc">适合中大型企业全面AI赋能</div>
-        <div class="price-val">¥29,800</div>
-        <div class="price-unit">/年 · 最多500人</div>
+        <h3>专业版</h3><div class="price-desc">适合中大型企业全面赋能</div>
+        <div class="price-val">¥29,800</div><div class="price-unit">/年 · 最多 500 人</div>
         <ul class="price-features">
-          <li>基础版全部功能</li>
-          <li>企业微信/钉钉/飞书集成</li>
-          <li>自定义课程上传</li>
-          <li>学习数据API接口</li>
-          <li>专属客户成功经理</li>
-          <li>季度培训效果分析报告</li>
-          <li>电话 + 在线技术支持</li>
+          <li>基础版全部功能</li><li>企业微信/钉钉/飞书集成</li>
+          <li>自定义课程上传</li><li>学习数据 API 接口</li><li>专属客户成功经理</li><li>季度效果分析报告</li><li>电话+在线技术支持</li>
         </ul>
         <a href="#" class="btn btn-primary" style="width:100%;justify-content:center">立即咨询</a>
       </div>
       <div class="price-card fade-up">
-        <h3>企业版</h3>
-        <div class="price-desc">适合大型集团定制化需求</div>
-        <div class="price-val">面议</div>
-        <div class="price-unit">不限人数 · 私有化部署</div>
+        <h3>企业版</h3><div class="price-desc">适合大型集团定制需求</div>
+        <div class="price-val">面议</div><div class="price-unit">不限人数 · 私有化部署</div>
         <ul class="price-features">
-          <li>专业版全部功能</li>
-          <li>私有化部署支持</li>
-          <li>定制化课程开发</li>
-          <li>定制化工种能力模型</li>
-          <li>API深度集成</li>
-          <li>线下培训 + 驻场支持</li>
-          <li>7×24专属技术支持</li>
+          <li>专业版全部功能</li><li>私有化部署支持</li><li>定制行业场景开发</li><li>定制能力模型</li><li>API 深度集成</li><li>线下培训 + 驻场支持</li><li>7×24 专属技术支持</li>
         </ul>
         <a href="#" class="btn btn-outline" style="width:100%;justify-content:center">联系销售</a>
       </div>
@@ -1070,18 +1061,18 @@ img { max-width: 100%; display: block; }
 <!-- ===== Final CTA ===== -->
 <section class="cta" id="contact">
   <div class="container">
-    <h2 class="fade-up">准备好提升全员AI能力了吗？</h2>
-    <p class="fade-up">立即预约免费演示，体验完整培训流程，让我们的专家为您定制专属AI培训方案</p>
+    <h2 class="fade-up">准备好让每个员工都成为 AI 高手了吗？</h2>
+    <p class="fade-up">立即预约免费演示，体验完整培训流程，我们的专家为您定制专属方案</p>
     <div class="cta-btns fade-up">
-      <a href="#" class="btn btn-primary" style="font-size:1.1rem;padding:18px 48px" onclick="event.preventDefault();openLogin()">🚀 免费体验系统</a>
-      <a href="#" class="btn btn-white" style="font-size:1.1rem;padding:18px 48px">📅 预约专家演示</a>
+      <a href="#" class="btn btn-primary" style="font-size:1.05rem;padding:16px 44px" onclick="event.preventDefault();openLogin()">免费体验系统</a>
+      <a href="#" class="btn btn-ghost" style="font-size:1.05rem;padding:16px 44px">预约专家演示</a>
     </div>
     <div class="cta-trust fade-up">
-      <span>已完成系统部署：</span>
+      <span>已获得信任：</span>
       <div class="cta-trust-logos">
-        <div class="logo-placeholder">某互联网公司</div>
-        <div class="logo-placeholder">某制造企业</div>
-        <div class="logo-placeholder">某金融科技</div>
+        <div class="logo-placeholder">某股份制银行</div>
+        <div class="logo-placeholder">某新能源车企</div>
+        <div class="logo-placeholder">某上市科技公司</div>
         <div class="logo-placeholder">某零售集团</div>
       </div>
     </div>
@@ -1094,41 +1085,15 @@ img { max-width: 100%; display: block; }
     <div class="footer-grid">
       <div class="footer-brand">
         <h3>AI达学 · AIDAX</h3>
-        <p>企业AI学习一站式服务。基于能力测评的个性化培训闭环，帮助企业快速提升全员AI应用能力，让每位员工都成为AI高手。</p>
+        <p>企业 AI 学习一站式服务。基于能力测评的个性化培训闭环，覆盖 5 大行业场景 × 5 大核心岗位，帮助每位员工在实战中掌握 AI 技能。</p>
       </div>
-      <div class="footer-col">
-        <h4>产品功能</h4>
-        <ul>
-          <li><a href="#">能力测评系统</a></li>
-          <li><a href="#">个性化课程推荐</a></li>
-          <li><a href="#">视频PPT课程</a></li>
-          <li><a href="#">实战关卡陪练</a></li>
-          <li><a href="#">管理数据看板</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>适用岗位</h4>
-        <ul>
-          <li><a href="#">研发工程师</a></li>
-          <li><a href="#">产品经理</a></li>
-          <li><a href="#">运营专员</a></li>
-          <li><a href="#">销售顾问</a></li>
-          <li><a href="#">HR专家</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>联系我们</h4>
-        <ul>
-          <li><a href="#">预约产品演示</a></li>
-          <li><a href="#">获取报价方案</a></li>
-          <li><a href="#">技术支持</a></li>
-          <li><a href="#">合作咨询</a></li>
-        </ul>
-      </div>
+      <div class="footer-col"><h4>产品</h4><ul><li><a href="#">能力测评</a></li><li><a href="#">课程推荐</a></li><li><a href="#">数字人课程</a></li><li><a href="#">实战陪练</a></li><li><a href="#">管理看板</a></li></ul></div>
+      <div class="footer-col"><h4>行业场景</h4><ul><li><a href="#">金融数字化</a></li><li><a href="#">智能汽车</a></li><li><a href="#">先进制造</a></li><li><a href="#">消费电子</a></li><li><a href="#">日化快消</a></li></ul></div>
+      <div class="footer-col"><h4>联系</h4><ul><li><a href="#">预约演示</a></li><li><a href="#">获取报价</a></li><li><a href="#">技术支持</a></li><li><a href="#">合作咨询</a></li></ul></div>
     </div>
     <div class="footer-bottom">
       <span>© 2026 AI达学 AIDAX — 企业AI学习一站式服务</span>
-      <span>企业AI技能培训系统 v1.0</span>
+      <span>v2.0</span>
     </div>
   </div>
 </footer>
@@ -1136,87 +1101,43 @@ img { max-width: 100%; display: block; }
 <!-- ===== Login Modal ===== -->
 <div class="login-overlay" id="loginOverlay">
   <div class="login-modal">
-    <button class="login-close" onclick="closeLogin()">&times;</button>
+    <button class="login-close" onclick="closeLogin()">✕</button>
     <h2>AI达学 · AIDAX</h2>
-    <p class="login-sub">欢迎使用企业AI技能培训系统</p>
-
-    <!-- Login tabs -->
+    <p class="login-sub">欢迎使用企业 AI 技能培训系统</p>
     <div class="login-tabs">
       <button class="login-tab active" onclick="switchLoginTab('manager')" id="tabManager">管理员登录</button>
       <button class="login-tab" onclick="switchLoginTab('employee')" id="tabEmployee">员工登录</button>
     </div>
-
-    <!-- Manager login form -->
     <div id="managerForm">
-      <div class="login-error" id="loginError">用户名或密码错误，请重试</div>
-      <div class="login-field">
-        <label>用户名</label>
-        <input type="text" id="mgrUser" placeholder="请输入管理员用户名" autocomplete="username" onkeydown="if(event.key==='Enter')handleManagerLogin()">
-      </div>
-      <div class="login-field">
-        <label>密码</label>
-        <input type="password" id="mgrPwd" placeholder="请输入密码" autocomplete="current-password" onkeydown="if(event.key==='Enter')handleManagerLogin()">
-      </div>
-      <button type="button" class="login-submit" onclick="handleManagerLogin()">登录系统</button>
+      <div class="login-error" id="loginError">用户名或密码错误</div>
+      <div class="login-field"><label>用户名</label><input type="text" id="mgrUser" placeholder="请输入管理员用户名" autocomplete="username" onkeydown="if(event.key==='Enter')handleManagerLogin()"></div>
+      <div class="login-field"><label>密码</label><input type="password" id="mgrPwd" placeholder="请输入密码" autocomplete="current-password" onkeydown="if(event.key==='Enter')handleManagerLogin()"></div>
+      <button type="button" class="login-submit" onclick="handleManagerLogin()">登录</button>
     </div>
-
-    <!-- Employee login form -->
-    <div id="employeeForm" style="display:none;">
+    <div id="employeeForm" style="display:none">
       <div class="login-error" id="empError">请填写姓名并选择岗位</div>
-      <div class="login-field">
-        <label>员工姓名</label>
-        <input type="text" id="empName" placeholder="请输入你的姓名" onkeydown="if(event.key==='Enter')handleEmployeeLogin()">
-      </div>
+      <div class="login-field"><label>员工姓名</label><input type="text" id="empName" placeholder="请输入你的姓名" onkeydown="if(event.key==='Enter')handleEmployeeLogin()"></div>
       <div class="login-field">
         <label>所属岗位</label>
         <div class="login-role-select" id="empRoleSelect">
-          <div class="login-role-opt" data-role="dev" onclick="selectEmpRole(this)">💻 研发工程师</div>
-          <div class="login-role-opt" data-role="pm" onclick="selectEmpRole(this)">📋 产品经理</div>
-          <div class="login-role-opt" data-role="ops" onclick="selectEmpRole(this)">📢 运营专员</div>
-          <div class="login-role-opt" data-role="sales" onclick="selectEmpRole(this)">💼 销售顾问</div>
-          <div class="login-role-opt" data-role="hr" onclick="selectEmpRole(this)">👥 HR专家</div>
+          <div class="login-role-opt" data-role="dev" onclick="selectEmpRole(this)">💻 研发</div>
+          <div class="login-role-opt" data-role="pm" onclick="selectEmpRole(this)">📋 产品</div>
+          <div class="login-role-opt" data-role="ops" onclick="selectEmpRole(this)">📢 运营</div>
+          <div class="login-role-opt" data-role="sales" onclick="selectEmpRole(this)">💼 销售</div>
+          <div class="login-role-opt" data-role="hr" onclick="selectEmpRole(this)">👥 HR</div>
         </div>
       </div>
-      <button type="button" class="login-submit" style="margin-top:8px;" onclick="handleEmployeeLogin()">进入培训系统</button>
+      <button type="button" class="login-submit" onclick="handleEmployeeLogin()">进入系统</button>
     </div>
-
-    <!-- Guest / demo link -->
-    <div class="login-guest">
-      <a onclick="guestLogin()">🔍 只是想先看看？游客体验入口 →</a>
-    </div>
+    <div class="login-guest"><a onclick="guestLogin()">只想看看？游客体验入口 →</a></div>
   </div>
 </div>
 
-<!-- ===== Scripts ===== -->
 <script>
-// Particle animation
-(function() {
-  const container = document.getElementById('particles');
-  if (!container) return;
-  for (let i = 0; i < 30; i++) {
-    const p = document.createElement('div');
-    p.className = 'particle';
-    const size = Math.random() * 4 + 2;
-    p.style.cssText = `
-      width:${size}px; height:${size}px;
-      left:${Math.random()*100}%;
-      background: hsl(${Math.random()*60+200}, 80%, 70%);
-      animation-duration: ${Math.random()*8+6}s;
-      animation-delay: ${Math.random()*5}s;
-    `;
-    container.appendChild(p);
-  }
-})();
-
 // Scroll fade-up animation
 const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-    }
-  });
+  entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
 }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-
 document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
 
 // Smooth scroll for nav links
@@ -1228,32 +1149,27 @@ document.querySelectorAll('.nav-links a').forEach(link => {
   });
 });
 
-// Nav background on scroll
+// Nav shadow on scroll
 window.addEventListener('scroll', () => {
   const nav = document.querySelector('.nav');
-  if (window.scrollY > 50) {
-    nav.style.boxShadow = '0 2px 20px rgba(0,0,0,0.08)';
-  } else {
-    nav.style.boxShadow = 'none';
-  }
+  nav.style.boxShadow = window.scrollY > 50 ? '0 2px 40px rgba(0,0,0,0.3)' : 'none';
+  nav.style.borderBottom = window.scrollY > 50 ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(255,255,255,0.04)';
 });
 
 // ==================== Login System ====================
-var currentLoginTab = 'manager';
-var selectedEmpRole = null;
+var currentLoginTab = 'manager', selectedEmpRole = null;
 
 function openLogin() {
   document.getElementById('loginOverlay').classList.add('show');
   document.getElementById('loginError').classList.remove('show');
-  document.getElementById('empError').classList.remove('show');
+  document.getElementById('empError').style.display = 'none';
   document.body.style.overflow = 'hidden';
 }
 
 function closeLogin() {
   document.getElementById('loginOverlay').classList.remove('show');
   document.body.style.overflow = '';
-  currentLoginTab = 'manager';
-  selectedEmpRole = null;
+  currentLoginTab = 'manager'; selectedEmpRole = null;
   document.getElementById('mgrUser').value = '';
   document.getElementById('mgrPwd').value = '';
   document.getElementById('empName').value = '';
@@ -1268,7 +1184,7 @@ function switchLoginTab(tab) {
   document.getElementById('managerForm').style.display = tab === 'manager' ? '' : 'none';
   document.getElementById('employeeForm').style.display = tab === 'employee' ? '' : 'none';
   document.getElementById('loginError').classList.remove('show');
-  document.getElementById('empError').classList.remove('show');
+  document.getElementById('empError').style.display = 'none';
 }
 
 function selectEmpRole(el) {
@@ -1281,61 +1197,27 @@ function handleManagerLogin() {
   var user = document.getElementById('mgrUser').value.trim();
   var pwd = document.getElementById('mgrPwd').value.trim();
   if (!user || !pwd) { document.getElementById('loginError').classList.add('show'); return; }
-  // Demo credentials: admin / ai_training_admin
   if (user === 'admin' && pwd === 'ai_training_admin') {
-    var session = {
-      loggedIn: true,
-      user: '管理员',
-      role: 'admin',
-      timestamp: Date.now()
-    };
-    localStorage.setItem('ai_training_session', JSON.stringify(session));
+    localStorage.setItem('ai_training_session', JSON.stringify({loggedIn:true, user:'管理员', role:'admin', timestamp:Date.now()}));
     window.location.replace('app.html');
-  } else {
-    document.getElementById('loginError').classList.add('show');
-  }
+  } else { document.getElementById('loginError').classList.add('show'); }
 }
 
 function handleEmployeeLogin() {
   var name = document.getElementById('empName').value.trim();
-  if (!name || !selectedEmpRole) {
-    document.getElementById('empError').style.display = 'block';
-    return;
-  }
-  var session = {
-    loggedIn: true,
-    user: name,
-    role: selectedEmpRole,
-    timestamp: Date.now()
-  };
-  localStorage.setItem('ai_training_session', JSON.stringify(session));
-  // Store the employee role preference so index.html can pre-select it
+  if (!name || !selectedEmpRole) { document.getElementById('empError').style.display = 'block'; return; }
+  localStorage.setItem('ai_training_session', JSON.stringify({loggedIn:true, user:name, role:selectedEmpRole, timestamp:Date.now()}));
   localStorage.setItem('ai_training_emp_role', selectedEmpRole);
   window.location.replace('app.html');
 }
 
 function guestLogin() {
-  var session = {
-    loggedIn: true,
-    user: '游客',
-    role: 'guest',
-    timestamp: Date.now()
-  };
-  localStorage.setItem('ai_training_session', JSON.stringify(session));
+  localStorage.setItem('ai_training_session', JSON.stringify({loggedIn:true, user:'游客', role:'guest', timestamp:Date.now()}));
   window.location.replace('app.html');
 }
 
-// Close modal on overlay click
-document.getElementById('loginOverlay').addEventListener('click', function(e) {
-  if (e.target === this) closeLogin();
-});
-
-// Close modal on Escape key
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape' && document.getElementById('loginOverlay').classList.contains('show')) {
-    closeLogin();
-  }
-});
+document.getElementById('loginOverlay').addEventListener('click', function(e) { if (e.target === this) closeLogin(); });
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && document.getElementById('loginOverlay').classList.contains('show')) closeLogin(); });
 </script>
 </body>
 </html>
