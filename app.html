@@ -395,9 +395,20 @@
 </style>
 </head>
 <body>
-<div class="app" id="app"></div>
+<div class="app" id="app"><div class="card text-center" style="padding:60px 20px"><p style="color:var(--text2);font-size:14px">正在加载 AI达学...</p></div></div>
 
 <script>
+// ==================== ERROR LOGGER ====================
+window._aidaxErrors = [];
+window.onerror = function(msg, url, line, col, err) {
+  window._aidaxErrors.push({msg, url, line, col, stack: err&&err.stack, time: new Date().toISOString()});
+  var app = document.getElementById('app');
+  if (app) {
+    app.innerHTML = '<div class="card" style="margin:40px;padding:30px;text-align:center"><h3 style="color:var(--red)">⚠️ 页面加载错误</h3><p style="color:var(--text2);margin:12px 0;font-size:14px">' + msg + '</p><p style="font-size:12px;color:var(--text2)">位置: 行' + line + ', 列' + col + '</p><p style="font-size:11px;color:var(--text2);margin-top:8px"><code>' + (err&&err.stack||'').replace(/</g,'&lt;').substring(0,500) + '</code></p><button class="btn btn-primary" onclick="location.reload()" style="margin-top:12px">刷新重试</button></div>';
+  }
+  return true;
+};
+
 // ==================== SESSION CHECK ====================
 (function() {
   // Skip check if we're already on landing page (prevent redirect loops)
@@ -2463,7 +2474,14 @@ function bindEvents() {}
   }
   S.view = 'role';
 })();
-render();
+
+try {
+  render();
+} catch(e) {
+  console.error('Render error:', e);
+  var app = document.getElementById('app');
+  if (app) app.innerHTML = '<div class="card" style="margin:40px;padding:30px;text-align:center"><h3 style="color:var(--red)">页面渲染失败</h3><p style="color:var(--text2);margin:12px 0">' + e.message + '</p><button class="btn btn-primary" onclick="location.reload()" style="margin-top:12px">刷新重试</button></div>';
+}
 </script>
 
 <!-- ===== CUSTOMER SERVICE ===== -->
