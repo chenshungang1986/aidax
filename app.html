@@ -2037,7 +2037,7 @@ function renderTaskModal() {
 
   // Hint system
   if (hintData && hintData.hints && hintData.hints.length) {
-    html += `<button class="hint-toggle" onclick="S.toggleTaskHint('${c.id}',${ti})">${showHint ? '🔽 收起提示' : '💡 查看解题提示 ('+hintData.hints.length+'步)'}</button>`;
+    html += `<button class="hint-toggle" data-action="toggleTaskHint" data-cid="${c.id}" data-ti="${ti}">${showHint ? '🔽 收起提示' : '💡 查看解题提示 ('+hintData.hints.length+'步)'}</button>`;
     if (showHint) {
       html += `<div class="hint-steps">`;
       hintData.hints.forEach((h, hi) => {
@@ -2055,15 +2055,15 @@ function renderTaskModal() {
 
   // Reference answer
   if (hintData && hintData.answer) {
-    html += `<button class="hint-toggle" style="margin-top:8px;" onclick="S.toggleTaskAnswer('${c.id}',${ti})">${showAnswer ? '🔼 收起参考' : '📋 查看参考答案'}</button>`;
+    html += `<button class="hint-toggle" style="margin-top:8px;" data-action="toggleTaskAnswer" data-cid="${c.id}" data-ti="${ti}">${showAnswer ? '🔼 收起参考' : '📋 查看参考答案'}</button>`;
     html += `<div class="task-answer-box${showAnswer?' show':''}" id="taskAnswerBox">${hintData.answer.replace(/\n/g,'<br>')}</div>`;
   }
 
   html += `<div class="flex-between mt-4">
-      <button class="btn btn-outline" onclick="S.goBack()">返回课程</button>
+      <button class="btn btn-outline" data-action="goBack">返回课程</button>
       <div style="display:flex;gap:8px;">
-        ${ti>0?`<button class="btn btn-outline" onclick="S.prevTask()">上一关卡</button>`:''}
-        <button class="btn btn-primary" onclick="S.submitTask()">提交任务</button>
+        ${ti>0?`<button class="btn btn-outline" data-action="prevTask">上一关卡</button>`:''}
+        <button class="btn btn-primary" data-action="submitTask">提交任务</button>
       </div>
     </div>`;
 
@@ -2071,8 +2071,8 @@ function renderTaskModal() {
     html += `<div class="alert alert-success mt-3">
       <strong>任务已提交！</strong>
       <p style="margin-top:4px;">AI评估：${prog['taskFeedback'+ti] || '正在评估中...'}</p>
-      ${ti < c.tasks.length-1 ? `<button class="btn btn-green btn-sm mt-2" onclick="S.nextTask()">进入下一关卡 →</button>` :
-      `<button class="btn btn-green btn-sm mt-2" onclick="S.finishCourse()">完成课程 ✓</button>`}
+      ${ti < c.tasks.length-1 ? `<button class="btn btn-green btn-sm mt-2" data-action="nextTask">进入下一关卡 →</button>` :
+      `<button class="btn btn-green btn-sm mt-2" data-action="finishCourse">完成课程 ✓</button>`}
     </div>`;
   }
 
@@ -2112,7 +2112,7 @@ function renderFinalQuiz() {
         // Subjective question
         html += `<div class="subj-template"><div class="subj-label">📋 答案模板</div><div class="subj-content">${q.template}</div></div>`;
         const showHint = S.finalShowHint[i];
-        html += `<button class="hint-toggle" onclick="S.toggleFinalHint(${i})">${showHint ? '🔼 收起提示' : '💡 查看解题步骤 ('+q.steps.length+'步)'}</button>`;
+        html += `<button class="hint-toggle" data-action="toggleFinalHint" data-idx="${i}">${showHint ? '🔼 收起提示' : '💡 查看解题步骤 ('+q.steps.length+'步)'}</button>`;
         if (showHint) {
           html += `<div class="hint-steps">`;
           q.steps.forEach((s, si) => {
@@ -2129,7 +2129,7 @@ function renderFinalQuiz() {
       if (q.type === 'choice') return S.finalAnswers[i] !== undefined;
       return S.finalSubjAnswers[i] && S.finalSubjAnswers[i].trim();
     });
-    html += `<button class="btn btn-primary" onclick="S.submitFinal()" ${!allAnswered?'disabled':''}>提交测验</button>`;
+    html += `<button class="btn btn-primary" data-action="submitFinal" ${!allAnswered?'disabled':''}>提交测验</button>`;
   }
 
   html += `</div>`;
@@ -2164,9 +2164,9 @@ function renderFinalResults() {
   html += `</div>`;
 
   html += `<div class="text-center mt-3" style="display:flex;gap:10px;justify-content:center;">
-      <button class="btn btn-outline" onclick="S.goDashboard()">返回学习</button>
-      <button class="btn btn-outline" onclick="S.startFinalQuiz()">重新测验</button>
-      <button class="btn btn-primary" onclick="S.saveAndFinish()">保存并完成</button>
+      <button class="btn btn-outline" data-action="goDashboard">返回学习</button>
+      <button class="btn btn-outline" data-action="startFinalQuiz">重新测验</button>
+      <button class="btn btn-primary" data-action="saveAndFinish">保存并完成</button>
     </div>`;
   return html;
 }
@@ -2211,7 +2211,7 @@ function renderAdmin() {
         <div class="emp-avatar">${e.name[0]}</div>
         <div class="emp-info"><div class="emp-name">${e.name}</div><div class="emp-meta">${r?r.icon+' '+r.name:''} · ${e.date} · ${e.doneCourses||0}/${COURSES[e.role]?.length||0}课</div></div>
         <div class="emp-score" style="color:${scoreCls}">${e.finalScore!=null?e.finalScore+'分':'学习中'}</div>
-        <button class="btn btn-sm btn-outline" onclick="S.loadEmployee(${i});S.goDashboard();">查看</button>
+        <button class="btn btn-sm btn-outline" data-action="loadAndGoDashboard" data-idx="${i}">查看</button>
       </div>`;
     });
   }
@@ -2496,6 +2496,10 @@ function bindEvents() {
             case 'goAdmin': S.goAdmin(); break;
             case 'goBack': S.goBack(); break;
             case 'logout': S.logout(); break;
+            case 'toggleTaskHint': S.toggleTaskHint(el.getAttribute('data-cid'), parseInt(el.getAttribute('data-ti'))); break;
+            case 'toggleTaskAnswer': S.toggleTaskAnswer(el.getAttribute('data-cid'), parseInt(el.getAttribute('data-ti'))); break;
+            case 'toggleFinalHint': S.toggleFinalHint(idx); break;
+            case 'loadAndGoDashboard': S.loadEmployee(idx); S.goDashboard(); break;
           }
           return;
         }
