@@ -2685,7 +2685,7 @@ function renderAdmin() {
 // ==================== ACTIONS ====================
 S.selectIndustry = function(id) { S.industry = id; render(); };
 S.selectRole = function(id) { S.role = id; render(); };
-S.startQuiz = function() { startAdaptiveQuiz(); render(); };
+S.startQuiz = function() { startAdaptiveQuiz(); S.view = 'quiz'; render(); };
 S.answerQuiz = function(i) { answerCurrentQuestion(i); };
 S.prevQuestion = function() { if(S._quizDims && S.quizIdx>0) { S.quizIdx--; render(); } };
 S.nextQuestion = function() { if(S._quizDims && S.quizIdx < S._quizDims.length-1) { S.quizIdx++; render(); } else { finishAdaptiveQuiz(); } };
