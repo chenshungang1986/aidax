@@ -638,17 +638,8 @@ img{max-width:100%;display:block}
     </div>
     <div id="employeeForm" style="display:none">
       <div class="login-field"><label>姓名</label><input type="text" id="empName" placeholder="请输入您的姓名" autocomplete="name"></div>
-      <div class="login-field"><label>岗位角色</label></div>
-      <div class="login-role-grid">
-        <div class="login-role-opt" onclick="selectEmpRole('dev',this)">研发</div>
-        <div class="login-role-opt" onclick="selectEmpRole('pm',this)">产品</div>
-        <div class="login-role-opt" onclick="selectEmpRole('ops',this)">运营</div>
-        <div class="login-role-opt" onclick="selectEmpRole('sales',this)">销售</div>
-        <div class="login-role-opt" onclick="selectEmpRole('hr',this)">HR</div>
-        <div class="login-role-opt" onclick="selectEmpRole('other',this)">其他</div>
-      </div>
-      <div class="login-error" id="empError">请填写姓名并选择岗位</div>
-      <button type="button" class="login-submit" onclick="handleEmployeeLogin()" style="margin-top:16px">进入培训</button>
+      <div class="login-error" id="empError">请填写姓名</div>
+      <button type="button" class="login-submit" onclick="handleEmployeeLogin()" style="margin-top:16px">进入体验</button>
     </div>
     <div class="login-guest"><a onclick="guestLogin()">游客体验入口 →</a></div>
   </div>
@@ -688,10 +679,10 @@ img{max-width:100%;display:block}
 function openLogin(){document.getElementById('loginOverlay').classList.add('show');document.getElementById('loginError').classList.remove('show');document.getElementById('empError').style.display='none'}
 function closeLogin(){document.getElementById('loginOverlay').classList.remove('show')}
 function switchLoginTab(t){var a=document.querySelectorAll('.login-tab'),f=document.getElementById('managerForm'),e=document.getElementById('employeeForm');a.forEach(function(x){x.classList.remove('active')});if(t==='manager'){event.target.classList.add('active');f.style.display='block';e.style.display='none'}else{event.target.classList.add('active');f.style.display='none';e.style.display='block'}}
-var selectedEmpRole=null;
-function selectEmpRole(r,el){selectedEmpRole=r;var opts=document.querySelectorAll('.login-role-opt');opts.forEach(function(o){o.classList.remove('selected')});el.classList.add('selected')}
+// (role selection removed — now handled on app.html)
+
 function handleManagerLogin(){var u=document.getElementById('mgrUser').value.trim(),p=document.getElementById('mgrPwd').value.trim();if(!u||!p){document.getElementById('loginError').classList.add('show');return}if(u==='admin'&&p==='ai_training_admin'){localStorage.setItem('ai_training_session',JSON.stringify({loggedIn:true,user:'管理员',role:'admin',timestamp:Date.now()}));window.location.replace('app.html')}else{document.getElementById('loginError').classList.add('show')}}
-function handleEmployeeLogin(){var n=document.getElementById('empName').value.trim();if(!n||!selectedEmpRole){document.getElementById('empError').style.display='block';return}localStorage.setItem('ai_training_session',JSON.stringify({loggedIn:true,user:n,role:selectedEmpRole,timestamp:Date.now()}));localStorage.setItem('ai_training_emp_role',selectedEmpRole);window.location.replace('app.html')}
+function handleEmployeeLogin(){var n=document.getElementById('empName').value.trim();if(!n){document.getElementById('empError').style.display='block';return}localStorage.setItem('ai_training_session',JSON.stringify({loggedIn:true,user:n,role:'employee',timestamp:Date.now()}));window.location.replace('app.html')}
 function guestLogin(){localStorage.setItem('ai_training_session',JSON.stringify({loggedIn:true,user:'游客',role:'guest',timestamp:Date.now()}));window.location.replace('app.html')}
 
 // Customer service toggle
