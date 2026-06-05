@@ -1,0 +1,2408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>企业AI技能培训系统</title>
+<style>
+  :root {
+    --bg: #f5f5f7;
+    --card: #ffffff;
+    --text: #1d1d1f;
+    --text2: #656571;
+    --text3: #9a9aa8;
+    --border: #e5e5ea;
+    --blue: #0071e3;
+    --blue-bg: #e8f4fd;
+    --green: #30b158;
+    --green-bg: #e9f8ee;
+    --amber: #ff9500;
+    --amber-bg: #fff5e6;
+    --red: #ff3b30;
+    --red-bg: #ffeeed;
+    --purple: #af52de;
+    --purple-bg: #f5edfc;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); line-height:1.6; min-height:100vh; }
+  .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0; }
+
+  /* Layout */
+  .app { max-width:960px; margin:0 auto; padding:20px 16px 60px; }
+  .header { text-align:center; padding:32px 0 24px; border-bottom:1px solid var(--border); margin-bottom:28px; }
+  .header h1 { font-size:26px; font-weight:700; margin-bottom:6px; }
+  .header p { font-size:14px; color:var(--text2); }
+
+  /* Cards */
+  .card { background:var(--card); border-radius:var(--radius); border:1px solid var(--border); padding:24px; margin-bottom:16px; }
+  .card-sm { padding:16px; }
+
+  /* Role Grid */
+  .role-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:12px; }
+  .role-card { background:var(--card); border:2px solid var(--border); border-radius:var(--radius); padding:20px 16px; text-align:center; cursor:pointer; transition:all .2s; }
+  .role-card:hover { border-color:var(--blue); transform:translateY(-2px); }
+  .role-card.selected { border-color:var(--blue); background:var(--blue-bg); }
+  .role-icon { font-size:36px; margin-bottom:8px; }
+  .role-name { font-size:15px; font-weight:600; }
+  .role-desc { font-size:12px; color:var(--text2); margin-top:4px; }
+
+  /* Buttons */
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:10px 24px; border-radius:var(--radius-sm); font-size:14px; font-weight:600; border:none; cursor:pointer; transition:all .2s; text-decoration:none; }
+  .btn:disabled { opacity:0.4; cursor:not-allowed; }
+  .btn-primary { background:var(--blue); color:#fff; }
+  .btn-primary:hover:not(:disabled) { background:#0066cc; }
+  .btn-outline { background:transparent; border:1px solid var(--border); color:var(--text); }
+  .btn-outline:hover:not(:disabled) { background:var(--bg); }
+  .btn-green { background:var(--green); color:#fff; }
+  .btn-green:hover:not(:disabled) { background:#27964a; }
+  .btn-sm { padding:6px 14px; font-size:13px; }
+
+  /* Tags */
+  .tag { display:inline-block; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:500; }
+  .tag-blue { background:var(--blue-bg); color:var(--blue); }
+  .tag-green { background:var(--green-bg); color:var(--green); }
+  .tag-amber { background:var(--amber-bg); color:#c47a00; }
+  .tag-red { background:var(--red-bg); color:var(--red); }
+  .tag-purple { background:var(--purple-bg); color:var(--purple); }
+
+  /* Quiz */
+  .quiz-progress { display:flex; gap:6px; margin-bottom:20px; }
+  .quiz-dot { width:28px; height:4px; border-radius:2px; background:var(--border); transition:all .3s; }
+  .quiz-dot.done { background:var(--green); }
+  .quiz-dot.current { background:var(--blue); }
+  .quiz-question { font-size:16px; font-weight:600; margin-bottom:16px; }
+  .quiz-option { display:block; width:100%; text-align:left; padding:12px 16px; margin-bottom:8px; background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:14px; cursor:pointer; transition:all .15s; }
+  .quiz-option:hover { border-color:var(--blue); background:var(--blue-bg); }
+  .quiz-option.selected { border-color:var(--blue); background:var(--blue-bg); }
+  .quiz-option.correct { border-color:var(--green); background:var(--green-bg); }
+  .quiz-option.wrong { border-color:var(--red); background:var(--red-bg); }
+
+  /* Skill Radar */
+  .radar-container { width:100%; max-width:380px; margin:0 auto; }
+
+  /* Progress Bars */
+  .progress-bar { height:8px; background:var(--border); border-radius:4px; overflow:hidden; }
+  .progress-fill { height:100%; border-radius:4px; transition:width .6s ease; }
+  .progress-fill.high { background:var(--green); }
+  .progress-fill.mid { background:var(--amber); }
+  .progress-fill.low { background:var(--red); }
+
+  /* Gauge */
+  .gauge { width:120px; height:120px; position:relative; margin:0 auto; }
+  .gauge svg { transform:rotate(-90deg); }
+  .gauge-bg { fill:none; stroke:var(--border); stroke-width:10; }
+  .gauge-fill { fill:none; stroke-width:10; stroke-linecap:round; transition:stroke-dashoffset 0.8s ease; }
+  .gauge-text { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:28px; font-weight:700; }
+  .gauge-label { text-align:center; font-size:12px; color:var(--text2); margin-top:6px; }
+
+  /* Course Card */
+  .course-card { border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin-bottom:10px; cursor:pointer; transition:all .15s; display:flex; align-items:center; gap:14px; }
+  .course-card:hover { border-color:var(--blue); }
+  .course-card.completed { border-color:var(--green); background:var(--green-bg); }
+  .course-card.locked { opacity:0.5; cursor:not-allowed; }
+  .course-num { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0; background:var(--bg); color:var(--text2); }
+  .course-card.completed .course-num { background:var(--green); color:#fff; }
+  .course-title { font-weight:600; font-size:14px; }
+  .course-meta { font-size:12px; color:var(--text2); }
+  .course-tag { margin-left:auto; flex-shrink:0; }
+
+  /* Task Modal */
+  .task-step { display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); align-items:flex-start; }
+  .task-step:last-child { border-bottom:none; }
+  .task-num { width:28px; height:28px; border-radius:50%; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; flex-shrink:0; }
+  .task-num.done { background:var(--green); border-color:var(--green); color:#fff; }
+  .task-num.active { border-color:var(--blue); color:var(--blue); }
+  .task-desc { font-size:13px; }
+  .task-desc strong { display:block; font-size:14px; margin-bottom:2px; }
+  .task-input { width:100%; min-height:80px; padding:10px; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:13px; resize:vertical; margin-top:8px; font-family:inherit; }
+
+  /* Tabs */
+  .tabs { display:flex; gap:0; margin-bottom:20px; background:var(--bg); border-radius:var(--radius-sm); padding:3px; }
+  .tab { flex:1; padding:8px 16px; text-align:center; font-size:13px; font-weight:500; border-radius:var(--radius-sm); cursor:pointer; transition:all .15s; color:var(--text2); border:none; background:transparent; }
+  .tab.active { background:var(--card); color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,0.08); }
+
+  /* Dashboard */
+  .stat-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; margin-bottom:16px; }
+  .stat-card { background:var(--bg); border-radius:var(--radius-sm); padding:14px; }
+  .stat-value { font-size:26px; font-weight:700; }
+  .stat-label { font-size:12px; color:var(--text2); }
+  .emp-row { display:flex; align-items:center; gap:12px; padding:10px 12px; border-bottom:1px solid var(--border); }
+  .emp-row:last-child { border-bottom:none; }
+  .emp-avatar { width:36px; height:36px; border-radius:50%; background:var(--blue-bg); color:var(--blue); display:flex; align-items:center; justify-content:center; font-weight:600; font-size:14px; }
+  .emp-info { flex:1; min-width:0; }
+  .emp-name { font-weight:600; font-size:13px; }
+  .emp-meta { font-size:12px; color:var(--text2); }
+  .emp-score { font-weight:700; font-size:15px; }
+
+  /* Animations */
+  @keyframes slideUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+  .slide-up { animation:slideUp .3s ease; }
+
+  /* Video placeholder */
+  .video-placeholder { background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius:var(--radius); padding:40px; text-align:center; color:#fff; margin-bottom:16px; cursor:pointer; transition:transform .2s; }
+  .video-placeholder:hover { transform:scale(1.02); }
+  .video-placeholder .play-btn { width:64px; height:64px; border-radius:50%; background:rgba(255,255,255,0.25); margin:0 auto 12px; display:flex; align-items:center; justify-content:center; font-size:24px; }
+
+  /* Gap card */
+  .gap-item { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); }
+  .gap-item:last-child { border-bottom:none; }
+  .gap-name { flex:1; font-size:13px; font-weight:500; }
+  .gap-bar { width:140px; height:6px; background:var(--border); border-radius:3px; overflow:hidden; flex-shrink:0; }
+  .gap-bar-fill { height:100%; border-radius:3px; }
+  .gap-bar-fill.strong { background:var(--green); }
+  .gap-bar-fill.ok { background:var(--amber); }
+  .gap-bar-fill.weak { background:var(--red); }
+  .gap-score { font-size:13px; font-weight:600; width:30px; text-align:right; }
+
+  /* Back nav */
+  .back-nav { display:flex; align-items:center; gap:8px; margin-bottom:20px; cursor:pointer; color:var(--blue); font-size:14px; font-weight:500; border:none; background:none; }
+  .back-nav:hover { opacity:0.7; }
+
+  /* Alerts */
+  .alert { padding:12px 16px; border-radius:var(--radius-sm); font-size:13px; margin-bottom:14px; }
+  .alert-info { background:var(--blue-bg); color:var(--blue); }
+  .alert-success { background:var(--green-bg); color:#1a7a37; }
+  .alert-warning { background:var(--amber-bg); color:#8c5a00; }
+
+  /* Flex */
+  .flex { display:flex; }
+  .flex-between { display:flex; justify-content:space-between; align-items:center; }
+  .flex-wrap { flex-wrap:wrap; gap:10px; }
+  .gap-2 { gap:8px; }
+  .gap-3 { gap:12px; }
+  .mb-2 { margin-bottom:8px; }
+  .mb-3 { margin-bottom:12px; }
+  .mb-4 { margin-bottom:16px; }
+  .mt-2 { margin-top:8px; }
+  .mt-3 { margin-top:12px; }
+  .mt-4 { margin-top:16px; }
+  .text-center { text-align:center; }
+  .text-sm { font-size:13px; }
+  .text-muted { color:var(--text2); }
+  .font-bold { font-weight:600; }
+
+  /* Course Content */
+  .content-section { margin-bottom:24px; }
+  .content-section h3 { font-size:16px; font-weight:600; margin-bottom:12px; padding-left:12px; border-left:3px solid var(--blue); }
+  .content-section p { font-size:13px; color:var(--text2); line-height:1.8; margin-bottom:8px; }
+  .content-section ul { padding-left:18px; font-size:13px; color:var(--text2); line-height:2; }
+  .content-section li { margin-bottom:4px; }
+  .obj-card { display:flex; align-items:flex-start; gap:10px; padding:10px 14px; background:var(--blue-bg); border-radius:var(--radius-sm); margin-bottom:8px; font-size:13px; }
+  .obj-card .obj-num { width:24px;height:24px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0; }
+  .step-card { display:flex; gap:12px; padding:14px; background:var(--bg); border-radius:var(--radius-sm); margin-bottom:8px; }
+  .step-num { width:32px;height:32px;border-radius:var(--radius-sm);background:var(--green-bg);color:var(--green);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0; }
+  .step-body { font-size:13px; line-height:1.7; }
+  .step-body strong { display:block; font-size:14px; color:var(--text); margin-bottom:4px; }
+  .case-box { background:var(--amber-bg); border-radius:var(--radius-sm); padding:14px; margin-bottom:10px; }
+  .case-box .case-label { font-size:11px; font-weight:600; color:#8c5a00; text-transform:uppercase; margin-bottom:6px; }
+  .case-box p { font-size:13px; color:var(--text2); line-height:1.7; margin:0; }
+  .tip-item { display:flex; gap:8px; align-items:flex-start; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px; }
+  .tip-item:last-child { border-bottom:none; }
+  .tip-icon { width:20px;height:20px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0; }
+  .tools-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:8px; }
+  .tool-card { background:var(--bg); border-radius:var(--radius-sm); padding:12px; }
+  .tool-card .tool-name { font-weight:600; font-size:13px; }
+  .tool-card .tool-desc { font-size:12px; color:var(--text2); margin-top:2px; }
+
+  /* Slideshow */
+  .slideshow { position:relative; background:#000; border-radius:var(--radius); overflow:hidden; cursor:pointer; margin-bottom:16px; min-height:320px; }
+  .slideshow .slide { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px; opacity:0; transition:opacity .5s; }
+  .slideshow .slide.active { opacity:1; }
+  .slideshow .slide-title { font-size:22px; font-weight:700; color:#fff; text-align:center; margin-bottom:12px; }
+  .slideshow .slide-body { font-size:14px; color:rgba(255,255,255,0.8); text-align:center; line-height:1.7; max-width:500px; }
+  .slideshow .slide-grad1 { background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+  .slideshow .slide-grad2 { background:linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+  .slideshow .slide-grad3 { background:linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+  .slideshow .slide-grad4 { background:linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+  .slideshow .slide-grad5 { background:linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+  .slideshow-dots { display:flex; justify-content:center; gap:6px; margin-top:10px; }
+  .slideshow-dots .dot { width:8px;height:8px;border-radius:50%;background:var(--border);transition:all .2s; }
+  .slideshow-dots .dot.active { background:var(--blue);width:20px;border-radius:4px; }
+  .slideshow-nav { position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.2);border:none;color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:16px;z-index:2;display:flex;align-items:center;justify-content:center; }
+  .slideshow-nav.prev { left:12px; }
+  .slideshow-nav.next { right:12px; }
+
+  /* Summary box */
+  .summary-box { background:var(--purple-bg); border-radius:var(--radius); padding:16px; margin-top:8px; }
+  .summary-box h4 { font-size:14px; font-weight:600; color:var(--purple); margin-bottom:8px; }
+  .summary-box p { font-size:13px; color:var(--text2); line-height:1.6; margin:0; }
+
+  /* ===== PPT Player ===== */
+  .ppt-container { background:#1a1a2e; border-radius:var(--radius); overflow:hidden; position:relative; }
+  .ppt-frame { position:relative; width:100%; aspect-ratio:16/9; min-height:380px; }
+  .ppt-slide { position:absolute; inset:0; display:flex; flex-direction:column; padding:48px 40px; opacity:0; transition:opacity .6s ease; pointer-events:none; }
+  .ppt-slide.active { opacity:1; pointer-events:auto; }
+  .ppt-slide-cover { background:linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%); color:#fff; justify-content:center; align-items:center; text-align:center; }
+  .ppt-slide-content { background:#fff; color:#1d1d1f; }
+  .ppt-slide-accent { background:linear-gradient(135deg, #f8f9ff 0%, #eef2ff 100%); color:#1d1d1f; }
+  .ppt-slide-dark { background:#16213e; color:#e8e8f0; }
+  .ppt-slide-summary { background:linear-gradient(135deg, #0f3460, #1a1a2e); color:#fff; justify-content:center; align-items:center; text-align:center; }
+  .ppt-badge { display:inline-block; padding:4px 14px; border-radius:20px; font-size:12px; font-weight:600; letter-spacing:.05em; margin-bottom:16px; }
+  .ppt-badge-blue { background:rgba(0,113,227,0.15); color:#4da6ff; }
+  .ppt-badge-green { background:rgba(48,177,88,0.15); color:#30b158; }
+  .ppt-badge-purple { background:rgba(175,82,222,0.15); color:#c47aff; }
+  .ppt-badge-amber { background:rgba(255,149,0,0.15); color:#ffb84d; }
+  .ppt-badge-dark { background:rgba(0,0,0,0.08); color:#656571; }
+  .ppt-h1 { font-size:28px; font-weight:800; letter-spacing:-.01em; margin-bottom:10px; }
+  .ppt-h2 { font-size:20px; font-weight:700; margin-bottom:20px; display:flex; align-items:center; gap:10px; }
+  .ppt-h2 .ppt-icon { width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+  .ppt-h3 { font-size:15px; font-weight:700; color:var(--blue); margin-bottom:6px; }
+  .ppt-p { font-size:14px; line-height:1.75; color:var(--text2); margin-bottom:8px; }
+  .ppt-list { list-style:none; padding:0; }
+  .ppt-list li { font-size:14px; line-height:1.8; padding:6px 0; padding-left:24px; position:relative; color:var(--text2); }
+  .ppt-list li::before { content:''; position:absolute; left:4px; top:14px; width:6px; height:6px; border-radius:50%; background:var(--blue); }
+  .ppt-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .ppt-card-mini { background:#fff; border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px; }
+  .ppt-card-mini .ppt-card-num { font-size:22px; font-weight:800; color:var(--blue); margin-bottom:4px; }
+  .ppt-card-mini .ppt-card-t { font-size:13px; font-weight:600; margin-bottom:3px; }
+  .ppt-card-mini .ppt-card-d { font-size:12px; color:var(--text2); line-height:1.5; }
+  /* Dark theme cards */
+  .ppt-slide-dark .ppt-card-mini { background:rgba(255,255,255,0.06); border-color:rgba(255,255,255,0.1); color:#e8e8f0; }
+  .ppt-slide-dark .ppt-card-mini .ppt-card-d { color:rgba(255,255,255,0.6); }
+  .ppt-slide-dark .ppt-p, .ppt-slide-dark .ppt-list li { color:rgba(255,255,255,0.7); }
+  .ppt-slide-dark .ppt-h2 { color:#fff; }
+  .ppt-slide-dark .ppt-list li::before { background:#fff; }
+
+  /* ===== Subtitle bar ===== */
+  .subtitle-bar { background:rgba(0,0,0,0.8); color:#fff; text-align:center; padding:12px 20px; font-size:14px; line-height:1.6; min-height:48px; display:flex; align-items:center; justify-content:center; transition:all .3s; }
+  .subtitle-bar.paused { opacity:0.5; }
+
+  /* ===== Voice controls ===== */
+  .voice-controls { display:flex; align-items:center; gap:10px; padding:10px 16px; background:#f0f0f5; }
+  .voice-btn { width:36px; height:36px; border-radius:50%; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px; transition:all .15s; }
+  .voice-btn-play { background:var(--blue); color:#fff; }
+  .voice-btn-play:hover { background:#0066cc; }
+  .voice-btn-outline { background:#fff; border:1px solid var(--border); color:var(--text); }
+  .voice-btn-outline:hover { background:var(--bg); }
+  .voice-speed-select { padding:4px 8px; border:1px solid var(--border); border-radius:6px; font-size:12px; background:#fff; cursor:pointer; }
+  .voice-slide-counter { font-size:12px; color:var(--text2); margin-left:auto; }
+  .voice-progress { flex:1; height:4px; background:var(--border); border-radius:2px; overflow:hidden; }
+  .voice-progress-fill { height:100%; background:var(--blue); border-radius:2px; transition:width .3s; }
+
+  /* ===== Quiz type tabs ===== */
+  .quiz-type-badge { display:inline-flex; align-items:center; gap:4px; padding:2px 10px; border-radius:12px; font-size:11px; font-weight:600; }
+  .quiz-type-choice { background:var(--blue-bg); color:var(--blue); }
+  .quiz-type-subj { background:var(--purple-bg); color:var(--purple); }
+
+  /* ===== Subjective question ===== */
+  .subj-template { background:var(--purple-bg); border-radius:var(--radius-sm); padding:14px; margin-bottom:12px; }
+  .subj-template .subj-label { font-size:11px; font-weight:600; color:var(--purple); text-transform:uppercase; margin-bottom:6px; }
+  .subj-template .subj-content { font-size:13px; color:var(--text); line-height:1.7; white-space:pre-wrap; font-family:inherit; }
+  .hint-toggle { display:inline-flex; align-items:center; gap:4px; padding:6px 12px; border-radius:20px; border:1px solid var(--amber); background:var(--amber-bg); color:#8c5a00; font-size:12px; font-weight:500; cursor:pointer; transition:all .15s; margin-right:8px; }
+  .hint-toggle:hover { background:#ffedd4; }
+  .hint-steps { background:var(--amber-bg); border-radius:var(--radius-sm); padding:14px; margin-bottom:10px; }
+  .hint-steps .hint-step { font-size:13px; padding:6px 0; display:flex; gap:8px; align-items:flex-start; }
+  .hint-steps .hint-num { width:22px; height:22px; border-radius:50%; background:#fff; color:var(--amber); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:11px; flex-shrink:0; border:1px solid var(--amber); }
+  .answer-reveal { background:var(--green-bg); border-radius:var(--radius-sm); padding:14px; margin-top:10px; }
+  .answer-reveal .ar-label { font-size:11px; font-weight:600; color:var(--green); text-transform:uppercase; margin-bottom:6px; }
+  .answer-reveal .ar-content { font-size:13px; color:var(--text); line-height:1.7; white-space:pre-wrap; }
+
+  /* ===== Task hint system ===== */
+  .task-hint-box { background:var(--amber-bg); border-left:3px solid var(--amber); border-radius:0 var(--radius-sm) var(--radius-sm) 0; padding:10px 14px; margin-top:8px; font-size:12px; color:#8c5a00; }
+  .task-answer-box { background:var(--green-bg); border-left:3px solid var(--green); border-radius:0 var(--radius-sm) var(--radius-sm) 0; padding:10px 14px; margin-top:10px; font-size:13px; color:var(--text); line-height:1.7; display:none; }
+  .task-answer-box.show { display:block; }
+
+  /* ===== Radar Chart ===== */
+  .radar-wrap { display:flex; flex-direction:column; align-items:center; margin:16px 0; }
+  .radar-canvas { display:block; }
+  .radar-legend { display:grid; grid-template-columns:repeat(2, 1fr); gap:6px 16px; margin-top:12px; width:100%; max-width:380px; }
+  .radar-legend-item { display:flex; align-items:center; gap:6px; font-size:12px; }
+  .radar-legend-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  .skill-pct-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:12px 0; }
+  .skill-pct-card { background:var(--bg); border-radius:var(--radius-sm); padding:10px 12px; display:flex; align-items:center; justify-content:space-between; border:1px solid var(--border); }
+  .skill-pct-name { font-size:12px; color:var(--text2); flex:1; min-width:0; margin-right:6px; line-height:1.4; }
+  .skill-pct-val { font-size:18px; font-weight:700; flex-shrink:0; }
+  .skill-pct-val.strong { color:var(--green); }
+  .skill-pct-val.ok { color:var(--amber); }
+  .skill-pct-val.weak { color:#ff3b30; }
+
+  /* ===== Learning Map ===== */
+  .map-header { text-align:center; margin-bottom:20px; }
+  .map-header h2 { font-size:17px; font-weight:700; margin-bottom:4px; }
+  .map-stage { margin-bottom:24px; }
+  .map-stage-title { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text3); margin-bottom:10px; padding-left:4px; }
+  .map-node { display:flex; align-items:flex-start; gap:12px; padding:12px; border-radius:var(--radius-sm); border:1.5px solid var(--border); background:var(--card); margin-bottom:8px; cursor:pointer; transition:all .15s; position:relative; }
+  .map-node:hover { border-color:var(--blue); box-shadow:0 2px 8px rgba(0,113,227,.1); }
+  .map-node.done { border-color:var(--green); background:var(--green-bg); }
+  .map-node.locked { opacity:.5; cursor:not-allowed; }
+  .map-node.current { border-color:var(--blue); background:var(--blue-bg); }
+  .map-node-icon { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; background:var(--bg); }
+  .map-node.done .map-node-icon { background:var(--green); color:#fff; }
+  .map-node.current .map-node-icon { background:var(--blue); color:#fff; }
+  .map-node-body { flex:1; min-width:0; }
+  .map-node-title { font-size:14px; font-weight:600; margin-bottom:3px; }
+  .map-node-meta { font-size:12px; color:var(--text2); }
+  .map-node-badge { font-size:11px; padding:2px 8px; border-radius:100px; font-weight:600; flex-shrink:0; }
+  .map-node-badge.done-badge { background:var(--green); color:#fff; }
+  .map-node-badge.current-badge { background:var(--blue); color:#fff; }
+  .map-node-badge.locked-badge { background:var(--border); color:var(--text3); }
+  .map-node-badge.pending-badge { background:var(--blue-bg); color:var(--blue); }
+  .map-connector { width:2px; height:14px; background:var(--border); margin:0 auto 0 29px; }
+  .map-connector.done-conn { background:var(--green); }
+  .map-skill-tag { display:inline-block; font-size:10px; padding:1px 6px; border-radius:4px; background:var(--amber-bg); color:var(--amber); margin-top:3px; }
+
+  /* ===== Schedule Plan ===== */
+  .schedule-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .schedule-week { margin-bottom:16px; }
+  .schedule-week-title { font-size:12px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.8px; margin-bottom:8px; }
+  .schedule-item { display:flex; align-items:center; gap:10px; padding:10px 12px; background:var(--bg); border-radius:var(--radius-sm); margin-bottom:6px; border-left:3px solid var(--blue); }
+  .schedule-item.priority-high { border-left-color:#ff3b30; }
+  .schedule-item.priority-mid { border-left-color:var(--amber); }
+  .schedule-item.priority-low { border-left-color:var(--green); }
+  .schedule-day { font-size:11px; font-weight:700; color:var(--text3); width:52px; flex-shrink:0; }
+  .schedule-course { flex:1; min-width:0; }
+  .schedule-course-name { font-size:13px; font-weight:500; }
+  .schedule-course-dur { font-size:11px; color:var(--text2); }
+  .schedule-tip { font-size:12px; color:var(--text2); background:var(--blue-bg); border-radius:var(--radius-sm); padding:10px 12px; margin-top:10px; }
+
+  @media(max-width:600px) {
+    .app { padding:12px 10px 40px; }
+    .role-grid { grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); }
+    .stat-grid { grid-template-columns:repeat(2, 1fr); }
+    .slideshow { min-height:240px; }
+    .slideshow .slide { padding:24px; }
+    .slideshow .slide-title { font-size:18px; }
+    .ppt-slide { padding:24px 20px; }
+    .ppt-h1 { font-size:22px; }
+    .ppt-h2 { font-size:17px; }
+    .ppt-grid2 { grid-template-columns:1fr; }
+    .ppt-frame { min-height:280px; }
+    .skill-pct-grid { grid-template-columns:1fr; }
+    .radar-legend { grid-template-columns:1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+// ==================== SESSION CHECK ====================
+(function() {
+  // Skip check if we're already on landing page (prevent redirect loops)
+  if (window.location.pathname.indexOf('landing') !== -1) return;
+
+  var session = localStorage.getItem('ai_training_session');
+  if (!session) {
+    window.location.replace('index.html');
+    return;
+  }
+  try {
+    var data = JSON.parse(session);
+    if (!data.loggedIn) {
+      localStorage.removeItem('ai_training_session');
+      window.location.replace('index.html');
+      return;
+    }
+    // Session valid — auto-logout after 12 hours
+    if (Date.now() - data.timestamp > 12 * 3600 * 1000) {
+      localStorage.removeItem('ai_training_session');
+      localStorage.removeItem('ai_training_emp_role');
+      window.location.replace('index.html');
+      return;
+    }
+  } catch(e) {
+    localStorage.removeItem('ai_training_session');
+    window.location.replace('index.html');
+    return;
+  }
+})();
+
+// ==================== DATA ====================
+
+const ROLES = {
+  dev: {
+    id:'dev', name:'研发', icon:'💻', color:'blue', desc:'AI编程助手、代码审查、自动化测试',
+    skills:['AI编程助手','代码审查与优化','自动化测试','提示词工程','技术文档生成','AI安全与合规']
+  },
+  pm: {
+    id:'pm', name:'产品', icon:'📋', color:'purple', desc:'需求分析、用户研究、数据分析',
+    skills:['AI需求分析','用户研究','数据分析与决策','原型设计辅助','竞品分析','产品策略评估']
+  },
+  ops: {
+    id:'ops', name:'运营', icon:'📊', color:'green', desc:'内容创作、数据运营、活动策划',
+    skills:['AI内容创作','数据分析运营','活动策划优化','用户洞察','自动化流程','社群运营']
+  },
+  sales: {
+    id:'sales', name:'销售', icon:'🤝', color:'amber', desc:'客户洞察、话术优化、CRM管理',
+    skills:['客户画像分析','销售话术优化','商机识别','CRM数据管理','会议纪要生成','客户跟进策略']
+  },
+  hr: {
+    id:'hr', name:'人资', icon:'👥', color:'red', desc:'简历筛选、人才分析、员工培训',
+    skills:['简历智能筛选','岗位JD撰写','人才数据分析','员工培训设计','绩效评估辅助','组织效能分析']
+  }
+};
+
+// Assessment questions per role - 10 questions each
+const ASSESSMENTS = {
+  dev: [
+    // dim0: AI编程工具应用
+    {q:'【AI编程工具】当你需要实现一个复杂算法（如红黑树、分布式锁），你会如何使用AI编程助手？',
+     opts:['不使用AI编程助手，完全自己写',
+           '让AI生成代码，直接复制粘贴，不做审查',
+           '让AI生成初版，对照文档逐行验证核心逻辑',
+           '用多轮对话让AI迭代方案，理解设计思路后再采用',
+           '能为AI提供上下文、边界条件和约束，引导其给出最优方案并对比多版本'],
+     dim:0, scores:[0,1,2,3,4]},
+    // dim1: AI代码审查
+    {q:'【AI代码审查】在Code Review阶段，以下哪种AI辅助方式最接近你的实际工作方式？',
+     opts:['不会用AI做Code Review',
+           '偶尔让AI解释一段看不懂的代码',
+           '用AI检查明显的语法错误和代码格式问题',
+           '让AI扫描SQL注入、XSS等安全漏洞，并解释风险原因',
+           '构建了定制化的AI Code Review提示词模板，能系统性评估安全、性能、可维护性'],
+     dim:1, scores:[0,1,2,3,4]},
+    // dim2: AI测试
+    {q:'【AI自动化测试】面对一个核心支付模块，你如何用AI完善测试策略？',
+     opts:['完全用手工测试，不依赖AI',
+           '让AI随机生成几条测试用例凑数',
+           '让AI分析接口文档，生成覆盖主路径的单元测试',
+           '让AI结合业务场景生成边界值、异常流测试，并分析覆盖盲区',
+           '用AI驱动变异测试（Mutation Testing），持续评估测试套件的有效性'],
+     dim:2, scores:[0,1,2,3,4]},
+    // dim3: Prompt工程
+    {q:'【Prompt工程】你需要让AI帮你重构一个有10年历史的遗留代码库，你的提示词策略是？',
+     opts:['直接说"帮我重构这段代码"',
+           '附上代码，让AI给出建议',
+           '描述背景+目标，让AI分步骤给出重构方案',
+           '使用系统提示设定架构师角色，提供代码上下文、约束条件、期望产出格式',
+           '运用思维链（Chain-of-Thought）、少样本示例，引导AI分析技术债务并输出可执行的重构路线图'],
+     dim:3, scores:[0,1,2,3,4]},
+    // dim4: AI文档
+    {q:'【AI技术文档】你们团队刚完成一个微服务架构改造，如何用AI高效产出技术文档？',
+     opts:['文档由人全程手写，不借助AI',
+           '用AI帮忙润色已有文档的语言表达',
+           '把代码和设计草稿喂给AI，让其生成README初稿',
+           '建立文档模板体系，AI根据代码变更自动生成API文档和架构说明',
+           '搭建了AI驱动的文档即代码流水线：代码合并时自动更新文档，AI检测文档与代码的一致性'],
+     dim:4, scores:[0,1,2,3,4]},
+    // dim5: AI安全
+    {q:'【AI安全合规】你的团队开始在生产项目中大量使用AI生成代码，以下哪项安全措施最接近你的团队实践？',
+     opts:['没有专门针对AI生成代码的安全措施',
+           '口头提醒开发者注意AI代码的安全问题',
+           '要求AI生成代码必须通过现有的静态代码分析（如SonarQube）',
+           '建立了AI代码安全审查清单，重点检查认证、加密、权限和依赖漏洞',
+           '在CI/CD中集成AI代码安全扫描，建立了AI辅助代码的全链路安全评估体系'],
+     dim:5, scores:[0,1,2,3,4]},
+    // dim0: AI编程高阶
+    {q:'【AI辅助架构设计】在设计一个高并发系统（如秒杀系统）时，你如何有效利用AI？',
+     opts:['AI在架构设计上没什么用',
+           '让AI推荐一个现成的架构方案直接套用',
+           '让AI对比几种架构（如消息队列、Redis+分布式锁）的优劣',
+           '提供业务规模、SLA要求和现有技术栈，让AI输出定制化架构方案和风险评估',
+           '用AI进行架构决策推演：模拟不同流量峰值下各方案的瓶颈，输出带成本分析的架构决策报告'],
+     dim:0, scores:[0,1,2,3,4]},
+    // dim1: AI代码重构
+    {q:'【AI代码质量】以下哪个场景最能体现你使用AI提升代码质量的能力？',
+     opts:['我不用AI来提升代码质量',
+           '让AI把变量名改得更规范',
+           '让AI把一个200行的函数拆分成更小的函数',
+           '让AI分析代码的圈复杂度，识别重构优先级，并给出设计模式建议',
+           '建立了AI驱动的代码质量度量体系：定期运行AI分析，追踪代码健康指数的变化趋势'],
+     dim:1, scores:[0,1,2,3,4]},
+    // dim2: 测试覆盖
+    {q:'【AI测试策略】在TDD（测试驱动开发）工作流中，AI能扮演什么角色？请选择最符合你实践的描述。',
+     opts:['我不做TDD',
+           'AI生成测试用例后，我再手写实现代码',
+           '用AI先生成测试用例，再让AI生成通过测试的最小实现，循环迭代',
+           'AI生成测试骨架和边界用例，我补充业务逻辑测试，并用AI审查测试质量',
+           '构建了AI辅助的TDD流水线：需求→AI生成验收标准→AI生成测试→AI生成实现→AI评审覆盖率'],
+     dim:2, scores:[0,1,2,3,4]},
+    // dim3: AI效率综合
+    {q:'【AI研发效能】在Sprint冲刺中，以下哪种场景最接近你利用AI提升研发效能的方式？',
+     opts:['AI对我的Sprint工作影响不大',
+           '偶尔用AI回答技术问题，减少查文档的时间',
+           '用AI生成样板代码（boilerplate），专注核心逻辑开发',
+           '用AI加速代码编写+审查+单测，Sprint交付量提升30%以上',
+           '构建了个人AI工作流：需求拆解→AI辅助设计→AI编码→AI测试→AI文档，全链路效率提升50%+'],
+     dim:3, scores:[0,1,2,3,4]}
+  ],
+  pm: [
+    // dim0: AI需求分析
+    {q:'【AI需求洞察】你收到了1000条用户反馈，需要快速提炼核心诉求，你会如何使用AI？',
+     opts:['人工逐条阅读，不使用AI',
+           '让AI随机总结几条反馈的关键词',
+           '将反馈分批喂给AI，让其分类归纳主要问题',
+           '构建结构化提示词，让AI按用户旅程、情感倾向、需求优先级多维度分析，输出洞察报告',
+           '建立了AI需求洞察Pipeline：自动抓取多渠道反馈→AI聚类分析→与历史需求对比→输出带优先级的需求树'],
+     dim:0, scores:[0,1,2,3,4]},
+    // dim1: AI数据分析
+    {q:'【AI数据驱动】某核心功能的DAU下降15%，你如何用AI辅助快速定位原因？',
+     opts:['直接凭经验判断原因',
+           '让AI帮我搜索类似问题的通用原因',
+           '把各渠道数据报表喂给AI，让其找异常指标',
+           'AI辅助建立假设树，逐层下钻验证（用户分群/功能路径/版本/设备），输出归因报告',
+           '用AI构建自动化监控告警+归因分析体系，15%下降发生时AI已自动推送初步归因和建议'],
+     dim:1, scores:[0,1,2,3,4]},
+    // dim2: AI决策支持
+    {q:'【AI产品决策】面对"是否要做直播功能"这一战略决策，你会如何让AI辅助产品决策？',
+     opts:['产品决策不适合用AI，全凭判断',
+           '让AI帮我搜集竞品是否做了直播',
+           '让AI分析用户调研数据，评估用户对直播功能的需求强度',
+           '让AI从市场规模、用户需求、技术成本、竞争格局四维度评估，输出决策矩阵',
+           '用AI进行完整的产品决策推演：构建用户模型+市场模型，模拟上线后的用户增长和收入影响'],
+     dim:2, scores:[0,1,2,3,4]},
+    // dim3: AI原型设计
+    {q:'【AI原型与交互】在做一个新功能的交互设计时，你如何借助AI提效？',
+     opts:['原型设计完全靠自己，不用AI',
+           '用AI搜集竞品的交互案例作为参考',
+           '用AI（如Figma AI/v0.dev）生成基础线框图，再人工调整',
+           '描述用户故事和业务场景，让AI生成多套交互方案，对比权衡后选优',
+           'AI全流程参与：需求→AI生成交互规范→自动生成可点击原型→AI评估可用性风险'],
+     dim:3, scores:[0,1,2,3,4]},
+    // dim4: AI竞品分析
+    {q:'【AI竞品研究】你需要在3天内产出一份深度竞品分析报告，如何用AI提速？',
+     opts:['AI在竞品分析上帮不上忙，自己做',
+           '让AI帮我整理搜集到的竞品信息',
+           '让AI根据竞品截图和文档，分析功能差异和设计逻辑',
+           '构建竞品分析提示词框架：功能矩阵+用户体验+商业模式+技术能力，AI批量处理并输出对比报告',
+           '建立竞品监控体系：AI定期抓取竞品更新，自动生成变化摘要和策略影响分析'],
+     dim:4, scores:[0,1,2,3,4]},
+    // dim5: AI产品评估
+    {q:'【AI方案评估】某功能有A/B两套方案争议很大，你如何借助AI辅助做出决策？',
+     opts:['开会讨论，少数服从多数',
+           '让AI说哪个方案好',
+           'AI汇总各方意见，识别核心分歧点',
+           'AI构建评估框架：用户价值/技术成本/业务影响/风险，给出评分矩阵和建议',
+           'AI做完整的方案推演：模拟不同用户群的使用路径，预测A/B方案的关键指标差异'],
+     dim:5, scores:[0,1,2,3,4]},
+    // dim0: 需求文档
+    {q:'【AI文档生成】你的团队要将AI写PRD作为标准流程，以下哪种做法最成熟？',
+     opts:['PRD必须完全手写，AI写的不可信',
+           '用AI把PRD草稿润色得更规范',
+           'AI根据需求背景生成PRD结构框架，人工填充核心内容',
+           '提供业务背景+用户故事+验收标准，AI生成完整PRD初稿，人工审核关键决策点',
+           '建立了AI-PRD生成规范：标准化提示词+自动关联历史需求+自动检测需求冲突'],
+     dim:0, scores:[0,1,2,3,4]},
+    // dim1: 用户研究
+    {q:'【AI用户研究】你需要深入了解某核心用户群体的真实需求，如何用AI辅助用户研究？',
+     opts:['用户研究必须面对面，AI帮不上忙',
+           '让AI帮我设计调研问卷',
+           'AI分析历史用户访谈录音转录文本，提炼关键洞察',
+           'AI结合行为数据+调研数据+舆情数据，多维度构建用户心智模型',
+           '用AI构建动态用户模型：持续学习新数据，预测用户行为变化，主动推送需求预警'],
+     dim:1, scores:[0,1,2,3,4]},
+    // dim2: A/B测试
+    {q:'【AI实验分析】一个改版A/B测试跑了2周，结果显示新版转化率提升8%但页面停留时长下降12%，你会如何让AI辅助做出决策？',
+     opts:['转化率高就上，不用分析太多',
+           '让AI总结数据说明',
+           'AI分析两个指标背后的用户行为变化原因',
+           'AI建立多目标决策模型：综合转化率、停留时长、长期留存、用户满意度，给出加权评分和建议',
+           'AI完整推演：分用户分层分析，预测上线后90天的LTV变化，给出分人群差异化上线策略'],
+     dim:2, scores:[0,1,2,3,4]},
+    // dim5: AI产品趋势
+    {q:'【AI产品趋势洞察】作为产品经理，你如何用AI把握行业技术趋势并转化为产品机会？',
+     opts:['靠看行业报告和参加会议了解趋势',
+           '让AI帮我搜集最新的行业新闻',
+           'AI定期分析行业报告和竞品动态，生成趋势摘要',
+           'AI构建趋势监测体系：追踪技术成熟度曲线，识别"从早期采用者到主流市场"的时机，映射产品机会',
+           '建立AI驱动的产品雷达：持续扫描技术/用户/监管三维变化，自动评估对产品路线图的影响'],
+     dim:5, scores:[0,1,2,3,4]}
+  ],
+  ops: [
+    // dim0: AI内容创作
+    {q:'【AI内容创作】你需要为一个促销活动在微信、抖音、小红书三个平台同步发布内容，如何用AI提效？',
+     opts:['每个平台的文案都手动单独写',
+           '写一篇再让AI做简单改写',
+           '给AI提供活动信息，让其生成三平台适配版本',
+           '为每平台建立AI内容模板（调性/语气/长度/话题标签规范），AI一键生成符合各平台规则的版本',
+           '构建了AI内容工厂：活动Brief→AI多平台内容矩阵→A/B测试→AI根据数据反馈自动优化下一轮内容'],
+     dim:0, scores:[0,1,2,3,4]},
+    // dim1: AI数据分析
+    {q:'【AI运营分析】上周的大促活动GMV达到预期，但新用户留存率只有18%，你如何用AI深挖原因？',
+     opts:['凭感觉猜原因，调整下次活动',
+           '让AI看一下数据表格，说说可能的原因',
+           'AI分析新用户注册→首单→复购的转化漏斗，找到最大流失节点',
+           'AI结合用户画像+行为路径+流失时间分布，给出多假设归因分析和验证方案',
+           'AI自动完成归因→根因分析→干预方案设计→预估改善效果→实验设计的完整闭环'],
+     dim:1, scores:[0,1,2,3,4]},
+    // dim2: AI活动策划
+    {q:'【AI活动策划】你负责策划一场针对高价值用户的专属权益活动，如何借助AI完成策划？',
+     opts:['完全自己策划，AI不适合做创意工作',
+           '让AI生成活动名称和文案',
+           '提供用户画像和预算，AI给出3-5套活动方案供选择',
+           'AI分析历史活动数据，基于高价值用户的行为偏好，生成个性化活动方案和预期ROI评估',
+           'AI完整策划：用户分层+权益设计+触达时机+A/B策略+效果预测，形成可执行的活动SOP'],
+     dim:2, scores:[0,1,2,3,4]},
+    // dim3: AI用户运营
+    {q:'【AI精细化运营】你的APP有500万用户，如何用AI实现从粗放运营到精细化分层运营？',
+     opts:['没有做用户分层，统一推送',
+           '按注册时间、消费金额做简单分层',
+           'AI分析RFM模型，识别高/中/低价值用户群，制定差异化策略',
+           'AI构建多维用户标签体系（行为+偏好+生命周期），实现千人千面的运营触达',
+           '建立了AI驱动的实时运营引擎：用户行为触发AI决策→个性化内容/优惠/提醒→持续优化触达策略'],
+     dim:3, scores:[0,1,2,3,4]},
+    // dim4: AI自动化流程
+    {q:'【AI运营自动化】你希望将用户召回运营从人工操作变成智能自动化，以下哪个阶段最接近你的现状？',
+     opts:['召回运营完全靠人工，没有自动化',
+           '设置了简单的定时推送规则',
+           '按流失天数触发阶梯式召回消息（7天/30天/90天）',
+           'AI根据用户流失原因（价格敏感/功能不满足/使用频次低）自动匹配差异化召回策略',
+           'AI自动识别高召回概率用户，动态调整召回时机、渠道、内容，并持续学习优化转化率'],
+     dim:4, scores:[0,1,2,3,4]},
+    // dim5: AI社群运营
+    {q:'【AI社群运营】你管理着一个5000人的品牌社群，如何用AI提升社群活跃度和转化？',
+     opts:['社群运营需要人情味，AI不合适',
+           '偶尔让AI帮写几条群公告',
+           'AI根据社群话题热度，定期生成讨论选题和互动话术',
+           'AI分析社群成员行为数据，识别KOC和沉默用户，制定差异化激活策略',
+           'AI驱动社群运营飞轮：内容推荐+成员激活+舆情监控+转化触发，实现社群自运营'],
+     dim:5, scores:[0,1,2,3,4]},
+    // dim0: 内容质量
+    {q:'【AI内容质量控制】你的运营团队每天产出大量AI生成内容，如何确保内容质量和品牌调性一致？',
+     opts:['靠人工审核，AI生成的内容不可信',
+           '简单审核有没有明显错误',
+           '建立内容规范手册，AI生成后人工对照检查',
+           '在AI提示词中嵌入品牌调性、禁用词、内容框架约束，人工只做最终审核',
+           '构建了AI内容质检体系：AI生成→AI自动质检（品牌一致性/事实准确性/违禁词）→人工终审敏感内容'],
+     dim:0, scores:[0,1,2,3,4]},
+    // dim1: ROI分析
+    {q:'【AI运营ROI归因】你同时在投放信息流广告、KOL内容和私域运营三条渠道，如何用AI做精准归因？',
+     opts:['各渠道数据分散，归因太复杂了',
+           '以最后点击渠道作为转化归因',
+           'AI整合多渠道数据，对比各渠道的直接转化贡献',
+           'AI构建多触点归因模型（如数据驱动归因），识别各渠道在用户决策路径中的实际贡献',
+           'AI实时归因分析+预算自动优化：当某渠道ROI下降时，AI自动建议调整预算分配'],
+     dim:1, scores:[0,1,2,3,4]},
+    // dim4: 竞品监控
+    {q:'【AI竞品运营监控】竞品突然推出类似你家核心产品的活动，你如何用AI快速响应？',
+     opts:['等老板指示，没有快速响应机制',
+           '人工收集竞品信息，开会讨论',
+           'AI帮我快速整理竞品活动的核心要素（权益/玩法/传播策略）',
+           'AI分析竞品活动与我方的差异，评估对我方用户流失的潜在影响，给出应对方案',
+           '建立了竞品运营预警系统：AI持续监控竞品动态，当检测到重大威胁时自动推送预警和建议'],
+     dim:4, scores:[0,1,2,3,4]},
+    // dim5: 运营趋势
+    {q:'【AI赋能运营升级】从运营视角看，AI最能颠覆哪个环节？请选择你认为最有价值、且你已有实践的方向。',
+     opts:['AI对运营价值有限，主要靠创意和执行力',
+           '内容生产提速，AI帮我写文案',
+           '数据分析提效，AI帮我解读报表，不用自己写SQL',
+           '个性化运营，AI实现千人千面的内容和权益推送',
+           '运营决策智能化：AI根据实时数据自动调整运营策略，我从执行者变为策略设计者'],
+     dim:5, scores:[0,1,2,3,4]}
+  ],
+  sales: [
+    // dim0: AI客户洞察
+    {q:'【AI客户洞察】你即将拜访一家年营收50亿的制造业大客户，如何用AI在1小时内完成充分的客户研究？',
+     opts:['靠销售经验和客户基本信息就够了',
+           '让AI搜索一下这家公司的官网和新闻',
+           '用AI整理公司年报、融资动态、高管履历等公开信息',
+           'AI综合企业信息：战略重点+近期痛点+决策人背景+竞争压力，生成结构化客户洞察报告',
+           'AI构建客户情报库：持续追踪客户动态，自动推送与我方产品相关的线索和拜访话题建议'],
+     dim:0, scores:[0,1,2,3,4]},
+    // dim1: AI话术优化
+    {q:'【AI销售话术】客户说"你们产品比竞品贵20%，我没法跟领导交代"，你如何用AI实时辅助应对这个异议？',
+     opts:['靠自己的经验直接回应',
+           '事后让AI帮我复盘该如何回应',
+           '提前让AI准备常见异议处理话术，记熟后使用',
+           '用AI分析该客户的具体情况（规模/业务痛点/预算），生成个性化的价值重框话术',
+           '建立了AI实时话术教练：会议中AI辅助识别客户信号，实时推荐最优应对策略和话术'],
+     dim:1, scores:[0,1,2,3,4]},
+    // dim2: AI商机管理
+    {q:'【AI商机评估】你手上有30个处于不同阶段的商机，如何用AI优先聚焦最有价值的机会？',
+     opts:['靠感觉判断哪个客户最重要',
+           'AI帮我列出各商机的基本信息',
+           '让AI根据商机金额和阶段给出排序建议',
+           'AI建立商机评分模型：综合客户意向、竞争态势、关系强度、时间压力，输出优先级矩阵',
+           'AI动态管理销售漏斗：实时更新商机健康度，预测月度业绩达成率，自动建议下一步行动'],
+     dim:2, scores:[0,1,2,3,4]},
+    // dim3: AI CRM
+    {q:'【AI CRM应用】你的团队有大量历史客户互动记录分散在CRM、邮件、会议纪要中，如何用AI挖掘价值？',
+     opts:['数据太分散，很难有效利用',
+           '偶尔让AI帮我整理某个客户的跟进记录',
+           '让AI从历史记录中提炼每个客户的核心诉求和关键决策人',
+           'AI挖掘客户成功模式：分析成交/丢单共同因素，输出"理想客户画像"和"高风险信号"识别模型',
+           '构建AI-CRM智能体：自动整合所有渠道信息，主动推送客户关系风险预警和拓展机会'],
+     dim:3, scores:[0,1,2,3,4]},
+    // dim4: AI会议管理
+    {q:'【AI会议与跟进】一次2小时的客户高层会议结束，你如何用AI快速产出高质量的跟进材料？',
+     opts:['自己手动整理纪要，耗时1-2小时',
+           '让AI把会议录音转文字',
+           '让AI从转录文本中提炼会议要点和行动项',
+           'AI生成结构化会议纪要（背景/共识/分歧/行动项/负责人/截止日）并自动识别客户的隐性需求',
+           'AI会议助手全流程：纪要生成+发给客户确认的邮件初稿+内部跟进计划+CRM自动更新一键完成'],
+     dim:4, scores:[0,1,2,3,4]},
+    // dim5: AI客户关系
+    {q:'【AI客户关系管理】对于一个已合作3年的大客户，如何用AI预警续约风险并提前干预？',
+     opts:['等客户主动说要续约或流失了才知道',
+           '定期人工回顾客户使用情况',
+           'AI分析客户使用数据，识别活跃度下降等流失信号',
+           'AI构建客户健康度评分体系：使用深度+满意度+关系强度+竞争威胁，自动触发续约干预策略',
+           'AI客户成功平台：7×24小时监控，预测90天内续约概率，自动推送挽留动作给销售'],
+     dim:5, scores:[0,1,2,3,4]},
+    // dim0: 丢单分析
+    {q:'【AI赢单分析】本季度你丢失了5个原本有希望的大单，如何用AI系统性复盘找到改进点？',
+     opts:['丢单很正常，经验告诉我下次注意就好',
+           '让AI帮我总结一下各单子的丢单原因',
+           'AI对比赢单和丢单的关键变量（客户规模/竞争对手/销售周期/决策链），识别规律',
+           'AI建立赢/丢单决策树：哪些因素最影响成交，哪个阶段丢单最多，输出销售流程优化建议',
+           'AI构建了持续学习的赢单模型：每季度自动迭代，发现新的成功模式并同步给全团队'],
+     dim:0, scores:[0,1,2,3,4]},
+    // dim1: 行业研究
+    {q:'【AI行业洞察】你刚拿到一个新行业（如半导体设备）的销售线索，对行业完全陌生，如何用AI快速建立专业认知？',
+     opts:['先联系老客户介绍引荐，再慢慢了解',
+           '让AI帮我搜索这个行业的基本情况',
+           'AI生成行业概况：市场规模/主要玩家/产业链结构/采购决策特点',
+           'AI生成客户视角的行业洞察：目标客户的核心痛点/KPI/预算周期/决策流程/关键人',
+           'AI驱动行业快速学习框架：2小时内产出"行业专家级"的客户拜访准备材料，包括有价值的行业问题清单'],
+     dim:1, scores:[0,1,2,3,4]},
+    // dim4: 团队管理
+    {q:'【AI销售团队赋能】作为销售团队负责人，你如何用AI提升整个团队的销售能力和业绩达成率？',
+     opts:['团队管理靠经验和1对1辅导，AI帮不上忙',
+           '让AI生成销售培训材料',
+           'AI分析团队成员的销售数据，识别能力短板，制定个性化培训计划',
+           'AI教练系统：分析每个销售的通话/会议记录，实时反馈话术质量，推送最佳实践',
+           'AI构建了销售能力雷达：实时追踪每人的核心能力指标，自动匹配辅导资源，预测季度达成率'],
+     dim:4, scores:[0,1,2,3,4]},
+    // dim2: 业绩预测
+    {q:'【AI业绩预测】季度末还有15天，你手上有价值共2000万的商机处于不同阶段，如何用AI预测能否完成1200万的季度目标？',
+     opts:['靠感觉评估，乐观点能完成',
+           'AI把各商机金额简单加总',
+           'AI按商机阶段打折加权，给出保守/基准/乐观三种预测',
+           'AI结合历史成交率+销售周期+竞争态势+客户信号，输出精准的业绩达成概率和关键风险点',
+           'AI构建了动态业绩预测模型：实时更新，识别最值得投入资源的商机，给出冲刺建议'],
+     dim:2, scores:[0,1,2,3,4]}
+  ],
+  hr: [
+    // dim0: AI招聘
+    {q:'【AI智能招聘】你需要在30天内招募10位高级工程师，如何用AI全面提升招聘效率和质量？',
+     opts:['发JD等候选人投递，靠人工筛选',
+           '让AI帮我优化JD的文字表达',
+           'AI智能筛选简历：根据JD要求对候选人打分排序，生成初筛报告',
+           'AI贯穿招聘全流程：JD优化+简历匹配+面试题库生成+候选人评估报告+薪酬对标建议',
+           '建立了AI招聘漏斗体系：AI主动搜寻被动候选人→多维度匹配评分→结构化面试设计→入职成功率预测'],
+     dim:0, scores:[0,1,2,3,4]},
+    // dim1: AI岗位描述
+    {q:'【AI岗位设计】公司要新设"AI产品运营专家"岗位，市场上没有成熟参考，如何用AI设计有竞争力的JD？',
+     opts:['参考其他公司招聘帖子，手动拼凑',
+           '让AI帮我写一份通用的AI岗位JD',
+           'AI分析市场上类似岗位的能力要求，结合公司实际生成JD',
+           'AI综合分析：岗位职责+核心能力模型+差异化竞争要素+市场薪酬区间，生成结构化JD',
+           'AI构建了岗位设计能力模型库：自动对比市场需求变化，定期更新岗位要求，确保招聘竞争力'],
+     dim:1, scores:[0,1,2,3,4]},
+    // dim2: AI人才分析
+    {q:'【AI人才数据分析】公司研发团队过去2年离职率高达35%，如何用AI深入分析并提出改善方案？',
+     opts:['做满意度调研，看结果再说',
+           '让AI帮我统计离职原因的分布',
+           'AI分析离职数据：按部门/级别/司龄/直属管理者分层，找到高风险群体',
+           'AI构建离职预测模型：识别在职员工的离职风险信号，主动推送干预建议给HRBP',
+           'AI人才健康度平台：整合招聘/绩效/参与度/离职数据，自动生成团队诊断报告和改善优先级'],
+     dim:2, scores:[0,1,2,3,4]},
+    // dim3: AI培训学习
+    {q:'【AI学习发展】公司要对500名员工开展AI技能培训，如何用AI让培训更高效、更个性化？',
+     opts:['统一安排集中培训课程，所有人一样',
+           '用AI帮我设计培训课件',
+           'AI根据岗位对每类员工生成定制化学习路径',
+           'AI驱动自适应学习：根据测评结果动态调整课程内容，跟踪学习进度，预测培训效果',
+           '构建了AI学习平台：员工测评→个性化课程→AI陪练→技能认证→岗位胜任力持续追踪'],
+     dim:3, scores:[0,1,2,3,4]},
+    // dim4: AI绩效管理
+    {q:'【AI绩效评估】年度绩效评估季，如何用AI辅助提升评估的客观性和效率？',
+     opts:['绩效评估需要人的判断，AI不适合介入',
+           '让AI帮我起草绩效反馈模板',
+           'AI汇总员工全年工作成果记录，生成数据支撑的绩效评估初稿',
+           'AI对比岗位目标与实际产出，识别高绩效行为模式，辅助校准跨部门评分一致性',
+           'AI绩效管理闭环：目标设定→进度追踪→季度复盘→年度评估→发展计划，全程AI辅助'],
+     dim:4, scores:[0,1,2,3,4]},
+    // dim5: AI组织效能
+    {q:'【AI组织诊断】公司计划重组一个200人的事业部，如何用AI辅助做组织诊断和架构设计？',
+     opts:['依赖咨询公司，AI做不了这种战略工作',
+           '让AI搜集组织设计的最佳实践',
+           'AI分析现有组织架构的汇报层级、跨部门协作效率、管理跨度合理性',
+           'AI综合诊断：结合业务战略+人才结构+文化特点，生成2-3套组织架构方案和影响评估',
+           'AI组织设计平台：模拟不同架构方案对沟通效率、关键人才留存、业务目标达成的影响'],
+     dim:5, scores:[0,1,2,3,4]},
+    // dim0: 面试设计
+    {q:'【AI结构化面试】你需要为AI产品经理岗位设计一套评估体系，确保面试官打分客观一致，如何用AI辅助？',
+     opts:['面试靠经验，让面试官自由发挥',
+           '让AI帮我列出一些面试问题',
+           'AI根据岗位能力模型，生成结构化行为面试题库（STAR方法）',
+           'AI设计完整评估体系：能力维度定义+分级评分标准（1-5级行为锚定）+面试官校准指南',
+           '建立了AI面试质量体系：面试录音AI分析偏见风险，评分一致性监控，持续优化评估有效性'],
+     dim:0, scores:[0,1,2,3,4]},
+    // dim2: 薪酬分析
+    {q:'【AI薪酬策略】公司准备调薪，你需要快速了解技术人才市场薪酬水平，如何用AI辅助薪酬决策？',
+     opts:['买第三方薪酬报告，照着执行',
+           '让AI搜集招聘网站的薪酬信息',
+           'AI整合多方薪酬数据，生成关键岗位的市场分位值报告',
+           'AI薪酬分析：对比公司现有薪酬竞争力缺口，识别高流失风险岗位，给出差异化调薪建议',
+           'AI薪酬策略平台：实时追踪市场薪酬变化，预测调薪对关键人才留存率的影响，优化薪酬结构'],
+     dim:2, scores:[0,1,2,3,4]},
+    // dim5: 员工体验
+    {q:'【AI员工体验】你们的员工敬业度调研显示整体敬业度下滑8%，如何用AI快速诊断并制定改善计划？',
+     opts:['开管理层会议讨论，制定改善措施',
+           '让AI帮我分析调研数据的均值',
+           'AI做文本情感分析，提炼开放性问题中的高频负面主题',
+           'AI交叉分析：敬业度与部门/管理者/晋升通道/工作灵活性的相关性，输出驱动因子排名',
+           'AI诊断+行动闭环：识别高优先级改善项→为每个业务部门生成定制化改善方案→追踪改善效果'],
+     dim:5, scores:[0,1,2,3,4]},
+    // dim4: HR效能
+    {q:'【AI赋能HR效能】HR每天处理大量重复性事务（政策咨询/合同审核/入离职办理），如何用AI释放人力？',
+     opts:['这些工作需要人工处理，AI代替不了',
+           '用AI帮我起草一些HR文件模板',
+           'AI搭建HR知识库，自动回答员工常见问题（FAQ Bot）',
+           'AI流程自动化：入职审核/合同生成/考勤异常处理等标准化场景80%由AI处理，HR专注战略工作',
+           '构建了AI-HR智能体：7×24小时处理员工咨询，自动触发流程节点，HR团队转型为策略伙伴'],
+     dim:4, scores:[0,1,2,3,4]}
+  ]
+};
+
+// Courses per role
+const COURSES = {
+  dev: [
+    {id:'dev1', title:'AI编程助手深度应用', desc:'掌握Copilot/Cursor等工具的核心用法，从代码补全到项目级架构设计', type:'video', dur:'45分钟', skills:[0], tasks:[{t:'用AI生成一个REST API接口',h:'尝试用AI编程助手从零生成一个完整的REST API接口（包含路由、控制器、数据模型）。完成后检查代码质量。'},{t:'优化生成的代码',h:'让AI分析你上一步生成的代码，找出性能瓶颈和安全问题，并给出优化方案。'},{t:'用AI编写单元测试',h:'让AI为你的API接口编写完整的单元测试，要求覆盖率>80%。'}], video:'https://player.bilibili.com/player.html?bvid=BV1...'},
+    {id:'dev2', title:'AI代码审查最佳实践', desc:'用AI系统性地审查代码质量、安全性和性能', type:'text', dur:'30分钟', skills:[1], tasks:[{t:'审查一段遗留代码',h:'给定一段遗留代码，用AI分析其中的代码坏味道、安全漏洞和性能问题。'},{t:'生成代码审查报告',h:'基于AI分析结果，生成一份结构化的代码审查报告，包含问题分级和修复建议。'},{t:'制定团队审查规范',h:'结合AI能力，草拟一份团队AI代码审查规范文档。'}] },
+    {id:'dev3', title:'AI驱动的自动化测试', desc:'用AI生成、优化和维护测试用例，建立持续测试体系', type:'video', dur:'40分钟', skills:[2], tasks:[{t:'AI生成测试用例',h:'选择一个项目模块，让AI分析代码并生成全面的测试用例（含正常、边界、异常场景）。'},{t:'分析测试覆盖率',h:'用AI分析当前测试覆盖率，识别未覆盖的代码路径。'},{t:'搭建自动化测试流水线',h:'用AI辅助搭建一个CI/CD中的自动化测试流水线配置。'}], video:'https://player.bilibili.com/player.html?bvid=BV1...'},
+    {id:'dev4', title:'提示词工程进阶', desc:'从基础到高级，掌握角色设定、few-shot和链式推理技巧', type:'text', dur:'35分钟', skills:[3], tasks:[{t:'设计角色提示词',h:'为"资深架构师"设计一套完整的角色提示词，用于代码评审场景。'},{t:'构建few-shot示例库',h:'收集或设计5个高质量的few-shot示例，用于常见编程场景。'},{t:'链式推理调试',h:'用chain-of-thought方式让AI逐步分析一个复杂bug，记录完整推理过程。'}] },
+    {id:'dev5', title:'AI辅助技术文档生成', desc:'用AI高效生成和维护API文档、技术方案和知识库', type:'text', dur:'25分钟', skills:[4], tasks:[{t:'从代码生成API文档',h:'选择项目中的一个模块，用AI从代码注释和函数签名生成完整的API文档。'},{t:'撰写技术方案文档',h:'用AI辅助撰写一份新功能的技术方案文档，包含架构图描述和实现路径。'}] },
+    {id:'dev6', title:'AI安全与合规实践', desc:'识别AI代码安全风险，建立安全评估体系', type:'video', dur:'30分钟', skills:[5], tasks:[{t:'审计AI生成的代码',h:'找一段AI生成的代码，从安全角度进行审计（注入、敏感信息泄露、权限等）。'},{t:'制定AI代码安全规范',h:'草拟一份团队AI代码安全审查清单和规范。'}], video:'https://player.bilibili.com/player.html?bvid=BV1...'}
+  ],
+  pm: [
+    {id:'pm1', title:'AI辅助需求分析与洞察', desc:'用AI从用户反馈和数据中提取真实需求，写出高质量需求文档', type:'video', dur:'40分钟', skills:[0], tasks:[{t:'AI分析用户反馈',h:'收集20条用户反馈，用AI分类聚类并提取核心需求。'},{t:'AI生成需求文档',h:'基于分析结果，用AI生成一份结构化的PRD文档。'},{t:'AI需求优先级排序',h:'用AI根据价值和可行性对需求进行优先级排序。'}], video:'https://player.bilibili.com/player.html?bvid=BV1...'},
+    {id:'pm2', title:'AI用户研究与数据分析', desc:'用AI高效完成用户调研和数据分析，发现隐藏的用户行为模式', type:'text', dur:'45分钟', skills:[1], tasks:[{t:'设计用户调研方案',h:'用AI辅助设计一份用户调研方案，包括问卷设计和访谈提纲。'},{t:'AI分析调研数据',h:'将调研数据输入AI，让AI分析用户行为模式和关键洞察。'},{t:'生成用户画像',h:'基于数据用AI生成3-5个典型用户画像。'}] },
+    {id:'pm3', title:'AI数据驱动决策', desc:'从数据到洞察再到决策，AI全链路辅助', type:'video', dur:'35分钟', skills:[2], tasks:[{t:'搭建数据看板',h:'用AI辅助设计关键指标看板，定义核心产品指标。'},{t:'A/B测试分析',h:'用AI分析A/B测试结果，得出结论和行动建议。'},{t:'数据驱动的需求决策',h:'基于数据用AI生成产品迭代优先级决策建议。'}], video:'https://player.bilibili.com/player.html?bvid=BV1...'},
+    {id:'pm4', title:'AI原型与交互设计', desc:'用AI快速生成和迭代产品原型，提升设计效率', type:'text', dur:'30分钟', skills:[3], tasks:[{t:'AI生成线框图',h:'描述一个功能需求，让AI生成详细的线框图描述。'},{t:'AI优化交互流程',h:'用AI分析一个交互流程，提出优化建议。'},{t:'AI生成设计规范',h:'用AI辅助生成一份产品设计规范和组件库说明。'}] },
+    {id:'pm5', title:'AI竞品深度分析', desc:'用AI持续监控和分析竞品，及时调整产品策略', type:'text', dur:'30分钟', skills:[4], tasks:[{t:'AI构建竞品分析框架',h:'用AI设计一个竞品分析框架，包含维度、指标和数据源。'},{t:'AI深度竞品拆解',h:'选一个竞品，用AI做全面的功能、策略和用户体验拆解。'},{t:'AI生成策略建议',h:'基于竞品分析用AI生成产品差异化策略建议。'}] }
+  ],
+  ops: [
+    {id:'ops1', title:'AI内容创作工作流', desc:'从选题到发布，用AI打造高效的内容生产线', type:'video', dur:'45分钟', skills:[0], tasks:[{t:'AI选题策划',h:'用AI分析热点和用户兴趣，生成本周内容选题方案。'},{t:'AI多平台内容生成',h:'将一个选题用AI生成适配小红书、公众号、抖音三种平台的内容。'},{t:'AI标题优化',h:'用AI为同一篇文章生成10个不同风格的标题并做A/B选择。'}], video:'https://player.bilibili.com/player.html?bvid=BV1...'},
+    {id:'ops2', title:'AI数据运营实战', desc:'用AI分析运营数据，建立数据驱动的运营闭环', type:'text', dur:'40分钟', skills:[1], tasks:[{t:'AI构建运营数据看板',h:'用AI设计运营核心指标体系，并生成看板结构。'},{t:'AI用户增长分析',h:'用AI分析用户增长数据，识别增长瓶颈和机会点。'},{t:'AI运营报告生成',h:'用AI将运营数据自动生成周报/月报。'}] },
+    {id:'ops3', title:'AI活动策划与优化', desc:'用AI辅助活动创意、执行方案和效果预估', type:'video', dur:'35分钟', skills:[2], tasks:[{t:'AI活动创意生成',h:'用AI为一个节日生成5个活动创意，并评估可行性。'},{t:'AI活动方案撰写',h:'用AI撰写一份完整的活动执行方案（含时间线和资源需求）。'},{t:'AI活动复盘分析',h:'用AI分析活动数据并生成复盘报告。'}], video:'https://player.bilibili.com/player.html?bvid=BV1...'},
+    {id:'ops4', title:'AI用户洞察与分群运营', desc:'用AI精细化用户运营，实现千人千面', type:'text', dur:'30分钟', skills:[3], tasks:[{t:'AI用户标签体系',h:'用AI设计一套用户标签体系，覆盖行为、偏好、价值等维度。'},{t:'AI分群策略制定',h:'基于标签用AI设计用户分群运营策略。'},{t:'AI个性化推送',h:'用AI为不同用户群生成个性化推送内容。'}] },
+    {id:'ops5', title:'AI自动化运营流程', desc:'搭建自动化运营流程，释放重复劳动力', type:'text', dur:'30分钟', skills:[4], tasks:[{t:'AI流程诊断',h:'梳理现有运营流程，用AI识别可自动化的环节。'},{t:'AI自动化方案设计',h:'设计一个自动化运营流程方案（如自动化欢迎旅程）。'},{t:'AI触发规则设计',h:'用AI设计智能触发规则和条件分支逻辑。'}] }
+  ],
+  sales: [
+    {id:'sales1', title:'AI客户画像与洞察', desc:'用AI深度分析客户，精准识别需求和意向', type:'video', dur:'40分钟', skills:[0], tasks:[{t:'AI客户画像构建',h:'用AI分析客户数据，生成一个详细的客户画像模板。'},{t:'AI客户意向评分',h:'设计一个AI辅助的客户意向评分模型。'},{t:'AI客户需求预判',h:'用AI分析客户历史行为，预判下一次需求点。'}], video:'https://player.bilibili.com/player.html?bvid=BV1...'},
+    {id:'sales2', title:'AI销售话术优化', desc:'用AI打磨销售话术，提升沟通转化率', type:'text', dur:'45分钟', skills:[1], tasks:[{t:'AI话术分析',h:'录入一段真实销售对话，让AI分析话术优缺点。'},{t:'AI话术生成',h:'针对不同客户类型，用AI生成2-3套个性化话术方案。'},{t:'AI异议处理',h:'收集常见客户异议，让AI生成最佳应对策略。'}] },
+    {id:'sales3', title:'AI商机识别与管理', desc:'用AI发现和评估商机，提高赢单率', type:'video', dur:'35分钟', skills:[2], tasks:[{t:'AI商机识别',h:'用AI分析线索数据，识别高价值潜在商机。'},{t:'AI成交预测',h:'基于历史数据用AI预测商机成交概率。'},{t:'AI商机管理策略',h:'用AI设计商机分级管理和跟进策略。'}], video:'https://player.bilibili.com/player.html?bvid=BV1...'},
+    {id:'sales4', title:'AI赋能CRM数据管理', desc:'用AI挖掘CRM数据价值，驱动精准销售决策', type:'text', dur:'30分钟', skills:[3], tasks:[{t:'AI数据清洗',h:'用AI辅助清理CRM中的重复和错误数据。'},{t:'AI客户分析报告',h:'用AI从CRM数据中生成客户分析报告。'},{t:'AI销售预测',h:'用AI基于CRM数据做季度销售预测。'}] },
+    {id:'sales5', title:'AI会议纪要与客户跟进', desc:'用AI高效管理销售会议和客户跟进全流程', type:'text', dur:'25分钟', skills:[4], tasks:[{t:'AI会议纪要生成',h:'模拟一场客户会议对话，让AI生成结构化会议纪要。'},{t:'AI行动项管理',h:'从纪要中让AI提取行动项并生成跟进计划。'},{t:'AI跟进策略优化',h:'用AI分析跟进节奏，给出优化建议。'}] }
+  ],
+  hr: [
+    {id:'hr1', title:'AI简历智能筛选', desc:'用AI高效筛选和评估候选人，缩短招聘周期', type:'video', dur:'40分钟', skills:[0], tasks:[{t:'AI简历匹配度评分',h:'用AI根据JD对10份简历进行打分和排序。'},{t:'AI候选人画像生成',h:'用AI从简历中提取候选人关键画像信息。'},{t:'AI筛选标准优化',h:'用AI分析历史招聘数据，优化简历筛选标准。'}], video:'https://player.bilibili.com/player.html?bvid=BV1...'},
+    {id:'hr2', title:'AI岗位JD优化与发布', desc:'用AI写出精准吸引力的JD，提升招聘效果', type:'text', dur:'30分钟', skills:[1], tasks:[{t:'AI JD分析优化',h:'拿一份现有JD让AI分析并给出优化建议。'},{t:'AI多版本JD生成',h:'为同一个岗位生成多个风格的JD版本。'},{t:'AI JD效果分析',h:'用AI分析JD投递数据，优化JD关键词和描述。'}] },
+    {id:'hr3', title:'AI人才数据分析', desc:'用AI分析人才数据，支撑人才决策', type:'video', dur:'35分钟', skills:[2], tasks:[{t:'AI人才结构分析',h:'用AI分析公司人才结构（年龄/职级/技能分布）。'},{t:'AI离职风险预测',h:'用AI分析员工数据预测离职风险。'},{t:'AI人才规划建议',h:'基于业务发展用AI生成人才需求规划。'}], video:'https://player.bilibili.com/player.html?bvid=BV1...'},
+    {id:'hr4', title:'AI培训方案设计', desc:'用AI个性化设计员工培训方案，提升培训效果', type:'text', dur:'35分钟', skills:[3], tasks:[{t:'AI培训需求分析',h:'用AI分析员工能力数据和业务需求，生成培训需求报告。'},{t:'AI个性化培训方案',h:'为不同岗位设计个性化AI技能培训方案。'},{t:'AI培训效果评估',h:'设计一套AI辅助的培训效果评估体系。'}] },
+    {id:'hr5', title:'AI组织效能分析与优化', desc:'用AI诊断组织效能，推动持续优化', type:'text', dur:'30分钟', skills:[5], tasks:[{t:'AI组织效能诊断',h:'用AI分析组织流程效率，找出瓶颈环节。'},{t:'AI组织优化建议',h:'基于诊断结果，让AI生成组织优化建议方案。'},{t:'AI人力效能看板',h:'设计一个人力效能数据看板的指标体系。'}] }
+  ]
+};
+
+// ==================== COURSE CONTENT GENERATOR ====================
+function getCourseContent(courseId) {
+  const CONTENTS = {
+    // 研发
+    dev1: { objectives:['掌握AI编程助手的核心能力，从简单补全到项目级架构','学会用AI生成完整的REST API接口和业务模块','理解如何通过渐进式提示优化AI代码质量'],
+      concepts:[{t:'AI编程助手的工作原理',c:'AI编程助手基于大语言模型，通过分析代码上下文、注释和自然语言指令来生成代码。它理解代码结构、API调用模式和最佳实践，能够提供上下文感知的代码建议。核心机制包括：上下文窗口（分析前后代码）、提示工程（通过注释和命名引导生成）、多轮对话优化（逐步完善代码）。'},{t:'从补全到架构的思维跃迁',c:'多数开发者停留在"让AI补全一行代码"的阶段。真正的高效用法是：将AI视为结对编程伙伴。先描述需求→让AI生成方案→审查并细化→迭代优化。这要求你从"写代码的人"转变为"定义问题的人"，用清晰的规格描述代替手工编写。关键是学会分解问题：大需求拆成小模块，每个模块独立与AI交互。'}],
+      steps:[{t:'第一步：建立清晰的上下文',d:'在开始编码前，用注释明确描述需求、输入输出格式、边界条件、性能要求。例如："// 需要实现一个用户注册接口，POST /api/register，接收username（3-20位字母数字）、password（8位以上，含大小写和数字）、email。返回JSON包含userId和token。需校验参数，密码需BCrypt加密存储。"'},{t:'第二步：分模块迭代生成',d:'不要试图让AI一次生成整个项目。采用"自顶向下"策略：先生成类型定义和接口→再生成核心业务逻辑→然后生成错误处理→最后生成测试。每步都在前一步基础上迭代。'},{t:'第三步：人工审查与定向优化',d:'AI生成的代码不是终点。检查：逻辑是否正确（特别是边界条件）、安全是否到位（输入验证、权限控制）、性能是否合理（N+1查询、内存泄漏）。发现问题后，用精准的提示词让AI针对性修复，而不是手动改代码——这样下次AI能生成更好的代码。'},{t:'第四步：沉淀团队提示词库',d:'将高频场景的优质提示词整理成团队知识库：API生成模板、数据库迁移模板、测试生成模板。统一团队的AI使用规范，提升整体效率。」'}],
+      cases:[{s:'场景：新人接到一个"实现文件上传功能"的任务，第一次用AI',sol:'好的做法：先整理需求（支持哪些文件类型、最大大小、存储位置、是否需要缩略图、安全性要求），将这些信息写成详细的注释块，再让AI生成代码。结果：一次生成的代码就达到了80%完成度，剩下20%是业务特有的安全策略调整。'},{s:'场景：重构一个历史遗留的订单处理模块',sol:'策略：先让AI分析现有代码，生成重构方案（不直接改代码），人工确认方案后，再逐步让AI执行重构。每步review后继续。这样避免了AI不理解业务逻辑就乱改的风险。'}],
+      tools:[{n:'GitHub Copilot',d:'IDE内置，代码补全和对话最强，支持VS Code/JetBrains'},{n:'Cursor',d:'AI-first编辑器，内置Chat和Composer，适合项目级开发'},{n:'Claude Code/Aider',d:'命令行AI编程，适合重构和批量修改'},{n:'Windsurf',d:'AI原生IDE，Context-aware代码生成'}],
+      tips:['始终添加清晰的需求注释，AI产出的质量与输入质量正相关','分而治之：大需求拆小模块，逐个攻破','养成"先看方案再改代码"的习惯，不要盲目信任AI输出','团队应统一AI工具和提示词规范，形成协作标准','定期回顾AI生成的代码，总结经验优化提示词策略'] },
+    dev2: { objectives:['建立AI代码审查的系统方法论','学会用AI发现代码坏味道、安全漏洞和性能瓶颈','能生成结构化的代码审查报告并指导改进'],
+      concepts:[{t:'AI代码审查的价值',c:'传统代码审查依赖审查者的经验和精力，容易遗漏隐蔽问题。AI代码审查可以系统性地扫描：命名规范、代码复杂度、安全漏洞、性能模式、API误用等。它不是替代人工审查，而是作为"第一道防线"，让人工审查聚焦在架构和业务逻辑层面。'},{t:'审查维度与标准',c:'AI代码审查应覆盖六个维度：安全性（注入、鉴权、敏感信息）、性能（N+1查询、内存泄漏、循环优化）、可维护性（圈复杂度、重复代码、注释质量）、正确性（边界条件、异常处理）、规范性（代码风格、API设计）、可测试性（依赖注入、职责分离）。'}],
+      steps:[{t:'第一步：建立审查上下文',d:'提交代码审查时，给AI提供完整背景：这个PR解决了什么问题、涉及哪些模块、有什么特别需要注意的地方。提供PR的描述链接或文字。'},{t:'第二步：分维度系统审查',d:'不要一次性让AI审查所有维度。分轮进行：第一轮关注安全→第二轮关注性能→第三轮关注可维护性。每轮生成独立的问题清单，按严重程度分级。'},{t:'第三步：生成可执行的修复建议',d:'对于每个发现的问题，要求AI不仅指出问题，还生成具体的修复代码。包含"问题描述→影响范围→修复方案→修改后代码"。这样开发者可以直接应用。'},{t:'第四步：沉淀审查规范',d:'基于AI发现的问题模式，总结团队的代码规范文档。将高频问题加入lint规则，形成自动化检测。逐步减少同类问题重复出现。'}],
+      cases:[{s:'场景：一个电商系统PR，涉及支付接口改造',sol:'审查指令示例："这是一个支付接口改造的PR，涉及资金安全，请重点审查：1)金额计算是否安全（防止浮点精度问题）；2)支付回调的幂等性处理；3)敏感数据是否脱敏；4)SQL是否有注入风险。对每个问题给出严重级别和修复代码。"'}],
+      tools:[{n:'CodeRabbit',d:'AI代码审查机器人，自动审查PR并生成评论'},{n:'SonarQube+AI',d:'静态代码分析+AI智能化建议'},{n:'GitHub Copilot Chat',d:'在IDE中直接对PR进行对话式审查'}],
+      tips:['审查不是找茬，是帮助团队写出更好的代码','永远不能让AI审查替代人工审查，尤其涉及业务逻辑','建立团队的审查维度checklist，AI和人工共用','审查报告要简明扼要，优先列出高严重性问题','定期复盘审查发现，优化开发规范'] },
+    dev3: { objectives:['掌握AI生成测试用例的系统方法','学会用AI分析测试覆盖率并补充用例','建立AI驱动的持续测试流程'],
+      concepts:[{t:'AI在测试中的角色',c:'测试是AI最能产生价值的领域之一。AI可以：1)从代码逻辑自动推导测试场景（正常、边界、异常、并发）；2)根据覆盖率报告生成缺失的测试用例；3)维护测试代码（重构导致的测试更新）。这大大减少了编写测试的枯燥感，让开发者更愿意写测试。'},{t:'测试用例的完整性',c:'一个好的测试策略应覆盖：正向用例（happy path）、边界用例（极值、空值、零值）、异常用例（错误输入、网络超时、资源不足）、并发用例（多线程安全问题）。AI可以帮助系统性地生成这些用例，确保不遗漏任何维度。'}],
+      steps:[{t:'第一步：让AI分析目标代码',d:'将要测试的代码输入AI，让它分析：函数签名和参数类型、业务逻辑分支、依赖的外部服务、可能的异常情况。AI会生成一个测试方案概述。'},{t:'第二步：生成测试用例矩阵',d:'基于分析结果，让AI生成测试用例矩阵。包含：用例ID、测试场景描述、输入参数、预期输出、覆盖的代码路径。人工review这个矩阵，补充AI未想到的业务场景。'},{t:'第三步：逐个生成测试代码',d:'按用例矩阵，逐个让AI生成测试代码。每个测试用例独立管理，方便后续维护。特别注意mock/stub外部依赖。'},{t:'第四步：CI集成与持续维护',d:'将测试集成到CI流水线。当代码变更导致测试失败时，让AI分析失败原因并建议修复方案。定期让AI扫描新增代码并生成对应测试。'}],
+      cases:[{s:'场景：一个支付服务有几十个分支条件，手动写测试太耗时',sol:'将支付服务的核心代码和业务文档一起提供给AI，要求它生成完整的测试用例矩阵。AI识别出7个主流程分支和23个边界条件，生成了30个测试用例。人工review后发现还需要增加退款和重复支付的并发测试，补充后覆盖率达到92%。'}],
+      tools:[{n:'Jest + Copilot',d:'JavaScript/TypeScript测试，AI辅助生成'},{n:'pytest + Claude/Cursor',d:'Python测试框架，AI生成pytest用例'},{n:'Playwright + AI',d:'E2E测试，AI生成浏览器操作脚本'}],
+      tips:['先让AI生成测试方案，人工确认后再生成代码','测试数据和业务逻辑分离，提高可维护性','利用AI分析覆盖率报告，针对性地补充缺失用例','复杂业务场景必须人工review AI生成的测试','将测试生成整合到日常开发流程中，不是一次性任务'] },
+    dev4: { objectives:['掌握提示词工程的核心方法论','学会角色设定、few-shot和链式推理等高级技巧','建立个人和团队的提示词模板库'],
+      concepts:[{t:'提示词工程的本质',c:'提示词工程（Prompt Engineering）不是"跟AI好好说话"，而是结构化地表达需求。核心要素：角色设定（告诉AI它是谁）、任务描述（要做什么）、输出格式（怎么呈现）、约束条件（不能做什么）、示例（few-shot，给出范例）。好的提示词能提升AI产出质量30-50%。'},{t:'链式思维推理',c:'Chain-of-Thought（CoT）是让AI"逐步思考"的技巧。不要直接问结果，而是要求AI"先分析问题→拆解步骤→逐步推理→得出结论"。例如调试复杂bug时："分析错误日志→列出可能原因→逐个排查→给出结论和修复方案"。这种分步推理大幅提升复杂问题的准确率。'},{t:'Few-shot学习',c:'给AI提供2-5个"输入→期望输出"的范例，AI会模仿范例的风格和结构。例如，给出3个代码审查的范例（问题→严重级别→修复方案），之后AI会按照相同格式输出。Few-shot的关键是范例要覆盖不同类型的场景。'}],
+      steps:[{t:'第一步：定义AI角色',d:'清晰的角色设定至关重要。不只说"你是程序员"，而是"你是一位有15年经验的资深后端架构师，精通Java和分布式系统，重视代码质量和安全性"。越具体，AI的行为越符合预期。'},{t:'第二步：结构化任务描述',d:'用分点、标题、代码块等方式组织你的请求。例如："【任务】审查以下代码【关注点】1)SQL注入 2)并发安全 3)异常处理【输出格式】问题描述+严重级别+修复代码【代码】{...}"。结构化的请求减少歧义。'},{t:'第三步：设计Few-shot示例',d:'对于团队的重复性任务，设计标准化的few-shot示例。每个示例包含：输入场景→AI的正确输出。维护3-5个高质量示例覆盖不同情况。'},{t:'第四步：链式推理调试',d:'当问题复杂时，拆成多轮对话：第一轮让AI分析问题、第二轮制定方案、第三轮执行方案、第四轮验证结果。每轮基于前一轮的产出继续深入。'}],
+      cases:[{s:'场景：一段复杂代码出现难以定位的内存泄漏',sol:'使用链式推理：第1轮"分析这段代码的内存分配模式"→AI识别出3个可疑点；第2轮"对可疑点1深入分析对象生命周期"→AI发现闭包未释放；第3轮"给出修复方案"→AI提供代码修复。这种分步方式比一次提问效果好几倍。'}],
+      tools:[{n:'PromptPerfect',d:'提示词自动优化工具'},{n:'Anthropic Prompt Library',d:'官方提示词模板库'},{n:'Cursor Rules/Notion',d:'个人提示词知识库管理'}],
+      tips:['角色设定是提示词最被低估的部分，花30秒写好角色','复杂问题一定用链式推理，拆成多步让AI思考','few-shot示例要精选，覆盖不同的失败和成功情况','建立团队提示词库，新人可以继承最佳实践','定期回顾哪些提示词效果好，哪些需要优化'] },
+    dev5: { objectives:['学会用AI从代码自动生成API文档','掌握用AI撰写高质量技术方案的方法','建立团队AI文档生成规范和知识库管理'],
+      concepts:[{t:'AI文档生成的价值',c:'文档是开发中被忽视最多的环节。AI改变了文档编写的成本结构：从"写文档要1小时"变成"审文档要10分钟"。关键转变：从代码生成文档→从需求生成方案→从变更生成更新记录。AI让文档可以像代码一样被持续维护。'},{t:'从代码到文档的自动化',c:'AI可以分析代码的注释、函数签名、类型定义，自动生成结构化的API文档。关键是：代码中的注释要规范、类型定义要完整、要有清晰的模块分层。投入写好注释，AI就能产出好的文档。'}],
+      steps:[{t:'第一步：建立代码注释规范',d:'制定团队的注释标准：每个公共函数必须有JSDoc/docstring，包含参数说明、返回值、异常说明、使用示例。AI生成的文档质量完全取决于注释质量。'},{t:'第二步：AI生成API文档',d:'将代码模块和注释提供给AI，要求它按照OpenAPI/Swagger格式生成接口文档。包含：接口路径、请求方法、参数定义、响应格式、错误码、使用示例。'}],
+      cases:[{s:'场景：新项目需要完整的技术方案文档',sol:'在需求分析后，将需求要点提供给AI，让它生成技术方案初稿。包含：架构设计、模块划分、技术选型理由、数据流设计、部署方案。人工review后补充业务特有部分。比从零写节省70%时间。'}],
+      tools:[{n:'Swagger/OpenAPI + AI',d:'API文档标准+AI自动生成'},{n:'Storybook + AI',d:'组件文档+AI生成用例'},{n:'Notion AI/飞书智能文档',d:'技术方案协同编辑+AI辅助'}],
+      tips:['注释是AI生成文档的原材料，垃圾进垃圾出','文档模板要统一，AI生成的文档才能保持一致风格','技术方案文档要包含选型理由，不只是架构图','定期让AI更新文档（代码变更后）','建立团队的文档review流程，AI生成+人工审核'] },
+    dev6: { objectives:['识别AI生成代码中的安全风险类型','建立AI代码安全审查的标准流程','制定团队AI代码安全规范'],
+      concepts:[{t:'AI代码的独特安全风险',c:'AI生成的代码可能引入传统开发中不常见的风险：1)训练数据中的不安全模式被复制；2)AI不了解你的安全策略（如特定的加密算法、权限模型）；3)AI可能生成看似正常但有细微漏洞的代码。这些风险要求我们建立专门的安全审查流程。'},{t:'安全审查清单',c:'AI代码安全审查需要覆盖：输入验证（注入攻击）、认证授权（权限绕过）、敏感数据处理（明文存储、日志泄露）、加密安全（弱算法、硬编码密钥）、依赖安全（过时库、已知漏洞）、配置安全（默认密码、调试模式）。每项都需要有明确的检查标准。'}],
+      steps:[{t:'第一步：建立安全性审查基线',d:'制定AI代码安全检查清单，包含：SQL/NoSQL注入检查、XSS/CSRF防护、认证token管理、敏感信息（密码、密钥、个人信息）处理、加密算法选择、依赖版本检查。'},{t:'第二步：AI安全审查工作流',d:'将安全检查清单作为提示词输入AI，让它逐项审查代码。要求AI输出：风险点、风险等级、影响范围、修复建议、修复后的代码。人工对高风险项做二次review。'},{t:'第三步：代码安全规范落地',d:'基于AI发现的安全问题模式，制定团队安全编码规范。将高频安全问题加入CI检测流水线。对新生成的AI代码，自动运行安全扫描。'}],
+      cases:[{s:'场景：AI生成了一个用户登录接口，审查发现密码用MD5加固定salt',sol:'正确做法：让AI改用bcrypt/argon2进行密码哈希，加随机salt。同时检查token生成是否使用加密安全的随机数，检查session管理是否存在会话固定攻击。这些安全细节AI在生成代码时可能忽略。'}],
+      tools:[{n:'Snyk',d:'代码依赖安全扫描'},{n:'OWASP ZAP',d:'Web应用安全测试'},{n:'Semgrep',d:'自定义安全规则扫描'},{n:'Burp Suite',d:'专业Web安全测试工具'}],
+      tips:['永远不要信任AI生成的代码的安全性','建立团队的安全审查checklist，含AI特有风险','敏感配置（密钥、密码）绝对不能硬编码','安全审查要成为代码合并的必要条件','定期更新安全规范，跟踪最新的AI安全风险'] },
+
+    // 产品
+    pm1: { objectives:['学会用AI从海量用户反馈中提取真实需求','掌握用AI生成结构化PRD文档的方法','能基于数据和AI分析进行需求优先级排序'],
+      concepts:[{t:'AI辅助需求挖掘的方法论',c:'产品经理的核心工作之一是"发现真正的需求"。传统方式依赖用户访谈和手动分析，效率低且容易受主观偏差影响。AI可以：批量分析用户反馈（评论、工单、NPS）→聚类相似问题→识别高频痛点→发现隐性需求→生成洞察报告。关键不是让AI替你决策，而是用AI减少信息处理的时间，让你有更多精力做判断。'},{t:'从反馈到PRD的转化',c:'AI可以将"用户说"转化为"需求描述"再转化为"功能规格"。流程：用户原话→AI提取核心诉求→AI判断是大需求/小优化/bug→AI生成需求背景和目标→AI撰写详细功能描述→人工review和补充业务上下文。'},{t:'需求优先级的系统化评估',c:'用AI做优先级排序不是让它"凭感觉"打分。要给AI一个评估框架（如RICE：Reach覆盖人数、Impact影响程度、Confidence信心指数、Effort投入成本），让AI基于数据和信息给每个需求打分，生成优先级矩阵。'}],
+      steps:[{t:'第一步：收集并清洗用户反馈',d:'从多个渠道（客服系统、App评论、NPS反馈、用户访谈录音）收集原始反馈。用AI去除无效信息（纯情绪宣泄、重复内容），保留有实质性内容的反馈。'},{t:'第二步：AI聚类分析',d:'将清洗后的反馈提供给AI，要求它按主题聚类。例如：将所有关于"登录体验"的反馈归为一类，"支付流程"的归为另一类。AI会生成聚类结果和每类的典型用户语录。'},{t:'第三步：提取核心需求',d:'对每个聚类，让AI提取"用户真正的需求是什么"。区分表面需求（"我要更快"）和底层需求（"订单确认页加载超过3秒"）。AI会生成用户故事和需求背景。'},{t:'第四步：生成PRD',d:'基于确认的需求，让AI生成结构化PRD。包含：需求背景、用户故事、功能描述、交互逻辑、验收标准、影响评估。人工review后补充业务策略和排期信息。'}],
+      cases:[{s:'场景：App收到了200条关于"搜索不好用"的反馈',sol:'将200条反馈输入AI，要求聚类分析。AI识别出4个子问题：搜索速度慢（35%）、结果不相关（30%）、无法按类别筛选（20%）、历史搜索无法清除（15%）。每个子问题都给出了3-5条典型用户语录。PM据此制定分阶段优化计划。'}],
+      tools:[{n:'ChatGPT/Claude',d:'需求分析和PRD生成'},{n:'Notion AI',d:'需求文档协同和AI写作'},{n:'飞书智能文档',d:'PRD模板+AI辅助'}],
+      tips:['反馈分析要区分"高频问题"和"高价值问题"，两者不总一致','AI生成的需求背景需要人工核实——用户的表述和真实需求可能有差距','PRD要有验收标准，AI可以帮助生成但需要PM确认','需求优先级评估要结合业务战略，AI提供数据参考而非最终决策','定期让AI分析需求趋势，发现产品演进方向'] },
+    pm2: { objectives:['用AI设计高效的用研方案','学会用AI分析调研数据并提取洞察','能基于AI分析生成精准的用户画像'],
+      concepts:[{t:'AI如何赋能用户研究',c:'传统用户研究面临三大难题：样本量有限（每次调研只能覆盖部分用户）、分析耗时长（从数据到洞察需要数天）、洞察碎片化（不同研究之间的关联难以发现）。AI的优势在于：快速处理大量非结构化数据（文本、语音）、发现数据中的隐性模式、跨越不同研究形成全局洞察。'},{t:'用户画像的AI构建方法',c:'AI构建用户画像不是凭空想象，而是基于真实数据：行为日志→用户分群→特征提取→画像生成→验证迭代。AI可以分析用户的行为数据（点击、购买、留存），识别出不同的行为模式，再结合调研数据丰富画像的社会属性（动机、偏好、痛点）。'}],
+      steps:[{t:'第一步：设计调研方案',d:'告诉AI你的调研目标（了解某功能的使用障碍），让它生成方案：调研方法建议（问卷/访谈/可用性测试）、问卷问题设计、访谈提纲、用户招募标准、样本量建议。'},{t:'第二步：执行调研并收集数据',d:'按照AI设计的方案执行调研。将收集到的数据（问卷结果、访谈录音转文字）整理后提供给AI分析。'},{t:'第三步：AI深度分析',d:'让AI从数据中提取关键发现：按主题分类洞察、标记频率（多少人提到）、发现矛盾点（用户说的和做的不同）、识别隐性需求（用户没说出来但行为表明的）。'},{t:'第四步：生成用户画像',d:'综合行为数据+调研洞察，让AI生成用户画像。每个画像包含：人口属性、行为特征、核心需求、典型场景、使用障碍、决策因素。给出代表性用户语录。'}],
+      cases:[{s:'场景：B2B产品用户流失率上升，需要快速了解原因',sol:'用AI分析最近流失用户的反馈和数据：AI发现流失用户集中在中型客户（50-200人），他们普遍提到"迁移成本高"和"培训不足"。基于此设计针对性调研方案：访谈5位最近流失的客户，确认AI发现的模式。'}],
+      tools:[{n:'腾讯问卷+AI',d:'问卷设计和数据收集'},{n:'ChatGPT/Claude',d:'调研数据分析'},{n:'Dovetail/Condens',d:'用户研究管理+AI分析'},{n:'飞书妙记',d:'访谈录音转文字+AI总结'}],
+      tips:['调研不是为了证明假设，是为了发现你不知道的东西','AI分析的输出要人工验证，防止过度解读数据','用户画像要定期更新，用户需求是动态变化的','定量数据告诉你"是什么"，定性调研告诉你"为什么"','将研究洞察结构化存储，形成团队的用户知识库'] },
+    pm3: { objectives:['建立AI辅助的数据驱动决策框架','学会用AI分析A/B测试并得出可靠结论','能基于数据用AI生成产品迭代决策建议'],
+      concepts:[{t:'数据驱动决策的AI框架',c:'数据→信息→洞察→决策，这是数据驱动决策的完整链路。AI在每个环节都能提供助力：数据清洗和可视化→模式发现和相关性分析→假设检验和因果推断→决策建议和风险评估。关键是建立"数据说话"的团队文化，并用AI降低数据分析的门槛。'},{t:'A/B测试的AI分析',c:'传统A/B测试分析的陷阱：只关注p值忽略效应量、多组测试的假阳性问题、统计显著但业务不显著。AI可以帮助：计算所需样本量、分析多维度指标（不仅看主指标）、检查分组均衡性、发现细分人群的差异化效果、生成通俗易懂的分析报告。'}],
+      steps:[{t:'第一步：定义分析目标和关键指标',d:'用AI辅助定义核心指标（北极星指标）和辅助指标（护栏指标）。AI会根据你描述的业务场景，建议合适的指标体系框架（如AARRR、HEART等）。'},{t:'第二步：搭建数据看板',d:'将定义的指标告诉AI，让它生成看板设计方案：布局建议、图表类型选择、异常阈值定义、数据刷新频率。关键是让看板"可行动"——看到数据就能判断下一步做什么。'},{t:'第三步：A/B测试全流程',d:'用AI辅助A/B测试的每个环节：样本量计算→实验设计→数据收集→结果分析→决策建议。特别是分析环节，让AI同时检查主指标和细分指标，避免过度关注单一指标。'},{t:'第四步：生成决策报告',d:'定期让AI分析产品数据趋势，生成决策建议。格式：本期关键数据变化→变化背后的原因分析→建议的行动方案→预测行动后的效果。'}],
+      cases:[{s:'场景：新功能上线后核心指标有波动，不确定是正面还是负面影响',sol:'让AI做多维度分析：1)核心指标趋势（上升还是下降）；2)不同用户群的表现差异（新老用户、活跃度分层）；3)关联指标的连锁反应；4)同期其他因素的影响。AI帮助发现是新功能降低了老用户的使用效率，建议对老用户做使用引导优化。'}],
+      tools:[{n:'Metabase/Superset',d:'开源数据分析看板'},{n:'ChatGPT Code Interpreter',d:'AI数据分析'},{n:'Amplitude/Mixpanel',d:'产品分析+AI洞察'},{n:'Eppo/Optimizely',d:'实验平台的AB测试分析'}],
+      tips:['数据驱动不是"唯数据是从"，要结合定性洞察','A/B测试要设置足够长的实验时长，避免早期波动误导','关注细分人群的差异化效果，总量指标可能掩盖问题','决策报告要简洁，一页纸说清楚"发生了什么→为什么→怎么办"','建立"假设→实验→验证→迭代"的闭环流程'] },
+    pm4: { objectives:['学会用AI快速生成和迭代产品原型','掌握用AI分析交互流程并提出优化建议','建立AI辅助的设计规范和组件管理体系'],
+      concepts:[{t:'AI辅助原型设计的范式转变',c:'传统产品设计流程：需求→手绘草图→低保真原型→高保真原型→开发实现。AI改变了这个流程：需求→AI生成多个方案→人工选择方向→AI细化细节→开发实现。核心变化是"方案探索"的成本急剧降低——以前做一个方案需要一天，现在AI可以生成10个方案让你选。'},{t:'从描述到原型的转化',c:'高效的AI原型设计需要你清晰描述：页面目的（用户来这做什么）、核心元素（必须有按钮、输入框、列表）、交互逻辑（点击后发生什么）、信息层级（什么最重要、什么次要）、约束条件（已有的组件库、品牌色）。描述越精确，AI生成的越接近你想要的。'}],
+      steps:[{t:'第一步：需求的结构化描述',d:'用结构化格式描述你要的页面。包含：页面类型（列表/详情/表单/仪表盘）、用户任务、核心元素清单、重点信息、交互预期。示例格式："【页面类型】订单列表页【用户任务】快速找到待处理的订单【核心元素】搜索栏、状态筛选、订单卡片（含订单号、客户名、金额、时间、状态）【交互】点击卡片进入详情"）'},{t:'第二步：AI生成多个方案',d:'基于需求描述，让AI生成3个不同方向的方案。例如：方案A侧重效率（信息密度高）、方案B侧重清晰（留白多、信息聚焦）、方案C侧重新功能引导。比较不同方向的优劣。'},{t:'第三步：UI细节优化',d:'选定方向后，让AI逐项优化：信息架构是否合理、视觉层级是否清晰、操作路径是否最短、异常状态是否覆盖（空状态、加载中、错误状态）。AI会给出修改建议和修改后的原型描述。'},{t:'第四步：构建设计规范',d:'让AI整理项目中用到的设计模式，生成设计规范文档。包含：组件清单、使用规则、设计原则、响应式断点。便于团队统一设计语言。'}],
+      cases:[{s:'场景：需要一个B2B产品的仪表盘页面',sol:'需求描述示例："CRM数据看板，用户是销售主管。核心信息：本月业绩（目标vs实际）、团队排名、近期商机Pipeline、流失预警。信息层级：业绩>商机>排名>预警。风格：专业、清晰、可操作。"AI基于此生成了低信息密度和高信息密度两个方案，团队选择了高密度方案。'}],
+      tools:[{n:'Figma + AI插件',d:'AI辅助原型设计和组件库'},{n:'v0.dev / bolt.new',d:'AI生成UI代码'},{n:'Galileo AI',d:'文字描述生成UI设计稿'},{n:'Uizard',d:'AI驱动的快速原型设计工具'}],
+      tips:['AI生成原型后一定要做可用性测试，不要直接开发','原型是沟通工具，不是美术作品——功能正确比视觉好看重要','设计规范要由人定义，AI辅助执行和检查','异常状态和边界情况要特别关注，AI容易忽略','每个页面要有明确的用户任务，避免"什么都能做"的设计'] },
+    pm5: { objectives:['建立系统化的AI竞品分析框架','学会用AI深度拆解竞品并发现策略机会','能基于竞品分析生成产品差异化策略'],
+      concepts:[{t:'AI如何提升竞品分析的质量',c:'传统竞品分析的痛点：信息收集耗时（每天刷竞品）→分析深度不够（停留在功能列表对比）→洞察不可操作（看了也不知道怎么做）。AI可以：自动化信息收集和整理→深度分析竞品的产品策略→发现市场空白机会→持续监控竞品动态。将分析时间从"每周半天"降到"每天10分钟"。'},{t:'从功能对比到策略分析',c:'好的竞品分析不是列功能表，而是理解竞品"为什么这样做"。分析框架：竞品的目标用户是谁（看似一样可能不同）→竞品的价值主张是什么（他们卖什么）→竞品的核心壁垒在哪（用户为什么离不开）→竞品的增长策略是什么（怎么获取用户）。AI可以帮助推断这些策略层面的信息。'}],
+      steps:[{t:'第一步：建立竞品分析框架',d:'让AI生成竞品分析模板：分析维度（产品功能、用户体验、商业模式、市场策略、技术架构）、每个维度的评估指标、数据收集方法、分析频率。'},{t:'第二步：收集和整理信息',d:'用AI辅助收集竞品信息：让AI搜索竞品的最新动态、整理App Store评论的核心反馈、分析竞品官网和帮助文档的产品定位、汇总公开的定价和商业模式信息。'},{t:'第三步：深度策略分析',d:'基于收集的信息，让AI做深度策略分析：竞品的核心优势和劣势、他们的产品演进路径、可能的下一步动作、我们和他们的关键差异点。不要只问"他们有什么功能"，要问"他们为什么做这个功能"。'},{t:'第四步：生成差异化建议',d:'根据分析结果，让AI生成产品策略建议：哪些领域我们应该追平、哪些可以差异化、哪些市场机会竞品还没覆盖。结合自身优势制定行动方案。'}],
+      cases:[{s:'场景：新竞品发布了一个看起来很厉害的功能，团队焦虑',sol:'不要让团队焦虑。用AI快速做一个小型竞品分析：这个功能解决什么问题、竞品的实现方式、用户的实际反馈（看评论而不是宣传）、我们的用户是否有这个需求、替代方案是什么。10分钟得出结论：这个功能用户反馈一般，当前不是优先级。'}],
+      tools:[{n:'SimilarWeb/SEMrush',d:'竞品流量和营销分析'},{n:'App Annie/data.ai',d:'应用商店数据分析'},{n:'ChatGPT/Claude',d:'竞品深度分析'},{n:'Crayon/Klue',d:'竞品监控和情报管理'}],
+      tips:['竞品分析是为了启发，不是为了复制','关注竞品"为什么赢"和"在什么场景下弱"','定期做但不频繁做——每周快速扫描，每季度深度分析','竞品分析要产出可行动的建议，不只是信息汇总','最好的差异化往往来自竞品忽视的领域'] },
+
+    // 运营
+    ops1: { objectives:['建立AI驱动的内容生产流水线','学会用AI一个选题生成多平台适配内容','掌握AI标题优化和内容质量评估方法'],
+      concepts:[{t:'AI内容生产的思维转变',c:'传统内容生产的瓶颈是人：一个人一天最多写3-4篇高质量内容。AI将瓶颈从"创作"转移到"策略"：你的核心工作变成"决定做什么内容"和"判断什么是好内容"，AI负责执行。这要求运营人员从"内容生产者"进化为"内容策略师"——决定选题方向、定义质量标准、把控品牌调性。'},{t:'多平台内容适配',c:'同一个主题在不同平台需要不同的表达方式：小红书要情绪化、口语化、带emoji；公众号要结构化、有深度、可收藏；抖音要抓眼球、前3秒定生死、口语化。AI可以理解这些风格差异，将一篇文章的材料转化为不同平台的适配内容。关键是给AI清晰的目标平台风格指南。'}],
+      steps:[{t:'第一步：AI选题策划',d:'让AI分析近期热点趋势、你的目标用户兴趣、竞品的内容策略，生成10-20个选题建议。每个选题标注：目标用户群、预期阅读量、内容形式、与品牌调性的匹配度。'},{t:'第二步：内容大纲和初稿生成',d:'选定选题后，让AI生成内容大纲（文章结构、核心观点、支撑论据）。审核大纲后，让AI按大纲生成完整初稿。控制AI的输出长度和质量方向（专业深度/普适易懂）。'},{t:'第三步：多平台适配',d:'将核心内容交给AI，让它生成不同平台的版本。提供清晰的指令："将以下内容改写为小红书版本，风格：口语化、分点、带emoji、加入个人体验感、适合年轻女性用户。字数300以内。"'},{t:'第四步：标题A/B优化',d:'为同一篇文章，让AI生成10个不同风格的标题（悬念式、数字式、冲突式、情感式）。根据平台特性选择合适的标题，发布后根据数据反馈优化。'}],
+      cases:[{s:'场景：一篇关于AI工具评测的文章，需要覆盖公众号和小红书',sol:'公众号版：深度评测、数据对比、购买建议，2000字，严肃专业风。小红书版：我的使用体验、3个最好用的功能、1个让我惊艳的细节，300字，emoji风，配表情包。AI一键转换，人工微调后双平台发布。'}],
+      tools:[{n:'ChatGPT/Claude',d:'内容生成和多平台改写'},{n:'Jasper/Copy.ai',d:'营销文案AI'},{n:'Midjourney/DALL-E',d:'内容配图生成'},{n:'Notion AI',d:'内容管理和协作'}],
+      tips:['AI生成的内容必须人工审核——事实准确性和品牌调性','建立平台的风格指南文档给AI参考，生成质量更高','选题比写作更重要——好的选题=成功的一半','标题要敢于A/B测试，数据说话而不是凭感觉','建立内容资产库，好的AI指令和模板要复用'] },
+    ops2: { objectives:['建立运营数据分析的AI工作流','学会用AI识别增长瓶颈和机会','能自动生成高质量的运营分析报告'],
+      concepts:[{t:'AI数据运营的闭环',c:'传统数据运营：月初定目标→手动拉数据→月末做总结。AI驱动的数据运营：实时数据监控→异常自动预警→AI分析根因→生成行动建议→追踪行动效果。这个闭环让运营决策从"月级别"缩短到"天级别"。'},{t:'指标体系的建立',c:'没有清晰指标体系的数据分析是盲目的。用AI辅助建立运营指标体系：北极星指标（核心目标）→一级指标（关键驱动因素）→二级指标（可执行细节）。例如：GMV（北极星）→流量/转化率/客单价（一级）→各渠道流量/各环节转化率/各品类客单价（二级）。'}],
+      steps:[{t:'第一步：定义运营指标体系',d:'告诉AI你的业务模型和运营目标，让它生成指标体系方案。包含：核心指标定义、计算公式、数据来源、目标值建议、监控频率。'},{t:'第二步：搭建AI数据看板',d:'基于指标体系，让AI设计看板布局。包含：总览仪表盘（核心KPI）、流量漏斗（各渠道流量和转化）、用户分析（新老用户行为对比）、内容分析（各内容类型效果）、异常检测规则。'},{t:'第三步：AI自动分析和预警',d:'将定期数据交给AI分析：本周/本月数据变化→同比环比分析→发现异常指标→推测可能原因→给出行动建议。AI的输出越具体越好，不是"转化率下降了"而是"某渠道的注册转化率下降15%，可能是新版本表单增加了字段"。'},{t:'第四步：自动生成运营报告',d:'让AI根据数据自动生成日报/周报/月报。模板化输入，确保每次报告覆盖相同的维度，便于对比。报告要简短有力，一页纸说清关键。'}],
+      cases:[{s:'场景：本周新增用户突然下降30%',sol:'将本周和上周的数据对比输入AI分析。AI自动分维度排查：各渠道新增变化→发现是信息流广告渠道下降（-50%）→进一步分析发现广告素材点击率下降（从3%降到1%）→推测素材疲劳→建议立即更换广告素材。从发现问题到定位原因到行动建议，10分钟完成。'}],
+      tools:[{n:'百度统计/Google Analytics',d:'网站和App数据分析'},{n:'GrowingIO/神策',d:'用户行为分析'},{n:'ChatGPT Code Interpreter',d:'数据分析和报告生成'},{n:'飞书多维表格+AI',d:'运营数据协同管理'}],
+      tips:['指标不是越多越好，10个核心指标比100个次要指标有用','差异分析时，先排查渠道和数据口径问题','AI分析需要你提供足够的数据上下文','日报看波动、周报看趋势、月报看战略','建立数据的版本管理，事后可以追踪分析变化'] },
+    ops3: { objectives:['学会用AI做活动创意发散和多方案生成','掌握AI辅助活动方案撰写的能力','能基于AI分析做活动效果预估和复盘'],
+      concepts:[{t:'AI辅助活动策划的方法论',c:'活动策划的三个核心挑战：创意枯竭（想不到新玩法）、方案粗糙（细节考虑不周）、效果难测（投入产出看不清）。AI在三个环节都能补强：发散环节→AI能生成大量创意组合（节日+用户类型+玩法+奖品）；细化环节→AI能检查方案完备性（时间线、资源、风险）；评估环节→AI能基于历史数据预估效果。'},{t:'从创意到执行方案的转化',c:'AI不能替代你对用户和品牌的理解，但可以帮助你将创意转化为可执行的方案。输入：活动目标+目标用户+预算范围+时间节点→AI输出：活动玩法设计+用户旅程地图+资源需求清单+时间进度表+风险预案+效果预估模型。'}],
+      steps:[{t:'第一步：创意发散',d:'给AI设定约束条件（预算、时间、目标用户、活动类型），让它生成10-20个创意方向。不急于筛选，先看组合可能性。第二步从10个中选出3-5个最可行的。'},{t:'第二步：方案细化',d:'对选中的创意，让AI生成详细方案。包含：活动规则、用户交互流程、奖品设计、推广计划、技术需求、法务审核点、应急预案。AI会提出你可能遗漏的细节。'},{t:'第三步：效果预估',d:'基于历史活动数据（转化率、参与率、ROI），让AI预估本次活动效果。给出乐观/中性/悲观三种预估，评估投入产出。'},{t:'第四步：活动复盘',d:'活动结束后，将数据输入AI做复盘。分析：目标达成率、各渠道效果对比、用户行为分析、意外发现、改进建议。形成标准复盘模板。'}],
+      cases:[{s:'场景：618大促需要策划一场拉新活动，预算5万',sol:'先用AI创意发散：生成15个创意（抽奖、邀请裂变、新用户专享、签到打卡等）。筛选出3个：新用户首单礼+邀请有礼+大转盘抽奖。然后AI分别细化3个方案，团队讨论后选择"新用户首单礼+邀请有礼"组合方案。最后AI生成完整执行方案和效果预估。'}],
+      tools:[{n:'ChatGPT/Claude',d:'创意发散和方案生成'},{n:'飞书/钉钉AI',d:'活动协同管理'},{n:'活动盒子等SaaS',d:'活动模板和数据分析'},{n:'Canva AI',d:'活动素材快速生成'}],
+      tips:['活动要有明确的目标（拉新/促活/营收），避免"什么都想做"','创意阶段不要自我设限，AI帮你看到更多可能性','活动规则要简单——用户30秒内能理解','每次活动都要做数据复盘，积累经验和基线','关注ROI而不仅仅是参与人数'] },
+    ops4: { objectives:['建立AI辅助的用户标签和分群体系','学会用AI设计用户分群运营策略','掌握AI个性化内容推送的方法'],
+      concepts:[{t:'用户运营的精细化演进',c:'粗放运营时代：给所有人发一样的消息→千人一面。精细化运营时代：给不同群发不同的消息→千人千群。AI时代：给每个人发个性化的消息→千人千面。AI让个性化的成本降到几乎为零，关键是你能否定义好分群的逻辑和触发规则。'},{t:'标签体系的设计',c:'好的标签体系是精细化运营的基础。三类标签：属性标签（年龄、城市、职业）→不变；行为标签（访问频率、购买品类、活跃时段）→有时间窗口；预测标签（流失概率、LTV、偏好分类）→AI计算。AI可以帮助你从行为数据中提炼出有价值的标签组合。'},{t:'分群策略的AI优化',c:'传统分群靠经验（"高价值用户"怎么定义？）。AI可以基于数据聚类（K-Means等）发现自然的分群，找到人工可能忽略的用户模式。然后针对每个群设计差异化的运营策略。'}],
+      steps:[{t:'第一步：设计标签体系',d:'与AI协作设计标签体系。告诉AI你的业务场景和用户类型，让它建议标签维度。覆盖：人口属性、行为特征、消费偏好、活跃度、风险指标。每个标签定义计算逻辑。'},{t:'第二步：AI发现用户分群',d:'将用户数据提供给AI（匿名化），让它用聚类算法发现自然分群。AI会输出：每群的人数、核心特征、行为差异。人工review后给每群命名和定性。'},{t:'第三步：分群运营策略设计',d:'为每个用户群设计运营策略：运营目标（拉新/激活/留存/变现）、内容策略（什么内容对这个群有吸引力）、触达方式（push/短信/邮件）、触达频率、禁扰规则。用AI辅助生成策略草案。'},{t:'第四步：AI个性化推送',d:'建立触发规则和模板库。例如："用户7天未活跃→推送个性化召回内容（AI根据用户历史兴趣生成）"。AI根据用户画像动态生成推送内容，而不是套固定模板。'}],
+      cases:[{s:'场景：一个电商App有100万用户但活跃率持续下降',sol:'用AI做用户分群分析，发现4个群体：活跃买家（15%）→需维护；偶尔浏览（30%）→需激活；沉默用户（40%）→需召回；一次性用户（15%）→放弃。为"偶尔浏览"群体设计"猜你喜欢"个性化推荐push；为"沉默用户"设计大促召回优惠。'}],
+      tools:[{n:'神策/GrowingIO',d:'用户行为分析和分群'},{n:'个推/极光',d:'个性化推送引擎'},{n:'火山引擎/阿里云',d:'推荐算法和个性化引擎'},{n:'ChatGPT',d:'分群策略和内容生成'}],
+      tips:['分群是手段不是目的，分群是为了更好地服务用户','不要过度分群——群太少没意义，群太多难运营','标签要定期更新，用户行为是动态变化的','个性化不是"骚扰用户"，要控制触达频率','数据隐私是底线，确保用户数据合规使用'] },
+    ops5: { objectives:['识别运营流程中可自动化的环节','学会用AI设计自动化运营流程方案','掌握AI智能触发规则和条件分支的配置'],
+      concepts:[{t:'运营自动化的本质',c:'运营自动化不是"让机器做所有事"，而是"把标准化的重复劳动交给机器，让人聚焦在创意和策略上"。适合自动化的场景：有明确触发条件（用户注册→发欢迎邮件）、处理量大（每天处理上千条）、规则清晰（if-else逻辑）。不适合自动化的：需要创意判断（活动策划）、需要情感交互（客诉处理）、策略制定（年度规划）。'},{t:'AI增强的自动化',c:'传统自动化：if-else规则引擎。AI增强的自动化：基于数据和用户行为的智能决策。例如：不只是"用户注册→发欢迎邮件"，而是"用户注册→AI判断用户来源和注册行为→选择最合适的欢迎内容→个性化发送→追踪效果→自动优化"。AI让自动化从"规则执行"进化为"智能运营"。'},{t:'自动化流程的设计原则',c:'设计自动化流程时遵循3C原则：Condition（触发条件要明确且可衡量）、Content（内容要个性化和有温度）、Control（要有监控和干预机制）。最常见的失败是：触发了但内容太通用（"尊敬的用户您好..."），或者误触发导致用户反感。'}],
+      steps:[{t:'第一步：运营流程梳理',d:'用AI辅助梳理你当前所有的运营流程。列出：流程名称、触发条件、执行动作、当前耗时、是否可自动化、自动化优先级。AI会分析哪些流程最适合自动化。'},{t:'第二步：自动化方案设计',d:'对优先级最高的流程，让AI设计自动化方案。包含：触发条件定义（用户行为/时间/数据变化）、执行逻辑（if-else分支/多条件组合）、内容策略（模板+AI个性化）、渠道选择（push/短信/邮件/企微）、A/B测试方案。'},{t:'第三步：搭建自动化旅程',d:'选择一个自动化营销工具（如Convertlab/GrowingIO），按照AI设计的方案搭建自动化旅程。设置触发→等待→判断→执行→追踪的完整链路。'},{t:'第四步：持续优化',d:'自动化上线后，定期让AI分析效果数据。找出：哪些触发条件效果好、哪些内容点击率高、哪些环节流失严重。基于数据持续优化自动化规则和内容。'}],
+      cases:[{s:'场景：新用户注册后的7天激活流程需要自动化',sol:'AI设计了一个7天自动化旅程：Day1-注册后立即发送个性化欢迎（根据注册来源选择内容）；Day3-如果未完成核心动作，推送功能引导教程；Day5-根据行为数据判断兴趣方向，推送相关内容；Day7-如果仍未活跃，触发人工跟进提醒。每个步骤都有A/B测试和效果追踪。」'}],
+      tools:[{n:'Convertlab/神策',d:'营销自动化平台'},{n:'HubSpot/Marketo',d:'CRM+营销自动化'},{n:'飞书机器人/AI',d:'企业IM自动化'},{n:'Zapier/Make.com',d:'跨平台自动化连接'}],
+      tips:['自动化不是"设置后就不管了"，需要持续监控和优化','触发条件要精确，避免误触发导致用户反感','内容要有温度——收到自动化消息时不能让用户觉得是机器人','建立自动化的效果追踪体系，用数据驱动优化','异常处理要完善——自动化出错时有fallback机制'] },
+
+    // 销售
+    sales1: { objectives:['学会用AI从多维度构建客户画像','掌握AI客户意向评分的建模方法','能基于AI分析预判客户需求和购买时机'],
+      concepts:[{t:'AI如何在B2B销售中重建客户理解',c:'B2B销售的挑战在于客户信息分散——CRM里的联系记录、微信里的对话、邮件里的往来、会议里的讨论，分散在不同的地方。AI可以将这些碎片化的信息整合起来，构建360度客户视图：基本信息→组织架构→决策链→历史互动→兴趣信号→风险信号。有了AI，销售可以花80%时间在"销售"上，而不是"查找信息"上。'},{t:'客户意向度的量化评估',c:'传统销售凭经验给客户贴标签："A类客户、B类客户"，标准主观且不一。AI可以从客观数据建立评分模型：活跃度（最近一次互动时间）、参与度（互动频率和深度）、需求匹配度（产品和客户痛点的匹配）、决策进度（进行到哪个阶段）、竞争态势（有几个竞品在争）。综合打分，给出量化的意向度评估。'},{t:'需求预判的时间窗口',c:'客户不会一直处于"要买"的状态。AI通过分析客户的公开信息（融资新闻、招聘动态、业务扩张信号）和私有互动数据（询问频率变化、关注话题的变化），可以预判客户的购买时间窗口。在窗口期主动联系，成功率远高于盲打。'}],
+      steps:[{t:'第一步：整合客户数据',d:'将客户的所有接触点数据整合起来：CRM记录、邮件往来、会议纪要、微信沟通（脱敏后）。用AI做数据清洗和标准化，消除重复和不一致。'},{t:'第二步：AI生成客户画像',d:'让AI为每个重要客户生成画像报告：公司概况（规模、行业、发展阶段）、决策链分析（关键人物、影响者、决策者）、历史互动汇总（接触频率、关注问题、异议点）、需求匹配度、风险信号。'},{t:'第三步：意向评分和分层',d:'基于AI生成的画像，建立客户分层体系。结合量化的意向度评分和销售经验的判断，将客户分为：高热（本月可能成交）、温热（本季度可能成交）、低温（需要培育）、冷（暂时放弃）。'},{t:'第四步：动态监控和预警',d:'建立动态监控机制。当客户出现购买信号（如突然增加咨询频率、查询价格、比较竞品），AI自动提醒销售跟进。当客户沉默超过一定时间，AI提醒销售激活。'}],
+      cases:[{s:'场景：手上有100个潜在客户，不知道优先跟谁',sol:'将100个客户的互动数据输入AI分析。AI从3个维度打分：1)需求匹配度（客户业务和我们的产品契合度）2)购买意向度（近期咨询频率和深度）3)成交阻碍（预算/决策链/竞品）。自动排序后，前20个客户贡献了80%的机会。销售聚焦在这20个客户后，成交率提升40%。'}],
+      tools:[{n:'Salesforce Einstein',d:'CRM AI预测和评分'},{n:'HubSpot AI',d:'客户洞察和意向评分'},{n:'ChatGPT/Claude',d:'客户分析报告生成'},{n:'飞书AI+CRM',d:'客户协作和洞察'}],
+      tips:['客户画像要动态更新，不要建完就不管了','意向评分模型需要定期校准——用成交数据反向验证','关注"隐性信号"：客户的高管变动、融资新闻、业务扩张','不要只看自己收集的数据，也要关注客户的公开信息','画像分析的最终目的是辅助销售决策，不是替代人的判断'] },
+    sales2: { objectives:['学会用AI分析销售话术的优缺点','掌握AI生成个性化话术的方法','建立面向不同客户类型的标准化话术库'],
+      concepts:[{t:'AI销售话术优化的科学方法',c:'传统话术优化靠资深销售的"感觉"。AI让话术优化变得可测量：录制/记录真实销售对话→AI分析话术的有效性→识别高转化率的话术模式→总结失败话术的共性→生成针对性优化建议。关键是建立一个"话术→效果"的反馈闭环。'},{t:'话术个性化vs标准化',c:'销售话术需要平衡标准化和个性化：标准化确保品牌一致性、降低新人上手难度；个性化提升客户体验、提高成交率。AI的解决方案是：以标准化话术框架为基础，根据客户类型（决策者/影响者/使用者）、行业、阶段动态调整内容和语气。'},{t:'异议处理的AI策略',c:'异议处理是销售最考验功力的环节。AI可以将常见客户异议分类（价格异议、需求异议、时机异议、信任异议、竞品异议），并为每类设计多个应对策略。关键是：先认同再转化（"您的担心我很理解"），用数据和案例论证（不是空口说"我们更好"），给客户选择权（不是强行说服）。'}],
+      steps:[{t:'第一步：收集并分析话术数据',d:'将真实的销售对话记录（脱敏后）输入AI。让AI分析：哪些话术后客户有积极反应、哪些话术导致对话中断、不同客户类型的反应差异、异议处理的有效性排名。'},{t:'第二步：AI话术优化',d:'基于分析结果，让AI优化高频使用但效果不佳的话术。例如："价格贵"的应对，从"我们性价比高"改为"我理解您对成本的关注。我们帮XX公司通过提效降低了30%运营成本，要不我给您算一下您这边可能节省多少？"'},{t:'第三步：多版本话术生成',d:'为同一个销售场景，让AI生成3-5个不同风格的话术版本：数据导向版、关系导向版、价值导向版、FOMO（害怕错过）版。不同客户类型匹配合适的版本。'},{t:'第四步：建立话术知识库',d:'将优化后的话术整理成知识库，按场景和客户类型分类。新销售入职时可以快速上手。定期用最新数据更新话术库，保持时效性。'}],
+      cases:[{s:'场景：客户说"你们的价格比XX贵30%"，销售不知道如何回应',sol:'AI分析后给出3种回应策略：1)价值锚定——"是的，因为我们的方案包括了XX功能，这块单独购买就要20%。2)ROI论证——"我帮您算一下，用我们的方案三个月可以节省的人力和时间成本，其实更划算。3)差异化对比——"我整理了一份我们和XX的详细对比，您看下这些差异对您重要吗？"'}],
+      tools:[{n:'Gong/Chorus',d:'销售通话分析和AI话术洞察'},{n:'ChatGPT/Claude',d:'话术生成和优化'},{n:'飞书文档+AI',d:'话术库管理和团队共享'}],
+      tips:['话术优化要用真实数据检验，不是凭感觉','最好的话术是"帮助客户看到价值"，不是"说服客户"','不同客户类型用不同话术——决策者关心ROI，使用者关心体验','异议处理的核心是先认同再转化，不要硬怼','话术库要保持更新，市场环境在变，客户需求也在变'] },
+    sales3: { objectives:['学会用AI从线索中识别高价值商机','掌握商机成交概率的AI预测方法','建立科学的商机分级管理和跟进策略'],
+      concepts:[{t:'商机管理的本质',c:'商机管理不是简单的"把线索分成ABC三类"。真正的商机管理是：在正确的时间、用正确的方式、跟进正确的客户。AI帮助解决三个核心问题：哪些线索值得投入精力（商机识别）？每个商机有多大概率成交（成交预测）？每个商机下一步应该做什么（行动建议）？'},{t:'BANT商机评估框架的AI增强',c:'传统BANT框架：Budget（预算）、Authority（决策权）、Need（需求）、Timeline（时间）。AI可以帮你从对话中自动识别BANT信息：客户提到"下个月要做预算"→时间窗口信号；客户问"有没有XX功能"→需求匹配信号；客户说"要跟领导汇报"→决策链信号。AI捕捉这些信号比人工更全面。'},{t:'商机成交预测模型',c:'预测商机成交概率需要多维度数据：客户特征（行业、规模、阶段）、互动特征（接触时长、参与角色、讨论深度）、竞争特征（有几个竞品、竞品信息）、历史模式（类似客户的成交率）。AI综合这些维度给出概率预测和置信度。'}],
+      steps:[{t:'第一步：商机识别和初步评分',d:'将所有的线索和初步接触信息输入AI。AI根据BANT框架和行业经验，给每个商机打分。重点关注Top20%的商机。'},{t:'第二步：深度商机分析',d:'对Top商机做深度分析：客户决策链画出、客户痛点详细描述、我们的解决方案匹配度、竞品态势评估、下一步行动计划。每个商机不超过一页纸的深度分析报告。'},{t:'第三步：成交预测和排序',d:'基于深度分析，AI给出成交概率预测（高/中/低）和对应的置信度。销售管理者基于预测结果分配团队精力和资源。'},{t:'第四步：商机动态管理',d:'建立商机的动态追踪机制。每周更新商机状态，AI自动分析变化趋势（哪些商机在推进、哪些在停滞、哪些有风险）。及时发现并处理停滞的商机。'}],
+      cases:[{s:'场景：四个客户同时推进，但销售团队只有2个人，怎么分配？',sol:'用AI做商机评分排序：客户A（成交概率80%，金额50万）→优先；客户B（成交概率60%，金额100万）→需要重点攻克；客户C（成交概率50%，金额20万）→保持跟进；客户D（成交概率30%，金额200万）→需要找突破口后再说。基于评分，两人主攻A和B，C设置自动化跟进，D每周评估一次状态。'}],
+      tools:[{n:'Salesforce Einstein',d:'商机评分和预测'},{n:'HubSpot Deal Pipeline',d:'商机Pipeline管理+AI'},{n:'Clari/People.ai',d:'AI商机和收入预测'}],
+      tips:['商机评分模型要持续校准——用实际成交数据反向修正','重点商机要建立"作战地图"，清晰画出决策链','商机有生命周期，长期不推动的商机会"过期"','不要所有商机都平等对待——20%的商机贡献80%的收入','AI提供数据参考，最终判断还是要结合销售经验'] },
+    sales4: { objectives:['学会用AI清洗和标准化CRM数据','掌握用AI从CRM数据中生成客户分析报告','能基于CRM数据做销售预测和策略调整'],
+      concepts:[{t:'CRM数据的三大价值层级',c:'CRM数据有三个使用层级：第一层-记录（存客户信息、联系记录）；第二层-分析（发现销售模式、客户特征）；第三层-预测（预测成交、识别风险、优化策略）。大多数团队停留在第一层。AI大幅降低了进入第二层和第三层的门槛，不需要数据分析师也能做。'},{t:'数据清洗——AI最务实的价值',c:'CRM最大的问题是数据质量：重复联系人、过时信息、不规范记录、缺失字段。AI可以在几分钟内完成人工需要几天才能完成的数据清洗工作：识别重复记录→建议合并规则→标准化字段格式→补全缺失信息→标注数据质量问题。数据干净了，后续分析才有意义。'}],
+      steps:[{t:'第一步：AI数据质量诊断',d:'将CRM数据导出，让AI进行质量评估。输出：数据完整度报告（各字段的填充率）、重复率、格式规范度、时效性评估。了解当前CRM数据的"健康状态"。'},{t:'第二步：AI数据清洗',d:'根据诊断结果，让AI执行数据清洗：合并重复联系人、统一公司名称格式、标准化日期和金额字段、补全可推测的缺失信息、标记无法自动处理的问题。'},{t:'第三步：AI客户分析报告',d:'用清洗后数据让AI生成分析报告：客户行业分布、客户规模分布、区域分布、成交周期分析、赢单/输单原因分析、销售效率分析（从接触到成交的时间）。'},{t:'第四步：AI销售预测',d:'基于历史数据，让AI预测未来周期的销售情况。分析Pipeline的健康发展度，识别可能无法达成的目标。给出策略调整建议。'}],
+      cases:[{s:'场景：CRM里有3000条联系人记录，但很多重复和过时了',sol:'将CRM数据导出CSV交给AI分析。AI识别出：800条重复记录（同一公司同一人，不同名片版本）、500条超过2年未更新的记录、200条公司名称格式不统一。AI给出清洗建议和操作步骤，预计3小时完成清洗（人工需要3天）。'}],
+      tools:[{n:'Salesforce/HubSpot',d:'CRM平台+AI功能'},{n:'飞书多维表格',d:'轻量级CRM和数据管理'},{n:'ChatGPT Code Interpreter',d:'数据分析和报告生成'},{n:'Zapier/Make',d:'CRM数据自动化处理'}],
+      tips:['CRM数据的价值=数据质量×分析深度，数据质量是基础','定期做数据健康检查（至少每季度一次）','销售预测要结合外部因素（市场变化、季节因素）','数据清洗是持续工作，不是一次性任务','好的CRM习惯从数据录入开始——制定团队录入规范'] },
+    sales5: { objectives:['学会用AI生成结构化客户会议纪要','掌握AI自动提取行动项并生成跟进计划的方法','能用AI分析和优化跟进策略'],
+      concepts:[{t:'会议纪要的认知升维',c:'传统会议纪要的问题是：每个人记得不一样、会后很难找到关键信息、行动项容易遗漏。AI可以：实时转录+识别说话人+提取关键决策+生成结构化纪要+自动分配行动项+追踪完成情况。会议纪要从"事后补的记录"变成"实时产生的资产"。'},{t:'客户跟进的科学方法',c:'跟进不只是"别忘了一周后给客户发消息"。科学的跟进包含：跟进内容（上次会议核心要点和待确认信息）、跟进时机（客户说了"下周"就是下周一，不是下周五）、跟进方式（邮件/电话/微信，根据客户偏好）、跟进目标（明确这次跟进要达成什么）。AI可以帮你记住这些细节并生成跟进内容。'},{t:'跟进节奏的最优策略',c:'跟进频率的艺术：太频繁→骚扰；太稀疏→被遗忘。AI可以基于客户阶段和互动历史推荐最优频率：初期联系（接近决策）→2-3天一次；中期推进→1周一次；长期培育→2周-1月一次。每次跟进要有新的价值（新信息、新案例、新方案），不是简单地问"您考虑得怎么样"。'}],
+      steps:[{t:'第一步：AI实时会议转录和纪要生成',d:'使用AI会议工具（飞书妙记/讯飞听见/腾讯会议AI），实时录制和转录会议。AI自动生成纪要：会议时间/参与人/讨论主题/关键决策/行动项（含负责人和截止日期）/待确认事项。'},{t:'第二步：AI提取行动项',d:'让AI从会议纪要中提取结构化的行动项清单。每条行动项包含：任务描述、负责人、截止日期、优先级、依赖项。导出到CRM或项目管理工具中。'},{t:'第三步：AI生成跟进计划',d:'基于会议内容和行动项，让AI生成下次跟进的内容大纲：上次会议回顾、关键进展更新、待讨论问题、下一步建议。在实际跟进前快速过一遍，确保不遗漏。'},{t:'第四步：跟进策略优化',d:'定期回顾跟进数据：哪些客户的跟进节奏有效、哪些跟进内容效果好、跟进到成交的平均次数和时长。让AI分析优化建议。'}],
+      cases:[{s:'场景：一周有8个客户会议，会议纪要总是拖到周末才补',sol:'使用AI会议工具实时转录。会后5分钟内AI自动生成纪要初稿，包含：会议时间、参会人、讨论摘要、3条关键决策、5条行动项（标注负责人和截止日期）。销售只需review修改2-3处，10分钟搞定8场会议的纪要。'}],
+      tools:[{n:'飞书妙记',d:'实时转录+AI纪要'},{n:'腾讯会议AI',d:'会议录制和智能纪要'},{n:'Fireflies.ai',d:'AI会议助手'},{n:'Notion AI',d:'纪要和跟进计划管理'}],
+      tips:['会议结束24小时内必须发出纪要——时效就是专业度','纪要要简洁：一页纸，重点标粗，行动项清晰','跟进前要看上次纪要和行动项——客户会看你是否用心','建立跟进模板库，不要让每次跟进都从零开始','关键会议后可以AI总结一份"客户沟通档案"给团队'] },
+
+    // 人资
+    hr1: { objectives:['学会用AI高效初筛和评估简历','掌握AI简历匹配度评分的实操方法','能基于AI分析优化招聘筛选标准'],
+      concepts:[{t:'AI简历筛选的正确打开方式',c:'AI不是替代HR做招聘决策，而是帮HR从"看简历"这个体力活中解放出来。一个HR一天最多认真看100份简历，但AI可以在几秒钟内看完1000份并给出初步打分。HR的时间和判断力应该用在面试和候选人沟通上，而不是筛简历。核心原则：AI初筛（效率）+HR复核（质量）+AI辅助分析（深度）。'},{t:'AI简历评估的多维度方法',c:'AI评估简历不是简单的关键词匹配。好的评估应该包含：硬性条件（学历、经验年资、技能列表）、软性匹配（行业经验、项目类型、工具使用）、潜力信号（学习能力、成长速度、项目复杂度）、风险信号（频繁跳槽、职业空窗、技能陈旧）。综合打分而非单一维度筛选。'},{t:'避免AI筛选中的偏见',c:'AI筛选最大的风险是放大既有偏见。如果训练数据中"某学校毕业生"的通过率更高，AI可能会不公平地偏好该学校。解决方案：去掉敏感字段（姓名、性别、照片、年龄）后再让AI评估；用人reviewAI的决策模式；定期检查不同群体的通过率是否公平。'}],
+      steps:[{t:'第一步：建立岗位评估标准',d:'与用人经理确认核心要求：必备条件（技能、经验、学历）、加分条件（行业背景、特定工具）、淘汰条件（不符合公司价值观、职业稳定性差）。将这些标准清晰描述。'},{t:'第二步：AI简历批处理',d:'将简历批量提供给AI，按照评估标准逐份打分。每份简历输出：综合评分、匹配度分析、亮点总结、风险提示、推荐理由。'},{t:'第三步：HR复核',d:'HR复核AI的评分结果，特别关注AI评分高但可能有隐藏问题的简历，以及AI评分低但可能有潜力的简历。写复核意见。'},{t:'第四步：筛选标准优化',d:'招聘一段时间后，回顾已入职员工的表现数据。让AI分析：入职后绩效好的人简历有什么共性？哪些筛选标准实际上与绩效无关？优化筛选标准。'}],
+      cases:[{s:'场景：一个技术岗位收到了300份简历',sol:'不用AI的话，HR需要花3天来筛简历。用AI辅助：上午将简历导入→AI在10分钟内完成初筛评分→下午HRreviewTop50份简历→从中选出15位进入面试。从3天缩短到半天，而且筛选质量更高（AI不会疲劳导致后面看的简历标准变松）。'}],
+      tools:[{n:'Moka/北森',d:'招聘系统+AI筛选'},{n:'Boss直聘AI',d:'智能匹配和推荐'},{n:'ChatGPT/Claude',d:'简历分析评估'},{n:'飞书招聘',d:'招聘流程管理和AI辅助'}],
+      tips:['AI筛选是初筛工具，最终面试决策一定要有人做','去掉简历中的敏感字段再给AI评估，避免算法偏见','筛选标准要定期校准——看入职后表现反推筛选有效性','关注AI看不懂的"软信号"：创业经历、开源贡献、side project','招聘是双向选择——AI也应该帮你评估"候选人会接受offer吗"'] },
+    hr2: { objectives:['学会用AI分析和优化现有JD','掌握用AI生成多风格多版本JD的方法','能基于投递数据用AI持续优化JD效果'],
+      concepts:[{t:'AI时代的JD写作革命',c:'写好JD是招聘的第一步，也是最被低估的转化率优化。一个好的JD=精准触达目标人群+让候选人觉得"这就是我想要的"+筛掉不合适的。AI可以帮助：从"招聘需求"转化为"候选人的语言"（HR写的是"岗位职责"，候选人想看的是"我能做什么"）、生成多版本测试效果、优化JD的结构和关键词。'},{t:'JD的转化率思维',c:'JD不是内部文档，是"招聘广告"。用营销思维写JD：标题决定打开率、第一段决定继续阅读率、岗位亮点决定投递意愿。AI可以帮助设计"卖点"——不只是列条件，而是告诉候选人"加入我们你会获得什么"。'},{t:'AI定制化JD',c:'同一个岗位在不同平台需要不同长度的JD，面向不同层级的候选人需要不同的话术。AI可以根据发布渠道（猎聘/Boss/脉脉/官网）和候选人群（应届生/资深/高管），一键生成适配版本。不必从头重写。'}],
+      steps:[{t:'第一步：AI诊断现有JD',d:'将现有JD输入AI，让它从候选人视角分析：标题是否吸引人、职责描述是否清晰、要求是否合理（还是要求太杂）、有没有体现公司文化和团队氛围。AI会标注问题和优化建议。'},{t:'第二步：AI优化JD',d:'基于诊断结果，让AI逐项优化：标题→突出核心卖点，职责→用"你会做什么"代替"你需要做什么"，要求→区分必备/加分，公司介绍→体现文化和价值观。'},{t:'第三步：多版本生成和测试',d:'让AI生成2-3个不同风格的版本：专业严谨版（适合猎聘/Boss）、活泼文化版（适合脉脉/官网）、极简版（适合朋友圈转发）。发布后追踪各版本投递量。'},{t:'第四步：JD效果持续优化',d:'追踪JD发布效果数据（曝光量→点击率→投递率→面试率），用AI分析哪些JD版本和措辞效果好。持续A/B测试和迭代。'}],
+      cases:[{s:'场景：某个职位发布了2周，投递量远低于预期',sol:'将JD发给AI分析。AI发现问题：1)标题太通用（"Java开发工程师"改成"Java开发（负责核心交易系统）"）；2)要求太长像购物清单（12条要求→缩减到5条核心+3条加分）；3)没有体现亮点（加上"技术栈：Spring Cloud+ K8s+自研中间件"）。优化后三天内投递量翻倍。」'}],
+      tools:[{n:'ChatGPT/Claude',d:'JD分析和生成'},{n:'Textio',d:'JD语言优化和偏见检测'},{n:'各大招聘平台',d:'JD效果数据分析'}],
+      tips:['JD的第一读者是候选人，要用候选人的视角写','标题是JD的"广告位"，决定80%的点击率','要求要精简——每多一条要求，投递率下降5-10%','公司介绍要真诚，不要套话——"行业领先"不如"我们做了什么"','JD是活的文档，根据投递数据持续优化','拆成多条短语，每条15-30字；每周review一次JD数据'] },
+    hr3: { objectives:['学会用AI分析人才结构数据','掌握AI离职风险预测的方法','能基于业务发展用AI做人才需求规划'],
+      concepts:[{t:'从HR到人才数据分析师',c:'传统HR做人才决策依赖经验和直觉。AI时代，HR需要具备数据思维：用数据描述人才现状（我们的人才结构是什么样的），用数据预测未来（谁会离职/我们需要什么样的人），用数据驱动决策（招聘/培训/晋升的资源怎么分配）。AI让数据分析的门槛从"需要数据分析师"降到"会用AI的HR都能做"。'},{t:'人才健康度仪表盘',c:'人才管理的核心指标：结构健康度（年龄/职级/技能/性别分布是否合理）、流动健康度（主动离职率vs被动离职率、关键人才留存率）、成长健康度（晋升率、技能提升速度、内部流动率）、文化健康度（敬业度、满意度、价值观匹配度）。AI可以帮你定期生成这个健康度报告。'}],
+      steps:[{t:'第一步：AI人才结构分析',d:'将员工数据（脱敏后）输入AI分析：年龄和司龄分布、职级结构、技能分布热力图、部门人才密度、关键岗位后备率。AI会标注不健康的结构特征（如某层级断层）。'},{t:'第二步：AI离职风险预测',d:'让AI分析离职风险信号：近期绩效变化、请假频率、外网活跃度、薪酬竞争力、职业发展速度。综合给出离职风险评分。重点跟进高风险员工。'},{t:'第三步：AI人才需求规划',d:'基于公司业务规划，让AI预测未来6-12个月的人才需求。包含：需要新增的岗位、关键能力缺口、内部培养vs外部招聘建议、预算估算。'},{t:'第四步：人才策略制定',d:'基于前三步的分析结果，制定人才策略：招聘优先级、培训重点、薪酬调整方向、组织优化建议。AI生成策略草案，管理团队讨论确认。'}],
+      cases:[{s:'场景：公司最近连续有骨干员工离职，管理层需要了解原因',sol:'将离职员工的访谈记录和在职员工的敬业度数据交给AI分析。AI识别出3个共性原因：1)晋升通道不清晰（70%的离职者提到）；2)薪酬低于市场水平（集中在工作3-5年的员工）；3)部分团队管理风格问题。HR基于此提出：建立职级体系、调整薪酬对标、对管理问题团队做管理辅导。'}],
+      tools:[{n:'北森/盖雅',d:'HR数据分析系统'},{n:'飞书人事',d:'员工数据管理'},{n:'ChatGPT/Claude',d:'数据分析报告生成'},{n:'Tableau/帆软',d:'HR数据可视化'}],
+      tips:['人才分析要以"可行动的建议"为输出，不只是数据呈现','离职预测不是制造恐慌，是帮助提前干预保留关键人才','数据分析要保护员工隐私——脱敏后再给AI','人才需求规划要跟业务部门确认，不是HR闭门造车','定期（每季度）做人才健康度检查，而不是等出了问题才分析'] },
+    hr4: { objectives:['学会用AI诊断员工的培训需求','掌握用AI设计个性化培训方案的方法','建立AI辅助的培训效果评估体系'],
+      concepts:[{t:'AI时代的培训范式转换',c:'传统培训：一刀切——所有人都上同样的课，不管你需要不需要。AI培训：千人千面——先评估每个人的能力短板，再推送针对性的学习内容，学完后评估效果，根据效果调整下一步学习计划。这就是这套培训系统在做的事情。培训从"一次性的活动"变成"持续的学习旅程"。'},{t:'培训需求的多源诊断',c:'培训需求不是HR拍脑袋定的。好的需求诊断来源于多个渠道：能力测评（可以是AI测评）、绩效数据（哪些能力不足导致绩效差距）、业务需求（公司未来需要什么能力）、员工意愿（员工自己想学什么）。AI可以综合分析这些数据源，生成培训需求优先级排序。'}],
+      steps:[{t:'第一步：多源需求收集',d:'收集三个维度的数据：组织层（公司战略和业务重点需要的能力）、岗位层（各岗位的能力模型和要求）、个人层（员工的测评结果和绩效数据）。AI综合分析。'},{t:'第二步：AI诊断和优先级排序',d:'让AI交叉分析三个维度的需求，生成培训需求矩阵。标注：哪些能力是"急需+影响大"（优先培训）、哪些是"重要但可缓"（纳入计划）、哪些是"个人兴趣"（可选学习）。'},{t:'第三步：AI个性化方案设计',d:'为每个员工或每个岗位群体设计个性化培训方案。包含：学习目标、推荐课程、学习方式（线上/线下/混合）、时间安排、实践任务、效果评估方式。'},{t:'第四步：培训效果追踪和优化',d:'培训后追踪效果：知识掌握度（测验）、行为改变度（上级反馈）、业务影响力（绩效变化）。AI分析效果数据，优化后续培训方案。'}],
+      cases:[{s:'场景：公司要全员提升AI技能，但不同岗位需要不同的培训内容',sol:'用AI分析各岗位的AI应用场景→设计5套差异化培训方案。研发学AI编程、产品学AI需求分析、运营学AI内容创作、销售学AI客户洞察、HR学AI简历筛选。每套方案包含：岗位专属课程+通用AI素养课+实践任务。这套系统本身就是这个思路的实现。'}],
+      tools:[{n:'企业微信/飞书学习平台',d:'培训管理和学习追踪'},{n:'ChatGPT/Claude',d:'培训方案设计'},{n:'LMS系统',d:'学习管理平台'},{n:'AI培训系统（本系统）',d:'能力测评+课程推荐+效果评估'}],
+      tips:['培训需求诊断要基于数据而非感觉——测评比问卷靠谱','个性化培训不是给每个人完全不同——是给每类人群有针对性的内容','培训效果的评估要看到"行为改变"，不只是"考了多少分"','最好的培训是有即时实践机会的培训——学了马上用','让业务部门参与培训方案设计，确保贴近真实工作场景'] },
+    hr5: { objectives:['学会用AI诊断组织的效率瓶颈','掌握AI组织优化建议的生成和应用方法','建立数据驱动的人力效能管理体系'],
+      concepts:[{t:'组织效能的AI诊断框架',c:'组织效能=战略清晰度×流程效率×人才匹配度×文化协同度。AI可以帮助诊断每个维度：战略清晰度（员工是否知道公司方向和自己的贡献）、流程效率（跨部门协作的时间成本、决策速度）、人才匹配度（人岗匹配率、关键岗位胜任度）、文化协同度（员工敬业度、价值观一致性）。'},{t:'从诊断到行动的转化',c:'诊断不是目的，改进才是。AI的组织诊断报告最有价值的部分不是"发现了什么"，而是"针对每个发现，建议的改进措施是什么"。每条改进建议要有：责任人、时间表、预期效果、衡量标准。让诊断结果可执行。'},{t:'人力效能的衡量体系',c:'传统HR的衡量指标是人头数、费用率——输入指标。现代人力效能要衡量的是输出指标：人均产值、关键人才保留率、招聘质量（入职后绩效）、培训ROI。AI可以帮助建立这些指标的计算和追踪体系。'}],
+      steps:[{t:'第一步：组织效能数据收集',d:'收集组织效能相关数据：组织架构和汇报关系、流程文档和审批时效、人岗匹配数据、敬业度调研结果、关键流程的效率数据。'},{t:'第二步：AI多维度诊断',d:'将数据输入AI，从多个维度诊断：组织架构是否合理（管理层级、汇报链、控制跨度）、流程效率（跨部门协作的摩擦点、决策瓶颈）、人才匹配（关键岗位人才充足率、人岗匹配度）、文化健康度。'},{t:'第三步：AI生成优化建议',d:'让AI基于诊断结果生成优化建议。每条建议按ROI排序：哪些优化投入小见效快、哪些需要长期投入。形成优化路线图。'},{t:'第四步：建立效能看板',d:'设计人力效能数据看板。核心指标：人均产出、招聘质量指数、关键人才留存率、培训效果转化率、组织健康度评分。定期更新和review。'}],
+      cases:[{s:'场景：公司从50人增长到200人，组织效率明显下降了',sol:'用AI做组织诊断：1)组织架构——管理层级从3层变成5层，决策变慢。建议：扁平化，合并职能重叠的团队。2)流程——原来适合50人的审批流程没有更新，现在需要5个审批。建议：建立分级授权机制。3)文化——新老员工融合不好。建议：建立导师制和跨团队项目。'}],
+      tools:[{n:'飞书/钉钉',d:'组织协作数据分析'},{n:'北森/PeopleSoft',d:'HR系统和组织数据'},{n:'ChatGPT/Claude',d:'组织诊断报告'},{n:'SurveyMonkey/问卷星',d:'敬业度和文化调研'}],
+      tips:['组织诊断要匿名收集真实反馈，员工才敢说实话','优化建议要聚焦——一次解决1-2个核心问题，不要全面铺开','组织效能的改善需要时间——做好3-6个月的时间预期','每次组织变动后要追踪效果，形成闭环','组织效能不是HR一个人的事——需要CEO和管理团队深度参与'] }
+  };
+  return CONTENTS[courseId] || null;
+}
+
+// ==================== PPT SLIDE GENERATOR ====================
+function getPPTSlides(courseId, courseTitle, courseDesc) {
+  const c = getCourseContent(courseId);
+  if (!c) return [];
+  const notes = (t) => t; // TTS reads the text directly
+  const slides = [];
+  // Slide 1: Cover
+  slides.push({type:'cover', blocks:[{el:'h1',txt:courseTitle},{el:'p',txt:courseDesc}], notes:notes(courseTitle+'。'+courseDesc)});
+  // Slide 2: Learning Objectives
+  if (c.objectives) {
+    slides.push({type:'content', title:{icon:'🎯',txt:'学习目标'}, blocks:c.objectives.map(o=>({el:'li',txt:o})), notes:notes('本课程的学习目标如下：'+c.objectives.join('。'))});
+  }
+  // Slide 3: Core Concept
+  if (c.concepts && c.concepts.length) {
+    const blocks = c.concepts.map(co=>({el:'h3p',title:co.t,txt:co.c.substring(0,200)+(co.c.length>200?'...':'')}));
+    slides.push({type:'accent', title:{icon:'💡',txt:'核心概念'}, blocks, notes:notes('核心概念讲解：'+c.concepts.map(co=>co.t+'。'+co.c.substring(0,300)).join('。'))});
+  }
+  // Slide 4: Steps summary
+  if (c.steps) {
+    const blocks = c.steps.map((s,i)=>({el:'card',num:i+1,title:s.t,txt:s.d.substring(0,80)+'...'}));
+    slides.push({type:'dark', title:{icon:'🛠',txt:'实操方法论'}, blocks, notes:notes('实操步骤：'+c.steps.map(s=>s.t+'。'+s.d.substring(0,200)).join('。'))});
+  }
+  // Slide 5: Summary & Next
+  const tipsSummary = c.tips ? c.tips.slice(0,3).join('；') : '';
+  slides.push({type:'summary', blocks:[{el:'h2',txt:'本章小结'},{el:'p',txt:tipsSummary || '请进入关卡练习检验学习成果'}], notes:notes('课程小结。'+tipsSummary+'现在请进入关卡练习，检验你的学习成果。')});
+  return slides;
+}
+
+// ==================== TASK HINTS & ANSWERS ====================
+const TASK_HINTS = {
+  dev1_0: {hints:['第一步：明确API的功能、请求方式、URL路径','第二步：设计数据模型（字段、类型、校验规则）','第三步：用AI生成路由+控制器+数据层代码'],answer:'【参考答案】\n1. 需求描述示例："创建一个POST /api/users接口，接受name(必填,2-20字)、email(必填,合法邮箱)、role(可选,默认user)。返回{id, name, email, createdAt}。需数据校验和错误处理。"\n2. 将上述描述输入AI编程助手\n3. AI生成代码后，检查：路由是否正确、参数校验是否完整、错误处理是否覆盖、响应格式是否符合RESTful规范'},
+  dev1_1: {hints:['先让AI分析代码结构，识别性能瓶颈','关注：N+1查询、循环中的重复计算、未使用索引','让AI给出优化方案和优化后的代码'],answer:'【优化示例】\n1. 将上述代码输入AI："请分析这段代码的性能瓶颈和安全问题"\n2. AI可能发现：循环内查询数据库(N+1)、未做分页、缺少输入验证\n3. 针对每个问题，让AI生成优化后的代码\n4. 验证优化后的代码逻辑正确性'},
+  dev1_2: {hints:['先让AI分析被测代码的所有分支路径','确保测试覆盖：正常路径、边界条件、异常场景','要求AI使用你团队的测试框架（如Jest/pytest）'],answer:'【测试思路】\n1. 将API代码输入AI："为以下代码编写完整单元测试，覆盖正常、边界、异常场景"\n2. AI生成测试用例后，人工review：是否覆盖了null/空值/超长输入？\n3. 运行测试，根据覆盖率报告补充缺失用例'}
+};
+
+function getTaskHint(courseId, taskIdx) {
+  const key = courseId + '_' + taskIdx;
+  return TASK_HINTS[key] || null;
+}
+
+// Final assessment — 3 choice + 2 subjective per role
+const FINAL_QUIZZES = {
+  dev: [
+    {type:'choice', q:'在AI辅助编程中，以下哪个是生成高质量代码的最佳实践？',opts:['完全信任AI，不做人工检查','写最短的提示词','提供清晰的技术要求和上下文','只使用一种AI工具'],ans:2, explain:'提供清晰的上下文是AI生成高质量代码的基础。提示词越具体（技术栈、输入输出、边界条件），AI产出越好。'},
+    {type:'choice', q:'以下哪种提示词技巧能获得最好的AI回复？',opts:['单句简单指令','角色设定+步骤拆解+示例','越长越好','只用英文提问'],ans:1, explain:'角色设定让AI明确身份定位，步骤拆解引导结构思考，示例(few-shot)提供输出参考——三者结合效果最佳。'},
+    {type:'choice', q:'关于AI代码安全性，以下哪个是正确的？',opts:['AI代码天然安全','上线前不需要审查','建立AI代码安全审查规范','安全问题由AI自己负责'],ans:2, explain:'AI生成的代码可能包含训练数据中的不安全模式。必须建立针对AI代码的专门安全审查流程。'},
+    {type:'subjective', q:'请描述你在日常开发中如何使用AI编程助手提升工作效率。列举至少3个具体场景，并说明每个场景中你给AI的关键提示词是什么。',
+      template:'【答题模板】\n场景1：[场景名称]\n- 使用的AI工具：[工具名]\n- 关键提示词：[写出你实际使用的提示词]\n- 效果：[AI产出的质量和时间节省]\n\n场景2：...\n场景3：...\n\n【总结】AI对你开发效率的整体提升比例：___%',
+      steps:['步骤1：回想你最近一周的编码工作，列举所有用到了AI的时刻','步骤2：从中选出3个最有代表性的场景（不同任务类型）','步骤3：回忆每个场景中你给AI的具体提示词或指令','步骤4：评估AI产出质量和人工修改的成本'],
+      keyPoints:['提示词是否包含了技术上下文（语言/框架/依赖）','是否给出了输入输出的具体要求','是否有边界条件和错误处理的说明','AI产出后人工review的比例']},
+    {type:'subjective', q:'你的团队如果要建立AI代码审查规范，你会包含哪些关键检查项？请列举至少5项，并简要说明每项的检查标准。',
+      template:'【答题模板】\n检查项1：[检查项名称]\n- 检查内容：[具体检查什么]\n- 检查标准：[如何判断通过/不通过]\n- AI辅助方式：[如何用AI自动化此项检查]\n\n检查项2：...\n（至少5项）',
+      steps:['步骤1：回顾AI生成代码的常见问题类型','步骤2：从安全性、性能、可维护性等维度分类','步骤3：为每类问题定义可操作的检查标准','步骤4：思考如何将检查标准转化为AI提示词'],
+      keyPoints:['是否覆盖了安全维度（注入/SQL/敏感信息）','是否有性能检查（N+1/内存/循环）','是否有代码规范（命名/格式/设计模式）','检查标准是否可操作（不是"代码要好"这种模糊描述）']}
+  ],
+  pm: [
+    {type:'choice', q:'用AI做需求分析时，最有效的做法是？',opts:['让AI替你做所有决策','输入用户原始反馈让AI分类提炼','不告诉AI业务背景','只看AI结论不核实'],ans:1, explain:'AI的优势是快速处理大量非结构化反馈并发现模式。但最终决策必须由产品经理结合业务理解做出。'},
+    {type:'choice', q:'用AI辅助A/B测试分析时要注意什么？',opts:['只看p值','AI会自动判断','结合业务理解解读AI分析结果','不需要显著性检验'],ans:2, explain:'AI可以分析数据但无法理解业务背景。统计显著不等于业务显著，产品经理需要结合业务判断AI的分析结论。'},
+    {type:'choice', q:'竞品分析中最适合用AI的是？',opts:['做最终战略决策','批量收集和基础分析','替代用户调研','编造竞品数据'],ans:1, explain:'AI擅长信息收集、整理和初步分析（信息聚合），但战略决策需要产品经理的综合判断。'},
+    {type:'subjective', q:'假设你的App收到了100条关于"搜索功能不好用"的用户反馈。请描述你会如何用AI分析这些反馈，并形成产品改进方案。',
+      template:'【答题模板】\n一、反馈清洗（如何用AI预处理反馈数据）\n- 处理方式：\n- 去除的无效信息：\n\n二、AI聚类分析（AI识别出的问题分类）\n- 问题1：[类别名] - 占比：__%\n- 问题2：...\n\n三、改进方案（基于分析的产品优化计划）\n- 短期（1-2周）：\n- 中期（1个月）：\n\n四、成功指标（如何验证改进效果）\n- 指标1：',
+      steps:['步骤1：先将反馈整理为结构化文本（每条一行）','步骤2：用AI去除纯情绪宣泄和无效反馈','步骤3：让AI按主题聚类，统计每个主题占比','步骤4：对每个主题，让AI提取用户底层需求','步骤5：基于AI分析制定分阶段的改进计划并定义验证指标'],
+      keyPoints:['是否区分了高频问题和深层问题','聚类维度是否合理','改进方案是否分阶段可执行','是否有明确的验证指标']},
+    {type:'subjective', q:'请为一个你熟悉的产品功能，用AI辅助撰写一份PRD的核心部分（需求背景+功能描述+验收标准）。',
+      template:'【答题模板】\n一、需求背景\n- 用户痛点：[AI从反馈中提取]\n- 数据支撑：[关键数据指标]\n- 业务目标：[解决什么业务问题]\n\n二、功能描述\n- 用户故事：作为[角色]，我想要[功能]，以便[目标]\n- 核心流程：[主要操作流程描述]\n- 交互要点：[关键交互逻辑]\n\n三、验收标准\n- [ ] 标准1\n- [ ] 标准2\n（至少5条可验证的标准）',
+      steps:['步骤1：选择一个你熟悉的实际产品功能作为素材','步骤2：收集该功能相关的用户反馈或数据','步骤3：用AI生成PRD初稿（含背景/功能/验收标准）','步骤4：人工审核AI输出，补充业务特有逻辑','步骤5：检查验收标准是否可验证'],
+      keyPoints:['用户故事是否清晰表达了角色-功能-目标','AI生成的验收标准是否具体可验证','是否有遗漏的边界情况','PRD是否简洁（一页纸说清楚）']}
+  ],
+  ops: [
+    {type:'choice', q:'AI内容创作的最佳实践是？',opts:['完全由AI生成发布','AI生成+人工审核优化','只用手动创作','AI仅做标题'],ans:1, explain:'AI负责效率（初稿生成），人工负责质量（事实核查+品牌调性+创意判断）。人机协作才是最佳实践。'},
+    {type:'choice', q:'用AI做数据运营的关键是什么？',opts:['AI自动出结果','明确分析目标和关键指标','数据越多越好','不需要数据清洗'],ans:1, explain:'没有清晰的分析目标，AI的分析结果就是一盘散沙。先定义要回答什么问题，再让AI分析数据。'},
+    {type:'choice', q:'自动化运营流程设计的第一步是？',opts:['直接写代码','识别可自动化的重复环节','自动化所有流程','购买最贵的工具'],ans:1, explain:'先梳理现有流程，识别标准化、高频、规则清晰的环节，再设计自动化方案。不是所有环节都适合自动化。'},
+    {type:'subjective', q:'请为一个电商产品设计一套新用户的7天激活自动化流程。描述每个时间节点的触发条件、推送内容和预期效果。',
+      template:'【答题模板】\nDay 1 - [触发时机：注册后立即]\n- 触发条件：[具体行为或时间]\n- 推送渠道：[push/短信/邮件/企微]\n- 推送内容：[AI个性化生成的内容概要]\n- 预期效果：[如：打开率__%，转化率__%]\n\nDay 2 - ...\n（覆盖Day1-Day7，至少5个节点）',
+      steps:['步骤1：画出新用户注册后的典型行为路径','步骤2：识别关键激活节点（如首次下单、完善资料）','步骤3：为每个节点设计触发条件和推送内容','步骤4：考虑用户未完成节点时的兜底策略','步骤5：定义每个节点的效果衡量指标'],
+      keyPoints:['触发条件是否精确且可衡量','推送内容是否根据用户行为做了个性化','是否有A/B测试计划','失败节点是否有兜底机制']},
+    {type:'subjective', q:'请描述你会如何用AI分析本周的运营数据，并形成一个可以分享给团队的运营周报。',
+      template:'【答题模板】\n一、本周关键数据总览\n- 核心指标：[本周值] vs [上周值] → 变化：±__%\n- 重点关注：\n\n二、数据变化分析（AI协助）\n- 变化点1：[描述] → AI分析原因：[...]\n- 变化点2：\n\n三、行动建议\n- 本周亮点（继续保持）：\n- 本周问题（需要改进）：\n- 下周重点：\n\n四、AI使用心得\n- 本次分析中用AI的方式：',
+      steps:['步骤1：收集本周核心运营数据（同期对比）','步骤2：将数据输入AI，要求做同比环比趋势分析','步骤3：让AI识别异常波动并分析可能原因','步骤4：请AI生成行动建议','步骤5：人工审核AI分析，补充业务理解后形成周报'],
+      keyPoints:['是否区分了正常波动和异常信号','AI分析的原因推断是否合理','行动建议是否具体可执行','报告是否简洁（一页纸）']}
+  ],
+  sales: [
+    {type:'choice', q:'AI客户画像分析的核心价值是？',opts:['替代销售沟通','精准识别客户需求和购买意向','减少拜访次数','自动成交'],ans:1, explain:'AI整合碎片化客户数据（CRM/邮件/会议），形成360度视图，帮助销售精准把握需求而非替代销售判断。'},
+    {type:'choice', q:'AI商机评分的目的是？',opts:['拒绝所有低分商机','合理分配精力聚焦高价值商机','完全依赖AI决策','放弃小客户'],ans:1, explain:'商机评分是为了帮助销售团队将有限精力优先聚焦在高价值商机上，低分商机仍需要合理培育。'},
+    {type:'choice', q:'CRM数据管理中AI最重要用途是？',opts:['删掉数据','从数据中提取洞察指导销售策略','替代CRM系统','不管数据质量'],ans:1, explain:'AI的价值在于从数据中挖掘洞察——客户行为模式、成交信号、流失风险——而非简单的数据存储。'},
+    {type:'subjective', q:'假设你手上有50个潜在客户，但只有时间跟进10个。请描述你会如何用AI对这50个客户进行优先级排序，并制定跟进计划。',
+      template:'【答题模板】\n一、排序维度设计\n- 维度1：[如需求匹配度] — 评估方法：[AI分析...]\n- 维度2：[如购买意向度] — 评估方法：\n- 维度3：[如成交可行性] — 评估方法：\n\n二、Top 10客户画像\n- 第1名：[客户类型/行业] — 综合评分：__\n  - 跟进策略：[AI建议的切入方式]\n  - 关键决策人：[AI从数据中识别的]\n\n三、跟进计划（按周期）\n- 本周重点（Top 3）：\n- 下周重点（Top 4-7）：\n- 持续培育（Top 8-10）：',
+      steps:['步骤1：整理50个客户的基础数据（行业/规模/历史互动）','步骤2：设定评分维度（BANT框架：预算/决策权/需求/时间）','步骤3：用AI逐维度打分并综合排序','步骤4：为Top 10客户生成个性化跟进策略','步骤5：制定每周跟进时间表'],
+      keyPoints:['评分维度是否合理全面','是否考虑了客户购买信号（近期行为变化）','跟进策略是否因人而异','是否有客户沉默后的重新激活计划']},
+    {type:'subjective', q:'请为一个典型客户异议（如"你们的价格比竞品贵30%"），设计3套不同的回应话术，并说明每种话术适用的客户类型。',
+      template:'【答题模板】\n客户异议：你们的价格比竞品贵30%\n\n话术方案A：[方案名称]\n- 适用客户类型：[如：理性决策者/关注ROI]\n- 回应策略：[如：价值锚定法]\n- 话术内容：\n- 预期客户反应：\n\n话术方案B：[方案名称]\n- ...\n\n话术方案C：[方案名称]\n- ...\n\n【心得】用AI优化话术的过程：',
+      steps:['步骤1：将客户异议输入AI，让它分析异议背后的真实顾虑','步骤2：让AI生成3-5种不同角度的回应策略','步骤3：从AI方案中选择3个，标注各自适用场景','步骤4：用AI打磨每套话术的语言表达','步骤5：设计话术效果追踪方式'],
+      keyPoints:['是否区分了不同客户类型（决策者/使用者/财务）','话术是否有数据或案例支撑','是否先认同客户再转化','是否给客户留了选择权而非强硬说服']}
+  ],
+  hr: [
+    {type:'choice', q:'AI简历筛选最大的优势是？',opts:['完全替代HR','高效初筛减少重复劳动','不需要面试','自动录取'],ans:1, explain:'AI擅长高效处理大量简历的初筛工作，但面试决策和候选人关系建立仍需HR的专业判断和人际能力。'},
+    {type:'choice', q:'AI人才数据分析的关键是？',opts:['只看薪酬','定义清晰的评估维度并持续跟踪','分析完就行','替代管理者判断'],ans:1, explain:'没有清晰的分析维度（如离职风险/绩效趋势/能力缺口），数据分析就是无的放矢。维度定义是分析的基础。'},
+    {type:'choice', q:'AI培训方案设计的核心步骤是？',opts:['直接套模板','需求诊断→方案设计→效果评估','越贵越好','员工自己选'],ans:1, explain:'培训是一个闭环：先诊断需求→再设计方案→然后实施培训→最后评估效果→基于评估优化下一个循环。'},
+    {type:'subjective', q:'请设计一个针对你所在公司某岗位的AI能力测评方案。包含测评维度、题目类型、评分标准和结果应用方式。',
+      template:'【答题模板】\n一、目标岗位：[岗位名称]\n二、AI能力测评维度\n- 维度1：[能力名称] — 考察要点：[...] — 权重：__%\n- 维度2：...\n（至少4个维度）\n\n三、测评设计\n- 题目总数：__题\n- 题型分布：[选择题__题 + 场景题__题]\n- 时长：__分钟\n\n四、评分标准\n- 优秀（≥80分）：\n- 良好（60-79分）：\n- 需加强（<60分）：\n\n五、结果应用\n- 个性化课程推荐逻辑：\n- 培训优先级排序：',
+      steps:['步骤1：明确目标岗位的核心AI应用场景','步骤2：从场景反推所需的能力维度','步骤3：设计题目（覆盖每个维度，偏重场景而非知识）','步骤4：定义评分标准和结果分级的应用规则','步骤5：思考系统如何自动化执行这个方案'],
+      keyPoints:['测评维度是否覆盖了该岗位AI应用的全貌','题目是否偏向真实工作场景而非理论','评分标准是否可量化','结果是否能直接映射到课程推荐']},
+    {type:'subjective', q:'请基于AI分析思维，为你公司制定一份季度人才健康度检查方案。包含检查指标、数据来源、AI分析方法和行动触发规则。',
+      template:'【答题模板】\n一、人才健康度核心指标\n- 结构健康：[年龄/司龄/职级/技能分布]\n- 流动健康：[主动离职率/关键人才留存率/新人留存率]\n- 成长健康：[晋升率/内部流动率/培训完成率]\n- 文化健康：[敬业度/满意度/价值观匹配]\n\n二、各指标的数据来源与AI分析方法\n- 指标1：[...] — 数据来源：[...] — AI分析方式：[...]\n\n三、预警触发规则\n- 红灯（需立即行动）：[阈值定义]\n- 黄灯（需关注）：[阈值定义]\n\n四、行动方案模板\n- 红灯级别的应对措施：',
+      steps:['步骤1：明确哪些人才指标对业务最关键','步骤2：为每个指标定义数据来源和统计口径','步骤3：设定AI在每个指标上的分析逻辑','步骤4：定义红/黄/绿灯的触发阈值','步骤5：为不同预警级别预设行动方案'],
+      keyPoints:['指标是否覆盖了选/育/用/留各环节','数据来源是否可获取（不要依赖不存在的系统）','预警阈值是否合理（过松/过严都不行）','行动方案是否具体可执行']}
+  ]
+};
+
+// ==================== APP STATE ====================
+const S = {
+  view:'role', // role|quiz|results|dashboard|course|task|final|admin|map|schedule
+  role:null,
+  quizIdx:0, quizAnswers:[], quizScores:null,
+  courseIdx:null, courseTaskIdx:0, courseProgress:{},
+  finalAnswers:[], finalSubjAnswers:{}, finalScore:null, finalSubmitted:false, finalShowHint:{},
+  taskShowHint:{}, taskShowAnswer:{},
+  employees: JSON.parse(localStorage.getItem('ai_training_employees') || '[]'),
+  currentEmployee: null,
+  pptCurrentSlide:0, voicePlaying:false, voicePaused:false, voiceRate:1.0
+};
+
+function saveEmployees() {
+  localStorage.setItem('ai_training_employees', JSON.stringify(S.employees));
+}
+
+// ==================== RENDER ====================
+function render() {
+  const app = document.getElementById('app');
+  switch(S.view) {
+    case 'role': app.innerHTML = renderRoleSelection(); break;
+    case 'quiz': app.innerHTML = renderQuiz(); break;
+    case 'results': app.innerHTML = renderResults(); initRadarChart(); break;
+    case 'dashboard': app.innerHTML = renderDashboard(); break;
+    case 'course': app.innerHTML = renderCourseDetail(); const c = COURSES[S.role]?.[S.courseIdx]; if (c && c.type==='video') initPPT(); break;
+    case 'task': app.innerHTML = renderTaskModal(); break;
+    case 'final': app.innerHTML = renderFinalQuiz(); break;
+    case 'admin': app.innerHTML = renderAdmin(); break;
+    case 'map': app.innerHTML = renderLearningMap(); break;
+    case 'schedule': app.innerHTML = renderSchedule(); break;
+  }
+  bindEvents();
+}
+
+// ---- HEADER ----
+function headerHtml(title, sub, showBack) {
+  var session = JSON.parse(localStorage.getItem('ai_training_session') || '{}');
+  var userName = session.user || '学员';
+  return `
+    <div class="flex-between mb-4">
+      <div>${showBack ? '<button class="back-nav" onclick="S.goBack()">← 返回</button>' : ''}</div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <span style="font-size:12px;color:var(--text3);">👤 ${userName}</span>
+        ${S.view!=='admin'&&session.role==='admin'?'<button class="btn btn-sm btn-outline" onclick="S.goAdmin()">管理员</button>':''}
+        ${S.view!=='role' ? '<button class="btn btn-sm btn-outline" onclick="S.reset()">切换岗位</button>' : ''}
+        <button class="btn btn-sm btn-outline" onclick="S.logout()" style="color:#ff3b30;border-color:#ff3b30;">退出</button>
+      </div>
+    </div>
+    <div class="header" style="padding-top:0;">
+      <h1>${title}</h1>
+      ${sub ? '<p>'+sub+'</p>' : ''}
+    </div>`;
+}
+
+// ---- ROLE SELECTION ----
+function renderRoleSelection() {
+  let html = `
+    <h2 class="sr-only">选择你的岗位开始AI技能测评</h2>
+    <div style="padding:20px 0;">
+      <div class="text-center mb-4">
+        <h1 style="font-size:26px;font-weight:700;margin-bottom:8px;">企业AI技能培训系统</h1>
+        <p style="color:var(--text2);font-size:14px;">测评诊断 → 个性化课程 → 关卡陪练 → 成果验证</p>
+      </div>
+      <div class="card">
+        <p style="font-weight:600;font-size:15px;margin-bottom:16px;">请选择你的岗位，开始AI能力测评</p>
+        <div class="role-grid">`;
+  for (const [id, r] of Object.entries(ROLES)) {
+    html += `
+          <div class="role-card${S.role===id?' selected':''}" onclick="S.selectRole('${id}')">
+            <div class="role-icon">${r.icon}</div>
+            <div class="role-name">${r.name}</div>
+            <div class="role-desc">${r.desc}</div>
+          </div>`;
+  }
+  html += `</div>
+        <div class="text-center mt-4"><button class="btn btn-primary" onclick="S.startQuiz()" ${!S.role?'disabled':''}>开始测评</button></div>
+      </div>`;
+
+  // Show recent employees
+  if (S.employees.length > 0) {
+    html += `<div class="card mt-3"><p style="font-weight:600;font-size:14px;margin-bottom:12px;">最近测评记录</p>`;
+    S.employees.forEach((e, i) => {
+      const r = ROLES[e.role];
+      html += `<div class="emp-row" onclick="S.loadEmployee(${i})" style="cursor:pointer;">
+        <div class="emp-avatar">${e.name[0]}</div>
+        <div class="emp-info"><div class="emp-name">${e.name}</div><div class="emp-meta">${r ? r.icon+' '+r.name : e.role} · ${e.date}</div></div>
+        <div class="emp-score" style="color:${e.finalScore>=80?'var(--green)':e.finalScore>=60?'var(--amber)':'var(--red)'}">${e.finalScore!=null?e.finalScore+'分':'测评中'}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  html += `</div>`;
+  return html;
+}
+
+// ---- QUIZ ----
+function renderQuiz() {
+  const role = ROLES[S.role];
+  const questions = ASSESSMENTS[S.role];
+  const q = questions[S.quizIdx];
+
+  let dots = '';
+  for (let i=0; i<questions.length; i++) {
+    let cls = '';
+    if (i < S.quizIdx) cls = 'done';
+    else if (i === S.quizIdx) cls = 'current';
+    dots += `<div class="quiz-dot ${cls}"></div>`;
+  }
+
+  let html = headerHtml(role.icon + ' ' + role.name + ' AI能力测评', `第 ${S.quizIdx+1}/${questions.length} 题`, true);
+  html += `<div class="card slide-up">
+    <div class="quiz-progress">${dots}</div>
+    <div class="quiz-question">${q.q}</div>
+    <div style="display:flex;flex-direction:column;">`;
+  const sel = S.quizAnswers[S.quizIdx];
+  q.opts.forEach((o, i) => {
+    let cls = 'quiz-option';
+    if (sel !== undefined && sel === i) cls += ' selected';
+    if (sel !== undefined && sel !== undefined) cls += (sel === i ? '' : '');
+    html += `<button class="${cls}" onclick="S.answerQuiz(${i})">${String.fromCharCode(65+i)}. ${o}</button>`;
+  });
+  html += `</div>
+    <div class="flex-between mt-4">
+      <button class="btn btn-outline" onclick="S.prevQuestion()" ${S.quizIdx===0?'disabled':''}>上一题</button>
+      <span style="font-size:13px;color:var(--text2);">${S.quizAnswers.filter(a=>a!==undefined).length}/${questions.length}</span>
+      <button class="btn btn-primary" onclick="S.nextQuestion()" ${S.quizAnswers[S.quizIdx]===undefined?'disabled':''}>
+        ${S.quizIdx===questions.length-1?'查看结果':'下一题'}
+      </button>
+    </div>
+  </div>`;
+  return html;
+}
+
+// ---- RESULTS ----
+function renderResults() {
+  const role = ROLES[S.role];
+  const scores = S.quizScores;
+  let total = 0, maxTotal = 0;
+  role.skills.forEach((s,i) => { total += scores[i] || 0; maxTotal += 4; });
+  const overall = Math.round(total / maxTotal * 100);
+
+  let html = headerHtml('测评结果分析', role.icon + ' ' + role.name, true);
+
+  // Overall gauge
+  html += `<div class="card slide-up">
+    <div class="text-center mb-4">
+      <div class="gauge"><svg viewBox="0 0 120 120" width="120" height="120"><circle class="gauge-bg" cx="60" cy="60" r="52"/><circle class="gauge-fill" cx="60" cy="60" r="52" stroke-dasharray="326" stroke-dashoffset="${326 - 326*overall/100}" stroke="${overall>=80?'var(--green)':overall>=60?'var(--amber)':'var(--red)'}"/></svg>
+        <div class="gauge-text">${overall}%</div></div>
+      <div class="gauge-label">AI综合能力指数</div>
+    </div>
+    <div class="alert ${overall>=80?'alert-success':overall>=60?'alert-warning':'alert-info'}">
+      ${overall>=80 ? '🎯 你的AI能力较强，课程将聚焦高阶应用和体系化建设' : overall>=60 ? '📈 你的AI能力有较好基础，课程将帮助你将能力转化为生产力' : '🚀 你处于AI应用起步阶段，课程将从基础开始帮助你建立AI思维'}
+    </div>
+
+    <!-- Radar Chart -->
+    <p style="font-weight:600;font-size:14px;margin:20px 0 8px;">能力雷达图</p>
+    <div class="radar-wrap">
+      <canvas class="radar-canvas" id="radarChart" width="300" height="260"></canvas>
+      <div class="radar-legend" id="radarLegend"></div>
+    </div>
+
+    <!-- Skill mastery % cards -->
+    <p style="font-weight:600;font-size:14px;margin:16px 0 10px;">各维度掌握度</p>
+    <div class="skill-pct-grid">`;
+
+  role.skills.forEach((s,i) => {
+    const pct = Math.round((scores[i]||0)/4*100);
+    const cls = pct>=70?'strong':pct>=40?'ok':'weak';
+    const icon = pct>=70?'✅':pct>=40?'⚡':'⚠️';
+    html += `<div class="skill-pct-card">
+      <div class="skill-pct-name">${icon} ${s}</div>
+      <div class="skill-pct-val ${cls}">${pct}%</div>
+    </div>`;
+  });
+
+  html += `</div>
+
+    <!-- Gap bars (compact) -->
+    <p style="font-weight:600;font-size:14px;margin:16px 0 10px;">能力短板诊断</p>`;
+  const sortedSkills = role.skills.map((s,i) => ({s, i, pct: Math.round((scores[i]||0)/4*100)}))
+    .sort((a,b) => a.pct - b.pct);
+  sortedSkills.forEach(({s, i, pct}) => {
+    let barCls = pct>=70?'strong':pct>=40?'ok':'weak';
+    html += `<div class="gap-item">
+      <span class="gap-name">${s}</span><div class="gap-bar"><div class="gap-bar-fill ${barCls}" style="width:${pct}%"></div></div>
+      <span class="gap-score">${pct}%</span></div>`;
+  });
+  html += `</div>`;
+
+  // Recommended courses
+  html += `<div class="card mt-3 slide-up">
+    <p style="font-weight:600;font-size:14px;margin-bottom:10px;">🗺️ 为你定制的学习路径</p>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:14px;">根据你的能力短板，推荐以下课程（按优先级排序）</p>`;
+  const courses = COURSES[S.role];
+  const ordered = courses.map((c, idx) => {
+    const skillIdx = c.skills[0];
+    const skillScore = scores[skillIdx] || 0;
+    return {...c, origIdx: idx, priority: 4 - skillScore};
+  }).sort((a,b) => b.priority - a.priority);
+  ordered.forEach((c, i) => {
+    const tagCls = c.type==='video' ? 'tag-blue' : 'tag-purple';
+    const skillName = role.skills[c.skills[0]] || '';
+    const pct = Math.round((scores[c.skills[0]]||0)/4*100);
+    const urgency = pct < 40 ? '🔴 急需提升' : pct < 70 ? '🟡 建议学习' : '🟢 进阶提升';
+    html += `<div class="course-card${S.courseProgress[c.id]?.done?' completed':''}" onclick="S.openCourse(${c.origIdx})" style="animation:slideUp ${0.3 + i*0.05}s ease both;">
+      <div class="course-num">${i+1}</div>
+      <div style="flex:1;min-width:0;">
+        <div class="course-title">${c.title}</div>
+        <div class="course-meta">${c.dur} · ${urgency}</div>
+        <span class="map-skill-tag">${skillName}</span>
+      </div>
+      <span class="tag ${tagCls}">${c.type==='video'?'视频':'图文'}</span>
+    </div>`;
+  });
+  html += `<div style="display:flex;gap:8px;margin-top:16px;">
+    <button class="btn btn-outline" style="flex:1;" onclick="S.goLearningMap()">📍 查看学习地图</button>
+    <button class="btn btn-primary" style="flex:1;" onclick="S.goDashboard()">开始学习 →</button>
+  </div></div>`;
+
+  // Draw radar after render
+  return html;
+}
+
+function initRadarChart() {
+  const role = ROLES[S.role];
+  const scores = S.quizScores;
+  if (!scores) return;
+  function drawRadar() {
+    const canvas = document.getElementById('radarChart');
+    if (!canvas) { setTimeout(drawRadar, 100); return; }
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    const cx = W/2, cy = H/2 + 10;
+    const R = Math.min(W, H)/2 - 42;
+    const skills = role.skills;
+    const N = skills.length;
+    const vals = skills.map((_,i) => (scores[i]||0)/4);
+    ctx.clearRect(0,0,W,H);
+
+    // Draw grid rings
+    for (let ring=1; ring<=4; ring++) {
+      const r = R * ring/4;
+      ctx.beginPath();
+      for (let i=0; i<=N; i++) {
+        const angle = (i/N)*Math.PI*2 - Math.PI/2;
+        const x = cx + r*Math.cos(angle), y = cy + r*Math.sin(angle);
+        if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      }
+      ctx.closePath();
+      ctx.strokeStyle = ring===4 ? '#c7c7cc' : '#e5e5ea';
+      ctx.lineWidth = ring===4 ? 1.5 : 1;
+      ctx.stroke();
+    }
+
+    // Draw axes
+    for (let i=0; i<N; i++) {
+      const angle = (i/N)*Math.PI*2 - Math.PI/2;
+      ctx.beginPath(); ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + R*Math.cos(angle), cy + R*Math.sin(angle));
+      ctx.strokeStyle='#e5e5ea'; ctx.lineWidth=1; ctx.stroke();
+    }
+
+    // Draw data polygon
+    ctx.beginPath();
+    for (let i=0; i<N; i++) {
+      const angle = (i/N)*Math.PI*2 - Math.PI/2;
+      const v = vals[i];
+      const x = cx + R*v*Math.cos(angle), y = cy + R*v*Math.sin(angle);
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.fillStyle='rgba(0,113,227,0.18)'; ctx.fill();
+    ctx.strokeStyle='#0071e3'; ctx.lineWidth=2.5; ctx.stroke();
+
+    // Draw data points
+    for (let i=0; i<N; i++) {
+      const angle = (i/N)*Math.PI*2 - Math.PI/2;
+      const v = vals[i];
+      const x = cx + R*v*Math.cos(angle), y = cy + R*v*Math.sin(angle);
+      ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2);
+      ctx.fillStyle = v>=0.7?'#30b158':v>=0.4?'#ff9500':'#ff3b30';
+      ctx.fill(); ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke();
+    }
+
+    // Draw labels
+    for (let i=0; i<N; i++) {
+      const angle = (i/N)*Math.PI*2 - Math.PI/2;
+      const labelR = R + 28;
+      const x = cx + labelR*Math.cos(angle), y = cy + labelR*Math.sin(angle);
+      const pct = Math.round(vals[i]*100);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      const shortLabel = skills[i].length>6 ? skills[i].slice(0,5)+'…' : skills[i];
+      ctx.font = 'bold 11px -apple-system,sans-serif';
+      ctx.fillStyle = '#1d1d1f';
+      ctx.fillText(shortLabel, x, y-8);
+      ctx.font = '11px -apple-system,sans-serif';
+      ctx.fillStyle = pct>=70?'#30b158':pct>=40?'#ff9500':'#ff3b30';
+      ctx.fillText(pct+'%', x, y+8);
+    }
+
+    // Legend
+    const legend = document.getElementById('radarLegend');
+    if(legend) {
+      legend.innerHTML = skills.map((s,i) => {
+        const pct = Math.round(vals[i]*100);
+        const c = pct>=70?'#30b158':pct>=40?'#ff9500':'#ff3b30';
+        return '<div class="radar-legend-item"><div class="radar-legend-dot" style="background:'+c+'"></div><span style="color:var(--text2)">'+s+'</span></div>';
+      }).join('');
+    }
+  }
+  setTimeout(drawRadar, 60);
+}
+
+// ---- LEARNING MAP ----
+function renderLearningMap() {
+  const role = ROLES[S.role];
+  const courses = COURSES[S.role];
+  const scores = S.quizScores;
+
+  // Sort courses by priority (weakest skill first)
+  const ordered = courses.map((c, idx) => {
+    const skillIdx = c.skills[0];
+    const skillScore = scores ? (scores[skillIdx] || 0) : 0;
+    return {...c, origIdx: idx, skillScore, priority: 4 - skillScore};
+  }).sort((a,b) => b.priority - a.priority);
+
+  // Compute total progress
+  const total = courses.length;
+  const done = courses.filter(c => S.courseProgress[c.id]?.done).length;
+  const progress = Math.round(done/total*100);
+
+  // Find current course (first non-done non-locked)
+  let currentIdx = -1;
+  for (let i=0; i<ordered.length; i++) {
+    if (!S.courseProgress[ordered[i].id]?.done) { currentIdx = i; break; }
+  }
+
+  let html = headerHtml('个人学习地图', role.icon + ' ' + role.name, true);
+
+  // Map header card
+  html += `<div class="card slide-up">
+    <div class="map-header">
+      <h2>📍 你的AI能力成长路线图</h2>
+      <p style="font-size:13px;color:var(--text2);">共 ${total} 门课程 · 已完成 ${done} 门 · 整体进度 ${progress}%</p>
+    </div>
+    <div class="progress-bar"><div class="progress-fill ${progress>=80?'high':progress>=40?'mid':'low'}" style="width:${progress}%"></div></div>
+    <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);"><div style="width:10px;height:10px;border-radius:50%;background:var(--green);"></div>已完成</div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);"><div style="width:10px;height:10px;border-radius:50%;background:var(--blue);"></div>进行中</div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);"><div style="width:10px;height:10px;border-radius:50%;background:var(--border);"></div>待开始</div>
+    </div>
+  </div>`;
+
+  // Stage grouping: Phase 1 (基础夯实, 前1/3), Phase 2 (能力提升, 中1/3), Phase 3 (综合应用, 后1/3)
+  const stageCount = Math.ceil(total/3);
+  const stages = [
+    { label: '阶段一：AI基础夯实', icon: '🌱', courses: ordered.slice(0, stageCount) },
+    { label: '阶段二：能力深化提升', icon: '⚡', courses: ordered.slice(stageCount, stageCount*2) },
+    { label: '阶段三：综合实战应用', icon: '🚀', courses: ordered.slice(stageCount*2) }
+  ].filter(s => s.courses.length > 0);
+
+  html += `<div class="card mt-3 slide-up">`;
+  stages.forEach((stage, stageIdx) => {
+    html += `<div class="map-stage">
+      <div class="map-stage-title">${stage.icon} ${stage.label}</div>`;
+
+    stage.courses.forEach((c, nodeIdx) => {
+      const globalIdx = stageIdx * stageCount + nodeIdx;
+      const isDone = S.courseProgress[c.id]?.done;
+      const isCurrent = !isDone && globalIdx === currentIdx;
+      const isLocked = !isDone && !isCurrent && globalIdx > currentIdx && currentIdx >= 0;
+      const skillName = role.skills[c.skills[0]] || '';
+      const skillPct = scores ? Math.round((scores[c.skills[0]]||0)/4*100) : 0;
+      const urgency = skillPct < 40 ? '🔴 急需' : skillPct < 70 ? '🟡 建议' : '🟢 进阶';
+
+      let nodeCls = 'map-node';
+      let iconContent = c.type==='video'?'🎬':'📖';
+      let badgeText = '', badgeCls = '';
+
+      if (isDone) {
+        nodeCls += ' done'; iconContent = '✓';
+        badgeText = '已完成'; badgeCls = 'done-badge';
+      } else if (isCurrent) {
+        nodeCls += ' current';
+        badgeText = '进行中'; badgeCls = 'current-badge';
+      } else if (isLocked) {
+        nodeCls += ' locked';
+        badgeText = '待解锁'; badgeCls = 'locked-badge';
+      } else {
+        badgeText = '待学习'; badgeCls = 'pending-badge';
+      }
+
+      const clickHandler = (isDone || isCurrent) ? `onclick="S.openCourse(${c.origIdx})"` : '';
+
+      html += `<div class="${nodeCls}" ${clickHandler}>
+        <div class="map-node-icon">${iconContent}</div>
+        <div class="map-node-body">
+          <div class="map-node-title">${c.title}</div>
+          <div class="map-node-meta">${c.dur} · ${c.type==='video'?'视频课程':'图文课程'}</div>
+          <span class="map-skill-tag">${skillName} ${urgency}</span>
+        </div>
+        <span class="map-node-badge ${badgeCls}">${badgeText}</span>
+      </div>`;
+
+      // Add connector line between nodes (not after last in stage)
+      const isLastInStage = nodeIdx === stage.courses.length - 1;
+      if (!isLastInStage) {
+        html += `<div class="map-connector${isDone?' done-conn':''}"></div>`;
+      }
+    });
+
+    // Connector between stages
+    if (stageIdx < stages.length - 1) {
+      html += `<div style="text-align:center;margin:10px 0;font-size:18px;color:var(--text3);">↓</div>`;
+    }
+    html += `</div>`;
+  });
+
+  // Final goal node
+  const allDone = done === total;
+  html += `<div class="map-connector${allDone?' done-conn':''}"></div>
+    <div class="map-node${allDone?' done':''}" ${allDone?'onclick="S.startFinalQuiz()"':''} style="border-style:dashed;background:${allDone?'var(--green-bg)':'var(--bg)'};">
+      <div class="map-node-icon" style="background:${allDone?'var(--green)':'var(--border)'};color:${allDone?'#fff':'var(--text3)'};">🏆</div>
+      <div class="map-node-body">
+        <div class="map-node-title">AI能力成果测验</div>
+        <div class="map-node-meta">完成所有课程后解锁 · 综合能力考核</div>
+      </div>
+      <span class="map-node-badge ${allDone?'done-badge':'locked-badge'}">${allDone?'可参加':'待解锁'}</span>
+    </div>
+  </div>`;
+
+  html += `<div style="display:flex;gap:8px;margin-top:12px;">
+    <button class="btn btn-outline" style="flex:1;" onclick="S.goSchedule()">📅 查看学习计划</button>
+    <button class="btn btn-primary" style="flex:1;" onclick="S.goDashboard()">进入课程列表 →</button>
+  </div>`;
+
+  return html;
+}
+
+// ---- SCHEDULE ----
+function renderSchedule() {
+  const role = ROLES[S.role];
+  const courses = COURSES[S.role];
+  const scores = S.quizScores;
+
+  const ordered = courses.map((c, idx) => {
+    const skillIdx = c.skills[0];
+    const skillScore = scores ? (scores[skillIdx] || 0) : 0;
+    const isDone = S.courseProgress[c.id]?.done;
+    return {...c, origIdx: idx, skillScore, priority: 4 - skillScore, isDone};
+  }).sort((a,b) => b.priority - a.priority).filter(c => !c.isDone);
+
+  const total = courses.length;
+  const done = courses.filter(c => S.courseProgress[c.id]?.done).length;
+
+  let html = headerHtml('学习时间计划', role.icon + ' ' + role.name, true);
+
+  // Summary card
+  const totalMinutes = ordered.reduce((sum, c) => {
+    const m = parseInt(c.dur) || 30;
+    return sum + m + 10; // +10min for task practice
+  }, 0);
+  const weeks = Math.ceil(ordered.length / 2);
+
+  html += `<div class="card slide-up">
+    <div class="schedule-header">
+      <p style="font-weight:700;font-size:15px;">📅 个性化学习时间计划</p>
+      <span class="tag tag-blue">${weeks}周完成</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;">
+      <div class="stat-card"><div class="stat-value" style="color:var(--blue);">${ordered.length}</div><div class="stat-label">待完成课程</div></div>
+      <div class="stat-card"><div class="stat-value">${Math.round(totalMinutes/60)}h</div><div class="stat-label">预计总时长</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:var(--green);">${done}</div><div class="stat-label">已完成</div></div>
+    </div>
+    <div class="schedule-tip">💡 <strong>建议节奏：</strong>每周安排2-3次学习，每次60-90分钟。优先完成标记为"急需提升"的课程，利用碎片时间完成图文课程，保持学习连续性效果最佳。</div>
+  </div>`;
+
+  if (ordered.length === 0) {
+    html += `<div class="card mt-3 slide-up text-center">
+      <p style="font-size:16px;font-weight:700;margin-bottom:8px;">🎉 所有课程已完成！</p>
+      <p style="color:var(--text2);font-size:13px;margin-bottom:16px;">你已完成全部学习计划，快去参加成果测验吧</p>
+      <button class="btn btn-primary" onclick="S.startFinalQuiz()">开始成果测验</button>
+    </div>`;
+    return html;
+  }
+
+  // Generate weekly plan
+  const weekDays = ['周一','周三','周五'];
+  html += `<div class="card mt-3 slide-up"><p style="font-weight:600;font-size:14px;margin-bottom:16px;">分周学习安排</p>`;
+
+  let courseQueue = [...ordered];
+  let weekNum = 1;
+
+  while (courseQueue.length > 0 && weekNum <= 8) {
+    const weekCourses = courseQueue.splice(0, 2);
+    const isCurrentWeek = weekNum === 1 && done === 0 || (weekNum === Math.ceil(done/2)+1);
+
+    html += `<div class="schedule-week">
+      <div class="schedule-week-title">第${weekNum}周${isCurrentWeek?' (当前)':''}</div>`;
+
+    weekCourses.forEach((c, ci) => {
+      const skillPct = scores ? Math.round((scores[c.skills[0]]||0)/4*100) : 50;
+      const priorityCls = skillPct < 40 ? 'priority-high' : skillPct < 70 ? 'priority-mid' : 'priority-low';
+      const day = weekDays[ci] || weekDays[0];
+      const dur = parseInt(c.dur) || 30;
+      const tagCls = c.type==='video' ? 'tag-blue' : 'tag-purple';
+
+      html += `<div class="schedule-item ${priorityCls}" onclick="S.openCourse(${c.origIdx})" style="cursor:pointer;">
+        <div class="schedule-day">${day}</div>
+        <div class="schedule-course">
+          <div class="schedule-course-name">${c.title}</div>
+          <div class="schedule-course-dur">${c.dur} + 约10分钟关卡练习 · <span class="tag ${tagCls}" style="font-size:10px;padding:1px 6px;">${c.type==='video'?'视频':'图文'}</span></div>
+        </div>
+      </div>`;
+    });
+
+    // Add review/practice day if week has 2 courses
+    if (weekCourses.length === 2) {
+      html += `<div class="schedule-item" style="border-left-color:#9b59b6;opacity:.7;">
+        <div class="schedule-day">周日</div>
+        <div class="schedule-course">
+          <div class="schedule-course-name">📝 复习巩固 + AI工具实操练习</div>
+          <div class="schedule-course-dur">约20分钟 · 自主实践</div>
+        </div>
+      </div>`;
+    }
+
+    html += `</div>`;
+    weekNum++;
+  }
+
+  // Tips section
+  html += `<div style="background:var(--bg);border-radius:var(--radius-sm);padding:14px;margin-top:4px;">
+    <p style="font-weight:600;font-size:13px;margin-bottom:8px;">🌟 高效学习建议</p>
+    <div style="font-size:12px;color:var(--text2);line-height:2;">
+      ① <strong>学前预热</strong>：提前5分钟回顾上节课内容，提升新知识吸收率<br>
+      ② <strong>即学即用</strong>：每次学完立即在实际工作中尝试应用，不留作业到明天<br>
+      ③ <strong>工具配套</strong>：先准备好ChatGPT/Copilot账号，学习时同步实操<br>
+      ④ <strong>记录卡点</strong>：遇到疑惑的地方记录下来，用AI工具本身去求解答案<br>
+      ⑤ <strong>分享输出</strong>：每周跟同事分享1个AI使用心得，教别人是最好的学习
+    </div>
+  </div>`;
+
+  html += `</div>`;
+  html += `<div style="display:flex;gap:8px;margin-top:12px;">
+    <button class="btn btn-outline" style="flex:1;" onclick="S.goLearningMap()">📍 返回学习地图</button>
+    <button class="btn btn-primary" style="flex:1;" onclick="S.goDashboard()">进入课程列表 →</button>
+  </div>`;
+
+  return html;
+}
+
+// ---- DASHBOARD ----
+function renderDashboard() {
+  const role = ROLES[S.role];
+  const courses = COURSES[S.role];
+  const total = courses.length;
+  const done = courses.filter(c => S.courseProgress[c.id]?.done).length;
+  const progress = Math.round(done/total*100);
+
+  let html = headerHtml('学习仪表盘', role.icon + ' ' + role.name + ' · ' + (S.currentEmployee?.name || '新学员'), true);
+  html += `<div class="card slide-up">
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-value" style="color:var(--blue);">${total}</div><div class="stat-label">课程总数</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:var(--green);">${done}</div><div class="stat-label">已完成</div></div>
+      <div class="stat-card"><div class="stat-value">${progress}%</div><div class="stat-label">学习进度</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:${progress>=80?'var(--green)':'var(--amber)'};">${done>=total/2?'阶段二':'阶段一'}</div><div class="stat-label">当前阶段</div></div>
+    </div>
+    <div class="progress-bar mt-2"><div class="progress-fill ${progress>=80?'high':progress>=40?'mid':'low'}" style="width:${progress}%"></div></div>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button class="btn btn-outline" style="flex:1;font-size:12px;" onclick="S.goLearningMap()">📍 学习地图</button>
+      <button class="btn btn-outline" style="flex:1;font-size:12px;" onclick="S.goSchedule()">📅 学习计划</button>
+    </div>
+  </div>`;
+
+  html += `<div class="card mt-3 slide-up"><p style="font-weight:600;font-size:14px;margin-bottom:14px;">课程列表</p>`;
+  const scores = S.quizScores;
+  const ordered = courses.map((c, idx) => {
+    const skillIdx = c.skills[0];
+    const skillScore = scores ? (scores[skillIdx] || 0) : 0;
+    return {...c, origIdx: idx, priority: 4 - skillScore};
+  }).sort((a,b) => b.priority - a.priority);
+  ordered.forEach((c, i) => {
+    const prog = S.courseProgress[c.id];
+    const isDone = prog?.done;
+    const locked = i > 0 && !S.courseProgress[ordered[i-1].id]?.done;
+    const cls = isDone ? 'completed' : locked ? 'locked' : '';
+    const tagCls = c.type==='video' ? 'tag-blue' : 'tag-purple';
+    html += `<div class="course-card ${cls}" onclick="${locked?'':`S.openCourse(${c.origIdx})`}">
+      <div class="course-num">${i+1}</div>
+      <div style="flex:1;min-width:0;"><div class="course-title">${c.title}</div><div class="course-meta">${c.dur}</div></div>
+      <span class="tag ${tagCls}">${c.type==='video'?'视频':'图文'}</span>
+      <span style="font-size:12px;margin-left:8px;">${isDone?'已完成':locked?'🔒':'待学习'}</span>
+    </div>`;
+  });
+  html += `</div>`;
+
+  if (done === total) {
+    html += `<div class="card mt-3 slide-up text-center">
+      <p style="font-size:18px;font-weight:700;margin-bottom:8px;">恭喜完成全部课程！</p>
+      <p style="color:var(--text2);font-size:13px;margin-bottom:16px;">现在可以进行AI能力成果测验</p>
+      <button class="btn btn-primary" onclick="S.startFinalQuiz()">开始成果测验</button>
+      ${S.finalScore!==null ? `<div class="alert alert-success mt-3">上次测验成绩：${S.finalScore}分</div>` : ''}
+    </div>`;
+  }
+
+  return html;
+}
+
+// ---- COURSE DETAIL ----
+function renderCourseDetail() {
+  const c = COURSES[S.role][S.courseIdx];
+  const role = ROLES[S.role];
+  const prog = S.courseProgress[c.id];
+  const content = getCourseContent(c.id);
+
+  let html = headerHtml(c.title, role.icon + ' ' + role.name, true);
+  html += `<div class="card slide-up">
+    <div class="flex-between mb-3"><span class="tag ${c.type==='video'?'tag-blue':'tag-purple'}">${c.type==='video'?'视频课程（配音+PPT）':'图文课程'}</span>
+    <span style="font-size:13px;color:var(--text2);">${c.dur}</span></div>
+    <p style="font-size:14px;color:var(--text2);margin-bottom:16px;">${c.desc}</p>`;
+
+  if (c.type === 'video' && content) {
+    const slides = getPPTSlides(c.id, c.title, c.desc);
+    // PPT Player
+    html += `<div class="ppt-container" id="pptContainer">
+      <div class="ppt-frame" id="pptFrame">`;
+    slides.forEach((s, i) => {
+      html += renderPPTSlide(s, i, slides.length);
+    });
+    html += `</div>
+      <!-- Subtitles -->
+      <div class="subtitle-bar" id="subtitleBar">${escapeHtml(slides[0]?.notes || '')}</div>
+      <!-- Voice Controls -->
+      <div class="voice-controls">
+        <button class="voice-btn voice-btn-play" id="voicePlayBtn" onclick="S.toggleVoice()" title="播放/暂停">▶</button>
+        <button class="voice-btn voice-btn-outline" onclick="S.prevPPTSlide()" title="上一页">⏮</button>
+        <button class="voice-btn voice-btn-outline" onclick="S.nextPPTSlide()" title="下一页">⏭</button>
+        <div class="voice-progress"><div class="voice-progress-fill" id="voiceProgress" style="width:0%"></div></div>
+        <select class="voice-speed-select" onchange="S.setVoiceSpeed(this.value)" title="语速">
+          <option value="0.7">0.7x</option><option value="0.85">0.85x</option><option value="1" selected>1x</option><option value="1.2">1.2x</option>
+        </select>
+        <span class="voice-slide-counter" id="slideCounter">1/${slides.length}</span>
+      </div>
+    </div>`;
+    // Full content below PPT
+    html += `<div class="mt-4">${buildContentHTML(content)}</div>`;
+  } else if (c.type === 'video') {
+    html += `<div class="video-placeholder"><div class="play-btn">▶</div><p style="font-weight:600;font-size:16px;">${c.title}</p><p style="font-size:13px;opacity:0.8;">课程PPT视频演示</p></div>`;
+  } else {
+    if (content) { html += buildContentHTML(content); }
+    else { html += `<div style="background:var(--bg);border-radius:var(--radius);padding:20px;"><p style="font-size:13px;color:var(--text2);text-align:center;">课程内容加载中…</p></div>`; }
+  }
+
+  // Task progress
+  html += `<div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);">
+    <p style="font-weight:600;font-size:14px;margin-bottom:12px;">关卡任务 (${prog?.tasksDone||0}/${c.tasks.length})</p>`;
+  c.tasks.forEach((t, i) => {
+    const taskDone = prog?.tasksDone > i;
+    html += `<div class="task-step"><div class="task-num ${taskDone?'done':'active'}">${taskDone?'✓':i+1}</div>
+      <div class="task-desc"><strong>关卡${i+1}：${t.t}</strong>${t.h}</div></div>`;
+  });
+  html += `</div>`;
+
+  html += `<div class="flex-between mt-4">
+    <button class="btn btn-outline" onclick="S.goDashboard()">返回课程列表</button>
+    <button class="btn btn-primary" onclick="S.openTask()">${prog?.tasksDone >= c.tasks.length ? '已完成所有关卡' : '进入关卡挑战'}</button>
+  </div></div>`;
+  return html;
+}
+
+function escapeHtml(str) { return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function renderPPTSlide(slide, idx, total) {
+  const clsMap = {cover:'ppt-slide-cover', content:'ppt-slide-content', accent:'ppt-slide-accent', dark:'ppt-slide-dark', summary:'ppt-slide-summary'};
+  const cls = clsMap[slide.type] || 'ppt-slide-content';
+  let inner = '';
+  // Title bar
+  if (slide.title) {
+    inner += `<div class="ppt-h2"><span class="ppt-icon" style="background:var(--blue-bg);">${slide.title.icon||''}</span>${slide.title.txt}</div>`;
+  }
+  // Blocks
+  slide.blocks.forEach(b => {
+    switch(b.el) {
+      case 'h1': inner += `<div class="ppt-badge ppt-badge-blue">视频课程</div><div class="ppt-h1">${b.txt}</div>`; break;
+      case 'h2': inner += `<div class="ppt-h1" style="font-size:22px;">${b.txt}</div>`; break;
+      case 'p': inner += `<div class="ppt-p" style="color:rgba(255,255,255,0.7);max-width:500px;margin:0 auto;">${b.txt}</div>`; break;
+      case 'li': inner += `<li>${b.txt}</li>`; break;
+      case 'h3p': inner += `<div style="margin-bottom:12px;"><div class="ppt-h3">${b.title}</div><div class="ppt-p">${b.txt}</div></div>`; break;
+      case 'card': inner += `<div class="ppt-card-mini"><div class="ppt-card-num">${String(b.num).padStart(2,'0')}</div><div class="ppt-card-t">${b.title}</div><div class="ppt-card-d">${b.txt}</div></div>`; break;
+    }
+  });
+  // Wrap li's in ul
+  if (slide.blocks.some(b=>b.el==='li')) {
+    inner = inner.replace(/((?:<li>.*?<\/li>)+)/g, '<ul class="ppt-list">$1</ul>');
+  }
+  // Wrap cards in grid
+  if (slide.blocks.some(b=>b.el==='card')) {
+    inner = inner.replace(/((?:<div class="ppt-card-mini">.*?<\/div>)+)/g, '<div class="ppt-grid2">$1</div>');
+  }
+  return `<div class="ppt-slide ${cls}${idx===0?' active':''}" data-slide="${idx}">${inner}</div>`;
+}
+
+function buildContentHTML(content) {
+  if (!content) return '';
+  let h = '';
+
+  // Objectives
+  if (content.objectives && content.objectives.length) {
+    h += `<div class="content-section"><h3>学习目标</h3>`;
+    content.objectives.forEach((o,i) => {
+      h += `<div class="obj-card"><div class="obj-num">${i+1}</div><div>${o}</div></div>`;
+    });
+    h += `</div>`;
+  }
+
+  // Core Concepts
+  if (content.concepts && content.concepts.length) {
+    h += `<div class="content-section"><h3>核心概念</h3>`;
+    content.concepts.forEach(c => {
+      h += `<div style="margin-bottom:14px;">
+        <p style="font-weight:600;font-size:14px;margin-bottom:4px;color:var(--text);">${c.t}</p>
+        <p style="font-size:13px;color:var(--text2);line-height:1.8;">${c.c}</p>
+      </div>`;
+    });
+    h += `</div>`;
+  }
+
+  // Steps
+  if (content.steps && content.steps.length) {
+    h += `<div class="content-section"><h3>实操步骤</h3>`;
+    content.steps.forEach(s => {
+      h += `<div class="step-card"><div class="step-num">${content.steps.indexOf(s)+1}</div>
+        <div class="step-body"><strong>${s.t}</strong>${s.d}</div></div>`;
+    });
+    h += `</div>`;
+  }
+
+  // Cases
+  if (content.cases && content.cases.length) {
+    h += `<div class="content-section"><h3>场景案例</h3>`;
+    content.cases.forEach(c => {
+      h += `<div class="case-box"><div class="case-label">场景</div><p>${c.s}</p>
+        <div class="case-label" style="margin-top:8px;color:var(--green);">最佳实践</div><p>${c.sol}</p></div>`;
+    });
+    h += `</div>`;
+  }
+
+  // Tools
+  if (content.tools && content.tools.length) {
+    h += `<div class="content-section"><h3>推荐工具</h3><div class="tools-grid">`;
+    content.tools.forEach(t => {
+      h += `<div class="tool-card"><div class="tool-name">${t.n}</div><div class="tool-desc">${t.d}</div></div>`;
+    });
+    h += `</div></div>`;
+  }
+
+  // Tips
+  if (content.tips && content.tips.length) {
+    h += `<div class="content-section"><h3>实践要点</h3>`;
+    content.tips.forEach((t,i) => {
+      h += `<div class="tip-item"><div class="tip-icon">${i+1}</div><div>${t}</div></div>`;
+    });
+    h += `</div>`;
+  }
+
+  // Summary
+  if (content.summary) {
+    h += `<div class="summary-box"><h4>本章小结</h4><p>${content.summary}</p></div>`;
+  }
+
+  return h;
+}
+
+// ---- TASK MODAL ----
+function renderTaskModal() {
+  const c = COURSES[S.role][S.courseIdx];
+  const ti = S.courseTaskIdx;
+  const t = c.tasks[ti];
+  const prog = S.courseProgress[c.id] || {};
+  const hintData = getTaskHint(c.id, ti);
+  const showHint = S.taskShowHint[c.id+'_'+ti];
+  const showAnswer = S.taskShowAnswer[c.id+'_'+ti];
+
+  let html = headerHtml(c.title + ' — 关卡' + (ti+1), '任务陪练', true);
+  html += `<div class="card slide-up">
+    <div style="display:flex;gap:8px;margin-bottom:16px;">`;
+  c.tasks.forEach((_, i) => {
+    const done = prog.tasksDone > i;
+    html += `<div style="flex:1;height:4px;border-radius:2px;background:${done?'var(--green)':i===ti?'var(--blue)':'var(--border)'};"></div>`;
+  });
+  html += `</div>
+    <p style="font-weight:700;font-size:16px;margin-bottom:8px;">关卡 ${ti+1}：${t.t}</p>
+    <p style="font-size:14px;color:var(--text2);margin-bottom:16px;">${t.h}</p>`;
+
+  // Hint system
+  if (hintData && hintData.hints && hintData.hints.length) {
+    html += `<button class="hint-toggle" onclick="S.toggleTaskHint('${c.id}',${ti})">${showHint ? '🔽 收起提示' : '💡 查看解题提示 ('+hintData.hints.length+'步)'}</button>`;
+    if (showHint) {
+      html += `<div class="hint-steps">`;
+      hintData.hints.forEach((h, hi) => {
+        html += `<div class="hint-step"><div class="hint-num">${hi+1}</div><div>${h}</div></div>`;
+      });
+      html += `</div>`;
+    }
+  }
+
+  html += `<div style="background:var(--bg);border-radius:var(--radius-sm);padding:14px;margin-bottom:12px;margin-top:12px;">
+      <p style="font-size:13px;font-weight:500;margin-bottom:6px;">请在下方完成你的任务</p>
+      <p style="font-size:12px;color:var(--text2);">模拟真实工作场景，用AI工具完成对应任务。在文本框中描述你的操作过程和成果。</p>
+    </div>
+    <textarea class="task-input" id="taskAnswer" placeholder="请描述你使用AI工具完成任务的过程和成果...">${prog['taskAns'+ti]||''}</textarea>`;
+
+  // Reference answer
+  if (hintData && hintData.answer) {
+    html += `<button class="hint-toggle" style="margin-top:8px;" onclick="S.toggleTaskAnswer('${c.id}',${ti})">${showAnswer ? '🔼 收起参考' : '📋 查看参考答案'}</button>`;
+    html += `<div class="task-answer-box${showAnswer?' show':''}" id="taskAnswerBox">${hintData.answer.replace(/\n/g,'<br>')}</div>`;
+  }
+
+  html += `<div class="flex-between mt-4">
+      <button class="btn btn-outline" onclick="S.goBack()">返回课程</button>
+      <div style="display:flex;gap:8px;">
+        ${ti>0?`<button class="btn btn-outline" onclick="S.prevTask()">上一关卡</button>`:''}
+        <button class="btn btn-primary" onclick="S.submitTask()">提交任务</button>
+      </div>
+    </div>`;
+
+  if (prog['taskAns'+ti]) {
+    html += `<div class="alert alert-success mt-3">
+      <strong>任务已提交！</strong>
+      <p style="margin-top:4px;">AI评估：${prog['taskFeedback'+ti] || '正在评估中...'}</p>
+      ${ti < c.tasks.length-1 ? `<button class="btn btn-green btn-sm mt-2" onclick="S.nextTask()">进入下一关卡 →</button>` :
+      `<button class="btn btn-green btn-sm mt-2" onclick="S.finishCourse()">完成课程 ✓</button>`}
+    </div>`;
+  }
+
+  html += `</div>`;
+  return html;
+}
+
+// ---- FINAL QUIZ ----
+function renderFinalQuiz() {
+  const role = ROLES[S.role];
+  const questions = FINAL_QUIZZES[S.role];
+
+  let html = headerHtml('AI能力成果测验', role.icon + ' ' + role.name, true);
+  html += `<div class="card slide-up">
+    <p style="font-weight:600;font-size:15px;margin-bottom:16px;">完成学习后，检验你的AI应用能力（${questions.filter(q=>q.type==='choice').length}道选择题 + ${questions.filter(q=>q.type==='subjective').length}道主观题）</p>`;
+
+  if (S.finalSubmitted) {
+    html += renderFinalResults();
+  } else {
+    questions.forEach((q, i) => {
+      const typeBadge = q.type === 'choice'
+        ? '<span class="quiz-type-badge quiz-type-choice">选择题</span>'
+        : '<span class="quiz-type-badge quiz-type-subj">主观题</span>';
+      html += `<div style="margin-bottom:20px;border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <span style="font-weight:700;font-size:14px;color:var(--blue);">第${i+1}题</span>${typeBadge}
+        </div>
+        <p style="font-weight:600;font-size:14px;margin-bottom:8px;">${q.q}</p>`;
+
+      if (q.type === 'choice') {
+        q.opts.forEach((o, j) => {
+          const sel = S.finalAnswers[i];
+          html += `<label class="quiz-option" style="margin-bottom:4px;${sel===j?'border-color:var(--blue);background:var(--blue-bg);':''}">
+            <input type="radio" name="q${i}" value="${j}" ${sel===j?'checked':''} onchange="S.answerFinal(${i},${j})" style="margin-right:8px;">${String.fromCharCode(65+j)}. ${o}</label>`;
+        });
+      } else {
+        // Subjective question
+        html += `<div class="subj-template"><div class="subj-label">📋 答案模板</div><div class="subj-content">${q.template}</div></div>`;
+        const showHint = S.finalShowHint[i];
+        html += `<button class="hint-toggle" onclick="S.toggleFinalHint(${i})">${showHint ? '🔼 收起提示' : '💡 查看解题步骤 ('+q.steps.length+'步)'}</button>`;
+        if (showHint) {
+          html += `<div class="hint-steps">`;
+          q.steps.forEach((s, si) => {
+            html += `<div class="hint-step"><div class="hint-num">${si+1}</div><div>${s}</div></div>`;
+          });
+          html += `</div>`;
+        }
+        html += `<textarea class="task-input" id="subjAns${i}" onchange="S.answerSubjFinal(${i},this.value)" placeholder="请按照模板在此作答...">${S.finalSubjAnswers[i]||''}</textarea>`;
+      }
+      html += `</div>`;
+    });
+
+    const allAnswered = questions.every((q,i) => {
+      if (q.type === 'choice') return S.finalAnswers[i] !== undefined;
+      return S.finalSubjAnswers[i] && S.finalSubjAnswers[i].trim();
+    });
+    html += `<button class="btn btn-primary" onclick="S.submitFinal()" ${!allAnswered?'disabled':''}>提交测验</button>`;
+  }
+
+  html += `</div>`;
+  return html;
+}
+
+function renderFinalResults() {
+  const questions = FINAL_QUIZZES[S.role];
+  let html = `<div class="text-center" style="padding:20px 0;">
+      <div class="gauge"><svg viewBox="0 0 120 120" width="120" height="120"><circle class="gauge-bg" cx="60" cy="60" r="52"/><circle class="gauge-fill" cx="60" cy="60" r="52" stroke-dasharray="326" stroke-dashoffset="${326 - 326*S.finalScore/100}" stroke="${S.finalScore>=80?'var(--green)':S.finalScore>=60?'var(--amber)':'var(--red)'}"/></svg>
+        <div class="gauge-text">${S.finalScore}</div></div>
+      <div class="gauge-label">分</div>
+      <p style="margin-top:12px;font-size:14px;font-weight:500;">${S.finalScore>=80?'优秀！你已掌握AI核心应用能力':S.finalScore>=60?'良好！继续练习可进一步提升':'需要加强，建议重新学习重点课程'}</p>
+    </div>`;
+
+  // Show correct answers for choice questions
+  html += `<div class="mt-3"><p style="font-weight:600;font-size:14px;margin-bottom:10px;">答案解析</p>`;
+  questions.forEach((q, i) => {
+    if (q.type === 'choice') {
+      const userAns = S.finalAnswers[i];
+      const correct = userAns === q.ans;
+      html += `<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;">
+        <span style="color:${correct?'var(--green)':'var(--red)'};font-weight:600;">${correct?'✓':'✗'}</span> ${i+1}. ${q.q}
+        <span style="display:block;margin-top:4px;color:var(--text2);">正确答案：${String.fromCharCode(65+q.ans)}. ${q.opts[q.ans]} — ${q.explain||''}</span></div>`;
+    } else {
+      const hasAnswer = S.finalSubjAnswers[i] && S.finalSubjAnswers[i].trim();
+      html += `<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;">
+        <span style="color:${hasAnswer?'var(--green)':'var(--red)'};font-weight:600;">${hasAnswer?'✓ 已作答':'✗ 未作答'}</span> ${i+1}. ${q.q}
+        <span style="display:block;margin-top:4px;color:var(--text2);">评分要点：${(q.keyPoints||[]).join(' | ')}</span></div>`;
+    }
+  });
+  html += `</div>`;
+
+  html += `<div class="text-center mt-3" style="display:flex;gap:10px;justify-content:center;">
+      <button class="btn btn-outline" onclick="S.goDashboard()">返回学习</button>
+      <button class="btn btn-outline" onclick="S.startFinalQuiz()">重新测验</button>
+      <button class="btn btn-primary" onclick="S.saveAndFinish()">保存并完成</button>
+    </div>`;
+  return html;
+}
+
+// ---- ADMIN ----
+function renderAdmin() {
+  const all = S.employees;
+  const total = all.length;
+  const completed = all.filter(e => e.finalScore != null).length;
+  const avgScore = completed > 0 ? Math.round(all.filter(e=>e.finalScore!=null).reduce((s,e)=>s+e.finalScore,0)/completed) : 0;
+  const roleBreakdown = {};
+  all.forEach(e => { roleBreakdown[e.role] = (roleBreakdown[e.role]||0)+1; });
+
+  let html = headerHtml('管理员看板', '团队AI学习进度总览', true);
+  html += `<div class="card slide-up">
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-value" style="color:var(--blue);">${total}</div><div class="stat-label">参训人数</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:var(--green);">${completed}</div><div class="stat-label">已完成测评</div></div>
+      <div class="stat-card"><div class="stat-value">${avgScore}</div><div class="stat-label">平均成绩</div></div>
+      <div class="stat-card"><div class="stat-value">${Math.round(completed/total*100)||0}%</div><div class="stat-label">完成率</div></div>
+    </div>
+    <div class="progress-bar mt-2"><div class="progress-fill ${completed/total>=0.8?'high':completed/total>=0.4?'mid':'low'}" style="width:${Math.round(completed/total*100)}%"></div></div>
+  </div>`;
+
+  html += `<div class="card mt-3 slide-up"><p style="font-weight:600;font-size:14px;margin-bottom:12px;">岗位分布</p>`;
+  for (const [rid, cnt] of Object.entries(roleBreakdown)) {
+    const r = ROLES[rid];
+    html += `<div class="emp-row"><div class="emp-avatar">${r?r.icon:'?'}</div>
+      <div class="emp-info"><div class="emp-name">${r?r.name:rid}</div><div class="emp-meta">${cnt}人</div></div>
+      <div class="emp-score">${Math.round(cnt/total*100)}%</div></div>`;
+  }
+  html += `</div>`;
+
+  html += `<div class="card mt-3 slide-up"><p style="font-weight:600;font-size:14px;margin-bottom:12px;">员工详细记录</p>`;
+  if (all.length === 0) {
+    html += `<p style="color:var(--text2);text-align:center;padding:20px;">暂无员工数据</p>`;
+  } else {
+    all.forEach((e, i) => {
+      const r = ROLES[e.role];
+      const scoreCls = e.finalScore>=80?'var(--green)':e.finalScore>=60?'var(--amber)':'var(--red)';
+      html += `<div class="emp-row">
+        <div class="emp-avatar">${e.name[0]}</div>
+        <div class="emp-info"><div class="emp-name">${e.name}</div><div class="emp-meta">${r?r.icon+' '+r.name:''} · ${e.date} · ${e.doneCourses||0}/${COURSES[e.role]?.length||0}课</div></div>
+        <div class="emp-score" style="color:${scoreCls}">${e.finalScore!=null?e.finalScore+'分':'学习中'}</div>
+        <button class="btn btn-sm btn-outline" onclick="S.loadEmployee(${i});S.goDashboard();">查看</button>
+      </div>`;
+    });
+  }
+  html += `</div>`;
+  return html;
+}
+
+// ==================== ACTIONS ====================
+S.selectRole = function(id) { S.role = id; render(); };
+S.startQuiz = function() { S.quizIdx=0; S.quizAnswers=[]; S.quizScores=null; S.courseProgress={}; S.finalAnswers=[]; S.finalSubjAnswers={}; S.finalScore=null; S.finalSubmitted=false; S.finalShowHint={}; S.currentEmployee=null; S.view='quiz'; render(); };
+S.answerQuiz = function(i) { S.quizAnswers[S.quizIdx]=i; render(); };
+S.prevQuestion = function() { if(S.quizIdx>0) S.quizIdx--; render(); };
+S.nextQuestion = function() {
+  const questions = ASSESSMENTS[S.role];
+  if (S.quizIdx < questions.length-1) { S.quizIdx++; render(); }
+  else { S.calcResults(); }
+};
+S.calcResults = function() {
+  const questions = ASSESSMENTS[S.role];
+  const scores = Array(ROLES[S.role].skills.length).fill(0);
+  questions.forEach((q, i) => { scores[q.dim] += q.scores[S.quizAnswers[i]]; });
+  const dimCount = {};
+  questions.forEach(q => { dimCount[q.dim] = (dimCount[q.dim]||0)+1; });
+  Object.keys(dimCount).forEach(k => { scores[k] = Math.round(scores[k] / dimCount[k]); });
+  S.quizScores = scores;
+  S.view = 'results';
+  render();
+};
+S.openCourse = function(idx) { S.courseIdx = idx; S.courseTaskIdx = 0; S.pptCurrentSlide = 0; S.voicePlaying = false; S.view = 'course'; render(); };
+S.goDashboard = function() { stopVoice(); S.view = 'dashboard'; S.courseIdx = null; S.courseTaskIdx = 0; render(); };
+S.goLearningMap = function() { stopVoice(); S.view = 'map'; render(); };
+S.goSchedule = function() { stopVoice(); S.view = 'schedule'; render(); };
+S.openTask = function() {
+  const c = COURSES[S.role][S.courseIdx];
+  const prog = S.courseProgress[c.id];
+  S.courseTaskIdx = prog?.tasksDone || 0;
+  if (S.courseTaskIdx >= c.tasks.length) S.courseTaskIdx = c.tasks.length - 1;
+  S.view = 'task'; render();
+};
+S.submitTask = function() {
+  const c = COURSES[S.role][S.courseIdx];
+  const ans = document.getElementById('taskAnswer')?.value || '';
+  if (!ans.trim()) { alert('请先完成任务描述'); return; }
+  if (!S.courseProgress[c.id]) S.courseProgress[c.id] = {tasksDone:0};
+  const prog = S.courseProgress[c.id];
+  prog['taskAns'+S.courseTaskIdx] = ans;
+  const feedbacks = ['任务完成度较高，操作流程清晰。建议补充边界情况处理。','AI工具使用得当，产出质量良好。可以尝试更多工具组合。','任务执行规范，思路清晰。继续加油！'];
+  prog['taskFeedback'+S.courseTaskIdx] = feedbacks[Math.floor(Math.random()*feedbacks.length)];
+  if (S.courseTaskIdx >= prog.tasksDone) prog.tasksDone = S.courseTaskIdx + 1;
+  render();
+};
+S.prevTask = function() { if(S.courseTaskIdx>0) S.courseTaskIdx--; render(); };
+S.nextTask = function() { S.courseTaskIdx++; render(); };
+S.finishCourse = function() {
+  const c = COURSES[S.role][S.courseIdx];
+  if (!S.courseProgress[c.id]) S.courseProgress[c.id] = {tasksDone:0};
+  S.courseProgress[c.id].done = true;
+  S.goDashboard();
+};
+S.startFinalQuiz = function() { S.finalAnswers = []; S.finalSubjAnswers = {}; S.finalShowHint = {}; S.finalSubmitted = false; S.view = 'final'; render(); };
+S.answerFinal = function(i, j) { S.finalAnswers[i] = j; render(); };
+S.answerSubjFinal = function(i, val) { S.finalSubjAnswers[i] = val; };
+S.toggleFinalHint = function(i) { S.finalShowHint[i] = !S.finalShowHint[i]; render(); };
+S.toggleTaskHint = function(courseId, ti) { const k = courseId+'_'+ti; S.taskShowHint[k] = !S.taskShowHint[k]; render(); };
+S.toggleTaskAnswer = function(courseId, ti) { const k = courseId+'_'+ti; S.taskShowAnswer[k] = !S.taskShowAnswer[k]; render(); };
+S.submitFinal = function() {
+  const questions = FINAL_QUIZZES[S.role];
+  let score = 0;
+  let maxScore = 0;
+  questions.forEach((q,i) => {
+    if (q.type === 'choice') { maxScore += 20; if (S.finalAnswers[i] === q.ans) score += 20; }
+    else { maxScore += 20; if (S.finalSubjAnswers[i] && S.finalSubjAnswers[i].trim().length > 50) score += 16; else if (S.finalSubjAnswers[i] && S.finalSubjAnswers[i].trim()) score += 8; }
+  });
+  S.finalScore = Math.round(score / maxScore * 100);
+  S.finalSubmitted = true;
+  render();
+};
+S.saveAndFinish = function() {
+  const name = prompt('请输入你的姓名（用于管理看板）：', S.currentEmployee?.name || '');
+  if (!name) return;
+  const emp = {
+    name, role: S.role,
+    date: new Date().toLocaleDateString('zh-CN'),
+    quizScores: S.quizScores,
+    courseProgress: S.courseProgress,
+    finalScore: S.finalScore,
+    doneCourses: Object.values(S.courseProgress).filter(p=>p.done).length
+  };
+  if (S.currentEmployee) {
+    const idx = S.employees.findIndex(e => e===S.currentEmployee);
+    if (idx>=0) S.employees[idx] = emp;
+  } else {
+    S.employees.push(emp);
+  }
+  S.currentEmployee = emp;
+  saveEmployees();
+  alert('数据已保存！');
+};
+S.reset = function() { stopVoice(); S.role=null; S.view='role'; S.quizIdx=0; S.quizAnswers=[]; S.quizScores=null; S.courseIdx=null; S.courseTaskIdx=0; S.courseProgress={}; S.finalAnswers=[]; S.finalSubjAnswers={}; S.finalScore=null; S.finalSubmitted=false; S.finalShowHint={}; S.currentEmployee=null; render(); };
+S.goAdmin = function() { S.view='admin'; render(); };
+S.logout = function() {
+  stopVoice();
+  localStorage.removeItem('ai_training_session');
+  localStorage.removeItem('ai_training_emp_role');
+  window.location.replace('index.html');
+};
+S.loadEmployee = function(idx) {
+  const e = S.employees[idx];
+  S.currentEmployee = e;
+  S.role = e.role;
+  S.quizScores = e.quizScores;
+  S.courseProgress = e.courseProgress;
+  S.finalScore = e.finalScore;
+  S.finalSubmitted = e.finalScore != null;
+};
+S.goBack = function() {
+  stopVoice();
+  if (S.view === 'quiz') { S.view='role'; }
+  else if (S.view === 'results') { S.view='role'; }
+  else if (S.view === 'final') { S.goDashboard(); return; }
+  else if (S.view === 'map') { S.view='results'; }
+  else if (S.view === 'schedule') { S.view='map'; }
+  else { S.goDashboard(); return; }
+  render();
+};
+
+// ==================== PPT & VOICE SYSTEM ====================
+let _voiceSynth = window.speechSynthesis;
+let _voiceUtterance = null;
+let _pptInterval = null;
+
+function initPPT() {
+  S.pptCurrentSlide = 0;
+  S.voicePlaying = false;
+  stopVoice();
+  updatePPTUI();
+  // Auto-start voice for slide 0
+  setTimeout(function() { S.toggleVoice(); }, 500);
+}
+
+function stopVoice() {
+  if (_voiceUtterance) { _voiceUtterance.onend = null; }
+  _voiceSynth.cancel();
+  if (_pptInterval) clearInterval(_pptInterval);
+  S.voicePlaying = false;
+  S.voicePaused = false;
+}
+
+S.toggleVoice = function() {
+  if (S.voicePlaying && !S.voicePaused) { // pause
+    _voiceSynth.pause();
+    S.voicePaused = true;
+    updateVoiceButton();
+    return;
+  }
+  if (S.voicePaused) { // resume
+    _voiceSynth.resume();
+    S.voicePaused = false;
+    updateVoiceButton();
+    return;
+  }
+  // Start playing from current slide
+  playCurrentSlide();
+};
+
+S.prevPPTSlide = function() {
+  if (S.pptCurrentSlide > 0) {
+    stopVoice();
+    S.pptCurrentSlide--;
+    updatePPTUI();
+    if (S.voicePlaying) setTimeout(function() { playCurrentSlide(); }, 200);
+  }
+};
+
+S.nextPPTSlide = function() {
+  const slides = document.querySelectorAll('.ppt-slide');
+  if (S.pptCurrentSlide < slides.length - 1) {
+    stopVoice();
+    S.pptCurrentSlide++;
+    updatePPTUI();
+    if (S.voicePlaying) setTimeout(function() { playCurrentSlide(); }, 200);
+  }
+};
+
+S.setVoiceSpeed = function(rate) {
+  S.voiceRate = parseFloat(rate);
+};
+
+function playCurrentSlide() {
+  S.voicePlaying = true;
+  S.voicePaused = false;
+  updateVoiceButton();
+  const slides = getPPTSlides(COURSES[S.role][S.courseIdx].id, '', '');
+  if (!slides[S.pptCurrentSlide]) return;
+  const notes = slides[S.pptCurrentSlide].notes || '';
+  _voiceUtterance = new SpeechSynthesisUtterance(notes);
+  _voiceUtterance.lang = 'zh-CN';
+  _voiceUtterance.rate = S.voiceRate;
+  _voiceUtterance.onend = function() {
+    // Auto advance to next slide
+    const allSlides = document.querySelectorAll('.ppt-slide');
+    if (S.pptCurrentSlide < allSlides.length - 1) {
+      S.pptCurrentSlide++;
+      updatePPTUI();
+      playCurrentSlide();
+    } else {
+      S.voicePlaying = false;
+      updateVoiceButton();
+    }
+  };
+  updateSubtitle(notes);
+  _voiceSynth.speak(_voiceUtterance);
+}
+
+function updatePPTUI() {
+  const slides = document.querySelectorAll('.ppt-slide');
+  slides.forEach(function(s, i) { s.classList.toggle('active', i === S.pptCurrentSlide); });
+  const counter = document.getElementById('slideCounter');
+  if (counter) counter.textContent = (S.pptCurrentSlide+1) + '/' + slides.length;
+  const prog = document.getElementById('voiceProgress');
+  if (prog && slides.length > 1) prog.style.width = Math.round(S.pptCurrentSlide/(slides.length-1)*100) + '%';
+}
+
+function updateSubtitle(text) {
+  const bar = document.getElementById('subtitleBar');
+  if (bar) bar.textContent = text;
+  if (bar) bar.classList.remove('paused');
+}
+
+function updateVoiceButton() {
+  const btn = document.getElementById('voicePlayBtn');
+  if (!btn) return;
+  if (S.voicePlaying && !S.voicePaused) { btn.textContent = '⏸'; }
+  else { btn.textContent = '▶'; }
+  const bar = document.getElementById('subtitleBar');
+  if (bar) bar.classList.toggle('paused', S.voicePaused);
+}
+
+document.addEventListener('keydown', function(e) {
+  if (S.view !== 'course') return;
+  if (e.key === 'ArrowRight') { S.nextPPTSlide(); }
+  else if (e.key === 'ArrowLeft') { S.prevPPTSlide(); }
+  else if (e.key === ' ') { e.preventDefault(); S.toggleVoice(); }
+});
+
+// ==================== INIT ====================
+function bindEvents() {}
+// Auto-select role from login
+(function() {
+  var empRole = localStorage.getItem('ai_training_emp_role');
+  var session = JSON.parse(localStorage.getItem('ai_training_session') || '{}');
+  if (session.role === 'admin') {
+    S.view = 'role';
+  } else if (empRole && ROLES[empRole]) {
+    S.role = empRole;
+    S.view = 'role';
+  }
+  // clean up emp_role after use (keep for this session, clear on logout)
+})();
+render();
+</script>
+</body>
+</html>
