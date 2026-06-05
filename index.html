@@ -6,1218 +6,697 @@
 <title>AI达学 AIDAX — 企业AI学习一站式服务</title>
 <style>
 /* ===== Reset & Base ===== */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  color: #e4e4e7; line-height: 1.7; background: #09090b; overflow-x: hidden;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  color:#1e293b;line-height:1.7;background:#f8fafc;overflow-x:hidden;
 }
-a { text-decoration: none; color: inherit; }
-img { max-width: 100%; display: block; }
+a{text-decoration:none;color:inherit}
+img{max-width:100%;display:block}
 
-/* ===== CSS Variables ===== */
-:root {
-  --bg: #09090b;
-  --bg2: #131320;
-  --bg3: #1a1a2e;
-  --card: rgba(255,255,255,0.03);
-  --card-hover: rgba(255,255,255,0.06);
-  --border: rgba(255,255,255,0.06);
-  --border-active: rgba(255,255,255,0.12);
-  --primary: #6366f1;
-  --primary-light: #818cf8;
-  --primary-glow: rgba(99,102,241,0.2);
-  --accent: #22d3ee;
-  --accent2: #f59e0b;
-  --green: #22c55e;
-  --text: #e4e4e7;
-  --text2: #71717a;
-  --text3: #52525b;
-  --white: #ffffff;
-  --radius: 16px;
-  --radius-sm: 10px;
+/* ===== Variables ===== */
+:root{
+  --c-bg:#f8fafc;--c-white:#fff;--c-card:#fff;
+  --c-border:#e2e8f0;--c-border-hover:#cbd5e1;
+  --c-text:#0f172a;--c-text2:#475569;--c-text3:#94a3b8;
+  --c-primary:#6366f1;--c-primary-light:#818cf8;--c-primary-dark:#4f46e5;
+  --c-accent:#06b6d4;--c-green:#10b981;--c-amber:#f59e0b;--c-red:#ef4444;
+  --c-glow:rgba(99,102,241,0.12);
+  --radius:16px;--radius-sm:10px;--shadow:0 1px 3px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.03);
+  --shadow-hover:0 2px 8px rgba(0,0,0,.06),0 8px 32px rgba(0,0,0,.05);
+  --shadow-lg:0 4px 12px rgba(0,0,0,.06),0 16px 48px rgba(0,0,0,.08);
 }
-::selection { background: rgba(99,102,241,0.3); color: #fff; }
+::selection{background:rgba(99,102,241,.2);color:#4338ca}
 
-/* ===== Utility ===== */
-.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-.section { padding: 120px 0; }
-.section-tag {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 6px 16px; border-radius: 50px; font-size: 0.8rem; font-weight: 600;
-  letter-spacing: 0.5px; text-transform: uppercase;
-  background: rgba(99,102,241,0.1); color: var(--primary-light);
-  border: 1px solid rgba(99,102,241,0.15); margin-bottom: 20px;
+.container{max-width:1200px;margin:0 auto;padding:0 24px}
+.section{padding:100px 0}
+.section-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:6px 16px;border-radius:50px;font-size:.8rem;font-weight:600;
+  letter-spacing:.5px;text-transform:uppercase;
+  background:rgba(99,102,241,.06);color:var(--c-primary-dark);
+  border:1px solid rgba(99,102,241,.12);margin-bottom:20px;
 }
-.section-tag::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
-.section-title {
-  font-size: 2.8rem; font-weight: 800; text-align: center;
-  background: linear-gradient(180deg, #fff 0%, #a1a1aa 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  margin-bottom: 16px; letter-spacing: -0.5px;
+.section-tag::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--c-accent)}
+.section-title{
+  font-size:2.6rem;font-weight:800;text-align:center;
+  color:var(--c-text);margin-bottom:16px;letter-spacing:-.5px;line-height:1.2;
 }
-.section-sub { font-size: 1.1rem; color: var(--text2); text-align: center; max-width: 640px; margin: 0 auto 80px; }
-.btn {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 14px 32px; border-radius: 50px; font-size: 0.95rem; font-weight: 600;
-  border: none; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden;
-}
-.btn-primary {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  color: #fff; box-shadow: 0 4px 24px rgba(99,102,241,0.35);
-}
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 36px rgba(99,102,241,0.5); }
-.btn-outline {
-  background: transparent; color: #a1a1aa;
-  border: 1.5px solid rgba(255,255,255,0.1);
-}
-.btn-outline:hover { border-color: var(--primary-light); color: #fff; background: rgba(99,102,241,0.08); }
-.btn-ghost {
-  background: rgba(255,255,255,0.04); color: #a1a1aa;
-  border: 1px solid rgba(255,255,255,0.06);
-}
-.btn-ghost:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.section-title .hl{color:var(--c-primary)}
+.section-sub{font-size:1.1rem;color:var(--c-text2);text-align:center;max-width:640px;margin:0 auto 72px}
+
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 30px;border-radius:50px;font-size:.92rem;font-weight:600;border:none;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.btn-primary{background:linear-gradient(135deg,#6366f1,#7c3aed);color:#fff;box-shadow:0 4px 20px rgba(99,102,241,.3)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 32px rgba(99,102,241,.45)}
+.btn-outline{background:transparent;color:var(--c-text2);border:1.5px solid var(--c-border)}
+.btn-outline:hover{border-color:var(--c-primary);color:var(--c-primary);background:rgba(99,102,241,.04)}
+.btn-ghost{background:rgba(0,0,0,.02);color:var(--c-text2);border:1px solid var(--c-border)}
+.btn-ghost:hover{background:rgba(0,0,0,.04);color:var(--c-text)}
 
 /* ===== Nav ===== */
-.nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-  background: rgba(9,9,11,0.8); backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid rgba(255,255,255,0.04); transition: all 0.3s;
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  background:rgba(255,255,255,.82);backdrop-filter:blur(20px) saturate(180%);
+  border-bottom:1px solid rgba(0,0,0,.04);transition:all .3s;
 }
-.nav-inner {
-  max-width: 1200px; margin: 0 auto; padding: 0 24px;
-  display: flex; align-items: center; justify-content: space-between; height: 64px;
-}
-.nav-logo { font-size: 1.05rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px; }
-.nav-logo img { height: 30px; width: auto; }
-.nav-logo .brand-text { display: flex; flex-direction: column; line-height: 1.15; }
-.nav-logo .brand-name { font-size: 1rem; font-weight: 700; color: #fff; }
-.nav-logo .brand-sub { font-size: 0.62rem; color: var(--text3); font-weight: 400; letter-spacing: 0.5px; }
-.nav-links { display: flex; gap: 36px; list-style: none; }
-.nav-links a { font-size: 0.88rem; color: var(--text2); font-weight: 500; transition: color 0.2s; position: relative; }
-.nav-links a::after {
-  content: ''; position: absolute; bottom: -4px; left: 0; right: 0; height: 2px;
-  background: var(--primary); transform: scaleX(0); transition: transform 0.2s;
-}
-.nav-links a:hover { color: #fff; }
-.nav-links a:hover::after { transform: scaleX(1); }
-.nav-cta .btn { padding: 8px 22px; font-size: 0.85rem; }
+.nav-inner{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px}
+.nav-logo{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--c-text)}
+.nav-logo svg{height:34px;width:auto}
+.nav-links{display:flex;gap:36px;list-style:none}
+.nav-links a{font-size:.88rem;color:var(--c-text2);font-weight:500;transition:color .2s;position:relative}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:2px;background:var(--c-primary);transform:scaleX(0);transition:transform .2s}
+.nav-links a:hover{color:var(--c-primary)}
+.nav-links a:hover::after{transform:scaleX(1)}
+.nav-cta .btn{padding:9px 24px;font-size:.85rem}
 
 /* ===== Hero ===== */
-.hero {
-  min-height: 100vh; display: flex; align-items: center;
-  background: #09090b; position: relative; overflow: hidden; padding-top: 64px;
+.hero{
+  min-height:100vh;display:flex;align-items:center;
+  background:linear-gradient(180deg,#fff 0%,#f0f4ff 40%,#f8fafc 100%);
+  position:relative;overflow:hidden;padding-top:64px;
 }
-.hero-glow {
-  position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.3;
+.hero-blob{
+  position:absolute;border-radius:50%;filter:blur(100px);opacity:.25;
 }
-.hero-glow.g1 { width: 600px; height: 600px; background: var(--primary); top: -200px; right: -100px; }
-.hero-glow.g2 { width: 400px; height: 400px; background: var(--accent); bottom: -100px; left: -50px; animation: glowPulse 8s ease-in-out infinite; }
-@keyframes glowPulse { 0%,100% { opacity: 0.2; transform: scale(1); } 50% { opacity: 0.35; transform: scale(1.15); } }
-.hero-grid {
-  position: absolute; inset: 0; opacity: 0.03;
-  background-image: linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
-  background-size: 60px 60px; mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+.hero-blob.b1{width:500px;height:500px;background:#818cf8;top:-150px;right:-80px}
+.hero-blob.b2{width:360px;height:360px;background:#06b6d4;bottom:-80px;left:-60px;animation:blobPulse 8s ease-in-out infinite}
+@keyframes blobPulse{0%,100%{opacity:.15;transform:scale(1)}50%{opacity:.3;transform:scale(1.2)}}
+.hero-dots{
+  position:absolute;inset:0;opacity:.04;
+  background-image:radial-gradient(#6366f1 1.5px,transparent 1.5px);
+  background-size:48px 48px;
 }
-.hero-inner {
-  position: relative; z-index: 2; max-width: 1200px; margin: 0 auto;
-  padding: 80px 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+.hero-inner{
+  position:relative;z-index:2;max-width:1200px;margin:0 auto;
+  padding:80px 24px;display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center;
 }
-.hero-badge {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.15);
-  border-radius: 50px; padding: 8px 20px; font-size: 0.82rem; color: var(--primary-light);
-  margin-bottom: 28px;
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.12);
+  border-radius:50px;padding:8px 20px;font-size:.82rem;color:var(--c-primary-dark);margin-bottom:24px;
 }
-.hero-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
-@keyframes pulse { 0%,100% { opacity: 1; box-shadow: 0 0 8px var(--green); } 50% { opacity: 0.4; box-shadow: 0 0 2px var(--green); } }
-.hero h1 {
-  font-size: 3.8rem; font-weight: 900; color: #fff; line-height: 1.1; margin-bottom: 24px; letter-spacing: -1px;
+.hero-badge .dot{width:7px;height:7px;border-radius:50%;background:var(--c-green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 8px var(--c-green)}50%{opacity:.4;box-shadow:0 0 2px var(--c-green)}}
+.hero h1{font-size:3.8rem;font-weight:900;color:var(--c-text);line-height:1.1;margin-bottom:20px;letter-spacing:-1px}
+.hero h1 .gradient{background:linear-gradient(135deg,#6366f1,#8b5cf6,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-desc{font-size:1.08rem;color:var(--c-text2);margin-bottom:36px;line-height:1.8;max-width:480px}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap}
+.hero-stats{display:flex;gap:48px;margin-top:52px;padding-top:36px;border-top:1px solid var(--c-border)}
+.hero-stat{text-align:left}
+.hero-stat strong{display:block;font-size:2.2rem;color:var(--c-primary);font-weight:800;letter-spacing:-1px}
+.hero-stat span{font-size:.85rem;color:var(--c-text3)}
+.hero-visual{position:relative;display:flex;justify-content:center;align-items:center}
+.hero-card{
+  background:#fff;border:1px solid var(--c-border);border-radius:24px;padding:36px;
+  width:100%;max-width:460px;box-shadow:var(--shadow-lg);
+  animation:cardFloat 6s ease-in-out infinite;
 }
-.hero h1 .gradient {
-  background: linear-gradient(135deg, #818cf8, #22d3ee, #f59e0b);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+@keyframes cardFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.hero-card-header{display:flex;align-items:center;gap:14px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--c-border)}
+.hero-card-avatar{
+  width:48px;height:48px;border-radius:14px;
+  background:linear-gradient(135deg,#6366f1,#8b5cf6);
+  display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:#fff;
 }
-.hero-desc { font-size: 1.1rem; color: var(--text2); margin-bottom: 40px; line-height: 1.8; max-width: 480px; }
-.hero-btns { display: flex; gap: 14px; flex-wrap: wrap; }
-.hero-stats {
-  display: flex; gap: 48px; margin-top: 56px; padding-top: 40px;
-  border-top: 1px solid var(--border);
-}
-.hero-stat { text-align: left; }
-.hero-stat strong { display: block; font-size: 2.2rem; color: #fff; font-weight: 800; letter-spacing: -1px; }
-.hero-stat span { font-size: 0.85rem; color: var(--text2); }
-.hero-visual { position: relative; display: flex; justify-content: center; align-items: center; }
-.hero-card {
-  background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-  border: 1px solid var(--border); border-radius: 24px; padding: 36px;
-  backdrop-filter: blur(20px); width: 100%; max-width: 460px;
-  box-shadow: 0 0 60px rgba(99,102,241,0.08);
-  animation: cardFloat 6s ease-in-out infinite;
-}
-@keyframes cardFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-.hero-card-header {
-  display: flex; align-items: center; gap: 14px; margin-bottom: 24px;
-  padding-bottom: 20px; border-bottom: 1px solid var(--border);
-}
-.hero-card-avatar {
-  width: 48px; height: 48px; border-radius: 14px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
-}
-.hero-card-header h4 { color: #fff; font-size: 1rem; font-weight: 600; }
-.hero-card-header p { color: var(--text2); font-size: 0.8rem; }
-.hero-card-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-.metric-item {
-  background: rgba(255,255,255,0.02); border-radius: 12px; padding: 18px; text-align: center;
-  border: 1px solid var(--border);
-}
-.metric-item .val { font-size: 1.5rem; font-weight: 800; color: var(--accent); }
-.metric-item .lbl { font-size: 0.75rem; color: var(--text3); margin-top: 4px; }
-.hero-card-bar { margin-top: 18px; }
-.bar-label { display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--text2); margin-bottom: 6px; }
-.bar-track { height: 6px; background: rgba(255,255,255,0.04); border-radius: 3px; overflow: hidden; }
-.bar-fill {
-  height: 100%; border-radius: 3px;
-  background: linear-gradient(90deg, var(--primary), var(--accent));
-  animation: barGrow 2s ease-out;
-}
-@keyframes barGrow { from { width: 0 !important; } }
-.hero-card-roles { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
-.role-tag {
-  padding: 5px 12px; border-radius: 20px; font-size: 0.75rem;
-  background: rgba(129,140,248,0.1); color: var(--primary-light);
-  border: 1px solid rgba(129,140,248,0.15);
-}
+.hero-card-header h4{color:var(--c-text);font-size:1rem;font-weight:600}
+.hero-card-header p{color:var(--c-text3);font-size:.8rem}
+.hero-card-metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.metric-item{background:#f8fafc;border-radius:12px;padding:18px;text-align:center;border:1px solid var(--c-border)}
+.metric-item .val{font-size:1.5rem;font-weight:800;color:var(--c-primary)}
+.metric-item .lbl{font-size:.75rem;color:var(--c-text3);margin-top:4px}
+.hero-card-bar{margin-top:18px}
+.bar-label{display:flex;justify-content:space-between;font-size:.78rem;color:var(--c-text2);margin-bottom:6px}
+.bar-track{height:6px;background:#f1f5f9;border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--c-primary),var(--c-accent));animation:barGrow 2s ease-out}
+@keyframes barGrow{from{width:0!important}}
+.hero-card-roles{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+.role-tag{padding:5px 12px;border-radius:20px;font-size:.75rem;background:rgba(99,102,241,.06);color:var(--c-primary-dark);border:1px solid rgba(99,102,241,.12)}
 
 /* ===== Pain Points ===== */
-.pain { background: var(--bg); }
-.pain-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-.pain-card {
-  background: var(--card); border-radius: var(--radius); padding: 32px 28px;
-  border: 1px solid var(--border); transition: all 0.3s; position: relative; overflow: hidden;
-}
-.pain-card::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, #ef4444, transparent); opacity: 0;
-  transition: opacity 0.3s;
-}
-.pain-card:hover::before { opacity: 1; }
-.pain-card:hover { border-color: var(--border-active); background: var(--card-hover); transform: translateY(-2px); }
-.pain-icon {
-  width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
-  font-size: 1.3rem; margin-bottom: 20px; background: rgba(239,68,68,0.08);
-}
-.pain-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; color: var(--text); }
-.pain-card p { font-size: 0.9rem; color: var(--text2); line-height: 1.7; }
-.pain-card .pain-badge {
-  display: inline-flex; margin-top: 14px; padding: 4px 12px; border-radius: 20px;
-  font-size: 0.75rem; font-weight: 600;
-  background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.15);
-}
+.pain{background:#fff}
+.pain-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.pain-card{background:var(--c-card);border-radius:var(--radius);padding:32px 28px;border:1px solid var(--c-border);transition:all .3s;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.pain-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#ef4444,transparent);opacity:0;transition:opacity .3s}
+.pain-card:hover::before{opacity:1}
+.pain-card:hover{border-color:var(--c-border-hover);transform:translateY(-2px);box-shadow:var(--shadow-hover)}
+.pain-icon-wrap{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;background:#fef2f2}
+.pain-icon-wrap svg{width:24px;height:24px;stroke:#ef4444}
+.pain-card h3{font-size:1.05rem;font-weight:700;margin-bottom:10px;color:var(--c-text)}
+.pain-card p{font-size:.9rem;color:var(--c-text2);line-height:1.7}
+.pain-badge{display:inline-flex;margin-top:14px;padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:600;background:#fef2f2;color:#f87171;border:1px solid #fee2e2}
 
 /* ===== Solution ===== */
-.solution { background: var(--bg2); }
-.solution-flow {
-  display: flex; align-items: center; justify-content: center; gap: 0;
-  margin: 0 auto 60px; max-width: 960px; flex-wrap: wrap;
-}
-.flow-step {
-  background: linear-gradient(135deg, rgba(99,102,241,0.05), rgba(99,102,241,0.02));
-  border: 1px solid rgba(99,102,241,0.1); border-radius: 20px;
-  padding: 28px 20px; text-align: center; width: 170px; position: relative;
-  transition: all 0.3s;
-}
-.flow-step:hover { border-color: rgba(99,102,241,0.3); transform: translateY(-4px); background: rgba(99,102,241,0.08); }
-.flow-step .step-num {
-  width: 36px; height: 36px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary), #8b5cf6);
-  color: #fff; font-weight: 800; font-size: 0.85rem;
-  display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;
-}
-.flow-step h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; color: var(--text); }
-.flow-step p { font-size: 0.78rem; color: var(--text2); }
-.flow-arrow {
-  font-size: 1.5rem; color: rgba(99,102,241,0.3); padding: 0 10px;
-  animation: arrowBlink 1.5s infinite;
-}
-@keyframes arrowBlink { 0%,100% { opacity: 0.2; } 50% { opacity: 0.7; } }
-.solution-detail {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
-  background: linear-gradient(135deg, rgba(99,102,241,0.04), rgba(34,211,238,0.04));
-  border-radius: 24px; padding: 48px; border: 1px solid var(--border); margin-top: 40px;
-}
-.solution-detail h3 { font-size: 1.5rem; font-weight: 800; margin-bottom: 16px; color: var(--text); }
-.solution-detail p { color: var(--text2); margin-bottom: 14px; line-height: 1.8; font-size: 0.95rem; }
-.solution-detail ul { list-style: none; }
-.solution-detail li {
-  padding: 8px 0; font-size: 0.9rem; color: var(--text2);
-  display: flex; align-items: center; gap: 12px;
-}
-.solution-detail li::before {
-  content: ''; display: flex; align-items: center; justify-content: center;
-  width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2322c55e' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E") center no-repeat;
-  background-size: 14px;
-}
-.solution-visual {
-  background: var(--card); border-radius: 20px; padding: 32px;
-  border: 1px solid var(--border);
-}
-.solution-visual .sv-header {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 24px;
-  padding-bottom: 16px; border-bottom: 1px solid var(--border);
-}
-.sv-dot { width: 10px; height: 10px; border-radius: 50%; }
-.sv-dot.r { background: #ef4444; }
-.sv-dot.y { background: #f59e0b; }
-.sv-dot.g { background: #22c55e; }
-.sv-bar { display: flex; flex-direction: column; gap: 16px; }
-.sv-row { display: flex; align-items: center; gap: 12px; }
-.sv-row .label { width: 72px; font-size: 0.8rem; color: var(--text2); text-align: right; }
-.sv-row .track { flex: 1; height: 8px; background: rgba(255,255,255,0.04); border-radius: 4px; overflow: hidden; }
-.sv-row .fill { height: 100%; border-radius: 4px; transition: width 1.5s ease; }
-.sv-row .pct { width: 48px; font-size: 0.8rem; font-weight: 700; color: var(--text); }
+.solution{background:#f8fafc}
+.solution-flow{display:flex;align-items:center;justify-content:center;gap:0;margin:0 auto 60px;max-width:960px;flex-wrap:wrap}
+.flow-step{background:#fff;border:1px solid var(--c-border);border-radius:20px;padding:28px 18px;text-align:center;width:170px;position:relative;transition:all .3s;box-shadow:var(--shadow)}
+.flow-step:hover{border-color:var(--c-primary);transform:translateY(-4px);box-shadow:var(--shadow-hover)}
+.flow-step .step-num{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-weight:800;font-size:.85rem;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+.flow-step svg{width:28px;height:28px;margin-bottom:8px;stroke:var(--c-primary)}
+.flow-step h4{font-size:.95rem;font-weight:700;margin-bottom:6px;color:var(--c-text)}
+.flow-step p{font-size:.78rem;color:var(--c-text2)}
+.flow-arrow{font-size:1.5rem;color:var(--c-primary);padding:0 10px;opacity:.3;animation:arrowBlink 1.5s infinite}
+@keyframes arrowBlink{0%,100%{opacity:.15}50%{opacity:.5}}
+.solution-detail{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;background:linear-gradient(135deg,rgba(99,102,241,.03),rgba(6,182,212,.03));border-radius:24px;padding:48px;border:1px solid var(--c-border);margin-top:40px}
+.solution-detail h3{font-size:1.5rem;font-weight:800;margin-bottom:16px;color:var(--c-text)}
+.solution-detail p{color:var(--c-text2);margin-bottom:14px;line-height:1.8;font-size:.95rem}
+.solution-detail ul{list-style:none}
+.solution-detail li{padding:8px 0;font-size:.9rem;color:var(--c-text2);display:flex;align-items:center;gap:12px}
+.solution-detail li::before{content:'';display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;flex-shrink:0;background:#ecfdf5 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E") center no-repeat;background-size:14px}
+.solution-visual{background:#fff;border-radius:20px;padding:32px;border:1px solid var(--c-border);box-shadow:var(--shadow)}
+.sv-header{display:flex;align-items:center;gap:10px;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--c-border)}
+.sv-dot{width:10px;height:10px;border-radius:50%}
+.sv-dot.r{background:#ef4444}.sv-dot.y{background:#f59e0b}.sv-dot.g{background:#10b981}
+.sv-bar{display:flex;flex-direction:column;gap:16px}
+.sv-row{display:flex;align-items:center;gap:12px}
+.sv-row .label{width:72px;font-size:.8rem;color:var(--c-text2);text-align:right}
+.sv-row .track{flex:1;height:8px;background:#f1f5f9;border-radius:4px;overflow:hidden}
+.sv-row .fill{height:100%;border-radius:4px;transition:width 1.5s ease}
+.sv-row .pct{width:48px;font-size:.8rem;font-weight:700;color:var(--c-text)}
 
 /* ===== Features ===== */
-.features { background: var(--bg); }
-.features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-.feature-card {
-  background: var(--card); border-radius: 20px; padding: 32px;
-  border: 1px solid var(--border); transition: all 0.3s; position: relative; overflow: hidden;
-}
-.feature-card:hover { border-color: var(--border-active); background: var(--card-hover); transform: translateY(-2px); }
-.feature-card .feat-icon {
-  width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center;
-  font-size: 1.4rem; margin-bottom: 20px;
-}
-.feature-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; color: var(--text); }
-.feature-card p { font-size: 0.88rem; color: var(--text2); line-height: 1.7; }
-.feature-card .feat-tags { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
-.feat-tag {
-  padding: 4px 12px; border-radius: 20px; font-size: 0.73rem; font-weight: 600;
-  background: rgba(99,102,241,0.08); color: var(--primary-light);
-  border: 1px solid rgba(99,102,241,0.12);
-}
+.features{background:#fff}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.feature-card{background:var(--c-card);border-radius:20px;padding:32px;border:1px solid var(--c-border);transition:all .3s;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.feature-card:hover{border-color:var(--c-border-hover);transform:translateY(-2px);box-shadow:var(--shadow-hover)}
+.feat-icon-wrap{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:20px}
+.feat-icon-wrap svg{width:28px;height:28px}
+.feature-card h3{font-size:1.1rem;font-weight:700;margin-bottom:10px;color:var(--c-text)}
+.feature-card p{font-size:.88rem;color:var(--c-text2);line-height:1.7}
+.feat-tags{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.feat-tag{padding:4px 12px;border-radius:20px;font-size:.73rem;font-weight:600;background:rgba(99,102,241,.06);color:var(--c-primary-dark);border:1px solid rgba(99,102,241,.1)}
 
 /* ===== Industries ===== */
-.industries { background: var(--bg2); }
-.industries-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
-.industry-card {
-  background: var(--card); border-radius: 20px; padding: 28px 20px; text-align: center;
-  border: 1px solid var(--border); transition: all 0.3s; cursor: pointer;
-}
-.industry-card:hover { border-color: var(--border-active); background: var(--card-hover); transform: translateY(-3px); }
-.industry-card .ind-icon {
-  width: 64px; height: 64px; border-radius: 18px; display: flex; align-items: center; justify-content: center;
-  font-size: 1.8rem; margin: 0 auto 16px; transition: transform 0.3s;
-}
-.industry-card:hover .ind-icon { transform: scale(1.1); }
-.industry-card h4 { font-size: 1rem; font-weight: 700; margin-bottom: 6px; color: var(--text); }
-.industry-card .ind-desc { font-size: 0.8rem; color: var(--text2); }
-.industry-card .ind-scenarios { display: flex; gap: 6px; margin-top: 14px; flex-wrap: wrap; justify-content: center; }
-.ind-tag {
-  padding: 3px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 500;
-  background: rgba(255,255,255,0.03); color: var(--text3); border: 1px solid var(--border);
-}
+.industries{background:#f8fafc}
+.ind-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+.ind-card{background:#fff;border-radius:20px;padding:28px 18px;text-align:center;border:1px solid var(--c-border);transition:all .3s;box-shadow:var(--shadow)}
+.ind-card:hover{border-color:var(--c-primary);transform:translateY(-3px);box-shadow:var(--shadow-hover)}
+.ind-card svg{width:36px;height:36px;margin:0 auto 14px;display:block;stroke:var(--c-primary)}
+.ind-card h4{font-size:1rem;font-weight:700;color:var(--c-text);margin-bottom:6px}
+.ind-card p{font-size:.8rem;color:var(--c-text3)}
 
 /* ===== Roles ===== */
-.roles { background: var(--bg); }
-.roles-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
-.role-card {
-  background: var(--card); border-radius: 20px; padding: 28px 18px; text-align: center;
-  border: 1px solid var(--border); transition: all 0.3s;
-}
-.role-card:hover { border-color: var(--border-active); background: var(--card-hover); transform: translateY(-3px); }
-.role-card .role-icon {
-  width: 64px; height: 64px; border-radius: 18px; display: flex; align-items: center; justify-content: center;
-  font-size: 1.8rem; margin: 0 auto 16px;
-}
-.role-card h4 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; color: var(--text); }
-.role-card .role-courses { font-size: 0.78rem; color: var(--text2); margin-bottom: 14px; }
-.role-card .role-list { text-align: left; list-style: none; }
-.role-card .role-list li {
-  font-size: 0.82rem; color: var(--text2); padding: 5px 0; padding-left: 16px; position: relative;
-}
-.role-card .role-list li::before {
-  content: ''; position: absolute; left: 0; top: 11px;
-  width: 6px; height: 6px; border-radius: 50%; background: var(--primary);
-}
+.roles{background:#fff}
+.role-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+.role-card-wrap{background:var(--c-card);border-radius:20px;padding:28px 18px;text-align:center;border:1px solid var(--c-border);transition:all .3s;box-shadow:var(--shadow)}
+.role-card-wrap:hover{border-color:var(--c-primary);transform:translateY(-3px);box-shadow:var(--shadow-hover)}
+.role-card-wrap svg{width:36px;height:36px;margin:0 auto 14px;display:block;stroke:var(--c-primary)}
+.role-card-wrap h4{font-size:1rem;font-weight:700;color:var(--c-text);margin-bottom:4px}
+.role-card-wrap p{font-size:.78rem;color:var(--c-text3)}
 
-/* ===== Advantages ===== */
-.advantages { background: var(--bg2); }
-.adv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-.adv-card {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 20px; padding: 32px 28px; transition: all 0.3s;
-}
-.adv-card:hover { border-color: var(--border-active); background: var(--card-hover); transform: translateY(-2px); }
-.adv-card .adv-icon {
-  width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center;
-  font-size: 1.3rem; margin-bottom: 18px;
-  background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.15);
-}
-.adv-card h4 { font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; color: var(--text); }
-.adv-card p { font-size: 0.88rem; color: var(--text2); line-height: 1.7; }
-.adv-card .adv-num {
-  font-size: 2.5rem; font-weight: 900; background: linear-gradient(135deg, rgba(99,102,241,0.4), rgba(34,211,238,0.3));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  margin-bottom: 8px; line-height: 1; opacity: 0.6;
-}
-
-/* ===== Social Proof ===== */
-.proof { background: var(--bg); }
-.proof-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-.proof-card {
-  background: var(--card); border-radius: 20px; padding: 32px 28px;
-  border: 1px solid var(--border); transition: all 0.3s;
-}
-.proof-card:hover { border-color: var(--border-active); background: var(--card-hover); }
-.proof-stars { color: #f59e0b; font-size: 0.95rem; margin-bottom: 16px; letter-spacing: 1px; }
-.proof-card blockquote { font-size: 0.9rem; color: var(--text); line-height: 1.8; margin-bottom: 20px; font-style: italic; }
-.proof-card .proof-author { display: flex; align-items: center; gap: 12px; }
-.proof-avatar {
-  width: 44px; height: 44px; border-radius: 12px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 0.85rem;
-}
-.proof-card .proof-name { font-size: 0.9rem; font-weight: 700; color: var(--text); }
-.proof-card .proof-title { font-size: 0.78rem; color: var(--text2); }
-
-/* ===== Pricing ===== */
-.pricing { background: var(--bg2); }
-.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 960px; margin: 0 auto; }
-.price-card {
-  background: var(--card); border-radius: 24px; padding: 40px 32px; text-align: center;
-  border: 1px solid var(--border); transition: all 0.3s; position: relative;
-}
-.price-card.featured {
-  border-color: rgba(99,102,241,0.3);
-  background: linear-gradient(135deg, rgba(99,102,241,0.06), rgba(99,102,241,0.02));
-  box-shadow: 0 0 40px rgba(99,102,241,0.08);
-}
-.price-card .price-badge {
-  position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  color: #fff; padding: 6px 20px; border-radius: 20px; font-size: 0.78rem; font-weight: 700;
-}
-.price-card h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 6px; color: var(--text); }
-.price-card .price-desc { font-size: 0.85rem; color: var(--text2); margin-bottom: 24px; }
-.price-card .price-val { font-size: 2.8rem; font-weight: 900; color: #fff; margin-bottom: 4px; }
-.price-card .price-unit { font-size: 0.85rem; color: var(--text2); margin-bottom: 28px; }
-.price-card .price-features { list-style: none; text-align: left; margin-bottom: 32px; }
-.price-card .price-features li {
-  padding: 10px 0; font-size: 0.88rem; color: var(--text2);
-  display: flex; align-items: center; gap: 10px;
-  border-bottom: 1px solid var(--border);
-}
-.price-card .price-features li:last-child { border-bottom: none; }
-.price-card .price-features li::before {
-  content: ''; width: 16px; height: 16px; flex-shrink: 0;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2322c55e' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E") center no-repeat;
-}
-
-/* ===== Final CTA ===== */
-.cta {
-  background: var(--bg); padding: 120px 0; text-align: center; position: relative; overflow: hidden;
-}
-.cta::before {
-  content: ''; position: absolute; width: 500px; height: 500px; border-radius: 50%;
-  background: rgba(99,102,241,0.15); filter: blur(150px);
-  top: 50%; left: 50%; transform: translate(-50%, -50%);
-  animation: glowPulse 6s ease-in-out infinite;
-}
-.cta h2 { font-size: 2.4rem; font-weight: 900; color: #fff; margin-bottom: 16px; position: relative; }
-.cta p { font-size: 1.05rem; color: var(--text2); margin-bottom: 40px; position: relative; }
-.cta-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; position: relative; }
-.cta-trust {
-  margin-top: 48px; position: relative; display: flex; align-items: center;
-  justify-content: center; gap: 24px; flex-wrap: wrap;
-}
-.cta-trust span { font-size: 0.82rem; color: var(--text3); }
-.cta-trust-logos { display: flex; gap: 16px; align-items: center; }
-.cta-trust-logos .logo-placeholder {
-  padding: 8px 18px; background: var(--card); border-radius: 8px;
-  font-size: 0.78rem; color: var(--text3); border: 1px solid var(--border);
-}
-
-/* ===== Login Modal ===== */
-.login-overlay {
-  position: fixed; inset: 0; z-index: 9999;
-  background: rgba(0,0,0,0.7); backdrop-filter: blur(10px);
-  display: none; align-items: center; justify-content: center;
-  animation: fadeIn .2s ease;
-}
-.login-overlay.show { display: flex; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-.login-modal {
-  background: linear-gradient(135deg, #1a1a2e, #131320);
-  border-radius: 24px; padding: 48px 40px 40px;
-  width: 440px; max-width: 92vw; position: relative;
-  border: 1px solid var(--border);
-  box-shadow: 0 24px 80px rgba(0,0,0,0.5); animation: modalSlideIn .35s ease;
-}
-@keyframes modalSlideIn {
-  from { opacity: 0; transform: translateY(24px) scale(0.96); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-.login-close {
-  position: absolute; top: 16px; right: 20px;
-  background: none; border: none; font-size: 22px;
-  color: var(--text2); cursor: pointer; padding: 4px 8px; line-height: 1;
-  transition: color .2s; border-radius: 8px;
-}
-.login-close:hover { color: #fff; background: var(--card); }
-.login-modal h2 {
-  font-size: 1.5rem; font-weight: 800; text-align: center; margin-bottom: 4px;
-  color: #fff;
-}
-.login-modal .login-sub {
-  font-size: 0.85rem; color: var(--text2); text-align: center; margin-bottom: 28px;
-}
-.login-tabs {
-  display: flex; gap: 0; margin-bottom: 28px;
-  border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
-}
-.login-tab {
-  flex: 1; padding: 12px 0; text-align: center; font-size: 0.88rem; font-weight: 600;
-  background: rgba(255,255,255,0.02); color: var(--text2); cursor: pointer;
-  border: none; transition: all .2s;
-}
-.login-tab.active { background: rgba(99,102,241,0.15); color: #fff; }
-.login-tab:first-child { border-right: 1px solid var(--border); }
-.login-field { margin-bottom: 16px; }
-.login-field label {
-  display: block; font-size: 0.82rem; font-weight: 600; color: var(--text2); margin-bottom: 6px;
-}
-.login-field input {
-  width: 100%; padding: 13px 16px; border: 1px solid var(--border);
-  border-radius: 12px; font-size: 0.92rem; outline: none; color: #fff;
-  transition: border .2s; background: rgba(255,255,255,0.03);
-}
-.login-field input::placeholder { color: var(--text3); }
-.login-field input:focus { border-color: var(--primary); background: rgba(99,102,241,0.05); }
-.login-error {
-  background: rgba(239,68,68,0.08); color: #f87171; padding: 10px 14px;
-  border-radius: 10px; font-size: 0.82rem; margin-bottom: 14px; display: none;
-  border: 1px solid rgba(239,68,68,0.15);
-}
-.login-error.show { display: block; }
-.login-submit {
-  width: 100%; padding: 14px; background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  color: #fff; border: none; border-radius: 12px; font-size: 0.95rem; font-weight: 700;
-  cursor: pointer; transition: all .3s; margin-top: 4px;
-}
-.login-submit:hover { transform: translateY(-1px); box-shadow: 0 8px 30px rgba(99,102,241,0.4); }
-.login-guest {
-  text-align: center; margin-top: 16px; padding-top: 16px;
-  border-top: 1px solid var(--border);
-}
-.login-guest a {
-  font-size: 0.82rem; color: var(--text2); cursor: pointer; transition: color .2s;
-}
-.login-guest a:hover { color: var(--primary-light); }
-.login-role-select {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px;
-}
-.login-role-opt {
-  padding: 10px 12px; border: 1px solid var(--border);
-  border-radius: 10px; text-align: center; font-size: 0.82rem; font-weight: 500;
-  cursor: pointer; transition: all .2s; background: rgba(255,255,255,0.02);
-  color: var(--text2);
-}
-.login-role-opt.selected {
-  border-color: var(--primary); background: rgba(99,102,241,0.1); color: #fff;
-  font-weight: 700;
-}
-.login-role-opt:hover { border-color: var(--primary-light); }
+/* ===== CTA ===== */
+.cta{background:linear-gradient(135deg,#6366f1,#8b5cf6);text-align:center;padding:80px 0;position:relative;overflow:hidden}
+.cta::before{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.1) 1px,transparent 1px);background-size:40px 40px}
+.cta .container{position:relative;z-index:1}
+.cta h2{font-size:2.4rem;font-weight:800;color:#fff;margin-bottom:16px;letter-spacing:-.5px}
+.cta p{color:rgba(255,255,255,.75);font-size:1.1rem;margin-bottom:36px;max-width:500px;margin-left:auto;margin-right:auto}
+.cta .btn-primary{background:#fff;color:#6366f1;box-shadow:0 4px 24px rgba(0,0,0,.15)}
+.cta .btn-primary:hover{background:#f0f0ff;transform:translateY(-2px)}
+.cta .btn-outline{color:rgba(255,255,255,.8);border-color:rgba(255,255,255,.25)}
+.cta .btn-outline:hover{border-color:#fff;color:#fff;background:rgba(255,255,255,.08)}
 
 /* ===== Footer ===== */
-.footer {
-  background: #060608; padding: 60px 0 30px; border-top: 1px solid var(--border);
-}
-.footer-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 40px; }
-.footer-brand h3 { font-size: 1.2rem; font-weight: 800; color: #fff; margin-bottom: 12px; }
-.footer-brand p { font-size: 0.85rem; line-height: 1.7; color: var(--text2); }
-.footer-col h4 { font-size: 0.88rem; font-weight: 700; color: #fff; margin-bottom: 14px; }
-.footer-col ul { list-style: none; }
-.footer-col li { padding: 5px 0; }
-.footer-col a { font-size: 0.83rem; color: var(--text3); transition: color 0.2s; }
-.footer-col a:hover { color: var(--primary-light); }
-.footer-bottom {
-  border-top: 1px solid var(--border); padding-top: 24px;
-  display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem;
-  color: var(--text3);
-}
+.footer{background:#0f172a;color:#94a3b8;padding:60px 0 30px}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px}
+.footer-brand svg{height:32px;width:auto;margin-bottom:16px}
+.footer h3{color:#fff;font-size:.9rem;font-weight:700;margin-bottom:12px}
+.footer a{display:block;padding:4px 0;font-size:.85rem;color:#94a3b8;transition:color .2s}
+.footer a:hover{color:#c4b5fd}
+.footer-bottom{text-align:center;padding-top:40px;margin-top:40px;border-top:1px solid rgba(255,255,255,.06);font-size:.82rem}
+.footer-bottom a{color:#c4b5fd}
+/* Footer logo fix */
+.footer .nav-logo{color:#fff}
 
-/* ===== Responsive ===== */
-@media (max-width: 1024px) {
-  .hero-inner { grid-template-columns: 1fr; text-align: center; }
-  .hero-desc { margin: 0 auto 40px; }
-  .hero-btns { justify-content: center; }
-  .hero-stats { justify-content: center; }
-  .hero-visual { display: none; }
-  .pain-grid, .features-grid, .adv-grid { grid-template-columns: 1fr 1fr; }
-  .roles-grid, .industries-grid { grid-template-columns: repeat(3, 1fr); }
-  .proof-grid { grid-template-columns: 1fr; }
-  .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
-  .solution-detail { grid-template-columns: 1fr; }
-  .solution-flow { flex-direction: column; }
-  .flow-arrow { transform: rotate(90deg); }
-  .footer-grid { grid-template-columns: 1fr 1fr; }
-}
-@media (max-width: 640px) {
-  .section { padding: 80px 0; }
-  .section-title { font-size: 2rem; }
-  .hero h1 { font-size: 2.4rem; }
-  .nav-links { display: none; }
-  .pain-grid, .features-grid, .adv-grid { grid-template-columns: 1fr; }
-  .roles-grid, .industries-grid { grid-template-columns: 1fr 1fr; }
-  .footer-grid { grid-template-columns: 1fr; }
-}
+/* ===== Login Modal ===== */
+.login-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:2000;justify-content:center;align-items:center;backdrop-filter:blur(4px)}
+.login-overlay.show{display:flex}
+.login-modal{background:#fff;border-radius:20px;padding:40px 36px;width:100%;max-width:420px;box-shadow:0 25px 80px rgba(0,0,0,.2);position:relative;animation:modalSlideIn .3s ease}
+@keyframes modalSlideIn{from{opacity:0;transform:translateY(20px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.login-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border:none;background:#f1f5f9;border-radius:50%;font-size:18px;cursor:pointer;color:var(--c-text2);display:flex;align-items:center;justify-content:center;transition:all .2s}
+.login-close:hover{background:#e2e8f0;color:var(--c-text)}
+.login-modal h2{text-align:center;font-size:1.4rem;font-weight:700;margin-bottom:4px;color:var(--c-text)}
+.login-sub{text-align:center;font-size:.8rem;color:var(--c-text3);margin-bottom:24px}
+.login-tabs{display:flex;gap:0;margin-bottom:24px;background:#f1f5f9;border-radius:10px;padding:4px}
+.login-tab{flex:1;padding:10px;text-align:center;border:none;background:transparent;font-size:.85rem;font-weight:600;color:var(--c-text2);cursor:pointer;border-radius:8px;transition:all .2s}
+.login-tab.active{background:#fff;color:var(--c-primary);box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.login-field{margin-bottom:16px}
+.login-field label{display:block;font-size:.82rem;font-weight:600;color:var(--c-text2);margin-bottom:6px}
+.login-field input,.login-field select{width:100%;padding:12px 14px;border:1.5px solid var(--c-border);border-radius:10px;font-size:.9rem;color:var(--c-text);background:#f8fafc;transition:all .2s}
+.login-field input:focus,.login-field select:focus{outline:none;border-color:var(--c-primary);background:#fff;box-shadow:0 0 0 3px rgba(99,102,241,.08)}
+.login-error{display:none;color:#ef4444;font-size:.82rem;text-align:center;margin-bottom:12px;background:#fef2f2;padding:8px;border-radius:8px}
+.login-error.show{display:block}
+.login-submit{width:100%;padding:13px;border:none;border-radius:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s}
+.login-submit:hover{box-shadow:0 4px 16px rgba(99,102,241,.35)}
+.login-guest{text-align:center;margin-top:16px}
+.login-guest a{font-size:.82rem;color:var(--c-primary);cursor:pointer;font-weight:500}
+.login-role-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
+.login-role-opt{padding:10px 6px;text-align:center;border:1.5px solid var(--c-border);border-radius:10px;cursor:pointer;font-size:.8rem;font-weight:600;color:var(--c-text2);transition:all .2s;background:#f8fafc}
+.login-role-opt:hover{border-color:var(--c-primary);color:var(--c-primary)}
+.login-role-opt.selected{border-color:var(--c-primary);background:rgba(99,102,241,.06);color:var(--c-primary)}
 
-/* ===== Scroll Animations ===== */
-.fade-up {
-  opacity: 0; transform: translateY(30px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
+/* ===== Customer Service Widget ===== */
+.cs-widget{position:fixed;bottom:28px;right:28px;z-index:1500}
+.cs-btn{
+  width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);
+  color:#fff;border:none;cursor:pointer;box-shadow:0 4px 20px rgba(99,102,241,.35);
+  display:flex;align-items:center;justify-content:center;transition:all .25s;position:relative;
 }
-.fade-up.visible { opacity: 1; transform: translateY(0); }
+.cs-btn:hover{transform:scale(1.08);box-shadow:0 8px 32px rgba(99,102,241,.5)}
+.cs-btn svg{width:26px;height:26px;stroke:#fff}
+.cs-btn .cs-dot{position:absolute;top:4px;right:4px;width:12px;height:12px;border-radius:50%;background:#10b981;border:2px solid #fff;animation:pulse 2s infinite}
+.cs-panel{
+  display:none;position:absolute;bottom:70px;right:0;width:320px;
+  background:#fff;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.12);
+  border:1px solid var(--c-border);overflow:hidden;animation:modalSlideIn .25s ease;
+}
+.cs-panel.show{display:block}
+.cs-panel-header{
+  background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;
+  padding:20px 24px;display:flex;align-items:center;gap:12px;
+}
+.cs-avatar{
+  width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.2);
+  display:flex;align-items:center;justify-content:center;font-size:1.3rem;
+}
+.cs-panel-header h4{font-size:1rem;font-weight:700;margin-bottom:2px}
+.cs-panel-header p{font-size:.75rem;opacity:.7}
+.cs-panel-body{padding:24px}
+.cs-info{display:flex;align-items:center;gap:14px;padding:14px 16px;background:#f8fafc;border-radius:12px;margin-bottom:12px;border:1px solid var(--c-border)}
+.cs-info svg{width:22px;height:22px;stroke:var(--c-primary);flex-shrink:0}
+.cs-info .cs-label{font-size:.75rem;color:var(--c-text3);margin-bottom:2px}
+.cs-info .cs-value{font-size:.9rem;font-weight:600;color:var(--c-text)}
+.cs-qr{width:120px;height:120px;margin:12px auto;background:#f1f5f9;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;border:1px solid var(--c-border)}
+.cs-qr svg{width:48px;height:48px;stroke:var(--c-primary);opacity:.5}
+.cs-qr span{font-size:.72rem;color:var(--c-text3)}
+
+/* Responsive */
+@media(max-width:768px){
+  .nav-links{display:none}
+  .hero-inner{grid-template-columns:1fr;gap:40px;text-align:center}
+  .hero h1{font-size:2.6rem}
+  .hero-desc{margin:0 auto 36px}
+  .hero-btns{justify-content:center}
+  .hero-stats{justify-content:center}
+  .hero-visual{display:none}
+  .pain-grid,.features-grid{grid-template-columns:1fr}
+  .ind-grid,.role-grid{grid-template-columns:repeat(2,1fr)}
+  .solution-flow{flex-direction:column;gap:12px}
+  .flow-arrow{transform:rotate(90deg)}
+  .solution-detail{grid-template-columns:1fr;padding:28px}
+  .footer-grid{grid-template-columns:1fr 1fr}
+  .section-title{font-size:2rem}
+}
 </style>
 </head>
 <body>
 
-<!-- ===== Nav ===== -->
+<!-- ===== NAV ===== -->
 <nav class="nav">
   <div class="nav-inner">
     <a href="#" class="nav-logo">
-      <img src="logo.png" alt="AI达学">
-      <span class="brand-text">
-        <span class="brand-name">AI达学</span>
-        <span class="brand-sub">AIDAX</span>
-      </span>
+      <svg viewBox="0 0 240 56" style="height:34px;width:auto">
+        <defs>
+          <linearGradient id="ng1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6366f1"/><stop offset="50%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#a855f7"/></linearGradient>
+          <linearGradient id="ng2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#6366f1"/></linearGradient>
+        </defs>
+        <circle cx="16" cy="18" r="6" fill="url(#ng1)"/>
+        <circle cx="32" cy="6" r="6" fill="url(#ng1)"/>
+        <circle cx="48" cy="18" r="6" fill="url(#ng1)"/>
+        <circle cx="32" cy="30" r="6" fill="url(#ng1)"/>
+        <circle cx="32" cy="42" r="5" fill="url(#ng2)"/>
+        <line x1="16" y1="18" x2="32" y2="6" stroke="url(#ng2)" stroke-width="1.8" stroke-linecap="round" opacity=".7"/>
+        <line x1="32" y1="6" x2="48" y2="18" stroke="url(#ng2)" stroke-width="1.8" stroke-linecap="round" opacity=".7"/>
+        <line x1="16" y1="18" x2="32" y2="30" stroke="url(#ng2)" stroke-width="1.8" stroke-linecap="round" opacity=".7"/>
+        <line x1="48" y1="18" x2="32" y2="30" stroke="url(#ng2)" stroke-width="1.8" stroke-linecap="round" opacity=".7"/>
+        <line x1="32" y1="30" x2="32" y2="42" stroke="url(#ng2)" stroke-width="1.8" stroke-linecap="round" opacity=".7"/>
+        <circle cx="32" cy="18" r="21" fill="none" stroke="#818cf8" stroke-width=".8" stroke-dasharray="4 8" opacity=".3"/>
+        <circle cx="8" cy="8" r="3" fill="#c4b5fd" opacity=".6"/><circle cx="56" cy="8" r="3" fill="#c4b5fd" opacity=".6"/>
+        <circle cx="56" cy="28" r="2.5" fill="#c4b5fd" opacity=".5"/><circle cx="8" cy="28" r="2.5" fill="#c4b5fd" opacity=".5"/>
+        <circle cx="32" cy="50" r="2" fill="#ddd6fe" opacity=".4"/>
+        <line x1="16" y1="18" x2="8" y2="8" stroke="#c4b5fd" stroke-width="1" opacity=".35"/>
+        <line x1="48" y1="18" x2="56" y2="8" stroke="#c4b5fd" stroke-width="1" opacity=".35"/>
+        <line x1="32" y1="42" x2="32" y2="50" stroke="#ddd6fe" stroke-width="1" opacity=".3"/>
+        <text x="68" y="28" font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif" font-weight="800" font-size="22" fill="#1e293b" letter-spacing="-.5">AI达学</text>
+        <text x="68" y="46" font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif" font-weight="500" font-size="10.5" fill="#94a3b8" letter-spacing="1.5">AIDAX · 企业AI学习一站式服务</text>
+      </svg>
     </a>
     <ul class="nav-links">
       <li><a href="#pain">痛点</a></li>
       <li><a href="#solution">方案</a></li>
-      <li><a href="#features">功能</a></li>
+      <li><a href="#features">能力</a></li>
       <li><a href="#industries">行业</a></li>
       <li><a href="#roles">岗位</a></li>
-      <li><a href="#pricing">价格</a></li>
     </ul>
-    <div class="nav-cta">
-      <a href="#" class="btn btn-primary" onclick="event.preventDefault();openLogin()">立即体验</a>
-    </div>
+    <div class="nav-cta"><button class="btn btn-primary" onclick="openLogin()">开始培训</button></div>
   </div>
 </nav>
 
-<!-- ===== Hero ===== -->
+<!-- ===== HERO ===== -->
 <section class="hero">
-  <div class="hero-glow g1"></div>
-  <div class="hero-glow g2"></div>
-  <div class="hero-grid"></div>
+  <div class="hero-blob b1"></div><div class="hero-blob b2"></div><div class="hero-dots"></div>
   <div class="hero-inner">
     <div>
-      <div class="hero-badge">
-        <span class="dot"></span>
-        企业AI学习一站式服务 · 已服务 100+ 企业
-      </div>
+      <div class="hero-badge"><span class="dot"></span>企业AI学习一站式服务 · 已服务100+企业</div>
       <h1>让每位员工<br>都成为<span class="gradient">AI高手</span></h1>
-      <p class="hero-desc">
-        基于能力测评的个性化AI培训闭环 —— 先诊断短板，再精准推荐课程，
-        配合实战陪练与成果验证，让AI能力真正落地到每个岗位。
-      </p>
+      <p class="hero-desc">AI达学AIDAX为企业提供从能力诊断、个性化课程、场景化陪练到成果验证的完整AI技能培训闭环，全面覆盖5大行业、5大岗位。</p>
       <div class="hero-btns">
-        <a href="#" class="btn btn-primary" onclick="event.preventDefault();openLogin()">免费体验系统</a>
-        <a href="#solution" class="btn btn-ghost">了解方案</a>
+        <button class="btn btn-primary" onclick="openLogin()">免费开始测评 →</button>
+        <button class="btn btn-outline" onclick="openLogin()">查看行业方案</button>
       </div>
       <div class="hero-stats">
         <div class="hero-stat"><strong>100+</strong><span>服务企业</span></div>
-        <div class="hero-stat"><strong>30+</strong><span>精品课程</span></div>
-        <div class="hero-stat"><strong>5</strong><span>行业场景</span></div>
-        <div class="hero-stat"><strong>95%</strong><span>满意度</span></div>
+        <div class="hero-stat"><strong>50,000+</strong><span>培训学员</span></div>
+        <div class="hero-stat"><strong>92%</strong><span>能力提升率</span></div>
       </div>
     </div>
     <div class="hero-visual">
       <div class="hero-card">
         <div class="hero-card-header">
-          <div class="hero-card-avatar">⟐</div>
-          <div>
-            <h4>AI Training Dashboard</h4>
-            <p>实时学习数据看板</p>
-          </div>
+          <div class="hero-card-avatar">AI</div>
+          <div><h4>AI能力诊断中...</h4><p>正在分析能力画像</p></div>
         </div>
         <div class="hero-card-metrics">
-          <div class="metric-item"><div class="val">87%</div><div class="lbl">完成率</div></div>
-          <div class="metric-item"><div class="val">92</div><div class="lbl">平均分</div></div>
-          <div class="metric-item"><div class="val">5</div><div class="lbl">行业场景</div></div>
-          <div class="metric-item"><div class="val">30</div><div class="lbl">课程库</div></div>
+          <div class="metric-item"><div class="val">78</div><div class="lbl">综合评分</div></div>
+          <div class="metric-item"><div class="val">85%</div><div class="lbl">学习匹配度</div></div>
         </div>
         <div class="hero-card-bar">
-          <div class="bar-label"><span>研发岗 AI 达标率</span><span>87%</span></div>
-          <div class="bar-track"><div class="bar-fill" style="width:87%"></div></div>
-        </div>
-        <div class="hero-card-bar" style="margin-top:10px">
-          <div class="bar-label"><span>产品岗 AI 达标率</span><span>91%</span></div>
-          <div class="bar-track"><div class="bar-fill" style="width:91%"></div></div>
+          <div class="bar-label"><span>提示词工程</span><span>82%</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:82%"></div></div>
         </div>
         <div class="hero-card-roles">
-          <span class="role-tag">研发</span>
-          <span class="role-tag">产品</span>
-          <span class="role-tag">运营</span>
-          <span class="role-tag">销售</span>
-          <span class="role-tag">HR</span>
+          <span class="role-tag">金融数字化</span>
+          <span class="role-tag">产品经理</span>
+          <span class="role-tag">中级</span>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ===== Pain Points ===== -->
+<!-- ===== PAIN POINTS ===== -->
 <section class="pain section" id="pain">
   <div class="container">
-    <div style="text-align:center;margin-bottom:16px">
-      <span class="section-tag">The Problem</span>
-    </div>
-    <h2 class="section-title fade-up">企业 AI 培训面临的核心痛点</h2>
-    <p class="section-sub fade-up">传统培训方式无法解决 AI 落地难题 —— 员工学了理论，却不会实际应用</p>
+    <div class="section-tag">Pain Points</div>
+    <h2 class="section-title">企业AI培训的<span class="hl">三大痛点</span></h2>
+    <p class="section-sub">传统的AI培训方式无法满足企业个性化、规模化的需求</p>
     <div class="pain-grid">
-      <div class="pain-card fade-up">
-        <div class="pain-icon">⊡</div>
-        <h3>千人一面，岗位错配</h3>
-        <p>所有员工上同样的 AI 通识课，运营听不懂技术术语，研发觉得内容太浅。</p>
-        <span class="pain-badge">岗位适配度低</span>
+      <div class="pain-card">
+        <div class="pain-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+        <h3>培训内容一刀切</h3>
+        <p>不同岗位、不同行业对AI的需求截然不同，通用课程无法解决实际业务场景中的具体问题。</p>
+        <div class="pain-badge">缺少个性化</div>
       </div>
-      <div class="pain-card fade-up">
-        <div class="pain-icon">⊟</div>
-        <h3>效果黑洞，无法量化</h3>
-        <p>培训结束不知道员工掌握了多少，更无法评估 AI 工具对效率的实际提升。</p>
-        <span class="pain-badge">缺乏评估体系</span>
+      <div class="pain-card">
+        <div class="pain-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        <h3>学习效果难衡量</h3>
+        <p>员工学完后是否真正掌握了AI技能？缺少科学的测评体系和实战验证机制，投入产出比不明。</p>
+        <div class="pain-badge">无法量化</div>
       </div>
-      <div class="pain-card fade-up">
-        <div class="pain-icon">⊞</div>
-        <h3>周期漫长，转化率低</h3>
-        <p>数周培训周期，员工边学边忘。据统计，传统培训的知识留存率不足 15%。</p>
-        <span class="pain-badge">学习效率低</span>
-      </div>
-      <div class="pain-card fade-up">
-        <div class="pain-icon">⊕</div>
-        <h3>脱离实战，学用断层</h3>
-        <p>培训内容与实际工作场景脱节，员工不知道如何将 AI 融入日常工作流。</p>
-        <span class="pain-badge">理论与实践脱节</span>
-      </div>
-      <div class="pain-card fade-up">
-        <div class="pain-icon">⊗</div>
-        <h3>缺乏个性，"一刀切"</h3>
-        <p>无法根据每个人的现有水平定制学习路径，导致有人"吃不饱"，有人"跟不上"。</p>
-        <span class="pain-badge">缺乏个性化</span>
-      </div>
-      <div class="pain-card fade-up">
-        <div class="pain-icon">⊘</div>
-        <h3>高成本，难持续</h3>
-        <p>外聘讲师、采购课程、组织培训，人均成本数千元，效果却难以持续追踪。</p>
-        <span class="pain-badge">投入产出比低</span>
+      <div class="pain-card">
+        <div class="pain-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+        <h3>落地转化率低</h3>
+        <p>"学完就忘"是常态，缺乏在实际工作场景中持续练习和反馈的机制，知识难以转化为生产力。</p>
+        <div class="pain-badge">学用脱节</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ===== Solution ===== -->
+<!-- ===== SOLUTION ===== -->
 <section class="solution section" id="solution">
   <div class="container">
-    <div style="text-align:center;margin-bottom:16px">
-      <span class="section-tag">How it Works</span>
+    <div class="section-tag">Solution</div>
+    <h2 class="section-title">四步闭环，<span class="hl">学以致用</span></h2>
+    <p class="section-sub">从诊断到验证，打造企业AI技能提升的完整飞轮</p>
+    <div class="solution-flow">
+      <div class="flow-step">
+        <div class="step-num">1</div>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6"/><path d="M8 11h6"/></svg>
+        <h4>智能测评</h4><p>多维度诊断AI能力画像</p>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="step-num">2</div>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <h4>个性课程</h4><p>场景×岗位精准匹配</p>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="step-num">3</div>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <h4>关卡陪练</h4><p>实战任务逐级通关</p>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="step-num">4</div>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <h4>成果验证</h4><p>终期测评量化能力提升</p>
+      </div>
     </div>
-    <h2 class="section-title fade-up">测评驱动的 AI 培训闭环</h2>
-    <p class="section-sub fade-up">不是"学了什么"而是"能用什么"——先诊断、再对症、后验证</p>
-
-    <div class="solution-flow fade-up">
-      <div class="flow-step"><div class="step-num">1</div><h4>能力测评</h4><p>5 分钟定位短板<br>6 维雷达图</p></div>
-      <div class="flow-arrow">→</div>
-      <div class="flow-step"><div class="step-num">2</div><h4>智能推荐</h4><p>AI 分析短板<br>生成学习路径</p></div>
-      <div class="flow-arrow">→</div>
-      <div class="flow-step"><div class="step-num">3</div><h4>课程学习</h4><p>图文+视频<br>数字人讲解</p></div>
-      <div class="flow-arrow">→</div>
-      <div class="flow-step"><div class="step-num">4</div><h4>实战陪练</h4><p>逐关解锁任务<br>分步 AI 提示</p></div>
-      <div class="flow-arrow">→</div>
-      <div class="flow-step"><div class="step-num">5</div><h4>成果验证</h4><p>综合测评<br>量化培训 ROI</p></div>
-    </div>
-
-    <div class="solution-detail fade-up">
+    <div class="solution-detail">
       <div>
-        <h3>Why it works</h3>
-        <p>传统培训是"一刀切"式灌输。我们的系统先通过<span style="color:var(--accent);font-weight:700">科学测评</span>
-           精准识别每位员工的 AI 能力短板，再由<span style="color:var(--accent);font-weight:700">AI 引擎</span>
-           生成个性化学习路径，配合<span style="color:var(--accent);font-weight:700">实战关卡</span>和
-           <span style="color:var(--accent);font-weight:700">成果测验</span>，形成完整的能力提升闭环。</p>
+        <h3>不只是培训，是完整的能力升级方案</h3>
+        <p>我们为每个学员建立AI能力档案，通过前测-学习-练习-后测的闭环，确保每次培训都有可量化的成果。</p>
         <ul>
-          <li>覆盖 5 大核心岗位 × 5 大行业场景，30+ 精品课程</li>
-          <li>图文详解 + 数字人视频讲解，多模态学习体验</li>
-          <li>主客观混合测评，含答案模板与分步解题提示</li>
-          <li>实时管理数据看板，一键导出培训报告</li>
-          <li>支持企业微信 / 钉钉 / 飞书集成，极速部署</li>
+          <li>前测诊断：20题AI能力测评，精准定位薄弱环节</li>
+          <li>场景化学习：匹配行业场景和个人岗位的实战课程</li>
+          <li>逐级过关：每课配套练习任务，通过才能解锁下一关</li>
+          <li>终期验证：后测对比前测，量化能力提升幅度</li>
         </ul>
       </div>
       <div class="solution-visual">
         <div class="sv-header">
           <div class="sv-dot r"></div><div class="sv-dot y"></div><div class="sv-dot g"></div>
-          <span style="margin-left:8px;font-size:0.8rem;color:var(--text2)">企业 AI 培训数据看板</span>
+          <span style="font-size:.8rem;color:var(--c-text3);margin-left:8px">学员能力成长曲线</span>
         </div>
         <div class="sv-bar">
-          <div class="sv-row">
-            <div class="label">参训人数</div>
-            <div class="track"><div class="fill" style="width:100%;background:linear-gradient(90deg,#6366f1,#818cf8)"></div></div>
-            <div class="pct">128</div>
-          </div>
-          <div class="sv-row">
-            <div class="label">完成率</div>
-            <div class="track"><div class="fill" style="width:87%;background:linear-gradient(90deg,#22d3ee,#67e8f9)"></div></div>
-            <div class="pct">87%</div>
-          </div>
-          <div class="sv-row">
-            <div class="label">平均分</div>
-            <div class="track"><div class="fill" style="width:92%;background:linear-gradient(90deg,#f59e0b,#fbbf24)"></div></div>
-            <div class="pct">92</div>
-          </div>
-          <div class="sv-row">
-            <div class="label">达标率</div>
-            <div class="track"><div class="fill" style="width:78%;background:linear-gradient(90deg,#22c55e,#4ade80)"></div></div>
-            <div class="pct">78%</div>
-          </div>
+          <div class="sv-row"><span class="label">提示词</span><div class="track"><div class="fill" style="width:92%;background:linear-gradient(90deg,#6366f1,#8b5cf6)"></div></div><span class="pct">92%</span></div>
+          <div class="sv-row"><span class="label">工具使用</span><div class="track"><div class="fill" style="width:85%;background:linear-gradient(90deg,#6366f1,#06b6d4)"></div></div><span class="pct">85%</span></div>
+          <div class="sv-row"><span class="label">场景应用</span><div class="track"><div class="fill" style="width:78%;background:linear-gradient(90deg,#6366f1,#10b981)"></div></div><span class="pct">78%</span></div>
+          <div class="sv-row"><span class="label">安全合规</span><div class="track"><div class="fill" style="width:70%;background:linear-gradient(90deg,#6366f1,#f59e0b)"></div></div><span class="pct">70%</span></div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ===== Features ===== -->
+<!-- ===== FEATURES ===== -->
 <section class="features section" id="features">
   <div class="container">
-    <div style="text-align:center;margin-bottom:16px">
-      <span class="section-tag">Core Features</span>
-    </div>
-    <h2 class="section-title fade-up">六大核心能力</h2>
-    <p class="section-sub fade-up">从诊断到验证，覆盖 AI 培训全链路</p>
+    <div class="section-tag">Capabilities</div>
+    <h2 class="section-title">六大<span class="hl">核心能力</span></h2>
+    <p class="section-sub">每一门课程都经过精心设计，确保学员在真实业务场景中掌握AI应用</p>
     <div class="features-grid">
-      <div class="feature-card fade-up">
-        <div class="feat-icon" style="background:rgba(99,102,241,0.1)">🎯</div>
-        <h3>智能能力测评</h3>
-        <p>5 岗位差异化题目，5 分钟精准定位 Prompt 工程、工具使用、数据分析等 6 维能力短板，生成雷达图。</p>
-        <div class="feat-tags"><span class="feat-tag">5岗位×5题</span><span class="feat-tag">6维雷达图</span><span class="feat-tag">即时出结果</span></div>
+      <div class="feature-card">
+        <div class="feat-icon-wrap" style="background:rgba(99,102,241,.08)"><svg viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <h3>提示词工程</h3><p>掌握结构化提示词设计方法，让AI精准理解需求，输出高质量结果。</p>
+        <div class="feat-tags"><span class="feat-tag">角色设定</span><span class="feat-tag">链式推理</span><span class="feat-tag">模板库</span></div>
       </div>
-      <div class="feature-card fade-up">
-        <div class="feat-icon" style="background:rgba(34,211,238,0.1)">📚</div>
-        <h3>个性化课程推荐</h3>
-        <p>AI 引擎分析测评结果，按优先级推荐最需要补强的课程。图文+视频双模式，支持数字人讲解。</p>
-        <div class="feat-tags"><span class="feat-tag">30+门课程</span><span class="feat-tag">智能排序</span><span class="feat-tag">数字人讲师</span></div>
+      <div class="feature-card">
+        <div class="feat-icon-wrap" style="background:rgba(6,182,212,.08)"><svg viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></div>
+        <h3>AI工具实战</h3><p>ChatGPT、Claude、Copilot等主流AI工具的深度使用技巧与工作流集成。</p>
+        <div class="feat-tags"><span class="feat-tag">ChatGPT</span><span class="feat-tag">Claude</span><span class="feat-tag">Copilot</span></div>
       </div>
-      <div class="feature-card fade-up">
-        <div class="feat-icon" style="background:rgba(245,158,11,0.1)">🎬</div>
-        <h3>数字人视频课程</h3>
-        <p>数字人讲师自然讲解，实时字幕、语速调节、自动播放。学习体验媲美真人课堂，可无限回看。</p>
-        <div class="feat-tags"><span class="feat-tag">AI数字人</span><span class="feat-tag">实时字幕</span><span class="feat-tag">PPT动画</span></div>
+      <div class="feature-card">
+        <div class="feat-icon-wrap" style="background:rgba(16,185,129,.08)"><svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+        <h3>AI辅助开发</h3><p>用AI进行代码生成、审查、调试和文档编写，提升研发效率300%。</p>
+        <div class="feat-tags"><span class="feat-tag">代码生成</span><span class="feat-tag">审查</span><span class="feat-tag">自动化</span></div>
       </div>
-      <div class="feature-card fade-up">
-        <div class="feat-icon" style="background:rgba(34,197,94,0.1)">🏋️</div>
-        <h3>实战关卡陪练</h3>
-        <p>每门课配备 2-3 个实战任务关卡，逐关解锁。AI 提供分步提示和参考答案，学以致用。</p>
-        <div class="feat-tags"><span class="feat-tag">逐关解锁</span><span class="feat-tag">步骤提示</span><span class="feat-tag">参考答案</span></div>
+      <div class="feature-card">
+        <div class="feat-icon-wrap" style="background:rgba(245,158,11,.08)"><svg viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+        <h3>AI内容创作</h3><p>用AI生成文案、设计、视频脚本等营销内容，轻松应对日常创作需求。</p>
+        <div class="feat-tags"><span class="feat-tag">文案</span><span class="feat-tag">设计</span><span class="feat-tag">视频</span></div>
       </div>
-      <div class="feature-card fade-up">
-        <div class="feat-icon" style="background:rgba(236,72,153,0.1)">✅</div>
-        <h3>综合成果测验</h3>
-        <p>3 道客观选择题 + 2 道主观实操题，主观题提供答案模板和分步解题提示，全面验证学习成果。</p>
-        <div class="feat-tags"><span class="feat-tag">混合题型</span><span class="feat-tag">答案模板</span><span class="feat-tag">自动评分</span></div>
+      <div class="feature-card">
+        <div class="feat-icon-wrap" style="background:rgba(139,92,246,.08)"><svg viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <h3>AI协同工作流</h3><p>构建人机协作的高效工作模式，跨部门AI协作规范与最佳实践。</p>
+        <div class="feat-tags"><span class="feat-tag">协作</span><span class="feat-tag">流程</span><span class="feat-tag">规范</span></div>
       </div>
-      <div class="feature-card fade-up">
-        <div class="feat-icon" style="background:rgba(99,102,241,0.1)">📊</div>
-        <h3>管理数据看板</h3>
-        <p>实时全员参训数据：完成率、测评分数、岗位分布。一键导出报告，方便管理层汇报与策略优化。</p>
-        <div class="feat-tags"><span class="feat-tag">实时数据</span><span class="feat-tag">岗位分析</span><span class="feat-tag">导出报告</span></div>
+      <div class="feature-card">
+        <div class="feat-icon-wrap" style="background:rgba(239,68,68,.08)"><svg viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h3>AI安全与合规</h3><p>AI使用中的数据安全、隐私保护与合规管理，建立企业AI使用规范。</p>
+        <div class="feat-tags"><span class="feat-tag">安全</span><span class="feat-tag">合规</span><span class="feat-tag">治理</span></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ===== Industries ===== -->
+<!-- ===== INDUSTRIES ===== -->
 <section class="industries section" id="industries">
   <div class="container">
-    <div style="text-align:center;margin-bottom:16px">
-      <span class="section-tag">Industry Scenarios</span>
-    </div>
-    <h2 class="section-title fade-up">覆盖 5 大行业场景</h2>
-    <p class="section-sub fade-up">每个行业配备专属 AI 应用场景课程，与岗位角色形成"场景 × 岗位"矩阵式培训体系</p>
-    <div class="industries-grid">
-      <div class="industry-card fade-up">
-        <div class="ind-icon" style="background:rgba(99,102,241,0.1)">🏦</div>
-        <h4>金融数字化场景</h4>
-        <div class="ind-desc">银行 · 保险 · 证券</div>
-        <div class="ind-scenarios">
-          <span class="ind-tag">智能风控</span><span class="ind-tag">AI投研</span><span class="ind-tag">合规审查</span>
-        </div>
+    <div class="section-tag">Industries</div>
+    <h2 class="section-title">覆盖<span class="hl">五大行业</span>场景</h2>
+    <p class="section-sub">每个行业有专属的AI应用场景和实战案例，确保学完即用</p>
+    <div class="ind-grid">
+      <div class="ind-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="6" y1="8" x2="10" y2="8"/><line x1="6" y1="12" x2="14" y2="12"/><line x1="18" y1="12" x2="18.01" y2="12"/><line x1="6" y1="16" x2="10" y2="16"/></svg>
+        <h4>金融数字化</h4><p>银行 · 保险 · 证券</p>
       </div>
-      <div class="industry-card fade-up">
-        <div class="ind-icon" style="background:rgba(34,211,238,0.1)">🚗</div>
-        <h4>智能汽车场景</h4>
-        <div class="ind-desc">整车 · 智驾 · 供应链</div>
-        <div class="ind-scenarios">
-          <span class="ind-tag">智能座舱</span><span class="ind-tag">自动驾驶</span><span class="ind-tag">车联网</span>
-        </div>
+      <div class="ind-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="18" r="2"/><path d="M2 12h3l3-9 4 18 3-9h3"/></svg>
+        <h4>智能汽车</h4><p>整车 · 智驾 · 供应链</p>
       </div>
-      <div class="industry-card fade-up">
-        <div class="ind-icon" style="background:rgba(245,158,11,0.1)">⚙️</div>
-        <h4>先进制造场景</h4>
-        <div class="ind-desc">半导体 · 精密制造 · IoT</div>
-        <div class="ind-scenarios">
-          <span class="ind-tag">质量检测</span><span class="ind-tag">预测维护</span><span class="ind-tag">数字孪生</span>
-        </div>
+      <div class="ind-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        <h4>先进制造</h4><p>半导体 · 精密制造 · IoT</p>
       </div>
-      <div class="industry-card fade-up">
-        <div class="ind-icon" style="background:rgba(34,197,94,0.1)">📱</div>
-        <h4>消费电子场景</h4>
-        <div class="ind-desc">手机 · 家电 · 可穿戴</div>
-        <div class="ind-scenarios">
-          <span class="ind-tag">产品创新</span><span class="ind-tag">用户体验</span><span class="ind-tag">供应链</span>
-        </div>
+      <div class="ind-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+        <h4>消费电子</h4><p>手机 · 家电 · 可穿戴</p>
       </div>
-      <div class="industry-card fade-up">
-        <div class="ind-icon" style="background:rgba(236,72,153,0.1)">🛒</div>
-        <h4>日化快消场景</h4>
-        <div class="ind-desc">个护 · 食品 · 零售</div>
-        <div class="ind-scenarios">
-          <span class="ind-tag">精准营销</span><span class="ind-tag">消费者洞察</span><span class="ind-tag">渠道优化</span>
-        </div>
+      <div class="ind-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <h4>日化快消</h4><p>个护 · 食品 · 零售</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ===== Roles ===== -->
+<!-- ===== ROLES ===== -->
 <section class="roles section" id="roles">
   <div class="container">
-    <div style="text-align:center;margin-bottom:16px">
-      <span class="section-tag">Role-based Training</span>
-    </div>
-    <h2 class="section-title fade-up">覆盖 5 大核心岗位</h2>
-    <p class="section-sub fade-up">每个岗位配备专属 AI 课程体系，匹配行业场景，确保内容与实际工作紧密结合</p>
-    <div class="roles-grid">
-      <div class="role-card fade-up">
-        <div class="role-icon" style="background:rgba(99,102,241,0.1)">💻</div>
-        <h4>研发工程师</h4>
-        <div class="role-courses">6 门课程</div>
-        <ul class="role-list">
-          <li>AI 辅助代码生成与重构</li>
-          <li>AI 代码审查与安全优化</li>
-          <li>AI 自动化测试策略</li>
-          <li>AI 技术文档与知识管理</li>
-          <li>AI 驱动需求分析</li>
-          <li>AI 运维与异常监控</li>
-        </ul>
+    <div class="section-tag">Roles</div>
+    <h2 class="section-title">适配<span class="hl">五大岗位</span>需求</h2>
+    <p class="section-sub">每个岗位有专属的AI课程体系和实战任务</p>
+    <div class="role-grid">
+      <div class="role-card-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        <h4>研发</h4><p>AI辅助编程与自动化</p>
       </div>
-      <div class="role-card fade-up">
-        <div class="role-icon" style="background:rgba(34,211,238,0.1)">📋</div>
-        <h4>产品经理</h4>
-        <div class="role-courses">6 门课程</div>
-        <ul class="role-list">
-          <li>AI 赋能需求挖掘与分析</li>
-          <li>AI 竞品与市场分析方法</li>
-          <li>AI 辅助产品原型设计</li>
-          <li>AI 数据驱动决策</li>
-          <li>AI 用户体验与增长策略</li>
-          <li>AI 产品 Roadmap 规划</li>
-        </ul>
+      <div class="role-card-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        <h4>产品</h4><p>AI驱动产品与数据决策</p>
       </div>
-      <div class="role-card fade-up">
-        <div class="role-icon" style="background:rgba(245,158,11,0.1)">📣</div>
-        <h4>运营专员</h4>
-        <div class="role-courses">6 门课程</div>
-        <ul class="role-list">
-          <li>AI 内容创作与多平台分发</li>
-          <li>AI 社交媒体与私域运营</li>
-          <li>AI 用户增长与留存策略</li>
-          <li>AI 数据洞察与运营分析</li>
-          <li>AI 活动策划与效果评估</li>
-          <li>AI 客服与智能对话设计</li>
-        </ul>
+      <div class="role-card-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        <h4>运营</h4><p>AI内容创作与效率提升</p>
       </div>
-      <div class="role-card fade-up">
-        <div class="role-icon" style="background:rgba(34,197,94,0.1)">💼</div>
-        <h4>销售顾问</h4>
-        <div class="role-courses">6 门课程</div>
-        <ul class="role-list">
-          <li>AI 客户画像与精准营销</li>
-          <li>AI 销售话术智能优化</li>
-          <li>AI 销售漏斗与预测分析</li>
-          <li>AI CRM 自动化工作流</li>
-          <li>AI 谈判与异议处理策略</li>
-          <li>AI 销售复盘与经验沉淀</li>
-        </ul>
+      <div class="role-card-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <h4>销售</h4><p>AI客户洞察与智能沟通</p>
       </div>
-      <div class="role-card fade-up">
-        <div class="role-icon" style="background:rgba(236,72,153,0.1)">👥</div>
-        <h4>HR 专家</h4>
-        <div class="role-courses">6 门课程</div>
-        <ul class="role-list">
-          <li>AI 招聘与智能筛选</li>
-          <li>AI 人才评估与发展规划</li>
-          <li>AI 培训需求分析与设计</li>
-          <li>AI 员工体验与关怀</li>
-          <li>AI 人效数据分析</li>
-          <li>AI 组织诊断与文化洞察</li>
-        </ul>
+      <div class="role-card-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <h4>HR</h4><p>AI人才管理与组织协作</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ===== Advantages ===== -->
-<section class="advantages section" id="advantages">
+<!-- ===== CTA ===== -->
+<section class="cta">
   <div class="container">
-    <div style="text-align:center;margin-bottom:16px">
-      <span class="section-tag">Why AIDAX</span>
-    </div>
-    <h2 class="section-title fade-up">为什么选择 AI 达学</h2>
-    <p class="section-sub fade-up">六大差异化优势，让企业 AI 培训不再是成本中心</p>
-    <div class="adv-grid">
-      <div class="adv-card fade-up"><div class="adv-num">01</div><div class="adv-icon">🎯</div><h4>精准个性化</h4><p>不是"选课"式学习，而是通过科学测评精准诊断短板，为每位员工生成专属学习路径。学你真正需要的。</p></div>
-      <div class="adv-card fade-up"><div class="adv-num">02</div><div class="adv-icon">🏭</div><h4>行业场景化</h4><p>5 大行业场景 × 5 大核心岗位，形成 25 个细分培训方向。金融怎么做 AI 风控？汽车怎么做智能座舱？都有答案。</p></div>
-      <div class="adv-card fade-up"><div class="adv-num">03</div><div class="adv-icon">🎬</div><h4>数字人讲师</h4><p>AI 数字人自然讲解，声音流畅、表情生动。支持字幕、语速调节、无限回看。学习体验远超传统录播。</p></div>
-      <div class="adv-card fade-up"><div class="adv-num">04</div><div class="adv-icon">🏋️</div><h4>实战驱动</h4><p>每门课配 2-3 个实战关卡，逐关解锁。AI 教练提供分步提示和参考答案，确保"学完即用、即用即会"。</p></div>
-      <div class="adv-card fade-up"><div class="adv-num">05</div><div class="adv-icon">📊</div><h4>全链路数据化</h4><p>测评→学习→陪练→验证，全流程数据可追踪。量化每个岗位的 AI 能力成长曲线，培训 ROI 一目了然。</p></div>
-      <div class="adv-card fade-up"><div class="adv-num">06</div><div class="adv-icon">⚡</div><h4>极速部署</h4><p>纯 Web 系统，无需安装，浏览器即开即用。支持 SSO 集成，1 天内完成全员开通。比传统方案快 10 倍。</p></div>
+    <h2>准备好让团队成为AI高手了吗？</h2>
+    <p>立即开始AI能力测评，获取个性化培训方案，见证团队能力的质变。</p>
+    <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="openLogin()">免费开始测评</button>
+      <button class="btn btn-outline" onclick="openLogin()">预约演示</button>
     </div>
   </div>
 </section>
 
-<!-- ===== Social Proof ===== -->
-<section class="proof section" id="proof">
-  <div class="container">
-    <div style="text-align:center;margin-bottom:16px">
-      <span class="section-tag">Testimonials</span>
-    </div>
-    <h2 class="section-title fade-up">客户好评</h2>
-    <p class="section-sub fade-up">来自不同行业企业培训负责人的真实反馈</p>
-    <div class="proof-grid">
-      <div class="proof-card fade-up">
-        <div class="proof-stars">★★★★★</div>
-        <blockquote>"行业场景 + 岗位角色的矩阵设计非常实用。我们的金融风控团队通过场景化课程，AI 应用水平提升了 3 倍。"</blockquote>
-        <div class="proof-author"><div class="proof-avatar">陈</div><div><div class="proof-name">陈女士</div><div class="proof-title">某股份制银行 L&D 总监</div></div></div>
-      </div>
-      <div class="proof-card fade-up">
-        <div class="proof-stars">★★★★★</div>
-        <blockquote>"数字人讲师的体验出乎意料地好。员工反馈比传统录播课有趣多了，课程完成率从 40% 提升到 87%。"</blockquote>
-        <div class="proof-author"><div class="proof-avatar">王</div><div><div class="proof-name">王先生</div><div class="proof-title">某新能源车企 HR 负责人</div></div></div>
-      </div>
-      <div class="proof-card fade-up">
-        <div class="proof-stars">★★★★★</div>
-        <blockquote>"管理看板让培训效果可视化，给 CEO 汇报时第一次有了硬数据支撑。我们已把 AI 培训纳入全员 KPI。"</blockquote>
-        <div class="proof-author"><div class="proof-avatar">李</div><div><div class="proof-name">李女士</div><div class="proof-title">某上市科技公司 培训经理</div></div></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== Pricing ===== -->
-<section class="pricing section" id="pricing">
-  <div class="container">
-    <div style="text-align:center;margin-bottom:16px">
-      <span class="section-tag">Pricing</span>
-    </div>
-    <h2 class="section-title fade-up">灵活的服务方案</h2>
-    <p class="section-sub fade-up">根据企业规模和需求，选择最适合的方案</p>
-    <div class="pricing-grid">
-      <div class="price-card fade-up">
-        <h3>基础版</h3><div class="price-desc">适合中小企业快速启动</div>
-        <div class="price-val">¥9,800</div><div class="price-unit">/年 · 最多 100 人</div>
-        <ul class="price-features">
-          <li>5 行业 × 5 岗位 × 30+ 课程</li><li>能力测评 + 个性化推荐</li>
-          <li>数字人视频课程</li><li>实战关卡陪练</li><li>综合成果测验</li><li>管理数据看板</li><li>邮件技术支持</li>
-        </ul>
-        <a href="#" class="btn btn-outline" style="width:100%;justify-content:center">联系销售</a>
-      </div>
-      <div class="price-card featured fade-up">
-        <div class="price-badge">最受欢迎</div>
-        <h3>专业版</h3><div class="price-desc">适合中大型企业全面赋能</div>
-        <div class="price-val">¥29,800</div><div class="price-unit">/年 · 最多 500 人</div>
-        <ul class="price-features">
-          <li>基础版全部功能</li><li>企业微信/钉钉/飞书集成</li>
-          <li>自定义课程上传</li><li>学习数据 API 接口</li><li>专属客户成功经理</li><li>季度效果分析报告</li><li>电话+在线技术支持</li>
-        </ul>
-        <a href="#" class="btn btn-primary" style="width:100%;justify-content:center">立即咨询</a>
-      </div>
-      <div class="price-card fade-up">
-        <h3>企业版</h3><div class="price-desc">适合大型集团定制需求</div>
-        <div class="price-val">面议</div><div class="price-unit">不限人数 · 私有化部署</div>
-        <ul class="price-features">
-          <li>专业版全部功能</li><li>私有化部署支持</li><li>定制行业场景开发</li><li>定制能力模型</li><li>API 深度集成</li><li>线下培训 + 驻场支持</li><li>7×24 专属技术支持</li>
-        </ul>
-        <a href="#" class="btn btn-outline" style="width:100%;justify-content:center">联系销售</a>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== Final CTA ===== -->
-<section class="cta" id="contact">
-  <div class="container">
-    <h2 class="fade-up">准备好让每个员工都成为 AI 高手了吗？</h2>
-    <p class="fade-up">立即预约免费演示，体验完整培训流程，我们的专家为您定制专属方案</p>
-    <div class="cta-btns fade-up">
-      <a href="#" class="btn btn-primary" style="font-size:1.05rem;padding:16px 44px" onclick="event.preventDefault();openLogin()">免费体验系统</a>
-      <a href="#" class="btn btn-ghost" style="font-size:1.05rem;padding:16px 44px">预约专家演示</a>
-    </div>
-    <div class="cta-trust fade-up">
-      <span>已获得信任：</span>
-      <div class="cta-trust-logos">
-        <div class="logo-placeholder">某股份制银行</div>
-        <div class="logo-placeholder">某新能源车企</div>
-        <div class="logo-placeholder">某上市科技公司</div>
-        <div class="logo-placeholder">某零售集团</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== Footer ===== -->
+<!-- ===== FOOTER ===== -->
 <footer class="footer">
-  <div class="footer-inner">
+  <div class="container">
     <div class="footer-grid">
       <div class="footer-brand">
-        <h3>AI达学 · AIDAX</h3>
-        <p>企业 AI 学习一站式服务。基于能力测评的个性化培训闭环，覆盖 5 大行业场景 × 5 大核心岗位，帮助每位员工在实战中掌握 AI 技能。</p>
+        <svg viewBox="0 0 240 56" style="height:32px;width:auto">
+          <use href="#ng1"/><use href="#ng2"/>
+          <circle cx="16" cy="18" r="6" fill="url(#ng1)"/><circle cx="32" cy="6" r="6" fill="url(#ng1)"/><circle cx="48" cy="18" r="6" fill="url(#ng1)"/><circle cx="32" cy="30" r="6" fill="url(#ng1)"/><circle cx="32" cy="42" r="5" fill="url(#ng2)"/>
+          <line x1="16" y1="18" x2="32" y2="6" stroke="url(#ng2)" stroke-width="1.8" stroke-linecap="round" opacity=".7"/><line x1="32" y1="6" x2="48" y2="18" stroke="url(#ng2)" stroke-width="1.8" stroke-linecap="round" opacity=".7"/><line x1="16" y1="18" x2="32" y2="30" stroke="url(#ng2)" stroke-width="1.8" stroke-linecap="round" opacity=".7"/><line x1="48" y1="18" x2="32" y2="30" stroke="url(#ng2)" stroke-width="1.8" stroke-linecap="round" opacity=".7"/><line x1="32" y1="30" x2="32" y2="42" stroke="url(#ng2)" stroke-width="1.8" stroke-linecap="round" opacity=".7"/>
+          <circle cx="32" cy="18" r="21" fill="none" stroke="#818cf8" stroke-width=".8" stroke-dasharray="4 8" opacity=".3"/><circle cx="8" cy="8" r="3" fill="#c4b5fd" opacity=".6"/><circle cx="56" cy="8" r="3" fill="#c4b5fd" opacity=".6"/><circle cx="56" cy="28" r="2.5" fill="#c4b5fd" opacity=".5"/><circle cx="8" cy="28" r="2.5" fill="#c4b5fd" opacity=".5"/><circle cx="32" cy="50" r="2" fill="#ddd6fe" opacity=".4"/>
+          <text x="68" y="28" font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif" font-weight="800" font-size="22" fill="#fff" letter-spacing="-.5">AI达学</text>
+          <text x="68" y="46" font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif" font-weight="500" font-size="10.5" fill="#94a3b8" letter-spacing="1.5">AIDAX · 企业AI学习一站式服务</text>
+        </svg>
+        <p style="margin-top:12px;font-size:.85rem">AI达学AIDAX为企业提供从能力诊断、个性化课程、场景化陪练到成果验证的完整AI技能培训闭环。</p>
       </div>
-      <div class="footer-col"><h4>产品</h4><ul><li><a href="#">能力测评</a></li><li><a href="#">课程推荐</a></li><li><a href="#">数字人课程</a></li><li><a href="#">实战陪练</a></li><li><a href="#">管理看板</a></li></ul></div>
-      <div class="footer-col"><h4>行业场景</h4><ul><li><a href="#">金融数字化</a></li><li><a href="#">智能汽车</a></li><li><a href="#">先进制造</a></li><li><a href="#">消费电子</a></li><li><a href="#">日化快消</a></li></ul></div>
-      <div class="footer-col"><h4>联系</h4><ul><li><a href="#">预约演示</a></li><li><a href="#">获取报价</a></li><li><a href="#">技术支持</a></li><li><a href="#">合作咨询</a></li></ul></div>
+      <div><h3>产品</h3><a href="#">AI能力测评</a><a href="#">个性化课程</a><a href="#">关卡陪练</a><a href="#">管理后台</a></div>
+      <div><h3>资源</h3><a href="#">行业案例</a><a href="#">课程目录</a><a href="#">帮助中心</a><a href="#">API文档</a></div>
+      <div><h3>联系</h3><a href="#">预约演示</a><a href="#">企业合作</a><a href="#">人才招聘</a></div>
     </div>
     <div class="footer-bottom">
       <span>© 2026 AI达学 AIDAX — 企业AI学习一站式服务</span>
-      <span>v2.0</span>
     </div>
   </div>
 </footer>
 
-<!-- ===== Login Modal ===== -->
+<!-- ===== LOGIN MODAL ===== -->
 <div class="login-overlay" id="loginOverlay">
   <div class="login-modal">
     <button class="login-close" onclick="closeLogin()">✕</button>
     <h2>AI达学 · AIDAX</h2>
-    <p class="login-sub">欢迎使用企业 AI 技能培训系统</p>
+    <p class="login-sub">企业AI学习一站式服务</p>
     <div class="login-tabs">
-      <button class="login-tab active" onclick="switchLoginTab('manager')" id="tabManager">管理员登录</button>
-      <button class="login-tab" onclick="switchLoginTab('employee')" id="tabEmployee">员工登录</button>
+      <button class="login-tab active" onclick="switchLoginTab('manager')">管理员登录</button>
+      <button class="login-tab" onclick="switchLoginTab('employee')">员工登录</button>
     </div>
     <div id="managerForm">
-      <div class="login-error" id="loginError">用户名或密码错误</div>
-      <div class="login-field"><label>用户名</label><input type="text" id="mgrUser" placeholder="请输入管理员用户名" autocomplete="username" onkeydown="if(event.key==='Enter')handleManagerLogin()"></div>
-      <div class="login-field"><label>密码</label><input type="password" id="mgrPwd" placeholder="请输入密码" autocomplete="current-password" onkeydown="if(event.key==='Enter')handleManagerLogin()"></div>
+      <div class="login-field"><label>用户名</label><input type="text" id="mgrUser" placeholder="请输入管理员用户名" autocomplete="username"></div>
+      <div class="login-field"><label>密码</label><input type="password" id="mgrPwd" placeholder="请输入密码" autocomplete="current-password"></div>
+      <div class="login-error" id="loginError">用户名或密码错误，请重试</div>
       <button type="button" class="login-submit" onclick="handleManagerLogin()">登录</button>
     </div>
     <div id="employeeForm" style="display:none">
-      <div class="login-error" id="empError">请填写姓名并选择岗位</div>
-      <div class="login-field"><label>员工姓名</label><input type="text" id="empName" placeholder="请输入你的姓名" onkeydown="if(event.key==='Enter')handleEmployeeLogin()"></div>
-      <div class="login-field">
-        <label>所属岗位</label>
-        <div class="login-role-select" id="empRoleSelect">
-          <div class="login-role-opt" data-role="dev" onclick="selectEmpRole(this)">💻 研发</div>
-          <div class="login-role-opt" data-role="pm" onclick="selectEmpRole(this)">📋 产品</div>
-          <div class="login-role-opt" data-role="ops" onclick="selectEmpRole(this)">📢 运营</div>
-          <div class="login-role-opt" data-role="sales" onclick="selectEmpRole(this)">💼 销售</div>
-          <div class="login-role-opt" data-role="hr" onclick="selectEmpRole(this)">👥 HR</div>
-        </div>
+      <div class="login-field"><label>姓名</label><input type="text" id="empName" placeholder="请输入您的姓名" autocomplete="name"></div>
+      <div class="login-field"><label>岗位角色</label></div>
+      <div class="login-role-grid">
+        <div class="login-role-opt" onclick="selectEmpRole('dev',this)">研发</div>
+        <div class="login-role-opt" onclick="selectEmpRole('pm',this)">产品</div>
+        <div class="login-role-opt" onclick="selectEmpRole('ops',this)">运营</div>
+        <div class="login-role-opt" onclick="selectEmpRole('sales',this)">销售</div>
+        <div class="login-role-opt" onclick="selectEmpRole('hr',this)">HR</div>
+        <div class="login-role-opt" onclick="selectEmpRole('other',this)">其他</div>
       </div>
-      <button type="button" class="login-submit" onclick="handleEmployeeLogin()">进入系统</button>
+      <div class="login-error" id="empError">请填写姓名并选择岗位</div>
+      <button type="button" class="login-submit" onclick="handleEmployeeLogin()" style="margin-top:16px">进入培训</button>
     </div>
-    <div class="login-guest"><a onclick="guestLogin()">只想看看？游客体验入口 →</a></div>
+    <div class="login-guest"><a onclick="guestLogin()">游客体验入口 →</a></div>
+  </div>
+</div>
+
+<!-- ===== CUSTOMER SERVICE ===== -->
+<div class="cs-widget">
+  <button class="cs-btn" onclick="toggleCsPanel()" title="在线客服">
+    <span class="cs-dot"></span>
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  </button>
+  <div class="cs-panel" id="csPanel">
+    <div class="cs-panel-header">
+      <div class="cs-avatar">🎓</div>
+      <div><h4>AI达学 · 在线客服</h4><p>工作日 9:00-18:00</p></div>
+    </div>
+    <div class="cs-panel-body">
+      <div class="cs-info">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <div><div class="cs-label">咨询电话</div><div class="cs-value">18682011582</div></div>
+      </div>
+      <div class="cs-info">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <div><div class="cs-label">添加微信</div><div class="cs-value">陈老师 · 18682011582</div></div>
+      </div>
+      <div class="cs-qr">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="15" y="15" width="1" height="1"/><rect x="18" y="15" width="1" height="1"/><rect x="15" y="18" width="1" height="1"/><rect x="18" y="18" width="1" height="1"/></svg>
+        <span>扫码添加微信</span>
+      </div>
+      <p style="font-size:.75rem;color:var(--c-text3);text-align:center;margin-top:8px">添加请备注"AI培训咨询"</p>
+    </div>
   </div>
 </div>
 
 <script>
-// Scroll fade-up animation
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
-}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+// Login functions
+function openLogin(){document.getElementById('loginOverlay').classList.add('show');document.getElementById('loginError').classList.remove('show');document.getElementById('empError').style.display='none'}
+function closeLogin(){document.getElementById('loginOverlay').classList.remove('show')}
+function switchLoginTab(t){var a=document.querySelectorAll('.login-tab'),f=document.getElementById('managerForm'),e=document.getElementById('employeeForm');a.forEach(function(x){x.classList.remove('active')});if(t==='manager'){event.target.classList.add('active');f.style.display='block';e.style.display='none'}else{event.target.classList.add('active');f.style.display='none';e.style.display='block'}}
+var selectedEmpRole=null;
+function selectEmpRole(r,el){selectedEmpRole=r;var opts=document.querySelectorAll('.login-role-opt');opts.forEach(function(o){o.classList.remove('selected')});el.classList.add('selected')}
+function handleManagerLogin(){var u=document.getElementById('mgrUser').value.trim(),p=document.getElementById('mgrPwd').value.trim();if(!u||!p){document.getElementById('loginError').classList.add('show');return}if(u==='admin'&&p==='ai_training_admin'){localStorage.setItem('ai_training_session',JSON.stringify({loggedIn:true,user:'管理员',role:'admin',timestamp:Date.now()}));window.location.replace('app.html')}else{document.getElementById('loginError').classList.add('show')}}
+function handleEmployeeLogin(){var n=document.getElementById('empName').value.trim();if(!n||!selectedEmpRole){document.getElementById('empError').style.display='block';return}localStorage.setItem('ai_training_session',JSON.stringify({loggedIn:true,user:n,role:selectedEmpRole,timestamp:Date.now()}));localStorage.setItem('ai_training_emp_role',selectedEmpRole);window.location.replace('app.html')}
+function guestLogin(){localStorage.setItem('ai_training_session',JSON.stringify({loggedIn:true,user:'游客',role:'guest',timestamp:Date.now()}));window.location.replace('app.html')}
 
-// Smooth scroll for nav links
-document.querySelectorAll('.nav-links a').forEach(link => {
-  link.addEventListener('click', (e) => {
-    e.preventDefault();
-    const target = document.querySelector(link.getAttribute('href'));
-    if (target) target.scrollIntoView({ behavior: 'smooth' });
-  });
-});
-
-// Nav shadow on scroll
-window.addEventListener('scroll', () => {
-  const nav = document.querySelector('.nav');
-  nav.style.boxShadow = window.scrollY > 50 ? '0 2px 40px rgba(0,0,0,0.3)' : 'none';
-  nav.style.borderBottom = window.scrollY > 50 ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(255,255,255,0.04)';
-});
-
-// ==================== Login System ====================
-var currentLoginTab = 'manager', selectedEmpRole = null;
-
-function openLogin() {
-  document.getElementById('loginOverlay').classList.add('show');
-  document.getElementById('loginError').classList.remove('show');
-  document.getElementById('empError').style.display = 'none';
-  document.body.style.overflow = 'hidden';
-}
-
-function closeLogin() {
-  document.getElementById('loginOverlay').classList.remove('show');
-  document.body.style.overflow = '';
-  currentLoginTab = 'manager'; selectedEmpRole = null;
-  document.getElementById('mgrUser').value = '';
-  document.getElementById('mgrPwd').value = '';
-  document.getElementById('empName').value = '';
-  document.querySelectorAll('.login-role-opt').forEach(el => el.classList.remove('selected'));
-  switchLoginTab('manager');
-}
-
-function switchLoginTab(tab) {
-  currentLoginTab = tab;
-  document.getElementById('tabManager').classList.toggle('active', tab === 'manager');
-  document.getElementById('tabEmployee').classList.toggle('active', tab === 'employee');
-  document.getElementById('managerForm').style.display = tab === 'manager' ? '' : 'none';
-  document.getElementById('employeeForm').style.display = tab === 'employee' ? '' : 'none';
-  document.getElementById('loginError').classList.remove('show');
-  document.getElementById('empError').style.display = 'none';
-}
-
-function selectEmpRole(el) {
-  document.querySelectorAll('.login-role-opt').forEach(opt => opt.classList.remove('selected'));
-  el.classList.add('selected');
-  selectedEmpRole = el.dataset.role;
-}
-
-function handleManagerLogin() {
-  var user = document.getElementById('mgrUser').value.trim();
-  var pwd = document.getElementById('mgrPwd').value.trim();
-  if (!user || !pwd) { document.getElementById('loginError').classList.add('show'); return; }
-  if (user === 'admin' && pwd === 'ai_training_admin') {
-    localStorage.setItem('ai_training_session', JSON.stringify({loggedIn:true, user:'管理员', role:'admin', timestamp:Date.now()}));
-    window.location.replace('app.html');
-  } else { document.getElementById('loginError').classList.add('show'); }
-}
-
-function handleEmployeeLogin() {
-  var name = document.getElementById('empName').value.trim();
-  if (!name || !selectedEmpRole) { document.getElementById('empError').style.display = 'block'; return; }
-  localStorage.setItem('ai_training_session', JSON.stringify({loggedIn:true, user:name, role:selectedEmpRole, timestamp:Date.now()}));
-  localStorage.setItem('ai_training_emp_role', selectedEmpRole);
-  window.location.replace('app.html');
-}
-
-function guestLogin() {
-  localStorage.setItem('ai_training_session', JSON.stringify({loggedIn:true, user:'游客', role:'guest', timestamp:Date.now()}));
-  window.location.replace('app.html');
-}
-
-document.getElementById('loginOverlay').addEventListener('click', function(e) { if (e.target === this) closeLogin(); });
-document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && document.getElementById('loginOverlay').classList.contains('show')) closeLogin(); });
+// Customer service toggle
+function toggleCsPanel(){document.getElementById('csPanel').classList.toggle('show')}
+document.addEventListener('click',function(e){var p=document.getElementById('csPanel'),b=document.querySelector('.cs-btn');if(!p.contains(e.target)&&!b.contains(e.target)){p.classList.remove('show')}});
 </script>
 </body>
 </html>
