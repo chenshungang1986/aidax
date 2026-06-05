@@ -1277,7 +1277,7 @@ function renderRoleSelection() {
         <a href="index.html" class="btn btn-outline btn-sm" style="font-size:12px;">← 返回主页</a>
       </div>
       <div class="text-center mb-4">
-        <img src="logo.png" alt="AI达学" style="height:48px;width:auto;margin-bottom:10px;">
+        <svg viewBox="0 0 240 56" style="height:48px;width:auto;margin-bottom:10px"><defs><linearGradient id="ng1a" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6366f1"/><stop offset="50%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#a855f7"/></linearGradient><linearGradient id="ng2a" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#6366f1"/></linearGradient></defs><circle cx="16" cy="18" r="6" fill="url(#ng1a)"/><circle cx="32" cy="6" r="6" fill="url(#ng1a)"/><circle cx="48" cy="18" r="6" fill="url(#ng1a)"/><circle cx="32" cy="30" r="6" fill="url(#ng1a)"/><circle cx="32" cy="42" r="5" fill="url(#ng2a)"/><line x1="16" y1="18" x2="32" y2="6" stroke="url(#ng2a)" stroke-width="1.8" stroke-linecap="round" opacity=".7"/><line x1="32" y1="6" x2="48" y2="18" stroke="url(#ng2a)" stroke-width="1.8" stroke-linecap="round" opacity=".7"/><line x1="16" y1="18" x2="32" y2="30" stroke="url(#ng2a)" stroke-width="1.8" stroke-linecap="round" opacity=".7"/><line x1="48" y1="18" x2="32" y2="30" stroke="url(#ng2a)" stroke-width="1.8" stroke-linecap="round" opacity=".7"/><line x1="32" y1="30" x2="32" y2="42" stroke="url(#ng2a)" stroke-width="1.8" stroke-linecap="round" opacity=".7"/><circle cx="32" cy="18" r="21" fill="none" stroke="#818cf8" stroke-width=".8" stroke-dasharray="4 8" opacity=".3"/><circle cx="8" cy="8" r="3" fill="#c4b5fd" opacity=".6"/><circle cx="56" cy="8" r="3" fill="#c4b5fd" opacity=".6"/><circle cx="56" cy="28" r="2.5" fill="#c4b5fd" opacity=".5"/><circle cx="8" cy="28" r="2.5" fill="#c4b5fd" opacity=".5"/><circle cx="32" cy="50" r="2" fill="#ddd6fe" opacity=".4"/><line x1="16" y1="18" x2="8" y2="8" stroke="#c4b5fd" stroke-width="1" opacity=".35"/><line x1="48" y1="18" x2="56" y2="8" stroke="#c4b5fd" stroke-width="1" opacity=".35"/><line x1="32" y1="42" x2="32" y2="50" stroke="#ddd6fe" stroke-width="1" opacity=".3"/><text x="68" y="28" font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif" font-weight="800" font-size="22" fill="#1e293b" letter-spacing="-.5">AI达学</text></svg>
         <h1 style="font-size:22px;font-weight:700;margin-bottom:4px;">AI达学 · AIDAX</h1>
         <p style="color:var(--text2);font-size:12px;margin-bottom:12px;">企业AI学习一站式服务</p>
         <p style="color:var(--text2);font-size:14px;">测评诊断 → 个性化课程 → 关卡陪练 → 成果验证</p>
@@ -1333,12 +1333,12 @@ function renderQuiz() {
   const questions = ASSESSMENTS[S.role];
   if (!role || !questions) {
     console.error('Quiz error: invalid role', S.role);
-    S.reset(); return '<div class="card text-center"><p style="padding:40px;color:var(--red)">⚠️ 加载失败，请重新选择岗位</p><button class="btn btn-primary" onclick="S.reset()">返回重新选择</button></div>';
+    return '<div class="card text-center"><p style="padding:40px;color:var(--red)">⚠️ 加载失败，请重新选择岗位</p><button class="btn btn-primary" data-action="reset">返回重新选择</button></div>';
   }
   const q = questions[S.quizIdx];
   if (!q) {
     console.error('Quiz error: no question at index', S.quizIdx, 'total:', questions.length);
-    S.reset(); return '<div class="card text-center"><p style="padding:40px;color:var(--red)">⚠️ 题目加载异常，请重新选择岗位</p><button class="btn btn-primary" onclick="S.reset()">返回重新选择</button></div>';
+    return '<div class="card text-center"><p style="padding:40px;color:var(--red)">⚠️ 题目加载异常，请重新选择岗位</p><button class="btn btn-primary" data-action="reset">返回重新选择</button></div>';
   }
 
   let dots = '';
@@ -1444,7 +1444,7 @@ function renderResults() {
     const skillName = role.skills[c.skills[0]] || '';
     const pct = Math.round((scores[c.skills[0]]||0)/4*100);
     const urgency = pct < 40 ? '🔴 急需提升' : pct < 70 ? '🟡 建议学习' : '🟢 进阶提升';
-    html += `<div class="course-card${S.courseProgress[c.id]?.done?' completed':''}" onclick="S.openCourse(${c.origIdx})" style="animation:slideUp ${0.3 + i*0.05}s ease both;">
+    html += `<div class="course-card${S.courseProgress[c.id]?.done?' completed':''}" data-action="openCourse" data-idx="${c.origIdx}" style="cursor:pointer;animation:slideUp ${0.3 + i*0.05}s ease both;">
       <div class="course-num">${i+1}</div>
       <div style="flex:1;min-width:0;">
         <div class="course-title">${c.title}</div>
@@ -1455,8 +1455,8 @@ function renderResults() {
     </div>`;
   });
   html += `<div style="display:flex;gap:8px;margin-top:16px;">
-    <button class="btn btn-outline" style="flex:1;" onclick="S.goLearningMap()">📍 查看学习地图</button>
-    <button class="btn btn-primary" style="flex:1;" onclick="S.goDashboard()">开始学习 →</button>
+    <button class="btn btn-outline" style="flex:1;" data-action="goLearningMap">📍 查看学习地图</button>
+    <button class="btn btn-primary" style="flex:1;" data-action="goDashboard">开始学习 →</button>
   </div></div>`;
 
   // Draw radar after render
@@ -1632,7 +1632,7 @@ function renderLearningMap() {
         badgeText = '待学习'; badgeCls = 'pending-badge';
       }
 
-      const clickHandler = (isDone || isCurrent) ? `onclick="S.openCourse(${c.origIdx})"` : '';
+      const clickHandler = (isDone || isCurrent) ? `data-action="openCourse" data-idx="${c.origIdx}" style="cursor:pointer"` : '';
 
       html += `<div class="${nodeCls}" ${clickHandler}>
         <div class="map-node-icon">${iconContent}</div>
@@ -1661,7 +1661,7 @@ function renderLearningMap() {
   // Final goal node
   const allDone = done === total;
   html += `<div class="map-connector${allDone?' done-conn':''}"></div>
-    <div class="map-node${allDone?' done':''}" ${allDone?'onclick="S.startFinalQuiz()"':''} style="border-style:dashed;background:${allDone?'var(--green-bg)':'var(--bg)'};">
+    <div class="map-node${allDone?' done':''}" ${allDone?'data-action="startFinalQuiz" style="cursor:pointer"':''} style="border-style:dashed;background:${allDone?'var(--green-bg)':'var(--bg)'};">
       <div class="map-node-icon" style="background:${allDone?'var(--green)':'var(--border)'};color:${allDone?'#fff':'var(--text3)'};">🏆</div>
       <div class="map-node-body">
         <div class="map-node-title">AI能力成果测验</div>
@@ -1672,8 +1672,8 @@ function renderLearningMap() {
   </div>`;
 
   html += `<div style="display:flex;gap:8px;margin-top:12px;">
-    <button class="btn btn-outline" style="flex:1;" onclick="S.goSchedule()">📅 查看学习计划</button>
-    <button class="btn btn-primary" style="flex:1;" onclick="S.goDashboard()">进入课程列表 →</button>
+    <button class="btn btn-outline" style="flex:1;" data-action="goSchedule">📅 查看学习计划</button>
+    <button class="btn btn-primary" style="flex:1;" data-action="goDashboard">进入课程列表 →</button>
   </div>`;
 
   return html;
@@ -1721,7 +1721,7 @@ function renderSchedule() {
     html += `<div class="card mt-3 slide-up text-center">
       <p style="font-size:16px;font-weight:700;margin-bottom:8px;">🎉 所有课程已完成！</p>
       <p style="color:var(--text2);font-size:13px;margin-bottom:16px;">你已完成全部学习计划，快去参加成果测验吧</p>
-      <button class="btn btn-primary" onclick="S.startFinalQuiz()">开始成果测验</button>
+      <button class="btn btn-primary" data-action="startFinalQuiz">开始成果测验</button>
     </div>`;
     return html;
   }
@@ -1747,7 +1747,7 @@ function renderSchedule() {
       const dur = parseInt(c.dur) || 30;
       const tagCls = c.type==='video' ? 'tag-blue' : 'tag-purple';
 
-      html += `<div class="schedule-item ${priorityCls}" onclick="S.openCourse(${c.origIdx})" style="cursor:pointer;">
+      html += `<div class="schedule-item ${priorityCls}" data-action="openCourse" data-idx="${c.origIdx}" style="cursor:pointer;">
         <div class="schedule-day">${day}</div>
         <div class="schedule-course">
           <div class="schedule-course-name">${c.title}</div>
@@ -1785,8 +1785,8 @@ function renderSchedule() {
 
   html += `</div>`;
   html += `<div style="display:flex;gap:8px;margin-top:12px;">
-    <button class="btn btn-outline" style="flex:1;" onclick="S.goLearningMap()">📍 返回学习地图</button>
-    <button class="btn btn-primary" style="flex:1;" onclick="S.goDashboard()">进入课程列表 →</button>
+    <button class="btn btn-outline" style="flex:1;" data-action="goLearningMap">📍 返回学习地图</button>
+    <button class="btn btn-primary" style="flex:1;" data-action="goDashboard">进入课程列表 →</button>
   </div>`;
 
   return html;
@@ -1810,8 +1810,8 @@ function renderDashboard() {
     </div>
     <div class="progress-bar mt-2"><div class="progress-fill ${progress>=80?'high':progress>=40?'mid':'low'}" style="width:${progress}%"></div></div>
     <div style="display:flex;gap:8px;margin-top:12px;">
-      <button class="btn btn-outline" style="flex:1;font-size:12px;" onclick="S.goLearningMap()">📍 学习地图</button>
-      <button class="btn btn-outline" style="flex:1;font-size:12px;" onclick="S.goSchedule()">📅 学习计划</button>
+      <button class="btn btn-outline" style="flex:1;font-size:12px;" data-action="goLearningMap">📍 学习地图</button>
+      <button class="btn btn-outline" style="flex:1;font-size:12px;" data-action="goSchedule">📅 学习计划</button>
     </div>
   </div>`;
 
@@ -1828,7 +1828,7 @@ function renderDashboard() {
     const locked = i > 0 && !S.courseProgress[ordered[i-1].id]?.done;
     const cls = isDone ? 'completed' : locked ? 'locked' : '';
     const tagCls = c.type==='video' ? 'tag-blue' : 'tag-purple';
-    html += `<div class="course-card ${cls}" onclick="${locked?'':`S.openCourse(${c.origIdx})`}">
+    html += `<div class="course-card ${cls}" ${locked?'':'data-action="openCourse" data-idx="'+c.origIdx+'"'}>
       <div class="course-num">${i+1}</div>
       <div style="flex:1;min-width:0;"><div class="course-title">${c.title}</div><div class="course-meta">${c.dur}</div></div>
       <span class="tag ${tagCls}">${c.type==='video'?'视频':'图文'}</span>
@@ -1841,7 +1841,7 @@ function renderDashboard() {
     html += `<div class="card mt-3 slide-up text-center">
       <p style="font-size:18px;font-weight:700;margin-bottom:8px;">恭喜完成全部课程！</p>
       <p style="color:var(--text2);font-size:13px;margin-bottom:16px;">现在可以进行AI能力成果测验</p>
-      <button class="btn btn-primary" onclick="S.startFinalQuiz()">开始成果测验</button>
+      <button class="btn btn-primary" data-action="startFinalQuiz">开始成果测验</button>
       ${S.finalScore!==null ? `<div class="alert alert-success mt-3">上次测验成绩：${S.finalScore}分</div>` : ''}
     </div>`;
   }
@@ -1905,8 +1905,8 @@ function renderCourseDetail() {
   html += `</div>`;
 
   html += `<div class="flex-between mt-4">
-    <button class="btn btn-outline" onclick="S.goDashboard()">返回课程列表</button>
-    <button class="btn btn-primary" onclick="S.openTask()">${prog?.tasksDone >= c.tasks.length ? '已完成所有关卡' : '进入关卡挑战'}</button>
+    <button class="btn btn-outline" data-action="goDashboard">返回课程列表</button>
+    <button class="btn btn-primary" data-action="openTask">${prog?.tasksDone >= c.tasks.length ? '已完成所有关卡' : '进入关卡挑战'}</button>
   </div></div>`;
   return html;
 }
