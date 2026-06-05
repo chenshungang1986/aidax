@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>企业AI技能培训系统 — 让每位员工都成为AI高手</title>
+<title>AI达学 AIDAX — 企业AI学习一站式服务</title>
 <style>
 /* ===== Reset & Base ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -75,8 +75,11 @@ img { max-width: 100%; display: block; }
   max-width: 1200px; margin: 0 auto; padding: 0 24px;
   display: flex; align-items: center; justify-content: space-between; height: 68px;
 }
-.nav-logo { font-size: 1.3rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 8px; }
-.nav-logo span { color: var(--accent); }
+.nav-logo { font-size: 1.15rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+.nav-logo img { height: 34px; width: auto; }
+.nav-logo .brand-text { display: flex; flex-direction: column; line-height: 1.15; }
+.nav-logo .brand-name { font-size: 1.1rem; font-weight: 700; color: #1e293b; }
+.nav-logo .brand-sub { font-size: 0.68rem; color: var(--text2); font-weight: 400; }
 .nav-links { display: flex; gap: 32px; list-style: none; }
 .nav-links a { font-size: 0.95rem; color: var(--text2); font-weight: 500; transition: color 0.2s; }
 .nav-links a:hover { color: var(--primary); }
@@ -118,6 +121,10 @@ img { max-width: 100%; display: block; }
 }
 .hero-badge .dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; animation: pulse 2s infinite; }
 @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+.hero-slogan {
+  font-size: 1.05rem; color: rgba(255,255,255,0.55);
+  margin-bottom: 8px; font-weight: 400; letter-spacing: 0.5px;
+}
 .hero h1 {
   font-size: 3.5rem; font-weight: 900; color: #fff; line-height: 1.15; margin-bottom: 24px;
 }
@@ -545,7 +552,13 @@ img { max-width: 100%; display: block; }
 <!-- ===== Nav ===== -->
 <nav class="nav">
   <div class="nav-inner">
-    <a href="#" class="nav-logo">AI<span>Training</span>Pro</a>
+    <a href="#" class="nav-logo">
+      <img src="logo.png" alt="AI达学">
+      <span class="brand-text">
+        <span class="brand-name">AI达学</span>
+        <span class="brand-sub">AIDAX</span>
+      </span>
+    </a>
     <ul class="nav-links">
       <li><a href="#pain">痛点</a></li>
       <li><a href="#solution">解决方案</a></li>
@@ -566,8 +579,9 @@ img { max-width: 100%; display: block; }
     <div>
       <div class="hero-badge">
         <span class="dot"></span>
-        企业AI能力测评与培训系统 · 已服务100+企业
+        企业AI学习一站式服务 · 已服务100+企业
       </div>
+      <p class="hero-slogan">AI达学 AIDAX — 企业AI学习一站式服务</p>
       <h1>让每位员工<br>都成为<span class="gradient">AI高手</span></h1>
       <p class="hero-desc">
         基于AI能力测评 → 个性化课程推荐 → 实战陪练 → 学习成果验证的闭环体系，
@@ -1079,8 +1093,8 @@ img { max-width: 100%; display: block; }
   <div class="footer-inner">
     <div class="footer-grid">
       <div class="footer-brand">
-        <h3>AI Training Pro</h3>
-        <p>企业AI技能培训系统，让每位员工都成为AI高手。基于能力测评的个性化培训闭环，帮助企业快速提升全员AI应用能力。</p>
+        <h3>AI达学 · AIDAX</h3>
+        <p>企业AI学习一站式服务。基于能力测评的个性化培训闭环，帮助企业快速提升全员AI应用能力，让每位员工都成为AI高手。</p>
       </div>
       <div class="footer-col">
         <h4>产品功能</h4>
@@ -1113,7 +1127,7 @@ img { max-width: 100%; display: block; }
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2026 AI Training Pro. All rights reserved.</span>
+      <span>© 2026 AI达学 AIDAX — 企业AI学习一站式服务</span>
       <span>企业AI技能培训系统 v1.0</span>
     </div>
   </div>
@@ -1123,7 +1137,7 @@ img { max-width: 100%; display: block; }
 <div class="login-overlay" id="loginOverlay">
   <div class="login-modal">
     <button class="login-close" onclick="closeLogin()">&times;</button>
-    <h2>🔐 登录系统</h2>
+    <h2>AI达学 · AIDAX</h2>
     <p class="login-sub">欢迎使用企业AI技能培训系统</p>
 
     <!-- Login tabs -->
