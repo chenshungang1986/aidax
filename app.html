@@ -1295,7 +1295,7 @@ function renderRoleSelection() {
           </div>`;
   }
   html += `</div>
-        <div class="text-center mt-4"><button class="btn btn-primary" onclick="S.startQuiz()" ${!S.industry||!S.role?'disabled':''}>开始测评</button></div>
+        <div class="text-center mt-4"><button class="btn btn-primary" onclick="S.startQuiz()" ${!S.industry||!S.role?'disabled':''}>测一测AI能力</button></div>
       </div>`;
 
   // Show recent employees
@@ -1320,7 +1320,15 @@ function renderRoleSelection() {
 function renderQuiz() {
   const role = ROLES[S.role];
   const questions = ASSESSMENTS[S.role];
+  if (!role || !questions) {
+    console.error('Quiz error: invalid role', S.role);
+    S.reset(); return '<div class="card text-center"><p style="padding:40px;color:var(--red)">⚠️ 加载失败，请重新选择岗位</p><button class="btn btn-primary" onclick="S.reset()">返回重新选择</button></div>';
+  }
   const q = questions[S.quizIdx];
+  if (!q) {
+    console.error('Quiz error: no question at index', S.quizIdx, 'total:', questions.length);
+    S.reset(); return '<div class="card text-center"><p style="padding:40px;color:var(--red)">⚠️ 题目加载异常，请重新选择岗位</p><button class="btn btn-primary" onclick="S.reset()">返回重新选择</button></div>';
+  }
 
   let dots = '';
   for (let i=0; i<questions.length; i++) {
@@ -2442,17 +2450,18 @@ document.addEventListener('keydown', function(e) {
 
 // ==================== INIT ====================
 function bindEvents() {}
-// Auto-select role from login
+// Init: start at role/industry selection page
 (function() {
-  var empRole = localStorage.getItem('ai_training_emp_role');
   var session = JSON.parse(localStorage.getItem('ai_training_session') || '{}');
-  if (session.role === 'admin') {
-    S.view = 'role';
-  } else if (empRole && ROLES[empRole]) {
-    S.role = empRole;
-    S.view = 'role';
+  var empRole = localStorage.getItem('ai_training_emp_role');
+  if (empRole) {
+    // Legacy: pre-selected role from old login flow
+    if (ROLES[empRole]) {
+      S.role = empRole;
+      localStorage.removeItem('ai_training_emp_role');
+    }
   }
-  // clean up emp_role after use (keep for this session, clear on logout)
+  S.view = 'role';
 })();
 render();
 </script>
