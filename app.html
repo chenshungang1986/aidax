@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>企业AI技能培训系统</title>
+<title>AI达学 AIDAX — 企业AI学习一站式服务</title>
 <style>
   :root {
     --bg: #f5f5f7;
@@ -32,6 +32,17 @@
   /* Layout */
   .app { max-width:960px; margin:0 auto; padding:20px 16px 60px; }
   .header { text-align:center; padding:32px 0 24px; border-bottom:1px solid var(--border); margin-bottom:28px; }
+  /* ===== Brand Bar ===== */
+  .brand-bar {
+    display: flex; align-items: center; gap: 10px; padding: 10px 20px;
+    background: linear-gradient(135deg, #1e1b4b, #312e81);
+    color: #fff; border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .brand-bar img { height: 28px; width: auto; }
+  .brand-bar .brand-text { display: flex; flex-direction: column; line-height: 1.15; }
+  .brand-bar .brand-name { font-size: 13px; font-weight: 700; }
+  .brand-bar .brand-sub { font-size: 9px; color: rgba(255,255,255,0.5); }
+  .brand-bar .brand-slogan { margin-left: auto; font-size: 11px; color: rgba(255,255,255,0.55); }
   .header h1 { font-size:26px; font-weight:700; margin-bottom:6px; }
   .header p { font-size:14px; color:var(--text2); }
 
@@ -1230,7 +1241,9 @@ function renderRoleSelection() {
     <h2 class="sr-only">选择你的岗位开始AI技能测评</h2>
     <div style="padding:20px 0;">
       <div class="text-center mb-4">
-        <h1 style="font-size:26px;font-weight:700;margin-bottom:8px;">企业AI技能培训系统</h1>
+        <img src="logo.png" alt="AI达学" style="height:48px;width:auto;margin-bottom:10px;">
+        <h1 style="font-size:22px;font-weight:700;margin-bottom:4px;">AI达学 · AIDAX</h1>
+        <p style="color:var(--text2);font-size:12px;margin-bottom:12px;">企业AI学习一站式服务</p>
         <p style="color:var(--text2);font-size:14px;">测评诊断 → 个性化课程 → 关卡陪练 → 成果验证</p>
       </div>
       <div class="card">
