@@ -1252,14 +1252,14 @@ function headerHtml(title, sub, showBack) {
   var roleText = S.role ? (ROLES[S.role]?.name||'') : '';
   return `
     <div class="flex-between mb-4">
-      <div>${showBack ? '<button class="back-nav" onclick="S.goBack()">← 返回</button>' : ''}</div>
+      <div>${showBack ? '<button class="back-nav" data-action="goBack">← 返回</button>' : ''}</div>
       <div style="display:flex;gap:10px;align-items:center;">
         ${indText ? '<span class="tag tag-blue">'+indText+'</span>' : ''}
         ${roleText ? '<span class="tag tag-purple">'+roleText+'</span>' : ''}
         <span style="font-size:12px;color:var(--text3);">👤 ${userName}</span>
-        ${S.view!=='admin'&&session.role==='admin'?'<button class="btn btn-sm btn-outline" onclick="S.goAdmin()">管理员</button>':''}
-        ${S.view!=='role' ? '<button class="btn btn-sm btn-outline" onclick="S.reset()">切换场景/岗位</button>' : ''}
-        <button class="btn btn-sm btn-outline" onclick="S.logout()" style="color:#ef4444;border-color:#ef4444;">退出</button>
+        ${S.view!=='admin'&&session.role==='admin'?'<button class="btn btn-sm btn-outline" data-action="goAdmin">管理员</button>':''}
+        ${S.view!=='role' ? '<button class="btn btn-sm btn-outline" data-action="reset">切换场景/岗位</button>' : ''}
+        <button class="btn btn-sm btn-outline" data-action="logout" style="color:#ef4444;border-color:#ef4444;">退出</button>
       </div>
     </div>
     <div class="header" style="padding-top:0;">
@@ -1287,7 +1287,7 @@ function renderRoleSelection() {
         <div class="industry-grid">`;
   for (const [id, ind] of Object.entries(INDUSTRIES)) {
     html += `
-          <div class="industry-card${S.industry===id?' selected':''}" onclick="S.selectIndustry('${id}')">
+          <div class="industry-card${S.industry===id?' selected':''}" data-action="selectIndustry" data-id="${id}">
             <div class="industry-icon">${ind.icon}</div>
             <div class="industry-name">${ind.name}</div>
             <div class="industry-desc">${ind.desc}</div>
@@ -1299,14 +1299,14 @@ function renderRoleSelection() {
         <div class="role-grid">`;
   for (const [id, r] of Object.entries(ROLES)) {
     html += `
-          <div class="role-card${S.role===id?' selected':''}" onclick="S.selectRole('${id}')">
+          <div class="role-card${S.role===id?' selected':''}" data-action="selectRole" data-id="${id}">
             <div class="role-icon">${r.icon}</div>
             <div class="role-name">${r.name}</div>
             <div class="role-desc">${r.desc}</div>
           </div>`;
   }
   html += `</div>
-        <div class="text-center mt-4"><button class="btn btn-primary" onclick="S.startQuiz()" ${!S.industry||!S.role?'disabled':''}>测一测AI能力</button></div>
+        <div class="text-center mt-4"><button class="btn btn-primary" data-action="startQuiz" ${!S.industry||!S.role?'disabled':''}>测一测AI能力</button></div>
       </div>`;
 
   // Show recent employees
@@ -1314,7 +1314,7 @@ function renderRoleSelection() {
     html += `<div class="card mt-3"><p style="font-weight:600;font-size:14px;margin-bottom:12px;">最近测评记录</p>`;
     S.employees.forEach((e, i) => {
       const r = ROLES[e.role];
-      html += `<div class="emp-row" onclick="S.loadEmployee(${i})" style="cursor:pointer;">
+      html += `<div class="emp-row" data-action="loadEmployee" data-idx="${i}" style="cursor:pointer;">
         <div class="emp-avatar">${e.name[0]}</div>
         <div class="emp-info"><div class="emp-name">${e.name}</div><div class="emp-meta">${r ? r.icon+' '+r.name : e.role} · ${e.date}</div></div>
         <div class="emp-score" style="color:${e.finalScore>=80?'var(--green)':e.finalScore>=60?'var(--amber)':'var(--red)'}">${e.finalScore!=null?e.finalScore+'分':'测评中'}</div>
@@ -1359,13 +1359,13 @@ function renderQuiz() {
     let cls = 'quiz-option';
     if (sel !== undefined && sel === i) cls += ' selected';
     if (sel !== undefined && sel !== undefined) cls += (sel === i ? '' : '');
-    html += `<button class="${cls}" onclick="S.answerQuiz(${i})">${String.fromCharCode(65+i)}. ${o}</button>`;
+    html += `<button class="${cls}" data-action="answerQuiz" data-idx="${i}">${String.fromCharCode(65+i)}. ${o}</button>`;
   });
   html += `</div>
     <div class="flex-between mt-4">
-      <button class="btn btn-outline" onclick="S.prevQuestion()" ${S.quizIdx===0?'disabled':''}>上一题</button>
+      <button class="btn btn-outline" data-action="prevQuestion" ${S.quizIdx===0?'disabled':''}>上一题</button>
       <span style="font-size:13px;color:var(--text2);">${S.quizAnswers.filter(a=>a!==undefined).length}/${questions.length}</span>
-      <button class="btn btn-primary" onclick="S.nextQuestion()" ${S.quizAnswers[S.quizIdx]===undefined?'disabled':''}>
+      <button class="btn btn-primary" data-action="nextQuestion" ${S.quizAnswers[S.quizIdx]===undefined?'disabled':''}>
         ${S.quizIdx===questions.length-1?'查看结果':'下一题'}
       </button>
     </div>
@@ -2460,7 +2460,50 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ==================== INIT ====================
-function bindEvents() {}
+function bindEvents() {
+  // Event delegation handler
+  const app = document.getElementById('app');
+  if (!app._bound) {
+    app._bound = true;
+    app.addEventListener('click', function(e) {
+      let el = e.target;
+      while (el && el !== app) {
+        const action = el.getAttribute('data-action');
+        if (action) {
+          const id = el.getAttribute('data-id') || el.getAttribute('data-idx');
+          const idx = parseInt(el.getAttribute('data-idx'));
+          switch (action) {
+            case 'selectIndustry': S.selectIndustry(id); break;
+            case 'selectRole': S.selectRole(id); break;
+            case 'startQuiz': S.startQuiz(); break;
+            case 'answerQuiz': S.answerQuiz(idx); break;
+            case 'prevQuestion': S.prevQuestion(); break;
+            case 'nextQuestion': S.nextQuestion(); break;
+            case 'loadEmployee': S.loadEmployee(idx); break;
+            case 'goDashboard': S.goDashboard(); break;
+            case 'goLearningMap': S.goLearningMap(); break;
+            case 'goSchedule': S.goSchedule(); break;
+            case 'openCourse': S.openCourse(idx); break;
+            case 'openTask': S.openTask(); break;
+            case 'submitTask': S.submitTask(); break;
+            case 'prevTask': S.prevTask(); break;
+            case 'nextTask': S.nextTask(); break;
+            case 'finishCourse': S.finishCourse(); break;
+            case 'startFinalQuiz': S.startFinalQuiz(); break;
+            case 'submitFinal': S.submitFinal(); break;
+            case 'saveAndFinish': S.saveAndFinish(); break;
+            case 'reset': S.reset(); break;
+            case 'goAdmin': S.goAdmin(); break;
+            case 'goBack': S.goBack(); break;
+            case 'logout': S.logout(); break;
+          }
+          return;
+        }
+        el = el.parentElement;
+      }
+    });
+  }
+}
 // Init: start at role/industry selection page
 (function() {
   var session = JSON.parse(localStorage.getItem('ai_training_session') || '{}');
