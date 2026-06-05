@@ -6,27 +6,33 @@
 <title>AI达学 AIDAX — 企业AI学习一站式服务</title>
 <style>
   :root {
-    --bg: #f5f5f7;
-    --card: #ffffff;
-    --text: #1d1d1f;
-    --text2: #656571;
-    --text3: #9a9aa8;
-    --border: #e5e5ea;
-    --blue: #0071e3;
-    --blue-bg: #e8f4fd;
-    --green: #30b158;
-    --green-bg: #e9f8ee;
-    --amber: #ff9500;
-    --amber-bg: #fff5e6;
-    --red: #ff3b30;
-    --red-bg: #ffeeed;
-    --purple: #af52de;
-    --purple-bg: #f5edfc;
+    --bg: #09090b;
+    --bg2: #131320;
+    --card: rgba(255,255,255,0.03);
+    --card-hover: rgba(255,255,255,0.06);
+    --text: #e4e4e7;
+    --text2: #71717a;
+    --text3: #52525b;
+    --border: rgba(255,255,255,0.06);
+    --border-active: rgba(255,255,255,0.12);
+    --blue: #6366f1;
+    --blue-bg: rgba(99,102,241,0.08);
+    --green: #22c55e;
+    --green-bg: rgba(34,197,94,0.08);
+    --amber: #f59e0b;
+    --amber-bg: rgba(245,158,11,0.08);
+    --red: #ef4444;
+    --red-bg: rgba(239,68,68,0.08);
+    --purple: #a855f7;
+    --purple-bg: rgba(168,85,247,0.08);
     --radius: 12px;
     --radius-sm: 8px;
+    --glow: rgba(99,102,241,0.1);
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); line-height:1.6; min-height:100vh; }
+  html { scroll-behavior: smooth; }
+  ::selection { background: rgba(99,102,241,0.3); color:#fff; }
   .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0; }
 
   /* Layout */
@@ -35,8 +41,8 @@
   /* ===== Brand Bar ===== */
   .brand-bar {
     display: flex; align-items: center; gap: 10px; padding: 10px 20px;
-    background: linear-gradient(135deg, #1e1b4b, #312e81);
-    color: #fff; border-bottom: 1px solid rgba(255,255,255,0.1);
+    background: linear-gradient(135deg, #131320, #1a1a2e);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
   }
   .brand-bar img { height: 28px; width: auto; }
   .brand-bar .brand-text { display: flex; flex-direction: column; line-height: 1.15; }
@@ -47,36 +53,40 @@
   .header p { font-size:14px; color:var(--text2); }
 
   /* Cards */
-  .card { background:var(--card); border-radius:var(--radius); border:1px solid var(--border); padding:24px; margin-bottom:16px; }
+  .card { background:var(--card); border-radius:var(--radius); border:1px solid var(--border); padding:24px; margin-bottom:16px; backdrop-filter:blur(12px); }
   .card-sm { padding:16px; }
 
-  /* Role Grid */
-  .role-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:12px; }
-  .role-card { background:var(--card); border:2px solid var(--border); border-radius:var(--radius); padding:20px 16px; text-align:center; cursor:pointer; transition:all .2s; }
-  .role-card:hover { border-color:var(--blue); transform:translateY(-2px); }
+  /* Grid layouts */
+  .role-grid, .industry-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:12px; }
+  .role-card, .industry-card { background:var(--card); border:2px solid var(--border); border-radius:var(--radius); padding:18px 14px; text-align:center; cursor:pointer; transition:all .2s; }
+  .role-card:hover, .industry-card:hover { border-color:var(--blue); background:var(--card-hover); transform:translateY(-2px); }
   .role-card.selected { border-color:var(--blue); background:var(--blue-bg); }
+  .industry-card.selected { border-color:var(--blue); background:var(--blue-bg); }
+  .industry-icon { font-size:28px; margin-bottom:6px; }
+  .industry-name { font-size:14px; font-weight:600; }
+  .industry-desc { font-size:11px; color:var(--text2); margin-top:3px; }
   .role-icon { font-size:36px; margin-bottom:8px; }
   .role-name { font-size:15px; font-weight:600; }
   .role-desc { font-size:12px; color:var(--text2); margin-top:4px; }
 
   /* Buttons */
   .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:10px 24px; border-radius:var(--radius-sm); font-size:14px; font-weight:600; border:none; cursor:pointer; transition:all .2s; text-decoration:none; }
-  .btn:disabled { opacity:0.4; cursor:not-allowed; }
-  .btn-primary { background:var(--blue); color:#fff; }
-  .btn-primary:hover:not(:disabled) { background:#0066cc; }
-  .btn-outline { background:transparent; border:1px solid var(--border); color:var(--text); }
-  .btn-outline:hover:not(:disabled) { background:var(--bg); }
+  .btn:disabled { opacity:0.3; cursor:not-allowed; }
+  .btn-primary { background:linear-gradient(135deg, #6366f1, #8b5cf6); color:#fff; box-shadow:0 4px 16px rgba(99,102,241,0.3); }
+  .btn-primary:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 6px 24px rgba(99,102,241,0.45); }
+  .btn-outline { background:transparent; border:1px solid var(--border); color:var(--text2); }
+  .btn-outline:hover:not(:disabled) { background:var(--card-hover); color:var(--text); border-color:var(--border-active); }
   .btn-green { background:var(--green); color:#fff; }
-  .btn-green:hover:not(:disabled) { background:#27964a; }
+  .btn-green:hover:not(:disabled) { filter:brightness(1.1); }
   .btn-sm { padding:6px 14px; font-size:13px; }
 
   /* Tags */
   .tag { display:inline-block; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:500; }
-  .tag-blue { background:var(--blue-bg); color:var(--blue); }
-  .tag-green { background:var(--green-bg); color:var(--green); }
-  .tag-amber { background:var(--amber-bg); color:#c47a00; }
-  .tag-red { background:var(--red-bg); color:var(--red); }
-  .tag-purple { background:var(--purple-bg); color:var(--purple); }
+  .tag-blue { background:var(--blue-bg); color:var(--blue); border:1px solid rgba(99,102,241,0.15); }
+  .tag-green { background:var(--green-bg); color:var(--green); border:1px solid rgba(34,197,94,0.15); }
+  .tag-amber { background:var(--amber-bg); color:var(--amber); border:1px solid rgba(245,158,11,0.15); }
+  .tag-red { background:var(--red-bg); color:var(--red); border:1px solid rgba(239,68,68,0.15); }
+  .tag-purple { background:var(--purple-bg); color:var(--purple); border:1px solid rgba(168,85,247,0.15); }
 
   /* Quiz */
   .quiz-progress { display:flex; gap:6px; margin-bottom:20px; }
@@ -84,9 +94,9 @@
   .quiz-dot.done { background:var(--green); }
   .quiz-dot.current { background:var(--blue); }
   .quiz-question { font-size:16px; font-weight:600; margin-bottom:16px; }
-  .quiz-option { display:block; width:100%; text-align:left; padding:12px 16px; margin-bottom:8px; background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:14px; cursor:pointer; transition:all .15s; }
+  .quiz-option { display:block; width:100%; text-align:left; padding:12px 16px; margin-bottom:8px; background:rgba(255,255,255,0.02); border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:14px; color:var(--text2); cursor:pointer; transition:all .15s; }
   .quiz-option:hover { border-color:var(--blue); background:var(--blue-bg); }
-  .quiz-option.selected { border-color:var(--blue); background:var(--blue-bg); }
+  .quiz-option.selected { border-color:var(--blue); background:var(--blue-bg); color:var(--text); }
   .quiz-option.correct { border-color:var(--green); background:var(--green-bg); }
   .quiz-option.wrong { border-color:var(--red); background:var(--red-bg); }
 
@@ -265,7 +275,7 @@
   .ppt-list li { font-size:14px; line-height:1.8; padding:6px 0; padding-left:24px; position:relative; color:var(--text2); }
   .ppt-list li::before { content:''; position:absolute; left:4px; top:14px; width:6px; height:6px; border-radius:50%; background:var(--blue); }
   .ppt-grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-  .ppt-card-mini { background:#fff; border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px; }
+  .ppt-card-mini { background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px; }
   .ppt-card-mini .ppt-card-num { font-size:22px; font-weight:800; color:var(--blue); margin-bottom:4px; }
   .ppt-card-mini .ppt-card-t { font-size:13px; font-weight:600; margin-bottom:3px; }
   .ppt-card-mini .ppt-card-d { font-size:12px; color:var(--text2); line-height:1.5; }
@@ -281,12 +291,12 @@
   .subtitle-bar.paused { opacity:0.5; }
 
   /* ===== Voice controls ===== */
-  .voice-controls { display:flex; align-items:center; gap:10px; padding:10px 16px; background:#f0f0f5; }
+  .voice-controls { display:flex; align-items:center; gap:10px; padding:10px 16px; background:rgba(255,255,255,0.03); border-top:1px solid var(--border); }
   .voice-btn { width:36px; height:36px; border-radius:50%; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px; transition:all .15s; }
   .voice-btn-play { background:var(--blue); color:#fff; }
-  .voice-btn-play:hover { background:#0066cc; }
-  .voice-btn-outline { background:#fff; border:1px solid var(--border); color:var(--text); }
-  .voice-btn-outline:hover { background:var(--bg); }
+  .voice-btn-play:hover { background:#4f46e5; }
+  .voice-btn-outline { background:rgba(255,255,255,0.03); border:1px solid var(--border); color:var(--text); }
+  .voice-btn-outline:hover { background:var(--card-hover); }
   .voice-speed-select { padding:4px 8px; border:1px solid var(--border); border-radius:6px; font-size:12px; background:#fff; cursor:pointer; }
   .voice-slide-counter { font-size:12px; color:var(--text2); margin-left:auto; }
   .voice-progress { flex:1; height:4px; background:var(--border); border-radius:2px; overflow:hidden; }
@@ -421,6 +431,15 @@
 })();
 
 // ==================== DATA ====================
+
+// Industry scenarios
+const INDUSTRIES = {
+  finance: {id:'finance', name:'金融数字化', icon:'🏦', desc:'银行 · 保险 · 证券', color:'blue'},
+  auto:    {id:'auto', name:'智能汽车', icon:'🚗', desc:'整车 · 智驾 · 供应链', color:'cyan'},
+  mfg:     {id:'mfg', name:'先进制造', icon:'⚙️', desc:'半导体 · 精密制造 · IoT', color:'amber'},
+  elec:    {id:'elec', name:'消费电子', icon:'📱', desc:'手机 · 家电 · 可穿戴', color:'green'},
+  cpg:     {id:'cpg', name:'日化快消', icon:'🛒', desc:'个护 · 食品 · 零售', color:'purple'}
+};
 
 const ROLES = {
   dev: {
@@ -1183,7 +1202,7 @@ const FINAL_QUIZZES = {
 // ==================== APP STATE ====================
 const S = {
   view:'role', // role|quiz|results|dashboard|course|task|final|admin|map|schedule
-  role:null,
+  industry:null, role:null,
   quizIdx:0, quizAnswers:[], quizScores:null,
   courseIdx:null, courseTaskIdx:0, courseProgress:{},
   finalAnswers:[], finalSubjAnswers:{}, finalScore:null, finalSubmitted:false, finalShowHint:{},
@@ -1219,14 +1238,18 @@ function render() {
 function headerHtml(title, sub, showBack) {
   var session = JSON.parse(localStorage.getItem('ai_training_session') || '{}');
   var userName = session.user || '学员';
+  var indText = S.industry ? (INDUSTRIES[S.industry]?.icon||'') + ' ' + (INDUSTRIES[S.industry]?.name||'') : '';
+  var roleText = S.role ? (ROLES[S.role]?.icon||'') + ' ' + (ROLES[S.role]?.name||'') : '';
   return `
     <div class="flex-between mb-4">
       <div>${showBack ? '<button class="back-nav" onclick="S.goBack()">← 返回</button>' : ''}</div>
       <div style="display:flex;gap:10px;align-items:center;">
+        ${indText ? '<span class="tag tag-blue">'+indText+'</span>' : ''}
+        ${roleText ? '<span class="tag tag-purple">'+roleText+'</span>' : ''}
         <span style="font-size:12px;color:var(--text3);">👤 ${userName}</span>
         ${S.view!=='admin'&&session.role==='admin'?'<button class="btn btn-sm btn-outline" onclick="S.goAdmin()">管理员</button>':''}
-        ${S.view!=='role' ? '<button class="btn btn-sm btn-outline" onclick="S.reset()">切换岗位</button>' : ''}
-        <button class="btn btn-sm btn-outline" onclick="S.logout()" style="color:#ff3b30;border-color:#ff3b30;">退出</button>
+        ${S.view!=='role' ? '<button class="btn btn-sm btn-outline" onclick="S.reset()">切换场景/岗位</button>' : ''}
+        <button class="btn btn-sm btn-outline" onclick="S.logout()" style="color:#ef4444;border-color:#ef4444;">退出</button>
       </div>
     </div>
     <div class="header" style="padding-top:0;">
@@ -1238,7 +1261,7 @@ function headerHtml(title, sub, showBack) {
 // ---- ROLE SELECTION ----
 function renderRoleSelection() {
   let html = `
-    <h2 class="sr-only">选择你的岗位开始AI技能测评</h2>
+    <h2 class="sr-only">选择行业场景与岗位开始AI技能测评</h2>
     <div style="padding:20px 0;">
       <div class="text-center mb-4">
         <img src="logo.png" alt="AI达学" style="height:48px;width:auto;margin-bottom:10px;">
@@ -1246,8 +1269,20 @@ function renderRoleSelection() {
         <p style="color:var(--text2);font-size:12px;margin-bottom:12px;">企业AI学习一站式服务</p>
         <p style="color:var(--text2);font-size:14px;">测评诊断 → 个性化课程 → 关卡陪练 → 成果验证</p>
       </div>
-      <div class="card">
-        <p style="font-weight:600;font-size:15px;margin-bottom:16px;">请选择你的岗位，开始AI能力测评</p>
+      <div class="card mb-3">
+        <p style="font-weight:600;font-size:15px;margin-bottom:16px;">Step 1: 选择行业场景</p>
+        <div class="industry-grid">`;
+  for (const [id, ind] of Object.entries(INDUSTRIES)) {
+    html += `
+          <div class="industry-card${S.industry===id?' selected':''}" onclick="S.selectIndustry('${id}')">
+            <div class="industry-icon">${ind.icon}</div>
+            <div class="industry-name">${ind.name}</div>
+            <div class="industry-desc">${ind.desc}</div>
+          </div>`;
+  }
+  html += `</div></div>
+      <div class="card${!S.industry?'':' selected'}">
+        <p style="font-weight:600;font-size:15px;margin-bottom:16px;">Step 2: 选择你的岗位</p>
         <div class="role-grid">`;
   for (const [id, r] of Object.entries(ROLES)) {
     html += `
@@ -1258,7 +1293,7 @@ function renderRoleSelection() {
           </div>`;
   }
   html += `</div>
-        <div class="text-center mt-4"><button class="btn btn-primary" onclick="S.startQuiz()" ${!S.role?'disabled':''}>开始测评</button></div>
+        <div class="text-center mt-4"><button class="btn btn-primary" onclick="S.startQuiz()" ${!S.industry||!S.role?'disabled':''}>开始测评</button></div>
       </div>`;
 
   // Show recent employees
@@ -2164,6 +2199,7 @@ function renderAdmin() {
 }
 
 // ==================== ACTIONS ====================
+S.selectIndustry = function(id) { S.industry = id; render(); };
 S.selectRole = function(id) { S.role = id; render(); };
 S.startQuiz = function() { S.quizIdx=0; S.quizAnswers=[]; S.quizScores=null; S.courseProgress={}; S.finalAnswers=[]; S.finalSubjAnswers={}; S.finalScore=null; S.finalSubmitted=false; S.finalShowHint={}; S.currentEmployee=null; S.view='quiz'; render(); };
 S.answerQuiz = function(i) { S.quizAnswers[S.quizIdx]=i; render(); };
@@ -2238,6 +2274,7 @@ S.saveAndFinish = function() {
   if (!name) return;
   const emp = {
     name, role: S.role,
+    industry: S.industry,
     date: new Date().toLocaleDateString('zh-CN'),
     quizScores: S.quizScores,
     courseProgress: S.courseProgress,
@@ -2254,7 +2291,7 @@ S.saveAndFinish = function() {
   saveEmployees();
   alert('数据已保存！');
 };
-S.reset = function() { stopVoice(); S.role=null; S.view='role'; S.quizIdx=0; S.quizAnswers=[]; S.quizScores=null; S.courseIdx=null; S.courseTaskIdx=0; S.courseProgress={}; S.finalAnswers=[]; S.finalSubjAnswers={}; S.finalScore=null; S.finalSubmitted=false; S.finalShowHint={}; S.currentEmployee=null; render(); };
+S.reset = function() { stopVoice(); S.industry=null; S.role=null; S.view='role'; S.quizIdx=0; S.quizAnswers=[]; S.quizScores=null; S.courseIdx=null; S.courseTaskIdx=0; S.courseProgress={}; S.finalAnswers=[]; S.finalSubjAnswers={}; S.finalScore=null; S.finalSubmitted=false; S.finalShowHint={}; S.currentEmployee=null; render(); };
 S.goAdmin = function() { S.view='admin'; render(); };
 S.logout = function() {
   stopVoice();
