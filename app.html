@@ -1214,7 +1214,7 @@ function startAdaptiveQuiz() {
   S._quizByDim = byDim;
   S._quizWeights = weights;
   S._quizCurrentLevel = {};
-  dimOrder.forEach(d => { S._quizCurrentLevel[d] = 1; });
+  dimOrder.forEach(d => { S._quizCurrentLevel[d] = 0; }); // 0=初阶 1=中阶 2=高阶
   S.quizIdx = 0;
   S.quizAnswers = {};
   S._quizSelected = {};
