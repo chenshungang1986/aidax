@@ -1217,6 +1217,7 @@ function startAdaptiveQuiz() {
   dimOrder.forEach(d => { S._quizCurrentLevel[d] = 1; });
   S.quizIdx = 0;
   S.quizAnswers = {};
+  S._quizSelected = {};
   S.quizScores = null;
 }
 
@@ -1229,24 +1230,34 @@ function getCurrentQuestion() {
 }
 
 function answerCurrentQuestion(answerIdx) {
+  // Record the selected option index for the current dimension
   if (!S._quizDims) return;
   const dimKey = S._quizDims[S.quizIdx];
+  S._quizSelected = S._quizSelected || {};
+  S._quizSelected[dimKey] = answerIdx;
+  // Also compute and store score so partial answers are preserved
   const q = getCurrentQuestion();
-  if (!q) return;
-  const score = q.scores ? q.scores[answerIdx] : answerIdx;
-  S.quizAnswers[dimKey] = score;
-  // Adapt level for next time this dim is visited
-  const normScore = score / 4;
+  if (q) {
+    const score = q.scores ? q.scores[answerIdx] : answerIdx;
+    S.quizAnswers[dimKey] = score;
+  }
+  render();
+}
+
+// Adapt difficulty level for current dimension based on answer score.
+// Called by nextQuestion and finishQuiz when leaving a dimension.
+function adaptLevelForCurrentDim() {
+  if (!S._quizDims) return;
+  const dimKey = S._quizDims[S.quizIdx];
+  if (!dimKey) return;
+  const rawScore = S.quizAnswers[dimKey];
+  if (rawScore === undefined) return;
+  const normScore = rawScore / 4;
   const currentLevel = S._quizCurrentLevel[dimKey] || 1;
   if (normScore >= 0.75 && currentLevel < 2) {
     S._quizCurrentLevel[dimKey] = currentLevel + 1;
   } else if (normScore <= 0.25 && currentLevel > 0) {
     S._quizCurrentLevel[dimKey] = currentLevel - 1;
-  }
-  // Move to next dimension
-  S.quizIdx++;
-  if (S.quizIdx >= S._quizDims.length) {
-    finishAdaptiveQuiz();
   }
 }
 
@@ -1763,18 +1774,19 @@ function renderQuiz() {
     <div class="quiz-progress">${dots}</div>
     <div class="quiz-question">${q.q}</div>
     <div style="display:flex;flex-direction:column;">`;
-  const sel = S.quizAnswers[dimKey];
+  const sel = S._quizSelected ? S._quizSelected[dimKey] : undefined;
   q.opts.forEach((o, i) => {
     let cls = 'quiz-option';
     if (sel !== undefined && sel === i) cls += ' selected';
     html += `<button class="${cls}" data-action="answerQuiz" data-idx="${i}">${String.fromCharCode(65+i)}. ${o}</button>`;
   });
+  const hasSelected = sel !== undefined;
   html += `</div>
     <div class="flex-between mt-4">
       <button class="btn btn-outline" data-action="prevQuestion" ${dimIdx===0?'disabled':''}>上一维度</button>
-      <span style="font-size:13px;color:var(--text2);">${Object.keys(S.quizAnswers).length}/${totalDims} 已完成</span>
-      ${dimIdx >= totalDims-1?'<button class="btn btn-primary" data-action="finishQuiz">查看结果</button>':
-        '<button class="btn btn-primary" data-action="nextQuestion">下一维度 →</button>'}
+      <span style="font-size:13px;color:${hasSelected?'var(--text2)':'var(--red)'};">${Object.keys(S.quizAnswers).length}/${totalDims} 已完成${hasSelected?'':'（请先选择答案）'}</span>
+      ${dimIdx >= totalDims-1?'<button class="btn btn-primary" data-action="finishQuiz"'+(hasSelected?'': ' disabled')+'>查看结果</button>':
+        '<button class="btn btn-primary" data-action="nextQuestion"'+(hasSelected?'': ' disabled')+'>下一维度 →</button>'}
     </div>
   </div>`;
   return html;
@@ -2688,8 +2700,8 @@ S.selectRole = function(id) { S.role = id; render(); };
 S.startQuiz = function() { startAdaptiveQuiz(); S.view = 'quiz'; render(); };
 S.answerQuiz = function(i) { answerCurrentQuestion(i); };
 S.prevQuestion = function() { if(S._quizDims && S.quizIdx>0) { S.quizIdx--; render(); } };
-S.nextQuestion = function() { if(S._quizDims && S.quizIdx < S._quizDims.length-1) { S.quizIdx++; render(); } else { finishAdaptiveQuiz(); } };
-S.finishQuiz = function() { finishAdaptiveQuiz(); };
+S.nextQuestion = function() { adaptLevelForCurrentDim(); if(S._quizDims && S.quizIdx < S._quizDims.length-1) { S.quizIdx++; render(); } else { finishAdaptiveQuiz(); } };
+S.finishQuiz = function() { adaptLevelForCurrentDim(); finishAdaptiveQuiz(); };
 S.calcResults = function() {
   const questions = ASSESSMENTS[S.role];
   const scores = Array(ROLES[S.role].skills.length).fill(0);
@@ -2772,7 +2784,7 @@ S.saveAndFinish = function() {
   saveEmployees();
   alert('数据已保存！');
 };
-S.reset = function() { stopVoice(); S.industry=null; S.role=null; S.view='role'; S.quizIdx=0; S.quizAnswers=[]; S.quizScores=null; S.courseIdx=null; S.courseTaskIdx=0; S.courseProgress={}; S.finalAnswers=[]; S.finalSubjAnswers={}; S.finalScore=null; S.finalSubmitted=false; S.finalShowHint={}; S.currentEmployee=null; render(); };
+S.reset = function() { stopVoice(); S.industry=null; S.role=null; S.view='role'; S.quizIdx=0; S.quizAnswers=[]; S._quizSelected={}; S._quizDims=null; S._quizByDim=null; S._quizCurrentLevel={}; S._quizWeights=null; S._quizResult=null; S.quizScores=null; S.courseIdx=null; S.courseTaskIdx=0; S.courseProgress={}; S.finalAnswers=[]; S.finalSubjAnswers={}; S.finalScore=null; S.finalSubmitted=false; S.finalShowHint={}; S.currentEmployee=null; render(); };
 S.goAdmin = function() { S.view='admin'; render(); };
 S.logout = function() {
   stopVoice();
