@@ -1710,7 +1710,7 @@ function renderRoleSelection() {
           </div>`;
   }
   html += `</div>
-        <div class="text-center mt-4"><button class="btn btn-primary" data-action="startQuiz" ${!S.industry||!S.role?'disabled':''}>测一测AI能力</button></div>
+        <div class="text-center mt-4"><button class="btn btn-primary" data-action="startQuiz" ${!S.industry||!S.role?'disabled':''} onclick="if(typeof S!=='undefined'){S.startQuiz()}">测一测AI能力</button></div>
       </div>`;
 
   // Show recent employees
@@ -1781,15 +1781,15 @@ function renderQuiz() {
   q.opts.forEach((o, i) => {
     let cls = 'quiz-option';
     if (sel !== undefined && sel === i) cls += ' selected';
-    html += `<button class="${cls}" data-action="answerQuiz" data-idx="${i}">${String.fromCharCode(65+i)}. ${o}</button>`;
+    html += `<button class="${cls}" data-action="answerQuiz" data-idx="${i}" onclick="if(typeof S!=='undefined'){S.answerQuiz(${i})}">${String.fromCharCode(65+i)}. ${o}</button>`;
   });
   const hasSelected = sel !== undefined;
   html += `</div>
     <div class="flex-between mt-4">
-      <button class="btn btn-outline" data-action="prevQuestion" ${dimIdx===0?'disabled':''}>上一维度</button>
+      <button class="btn btn-outline" data-action="prevQuestion" ${dimIdx===0?'disabled':''} onclick="if(typeof S!=='undefined'){S.prevQuestion()}">上一维度</button>
       <span style="font-size:13px;color:${hasSelected?'var(--text2)':'var(--red)'};">${Object.keys(S.quizAnswers).length}/${totalDims} 已完成${hasSelected?'':'（请先选择答案）'}</span>
-      ${dimIdx >= totalDims-1?'<button class="btn btn-primary" data-action="finishQuiz"'+(hasSelected?'': ' disabled')+'>查看结果</button>':
-        '<button class="btn btn-primary" data-action="nextQuestion"'+(hasSelected?'': ' disabled')+'>下一维度 →</button>'}
+      ${dimIdx >= totalDims-1?'<button class="btn btn-primary" data-action="finishQuiz"'+(hasSelected?'': ' disabled')+' onclick="if(typeof S!==\'undefined\'){S.finishQuiz()}">查看结果</button>':
+        '<button class="btn btn-primary" data-action="nextQuestion"'+(hasSelected?'': ' disabled')+' onclick="if(typeof S!==\'undefined\'){S.nextQuestion()}">下一维度 →</button>'}
     </div>
   </div>`;
   return html;
@@ -2995,6 +2995,7 @@ function bindEvents() {
     }
   }
   S.view = 'role';
+  window.S = S;  // expose S for inline onclick handlers
 })();
 
 try {
