@@ -602,12 +602,12 @@ function calculateAdaptiveScores() {
 // (replaced by getIndustryPMWeights)
 
 // ==================== COURSE DATA ====================
-
-
+const COURSE_TITLE = 'AI重塑制造产品规划：从产线数据到产品决策';
+const COURSE_META = { duration:'45分钟', level:'中高级', industry:'先进制造', role:'产品经理' };
 
 const SLIDES_MFG = [
   {
-    title: getCourseTitle(),
+    title: COURSE_TITLE,
     subtitle: '先进制造业产品经理的AI实战指南',
     type: 'cover',
     narration: '欢迎来到"AI重塑制造产品规划"课程。在接下来的45分钟里，我们将深入探讨如何用AI工具彻底改变制造业产品经理的工作方式。从产线数据到产品决策，AI正在重塑每一个环节。'
@@ -944,14 +944,14 @@ function stopVoice() {
 }
 
 
-const IND_INFO = {
+var IND_INFO = {
   mfg: {name:'先进制造', icon:'🏭', desc:'半导体 · 精密制造 · IoT', color:'amber'},
   finance: {name:'金融数字化', icon:'🏦', desc:'银行 · 保险 · 证券', color:'blue'},
   auto: {name:'智能汽车', icon:'🚗', desc:'整车 · 智驾 · 供应链', color:'cyan'},
   cpg: {name:'日化快消', icon:'🧴', desc:'个护 · 食品 · 零售', color:'purple'},
 };
 
-const COURSES = {
+var COURSES = {
   mfg: {title:'AI重塑制造产品规划：从产线数据到产品决策', meta:{duration:'45分钟',level:'中高级',industry:'先进制造',role:'产品经理'}, slides: SLIDES_MFG},
   finance: {title:'AI重塑金融产品：从数据洞察到智能决策', meta:{duration:'45分钟',level:'中高级',industry:'金融数字化',role:'产品经理'}, slides: SLIDES_FIN},
   auto: {title:'AI重塑智能汽车产品：从驾驶数据到极致体验', meta:{duration:'45分钟',level:'中高级',industry:'智能汽车',role:'产品经理'}, slides: SLIDES_AUTO},
@@ -1155,7 +1155,7 @@ function renderResults() {
     <h3 style="margin-bottom:8px;">🎓 推荐课程</h3>
     <p style="color:var(--text2);font-size:14px;margin-bottom:16px;">基于你的能力短板，推荐以下实战课程</p>
     <button class="btn btn-primary" onclick="stopVoice(); S.view='course'; S.courseSlide=0; render();">
-      📖 ' + getCourseTitle() + '（' + getCourseMeta().duration + '）' + '
+      📖 AI重塑制造产品规划（45分钟）
     </button>
     <p style="font-size:12px;color:var(--text2);margin-top:8px;">包含精美PPT + 真人语音讲解</p>
   </div>`;
