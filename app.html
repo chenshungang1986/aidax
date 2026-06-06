@@ -1751,8 +1751,11 @@ function renderQuiz() {
     finishAdaptiveQuiz();
     return '';
   }
+  const hasAnswered = S.quizAnswers[dimKey] !== undefined;
+  // On first visit always show 中阶 (level 1); on revisit show adapted level
+  const displayLevel = hasAnswered ? level : 1;
   const levelNames = ['初阶','中阶','高阶'];
-  const levelName = levelNames[level] || '中阶';
+  const levelName = levelNames[displayLevel] || '中阶';
   const totalDims = S._quizDims.length;
   const dimIdx = S.quizIdx; // 0-based
 
@@ -1767,9 +1770,9 @@ function renderQuiz() {
 
   let html = headerHtml(dimInfo.icon + ' ' + dimInfo.name + ' · ' + levelName, `能力维度 ${dimIdx+1}/${totalDims}`, true);
   html += `<div class="card slide-up">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
       <span class="tag tag-blue">${dimInfo.short}</span>
-      <span style="font-size:12px;color:var(--text2);">${levelName} · 难度 ${['低','中','高'][level]}</span>
+      <span style="font-size:12px;color:var(--text2);">${levelName} · 难度 ${['低','中','高'][displayLevel]}${hasAnswered ? '<span style="color:var(--amber);margin-left:4px;">(根据你上次的回答已调整)</span>' : ''}</span>
     </div>
     <div class="quiz-progress">${dots}</div>
     <div class="quiz-question">${q.q}</div>
