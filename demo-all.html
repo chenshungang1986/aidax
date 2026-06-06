@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智能制造 × 产品经理 — AI能力测评与实战课程</title>
+<style>
+:root {
+  --blue: #2563eb; --blue2: #1d4ed8; --cyan: #0891b2; --amber: #d97706;
+  --green: #059669; --red: #dc2626; --purple: #7c3aed;
+  --bg: #f0f4f8; --card: #fff; --text: #1e293b; --text2: #64748b;
+  --border: #e2e8f0; --shadow: 0 2px 12px rgba(0,0,0,.06);
+  --radius: 14px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-height:100vh; }
+.app { max-width:900px; margin:0 auto; padding:20px; }
+.card { background: var(--card); border-radius: var(--radius); padding:24px; box-shadow: var(--shadow); margin-bottom:16px; }
+.btn { display:inline-flex; align-items:center; gap:6px; padding:10px 20px; border-radius:8px; border:none; font-size:15px; font-weight:600; cursor:pointer; transition: all .2s; }
+.btn-primary { background: var(--blue); color:#fff; }
+.btn-primary:hover { background: var(--blue2); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,.3); }
+.btn-outline { background: #fff; color: var(--text); border: 1.5px solid var(--border); }
+.btn-outline:hover { border-color: var(--blue); color: var(--blue); }
+.btn:disabled { opacity:.4; cursor:not-allowed; transform:none !important; }
+.tag { display:inline-block; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
+.tag-blue { background: #eff6ff; color: var(--blue); }
+.tag-green { background: #ecfdf5; color: var(--green); }
+.tag-amber { background: #fffbeb; color: var(--amber); }
+.tag-purple { background: #f5f3ff; color: var(--purple); }
+.header { text-align:center; padding:24px 0 12px; }
+.header h1 { font-size:26px; margin-bottom:6px; }
+.header p { color: var(--text2); font-size:14px; }
+.industry-card, .role-card { cursor:pointer; border:2px solid var(--border); border-radius:12px; padding:16px; transition: all .2s; text-align:center; }
+.industry-card:hover, .role-card:hover { border-color: var(--blue); box-shadow: 0 4px 16px rgba(37,99,235,.12); transform: translateY(-2px); }
+.industry-card.selected, .role-card.selected { border-color: var(--blue); background: #eff6ff; }
+.industry-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; }
+.role-grid { display:flex; gap:10px; flex-wrap:wrap; }
+.role-card { flex:1; min-width:100px; }
+.quiz-option { display:block; width:100%; text-align:left; padding:14px 16px; border:2px solid var(--border); border-radius:10px; background:#fff; cursor:pointer; font-size:14px; line-height:1.6; margin-bottom:8px; transition: all .15s; }
+.quiz-option:hover { border-color: var(--blue); background: #f8faff; }
+.quiz-option.selected { border-color: var(--blue); background: #eff6ff; font-weight:600; }
+.quiz-dots { display:flex; gap:6px; justify-content:center; margin-bottom:20px; }
+.quiz-dot { width:28px; height:4px; border-radius:2px; background: var(--border); transition: all .3s; }
+.quiz-dot.done { background: var(--green); }
+.quiz-dot.current { background: var(--blue); width:40px; }
+.flex-between { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.mt-2 { margin-top:8px; } .mt-3 { margin-top:12px; } .mt-4 { margin-top:16px; } .mt-6 { margin-top:24px; }
+.mb-2 { margin-bottom:8px; } .mb-3 { margin-bottom:12px; } .mb-4 { margin-bottom:16px; }
+.text-center { text-align:center; }
+.slide-up { animation: slideUp .4s ease-out; }
+@keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+.gauge { position:relative; width:140px; height:140px; margin:0 auto; }
+.gauge svg { transform:rotate(-90deg); }
+.gauge-value { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:32px; font-weight:700; }
+/* Radar chart */
+.radar-container { width:100%; max-width:400px; margin:0 auto; }
+/* Mastery cards */
+.mastery-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+@media (max-width:640px) { .mastery-grid { grid-template-columns:repeat(2,1fr); } }
+.mastery-card { background: #fff; border-radius:10px; padding:14px; text-align:center; border:1px solid var(--border); }
+.mastery-card .score { font-size:24px; font-weight:700; }
+/* Gap bars */
+.gap-bar { height:8px; border-radius:4px; background: var(--border); overflow:hidden; margin-top:4px; }
+.gap-fill { height:100%; border-radius:4px; transition: width .6s; }
+/* Course player */
+.course-hero { background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 50%, #0891b2 100%); color:#fff; border-radius: var(--radius); padding:40px 32px; text-align:center; position:relative; overflow:hidden; }
+.course-hero::before { content:''; position:absolute; top:-50%; right:-20%; width:300px; height:300px; background: rgba(255,255,255,.05); border-radius:50%; }
+.course-hero h2 { font-size:28px; margin-bottom:8px; }
+.course-hero .sub { opacity:.85; font-size:15px; margin-bottom:20px; }
+.course-hero .meta { display:flex; gap:16px; justify-content:center; flex-wrap:wrap; font-size:13px; opacity:.8; }
+.course-hero .meta span { background: rgba(255,255,255,.15); padding:4px 12px; border-radius:20px; }
+/* Slide viewer */
+.slide-container { position:relative; background: #fff; border-radius: var(--radius); box-shadow: var(--shadow); overflow:hidden; min-height:460px; }
+.slide { padding:40px; min-height:460px; display:none; animation: fadeSlide .4s; }
+.slide.active { display:block; }
+@keyframes fadeSlide { from { opacity:0; transform:translateX(30px); } to { opacity:1; transform:translateX(0); } }
+.slide h3 { font-size:22px; margin-bottom:16px; color: var(--text); }
+.slide p, .slide li { font-size:15px; line-height:1.8; color: var(--text2); }
+.slide ul { padding-left:20px; }
+.slide ul li { margin-bottom:6px; }
+.slide .highlight { background: linear-gradient(120deg, #eff6ff 0%, #f5f3ff 100%); border-left:4px solid var(--blue); padding:12px 16px; border-radius:0 8px 8px 0; margin:12px 0; }
+.slide .step-num { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; background: var(--blue); color:#fff; font-size:13px; font-weight:700; margin-right:8px; }
+/* Player controls */
+.player-bar { display:flex; align-items:center; gap:12px; padding:14px 20px; background: #fff; border-top:1px solid var(--border); border-radius:0 0 var(--radius) var(--radius); }
+.player-btn { width:36px; height:36px; border-radius:50%; border:1.5px solid var(--border); background:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px; transition: all .15s; }
+.player-btn:hover { border-color: var(--blue); color: var(--blue); }
+.player-btn.playing { background: var(--blue); color:#fff; border-color: var(--blue); }
+.progress-track { flex:1; height:6px; border-radius:3px; background: var(--border); cursor:pointer; position:relative; }
+.progress-fill { height:100%; border-radius:3px; background: var(--blue); transition: width .3s; }
+.slide-counter { font-size:13px; color: var(--text2); min-width:60px; text-align:center; }
+.speaking-indicator { display:flex; align-items:center; gap:4px; }
+.speaking-dot { width:6px; height:6px; border-radius:50%; background: var(--border); animation: none; }
+.speaking-dot.active { background: var(--green); animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.3; } }
+.voice-select { padding:6px 10px; border-radius:6px; border:1px solid var(--border); font-size:13px; background:#fff; }
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+// ==================== STATE ====================
+const S = { view:'industry', industry:null, role:null,
+  quizIdx:0, quizAnswers:{}, _quizSelected:{}, _quizDims:null,
+  _quizByDim:null, _quizCurrentLevel:{}, _quizWeights:null, _quizResult:null,
+  courseSlide:0, isPlaying:false, speechSynth:null, speechUtterance:null };
+
+// ==================== DATA ====================
+
+// AI 8-dimension model
+const DIMS = {
+  prompt:   {id:'prompt',   name:'提示词工程',     icon:'💬', short:'Prompt'},
+  tools:    {id:'tools',    name:'AI工具实战',     icon:'🛠️', short:'Tools'},
+  data:     {id:'data',     name:'数据分析与决策',  icon:'📊', short:'Data'},
+  content:  {id:'content',  name:'AI内容创作',     icon:'✍️', short:'Content'},
+  dev:      {id:'dev',      name:'AI辅助开发',     icon:'💻', short:'Dev'},
+  workflow: {id:'workflow', name:'AI协同工作流',   icon:'⚡', short:'Workflow'},
+  security: {id:'security', name:'AI安全与合规',   icon:'🔒', short:'Security'},
+  strategy: {id:'strategy', name:'AI战略思维',     icon:'🎯', short:'Strategy'}
+};
+
+// ==================== MANUFACTURING PM SCENARIO QUIZ ====================
+// 24 questions: 8 dimensions × 3 levels
+// Each question is a REAL manufacturing PM scenario
+const MFG_PM_QUIZ = {
+  prompt: [
+    { // Level 0 - 初阶
+      level:0, difficulty:'初阶',
+      scenario:'场景：你正在分析抛光车间的OEE数据（设备利用率85%、良品率92%、性能效率78%），需要AI帮你找出瓶颈。',
+      q:'以下哪个提示词最能让AI给出专业分析？',
+      opts:[
+        'A. "分析生产效率数据"',
+        'B. "帮我看看产线数据有什么问题"',
+        'C. "你是精益生产专家。抛光车间OEE数据：利用率85%、良品率92%、性能效率78%。请：(1)计算OEE (2)识别最大瓶颈 (3)给出3条改进建议，按ROI排序"',
+        'D. "OEE数据：85%, 92%, 78%。分析"',
+        'E. "write python code to analyze production efficiency"'
+      ],
+      scores:[0,1,4,2,0], best:2,
+      explain:'制造业场景的提示词需要结构化：角色设定→数据输入→分析指令→输出格式。选项C包含完整上下文和分析框架，产出质量最高。'
+    },
+    { // Level 1 - 中阶
+      level:1, difficulty:'中阶',
+      scenario:'场景：你需要AI同时分析3条产线的MES数据，识别产能瓶颈并给出产线调度建议。数据涉及工单、设备状态、人员排班。',
+      q:'如何设计提示词以获得最精准的分析？',
+      opts:[
+        'A. 分三轮：(1)让AI定义分析框架和关键指标 (2)逐产线输入数据 (3)让AI交叉对比并给出调度方案',
+        'B. 把所有数据一股脑丢给AI',
+        'C. 让AI写Python脚本自己分析',
+        'D. 只给AI看汇总数据',
+        'E. 分别问3条产线的问题，手工对比'
+      ],
+      scores:[4,1,3,2,2], best:0,
+      explain:'复杂制造业场景采用"分步渐进式提示"策略：框架先行→数据注入→交叉分析。这比一次性投喂更精准可控。'
+    },
+    { // Level 2 - 高阶
+      level:2, difficulty:'高阶',
+      scenario:'场景：你要让AI扮演"智能制造顾问"，针对公司3年内的数字化转型路线图（含ERP升级、MES重构、IoT平台建设），给出产品优先级建议。',
+      q:'最优的提示策略是？',
+      opts:[
+        'A. 用Chain-of-Thought：先让AI分析行业趋势→评估公司现状→对比ROI→排序建议',
+        'B. 直接问"我们该先做哪个系统"',
+        'C. 分别问每个系统的优先级，取平均',
+        'D. 让AI读3份行业报告后做答',
+        'E. 用投票法：生成5个回答取最优'
+      ],
+      scores:[4,0,1,3,2], best:0,
+      explain:'战略级问题需要CoT（思维链）：趋势→现状→ROI对比→决策。让AI展示推理过程比直接要答案更可靠。'
+    }
+  ],
+  tools: [
+    { // Level 0
+      level:0, difficulty:'初阶',
+      scenario:'场景：你需要快速理解竞品MES系统（西门子Opcenter）的功能架构。手头有一份300页的产品手册PDF。',
+      q:'最合适的AI工具使用方式是？',
+      opts:[
+        'A. 用ChatGPT直接问"西门子MES有什么功能"',
+        'B. 将手册PDF上传到Claude/GPT，让AI提取功能模块、架构图和核心卖点，生成结构化对比表',
+        'C. 用Midjourney画竞品界面',
+        'D. 问竞品销售要资料',
+        'E. 用Copilot写爬虫抓竞品官网'
+      ],
+      scores:[1,4,0,1,2], best:1,
+      explain:'制造业PM核心技能：用AI处理长文档。PDF上传+结构化提取是分析工业软件竞品最高效的方式。'
+    },
+    { // Level 1
+      level:1, difficulty:'中阶',
+      scenario:'场景：你要评估3个IoT平台（PTC ThingWorx、AWS IoT、阿里云IoT）在"设备管理+数据分析+可视化"三个维度的优劣势。',
+      q:'最优AI工具组合是？',
+      opts:[
+        'A. 用Claude分别分析3个平台的文档→让AI生成对比矩阵→用NotebookLM深度分析差异点',
+        'B. 只用ChatGPT问一遍',
+        'C. 分别用不同AI工具分析，手工汇总',
+        'D. 用Excel做对比表，AI帮忙填',
+        'E. 让技术团队做POC'
+      ],
+      scores:[4,1,2,2,0], best:0,
+      explain:'工业软件选型需要"AI多工具链"：文档分析→矩阵对比→深度差异分析。Claude+NotebookLM是黄金组合。'
+    },
+    { // Level 2
+      level:2, difficulty:'高阶',
+      scenario:'场景：你需要在公司内部搭建一个"AI产品助手"，集成产线数据查询、竞品情报、需求文档模板，供产品团队日常使用。',
+      q:'最佳技术方案是？',
+      opts:[
+        'A. 基于RAG架构：向量数据库存储内部文档+KPI数据，Claude/GPT作为推理引擎，前端搭建轻量查询界面',
+        'B. 让大家各自用ChatGPT',
+        'C. 开发一个完整的SaaS平台',
+        'D. 用飞书机器人实现',
+        'E. 做一个Excel插件'
+      ],
+      scores:[4,0,1,2,1], best:0,
+      explain:'企业级AI产品助手=内部知识库(RAG)+大模型推理+轻量UI。制造业PM需要理解RAG基础架构。'
+    }
+  ],
+  data: [
+    { // Level 0
+      level:0, difficulty:'初阶',
+      scenario:'场景：质检部门给了你过去6个月的缺陷数据（CSV，8000行），需要找出良品率下降的根因。',
+      q:'最优AI数据分析方式是？',
+      opts:[
+        'A. 手工在Excel做透视表',
+        'B. 将CSV导入Claude Code Interpreter，描述业务背景（工序、物料、班次），让AI运行探索性分析并可视化',
+        'C. 直接问质检部门',
+        'D. 用Python逐个分析',
+        'E. 只看最近一个月的'
+      ],
+      scores:[1,4,0,2,0], best:1,
+      explain:'AI数据分析的关键是把"业务上下文"告诉AI：工序名、物料类型、班次制度。AI会跑相关性分析找出根因。'
+    },
+    { // Level 1
+      level:1, difficulty:'中阶',
+      scenario:'场景：你有3条产线的实时MES数据流（设备OEE、工单完成率、异常停机时间），需要建立预测性维护模型的产品需求。',
+      q:'你如何用AI辅助需求分析？',
+      opts:[
+        'A. 让AI分析历史停机数据，识别高频故障模式→定义预测模型的特征工程需求→输出产品功能规格',
+        'B. 直接让开发团队实现',
+        'C. 参考行业白皮书照搬',
+        'D. 等设备厂商提供方案',
+        'E. 用Excel分析后写需求'
+      ],
+      scores:[4,0,1,1,2], best:0,
+      explain:'预测性维护的PM需求=历史数据分析(找模式)→特征定义(输入)→功能规格(输出)。AI全程辅助。'
+    },
+    { // Level 2
+      level:2, difficulty:'高阶',
+      scenario:'场景：CEO要求你用数据回答：新建一条产线的ROI预测 vs 改造现有产线的ROI预测，需要融合产能、质量、人力、能耗多维数据。',
+      q:'如何用AI做这个复杂决策分析？',
+      opts:[
+        'A. 构建决策模型：收集多维历史数据→用AI清洗和特征工程→多场景模拟（乐观/中性/悲观）→AI生成决策报告和可视化',
+        'B. 用Excel做简单估算',
+        'C. 请咨询公司做',
+        'D. 分别问AI各维度的问题，手工汇总',
+        'E. 根据经验判断'
+      ],
+      scores:[4,1,0,2,1], best:0,
+      explain:'高层决策分析=多维数据融合+场景模拟+可视化报告。用AI建立可复现的分析Pipeline。'
+    }
+  ],
+  content: [
+    { // Level 0
+      level:0, difficulty:'初阶',
+      scenario:'场景：你要为MES系统的"智能排产"新模块写一份PRD。产线特点：5条产线、30+工序、换线时间15-45分钟、紧急插单频繁。',
+      q:'如何用AI最优地生成PRD？',
+      opts:[
+        'A. 先给AI输入业务约束（产线数、工序、换线时间、插单规则），生成PRD框架，你补充业务细节和验收标准',
+        'B. 让AI直接生成完整PRD',
+        'C. 用竞品PRD模板手动改写',
+        'D. 让AI生成10份然后挑',
+        'E. 口头交代开发，不写PRD'
+      ],
+      scores:[4,1,2,0,0], best:0,
+      explain:'制造业PRD的铁律：先喂业务约束再让AI生成框架。无上下文的AI产出=不靠谱的通用模板。'
+    },
+    { // Level 1
+      level:1, difficulty:'中阶',
+      scenario:'场景：你要为IoT平台的"设备数字孪生"功能撰写产品介绍文档，面向客户（工厂厂长）+ 内部销售。',
+      q:'AI辅助的最佳策略是？',
+      opts:[
+        'A. 分两个版本：(1)客户版：用AI生成业务价值故事（降本XX%、减故障XX%）(2)销售版：生成技术亮点+竞品对比+话术',
+        'B. 写一份通用版就行',
+        'C. 让AI生成然后不改',
+        'D. 只用PPT展示',
+        'E. 让销售自己写'
+      ],
+      scores:[4,0,1,2,0], best:0,
+      explain:'B2B工业产品文档要分角色生成。客户看ROI故事，销售看技术卖点+对比。AI可以一键双版本。'
+    },
+    { // Level 2
+      level:2, difficulty:'高阶',
+      scenario:'场景：你要撰写年度产品规划报告（30页），涵盖：市场分析、竞品动态、年度产品路线图、资源需求、风险预案。',
+      q:'AI辅助撰写的最优工作流？',
+      opts:[
+        'A. 分章节协作：(1)AI生成大纲→你确认 (2)每章：AI生成初稿→你修改关键数据 (3)AI统一润色风格 (4)AI生成Executive Summary',
+        'B. 让AI一次性生成30页',
+        'C. 自己写完全部然后让AI改',
+        'D. 用PPT模板凑',
+        'E. 参考去年的报告改改'
+      ],
+      scores:[4,0,2,1,1], best:0,
+      explain:'长文档=大纲共创+分章迭代+统一风格。人机协作模式：你负责判断，AI负责初稿和润色。'
+    }
+  ],
+  dev: [
+    { // Level 0
+      level:0, difficulty:'初阶',
+      scenario:'场景：研发团队说"AI智能排产算法"技术上很难实现（需要处理约束满足问题）。作为PM，你需要评估可行性。',
+      q:'最优做法是？',
+      opts:[
+        'A. 用AI生成技术可行性报告：调研遗传算法、约束规划、OR-Tools等方案→对比适用场景和复杂度→输出"最小可行方案"建议',
+        'B. 相信研发，直接砍需求',
+        'C. 自己学算法去验证',
+        'D. 找外部供应商报价',
+        'E. 坚持做，不管技术难度'
+      ],
+      scores:[4,0,1,2,1], best:0,
+      explain:'PM不需要懂算法实现，但需要用AI调研技术方案→理解可行性边界→推动"最小可行方案"。'
+    },
+    { // Level 1
+      level:1, difficulty:'中阶',
+      scenario:'场景：你要评估供应商提供的"AI视觉检测方案"，包含技术白皮书和API文档（50页）。',
+      q:'如何用AI快速完成技术评估？',
+      opts:[
+        'A. 上传白皮书和API文档→让AI提取技术指标(检测精度/速度/支持缺陷类型)→生成评估报告(含优劣+风险+集成复杂度)',
+        'B. 让开发团队读文档评估',
+        'C. 只看PPT演示',
+        'D. 对比各家官网',
+        'E. 做POC等结果'
+      ],
+      scores:[4,1,0,2,2], best:0,
+      explain:'供应商技术评估的AI加速：文档解析+指标提取+风险评估。PM不再依赖"开发看完告诉我"。'
+    },
+    { // Level 2
+      level:2, difficulty:'高阶',
+      scenario:'场景：公司要自研MES核心模块 vs 采购SAP/西门子方案。你需要一份技术+商业的综合评估。',
+      q:'AI辅助决策的最佳方式？',
+      opts:[
+        'A. 构建多维评估框架→AI对比自研/采购在：技术壁垒、TCO(5年)、定制灵活性、上线时间、生态兼容性→生成决策矩阵和推荐方案',
+        'B. 让AI选一个',
+        'C. 看哪个便宜选哪个',
+        'D. 让老板决定',
+        'E. 内部投票'
+      ],
+      scores:[4,0,1,1,0], best:0,
+      explain:'Make-or-Buy决策=技术+商业多维评估。AI的价值是让你同时看到所有维度的权衡。'
+    }
+  ],
+  workflow: [
+    { // Level 0
+      level:0, difficulty:'初阶',
+      scenario:'场景：你的日常：每天早会看产线数据、处理异常工单、更新产品Backlog。花费大量时间在重复性工作上。',
+      q:'如何用AI优化这个工作流？',
+      opts:[
+        'A. AI自动化：(1)每天自动拉取MES数据生成日报摘要 (2)异常工单AI自动分类分级 (3)Backlog根据影响面AI自动排序',
+        'B. 保持现状，已经够高效了',
+        'C. 招一个助理',
+        'D. 用Excel宏',
+        'E. 只看异常'
+      ],
+      scores:[4,0,1,1,0], best:0,
+      explain:'PM日常60%是重复劳动。AI可以让数据报表自动化、异常分级化、优先级智能化。'
+    },
+    { // Level 1
+      level:1, difficulty:'中阶',
+      scenario:'场景：你要协调生产、质量、IT三个部门，推动MES新模块上线。每周有大量沟通和文档同步。',
+      q:'AI如何提升跨部门协同效率？',
+      opts:[
+        'A. AI工具链：会议纪要AI自动生成+任务分配到人→需求变更AI分析影响面→进度报告AI自动汇总各部门数据→风险预警自动触发',
+        'B. 多开会',
+        'C. 用企业微信',
+        'D. 建共享Excel',
+        'E. 写邮件'
+      ],
+      scores:[4,0,1,1,2], best:0,
+      explain:'制造业PM的跨部门协同=信息透明+影响评估+风险预警。AI让这三点自动化。'
+    },
+    { // Level 2
+      level:2, difficulty:'高阶',
+      scenario:'场景：你要设计一套"AI+产品"的工作SOP，覆盖从需求发现→方案设计→开发跟进→上线复盘的全流程。',
+      q:'SOP设计的最优思路是？',
+      opts:[
+        'A. 每个阶段定义AI介入点：需求发现(AI分析产线数据+用户反馈)→方案设计(AI生成PRD+原型)→开发跟进(AI辅助技术评审)→上线复盘(AI自动生成数据报告+改进建议)',
+        'B. 保持现有流程不变',
+        'C. AI随便用',
+        'D. 让每个PM自己决定怎么用AI',
+        'E. 只在需求阶段用AI'
+      ],
+      scores:[4,0,1,2,2], best:0,
+      explain:'成熟团队的标志=SOP化。为每个产品阶段定义明确的AI介入点和产出标准。'
+    }
+  ],
+  security: [
+    { // Level 0
+      level:0, difficulty:'初阶',
+      scenario:'场景：你计划将某产线的工艺参数上传到云端AI工具分析，但数据包含配方信息和工序参数。',
+      q:'正确的做法是？',
+      opts:[
+        'A. 先脱敏处理（去除配方比例、替换参数范围为区间），使用企业版AI（数据不用于训练），确认符合公司数据安全规范',
+        'B. 没关系，直接上传',
+        'C. 不传敏感数据就行',
+        'D. 放弃使用AI',
+        'E. 让IT处理，你不管'
+      ],
+      scores:[4,0,2,1,1], best:0,
+      explain:'制造业数据安全=脱敏+企业版AI+合规确认。三缺一不可。'
+    },
+    { // Level 1
+      level:1, difficulty:'中阶',
+      scenario:'场景：你发现竞品的产品经理用AI分析了你们公司官网的产品介绍，输出了详细的竞品分析报告。',
+      q:'这给你什么启示？',
+      opts:[
+        'A. 建立AI使用边界：(1)对外：规范公开信息脱敏策略 (2)对内：制定AI工具使用规范，敏感数据使用私有化部署 (3)竞品分析：合法合规收集公开信息',
+        'B. 无所谓',
+        'C. 禁止所有人用AI',
+        'D. 也去分析竞品',
+        'E. 加密官网'
+      ],
+      scores:[4,0,1,2,1], best:0,
+      explain:'AI让信息获取更便捷，也意味着你的公开信息也可能被AI分析。边界意识是双向的。'
+    },
+    { // Level 2
+      level:2, difficulty:'高阶',
+      scenario:'场景：你要推动公司在"AI使用规范"上制定制度。涉及到数据分级、工具白名单、员工培训。',
+      q:'作为PM，你的最佳推动策略？',
+      opts:[
+        'A. 三线并行：(1)联合IT/法务制定数据分级标准 (2)牵头梳理AI工具评估矩阵（安全等级+适用场景） (3)组织全员AI安全意识培训，用真实案例说明风险',
+        'B. 等IT部门出规范',
+        'C. 只关注自己的使用',
+        'D. 买最好的安全软件',
+        'E. 参考其他公司的抄一份'
+      ],
+      scores:[4,1,0,1,2], best:0,
+      explain:'AI治理=数据分级+工具评估+人员培训。PM需要推动制度，不只是遵守制度。'
+    }
+  ],
+  strategy: [
+    { // Level 0
+      level:0, difficulty:'初阶',
+      scenario:'场景：CTO问你：在工业4.0和AI大背景下，产品经理的工作方式会发生什么变化？',
+      q:'最佳回答是？',
+      opts:[
+        'A. 从"经验驱动"到"数据+AI驱动"：实时感知产线痛点→精准定义需求→AI辅助方案设计和验证→从卖功能进化到卖智能服务（预测性维护、智能排产、数字孪生）',
+        'B. AI可以替代产品经理',
+        'C. 没啥变化，还是写PRD',
+        'D. 需要所有PM学编程',
+        'E. 等AI成熟了再说'
+      ],
+      scores:[4,0,0,1,1], best:0,
+      explain:'工业4.0 PM的核心转变：感知方式变了（实时数据）、设计工具变了（AI辅助）、价值主张变了（功能→智能服务）。'
+    },
+    { // Level 1
+      level:1, difficulty:'中阶',
+      scenario:'场景：CEO说：竞争对手已经开始用AI做"预测性维护"和"智能排产"了，我们怎么应对？',
+      q:'作为产品负责人，你的战略级回答是？',
+      opts:[
+        'A. 三步走：(1)用AI快速完成竞品能力拆解 (2)识别我们的差异化优势（如行业know-how、客户关系） (3)提出"AI增强而非替代"策略：在现有产品上加AI层，而非推倒重建',
+        'B. 我们也马上做',
+        'C. 降价竞争',
+        'D. 请咨询公司',
+        'E. 观望'
+      ],
+      scores:[4,0,0,1,2], best:0,
+      explain:'AI竞争策略=知己知彼+差异化定位+"增强非替代"。制造业B2B产品切换成本高，AI增强是性价比最高的路线。'
+    },
+    { // Level 2
+      level:2, difficulty:'高阶',
+      scenario:'场景：公司要制定3年AI产品战略。你要在董事会上提出产品视角的AI路线图。',
+      q:'最能打动董事会的方案是？',
+      opts:[
+        'A. "AI产品三级火箭"：(1)Year1-效率提升：用AI优化现有产品体验(MES智能分析/IoT异常检测) (2)Year2-能力升级：推出AI原生模块(预测性维护/智能排产) (3)Year3-生态平台：开放AI能力API，构建工业APP生态，数据驱动的新商业模式',
+        'B. 大量招AI人才',
+        'C. 购买最先进的AI系统',
+        'D. 与AI独角兽合作',
+        'E. 跟随行业龙头'
+      ],
+      scores:[4,0,1,1,3], best:0,
+      explain:'董事会=战略+节奏+ROI。三级火箭清晰展示了渐进投入和递进产出，比"买买买"更有说服力。'
+    }
+  ]
+};
+
+
+// 金融×PM 测评数据 (8维度×3级=24题)
+const FIN_PM_QUIZ = {
+prompt: [{level:0,difficulty:"初阶",scenario:"场景：你负责智能风控产品，需要让AI分析信贷审批数据来发现新的风控规则。你手上有最近6个月的审批数据（含拒绝原因）。",q:"如何用提示词让AI成为风控分析专家？",opts:["A. 先设定角色——「你是银行风控专家」，喂入字段说明（申请金额/收入/征信分/审批结果/拒绝原因），要求分析：拒绝率趋势、高风险特征组合、建议新增风控规则","B. 把数据丢给AI让它自己判断","C. 让AI写代码分析","D. 问AI「风控怎么做」","E. 直接让AI做审批决策"],scores:[4,0,1,0,0],best:0,explain:"金融PM的Prompt关键：角色设定+字段解释+分析框架。风控场景必须说明每个字段的业务含义。"},{level:1,difficulty:"中阶",scenario:"场景：你要让AI对比本行和3家竞品的信用卡审批策略差异。数据来源：竞品官网、行业报告、监管披露。",q:"最佳Prompt设计是？",opts:["A. 三步法：(1)设定「信用卡产品对比分析师」角色 (2)按维度结构化输入（额度策略/利率策略/风控门槛/权益设计）(3)要求输出对比矩阵+差异化机会+本行优化建议","B. 给AI四个链接让它读","C. 让AI总结每家策略","D. 问AI谁家最好","E. 只关注利率对比"],scores:[4,0,1,0,1],best:0,explain:"竞品分析Prompt=角色+结构化维度+可执行输出。金融竞品对比必须覆盖完整产品维度。"},{level:2,difficulty:"高阶",scenario:"场景：你要设计一个「AI辅助反洗钱(AML)交易监控」产品的PRD。涉及：交易规则引擎、异常检测模型、case管理流程、监管报告生成。",q:"如何用多轮Prompt链完成这个复杂任务？",opts:["A. 5轮Prompt链：(1)AML法规翻译官→解析最新监管要求 (2)交易场景分析师→枚举可疑交易模式 (3)产品架构师→设计模块架构 (4)PRD撰写助手→逐章节生成 (5)合规审查员→逐条核对监管对齐度。每轮输出作为下一轮输入","B. 一次性让AI写完整PRD","C. 先写PRD再查法规","D. 让风控部门写需求，AI润色","E. 参考其他银行的文档改一改"],scores:[4,0,0,1,2],best:0,explain:"复杂金融产品PRD=Prompt链。AML这种强监管产品必须法规先行，逐层构建，确保每个环节合规。"}],
+tools: [{level:0,difficulty:"初阶",scenario:"场景：你是银行信贷产品经理，需要分析一份100页的《消费金融行业监管新规》PDF，提取对你们产品的影响。",q:"最佳工具体验是什么？",opts:["A. 上传PDF到Claude/GPT → 设定「消费金融产品合规专家」角色 → 要求：(1)提取影响现有产品线的条款 (2)按影响等级分类 (3)给每项列出整改建议和截止时间","B. 手动读PDF然后自己总结","C. 用搜索引擎搜索摘要","D. 让法务部门读然后告诉你","E. 用OCR工具转文字再看"],scores:[4,0,0,1,1],best:0,explain:"AI分析长文档=上传+角色+结构化输出。金融合规文档的分析效率从3天→30分钟。"},{level:1,difficulty:"中阶",scenario:"场景：你需要评估「接入新版征信API」的技术方案。方案涉及数据加密传输、接口鉴权、异常重试、数据映射。",q:"如何用AI辅助技术评估？",opts:["A. 上传API文档→设定「金融系统架构师」角色→要求：(1)评估接口设计合理性 (2)标注安全合规要点(加密/签名/鉴权) (3)给出现有系统的对接改动量评估 (4)列出潜在风险和降级方案","B. 让研发自己评估不用AI","C. 问AI「这个API好不好」","D. 只关注接口响应速度","E. 找供应商要方案"],scores:[4,0,0,0,1],best:0,explain:"金融API评估：AI擅长架构审查+合规检查+风险评估。但最终技术决策必须结合内部系统现状。"},{level:2,difficulty:"高阶",scenario:"场景：你要搭建一个「AI辅助信贷决策」的实验环境。需要脱敏的审批数据、模型评估框架、AB测试方案、合规审查流程。",q:"如何用AI工具组合搭建这个环境？",opts:["A. 工具链组合：(1)Claude做数据脱敏方案设计+模型评估指标定义 (2)Cursor辅助写AB测试框架代码 (3)NotebookLM做合规要求深度研究 (4)Perplexity搜索行业最佳实践，四者协同","B. 只用Claude做所有事情","C. 找一个开源的直接用","D. 外包给数据公司","E. 先用Excel做分析"],scores:[4,0,0,1,0],best:0,explain:"复杂场景=多工具协同。金融实验环境涉及数据+模型+测试+合规，单一工具无法覆盖全链。"}],
+data: [{level:0,difficulty:"初阶",scenario:"场景：你拿到一份消费贷产品的用户行为数据：10万条记录，含申请金额、审批额度、使用率、逾期情况、提前还款。",q:"如何用AI做初步分析发现产品优化方向？",opts:["A. 上传CSV→描述每个字段的业务含义→要求：(1)用户分层(按额度使用率+信用等级) (2)识别高逾期特征群体 (3)发现「额度未充分使用」的用户群→提出提额或降额的产品建议","B. 直接用Excel做透视表","C. 让AI预测谁会逾期","D. 只关注逾期率一个指标","E. 等数据部门出报告"],scores:[4,1,0,0,0],best:0,explain:"金融数据分析=业务字段解释+分层分析+可执行建议。AI的优势在于多维交叉分析的速度。"},{level:1,difficulty:"中阶",scenario:"场景：信用卡产品的激活率从65%降到52%。你有用户画像、渠道来源、卡片权益偏好、竞品权益数据。",q:"如何用AI找出激活率下降的根因并提出产品优化？",opts:["A. 四步分析：(1)AI对比激活vs未激活用户画像差异 (2)按渠道来源分析激活率变化 (3)提取权益偏好与竞品差异 (4)输出：根因假设Top3+对应的产品优化方案（如调整新户权益组合、优化激活流程）","B. 做用户调研问卷","C. 看竞品怎么做的照抄","D. 增加推广预算","E. 降低办卡门槛"],scores:[4,1,0,0,0],best:0,explain:"金融产品的激活率=用户画像+渠道+权益。AI能快速交叉分析找出最可能的根因组合。"},{level:2,difficulty:"高阶",scenario:"场景：你要构建一个「理财产品的智能推荐」模型。数据源：用户风险偏好问卷、历史交易行为、持仓数据、市场行情。合规要求：适当性管理、风险揭示。",q:"如何设计AI辅助的产品策略方案？",opts:["A. 六维度方案：(1)数据层-多源用户画像融合 (2)模型层-协同过滤+知识图谱 (3)合规层-适当性规则引擎前置 (4)解释层-AI生成推荐理由 (5)实验层-AB测试框架 (6)监控层-推荐效果+合规指标，AI辅助每层设计","B. 直接用协同过滤算法推荐","C. 按收益率排序推荐","D. 让理财经理手动推荐","E. 只推荐低风险产品"],scores:[4,0,0,0,0],best:0,explain:"金融智能推荐≠电商推荐。合规是第一优先级：推荐之前必须有适当性校验，推荐之后必须有风险揭示。"}],
+content: [{level:0,difficulty:"初阶",scenario:"场景：你要写一份面向C端用户的「智能存款」产品介绍页面。目标是让用户理解产品优势，同时满足监管的「充分信息披露」要求。",q:"如何用AI高效完成？",opts:["A. 先喂AI监管要求（存款保险、利率说明、风险提示的披露规范）→再给产品参数（利率/期限/起存金额/提前支取规则）→要求生成3个版本（简洁版/详细版/合规版）→选择并人工优化","B. 让AI自由发挥创意","C. 参考竞品页面改写","D. 只写产品优势不提风险","E. 用法务模板填充"],scores:[4,0,1,0,0],best:0,explain:"金融产品文案=监管要求+产品参数+多版本输出。合规不是限制创意，是创意的边界。"},{level:1,difficulty:"中阶",scenario:"场景：你要输出一份面向合作渠道方的「联合贷产品合作方案书」，包含产品设计、分润模型、风险共担机制、技术对接方案。",q:"如何用AI确保方案专业且全面？",opts:["A. 结构化生成：(1)定义方案书章节结构 (2)每章先输入业务约束（监管比例、行内风控要求） (3)AI生成初稿→人工审核关键数字→AI统一润色格式 (4)最后用AI做「挑刺」：找出逻辑漏洞和遗漏","B. 参考历史方案模板填充","C. 让商务团队写好AI美化","D. 每个章节单独找一个AI写","E. 先签了再说细节"],scores:[4,1,0,0,0],best:0,explain:"合作方案书=结构+约束+迭代+审查。让AI先写再让AI挑刺，效果出奇好。"},{level:2,difficulty:"高阶",scenario:"场景：你要代表公司在行业论坛上发表「AI重塑零售银行」的主题演讲。需要兼顾专业性、前瞻性和行业影响力。",q:"如何用AI打造有深度的行业演讲稿？",opts:["A. 五步打造：(1)AI研究最新行业报告和趋势 (2)AI提炼3-5个核心观点+数据支撑 (3)用AI做「魔鬼代言人」挑战每个观点 (4)AI生成叙事框架（问题→洞察→案例→展望） (5)AI优化语言节奏和修辞，最终人工注入个人风格","B. 让AI写一篇然后照着念","C. 讲公司产品介绍的PPT","D. 找公关公司代写","E. 讲通用的AI趋势"],scores:[4,0,0,1,0],best:0,explain:"行业演讲=研究+观点+挑战+叙事+润色。AI负责信息密度，你负责思想深度。"}],
+dev: [{level:0,difficulty:"初阶",scenario:"场景：研发团队说「我们可以用大模型做智能客服」，你是PM需要快速评估技术可行性和产品价值。",q:"如何用AI辅助技术评估？",opts:["A. 用AI三步评估：(1)让AI列出金融智能客服的技术方案对比(规则引擎vs大模型vs混合) (2)让AI分析每方案的优缺点、成本和风险 (3)结合你的产品判断输出「是否值得投入」的决策矩阵","B. 直接相信研发的判断","C. 问AI「大模型好不好」","D. 找外部技术顾问","E. 先做一个MVP看看"],scores:[4,0,0,1,2],best:0,explain:"PM评估技术方案=AI提供信息+你做决策。AI帮你快速建立技术认知，但产品价值的判断需要行业经验。"},{level:1,difficulty:"中阶",scenario:"场景：你要为「智能风控引擎」产品写技术需求。涉及：实时计算（<50ms响应）、规则热更新、模型可解释性、监管审计轨迹。",q:"如何用AI写出研发看得懂的技术需求？",opts:["A. 四步法：(1)AI解释每个技术概念的基础知识 (2)描述业务场景→AI转化为技术约束 (3)AI按「功能需求+非功能需求+接口规范」模板生成初稿 (4)用AI模拟研发评审找出表述不清的地方","B. 写成普通PRD希望研发理解","C. 把所有技术细节都写进需求","D. 只写功能描述不管技术约束","E. 让研发自己写技术需求"],scores:[4,0,0,0,0],best:0,explain:"金融技术需求=业务→技术转译+非功能需求。金融系统最大的非功能需求是：实时性、可解释性、可审计性。"}],
+workflow: [{level:0,difficulty:"初阶",scenario:"场景：你每天需要花2小时整理各业务线的数据日报：存款、贷款、理财、信用卡四个板块的昨日数据。",q:"如何用AI自动化这个重复劳动？",opts:["A. 建立AI日报工作流：(1)用AI设计标准化日报模板（每板块3-5个核心指标） (2)设定数据源→AI自动提取和计算 (3)AI生成日报初稿含异常标注 (4)你花10分钟审核加评语→一键发送","B. 继续手工做日报","C. 让每个业务线自己报数据","D. 只关注一个板块","E. 雇一个助理做"],scores:[4,0,0,0,1],best:0,explain:"日报自动化=模板化+AI提取+人工审核。从2小时→10分钟，而且AI善于发现异常数据。"},{level:1,difficulty:"中阶",scenario:"场景：你要推动团队建立「AI嵌入产品评审」的流程。当前评审会的痛点：需求文档质量参差、评审讨论发散、结论难以追踪。",q:"如何设计AI协同的产品评审？",opts:["A. 三阶段AI嵌入：(1)评审前-AI预审PRD，标注逻辑漏洞/数据缺失/边界遗漏 (2)评审中-AI实时记录讨论要点并结构化 (3)评审后-AI生成会议纪要和待办事项，追踪闭环","B. 让AI替你做决策","C. 只在写PRD时用AI","D. 每次评审会都用AI录屏","E. 取消评审会改成文档异步评审"],scores:[4,0,0,0,1],best:0,explain:"AI嵌入评审=前中后全流程。关键不是替代人评审，而是让人的讨论更高效、更有记录。"},{level:2,difficulty:"高阶",scenario:"场景：你是金融产品总监，要建立团队级的「AI辅助产品管理」工作体系。5个PM，每人负责不同产品线。",q:"如何设计可落地的AI工作体系？",opts:["A. 四层体系：(1)工具层-每人配置AI工具矩阵（分析/写作/研究） (2)流程层-在PRD评审/竞品分析/数据分析节点嵌入AI (3)知识层-建立团队共享的Prompt库和最佳实践 (4)度量层-追踪AI使用带来的效率和质量提升指标，季度复盘迭代","B. 每人自己摸索怎么用AI","C. 购买一套AI产品管理系统","D. 设一个AI专员的岗位","E. 出一个AI使用手册发给大家"],scores:[4,1,0,0,0],best:0,explain:"团队级AI工作体系=工具+流程+知识+度量。个人用AI靠自觉，团队用AI靠体系。"}],
+security: [{level:0,difficulty:"初阶",scenario:"场景：你打算用公共AI分析一份包含「客户姓名+身份证号」的信贷审批数据。",q:"正确的做法是？",opts:["A. 先用AI生成脱敏脚本→对姓名/身份证号/手机号/银行卡号做脱敏处理→确认脱敏完整→再将脱敏后数据上传企业版AI分析","B. 直接上传分析，AI公司有保密协议","C. 把数据打印出来手动分析","D. 只删除姓名就上传","E. 用Excel代替AI分析"],scores:[4,0,0,0,0],best:0,explain:"金融数据使用AI的铁律：先脱敏后上传，且必须用企业版AI。客户隐私不是技术问题，是法律红线。"},{level:1,difficulty:"中阶",scenario:"场景：你要推动公司在AI使用上建立规范。涉及数据分级、工具白名单、员工培训。作为PM，需要推动产品部门率先合规。",q:"最佳推动策略？",opts:["A. 三线并行：(1)联合合规/法务制定数据分级标准（公开/内部/敏感/绝密） (2)牵头建立AI工具评估矩阵（安全等级×适用场景） (3)用真实案例组织全员安全意识培训（某银行因数据泄露被罚的案例）","B. 等合规部门制定规范再执行","C. 只限制敏感数据不限制工具","D. 禁止所有人用AI","E. 只关注自己的合规"],scores:[4,0,1,0,0],best:0,explain:"金融AI合规=数据分级+工具评估+人员培训。PM不只是遵守者，应该是推动者。"},{level:2,difficulty:"高阶",scenario:"场景：你要设计一个面向B端客户的「AI辅助授信」产品的安全架构。产品需要调用外部AI能力，同时确保客户数据安全。",q:"最佳安全架构设计？",opts:["A. 三隔离架构：(1)数据隔离-客户数据不出私有云，只传脱敏后的特征向量 (2)模型隔离-AI模型部署在企业私有环境，不做公网调用 (3)审计隔离-每次AI调用记录完整的审计日志（谁/什么时候/什么数据/什么结果），满足监管可追溯要求","B. 直接调用公有云AI接口","C. 自己做一个小模型","D. 让客户自己处理数据安全","E. 签NDA后使用公共AI"],scores:[4,0,0,0,0],best:0,explain:"金融AI产品的安全=数据+模型+审计三重隔离。监管看的就是每一步都可追溯。"}],
+strategy: [{level:0,difficulty:"初阶",scenario:"场景：CEO问：AI对金融产品最大的影响是什么？",q:"作为PM的最佳回答是？",opts:["A. AI让「普惠金融」真正可行：(1)智能风控降低服务成本→覆盖长尾客户 (2)个性化推荐实现千人千面的财富管理 (3)智能客服7×24服务→从「产品为中心」到「客户为中心」的范式转移","B. AI能替代所有金融产品经理","C. AI让交易更快","D. AI主要影响科技部门","E. AI是未来的事现在不用急"],scores:[4,0,0,0,0],best:0,explain:"金融PM的战略视角：AI改变的不仅是效率，而是让「服务更多人」成为可能。普惠金融是最大的战略机会。"},{level:1,difficulty:"中阶",scenario:"场景：竞品App推出了「AI理财顾问」功能，用户可以对话式咨询投资建议。CEO问你「我们要不要跟进」？",q:"你的战略级回答是？",opts:["A. 不盲目跟进，三步分析：(1)AI拆解竞品功能：是真正的AI还是规则引擎包装？用户真实使用率？ (2)评估我们的差异化：客户信任度/理财经理团队/线下网点是优势 (3)提出「AI增强理财经理」策略（AI辅助经理做方案，不是替代），同时小范围灰度测试纯AI顾问","B. 马上做一个一样的","C. 不做，我们有理财经理","D. 外包给AI公司做","E. 等市场验证后再决定"],scores:[4,0,0,0,1],best:0,explain:"金融产品跟进决策=竞品拆解+差异化评估+渐进策略。金融行业的信任是壁垒，善用而非放弃。"},{level:2,difficulty:"高阶",scenario:"场景：董事会要求你提出「未来3年AI驱动的零售银行产品战略」。",q:"最能说服董事会的方案？",opts:["A. 「AI三级火箭」：(1)Year1-效率革命：AI嵌入客服/风控/营销，ROI可量化 (2)Year2-体验升级：AI个性化理财/智能投顾/智能存款推荐 (3)Year3-生态重构：开放AI能力API构建金融科技生态，从「卖产品」到「卖智能服务」，每阶段配KPIs和投资回报预估","B. 大量投资AI基础设施","C. 收购一家AI公司","D. 与互联网大厂合作","E. 在每个产品里加AI功能"],scores:[4,0,1,0,0],best:0,explain:"董事会要的是：清晰的路线图+可量化的ROI+渐进的投资节奏。三级火箭展示从效率→体验→生态的递进逻辑。"}]
+};
+
+// 智能汽车×PM 测评数据
+const AUTO_PM_QUIZ = {
+prompt: [{level:0,difficulty:"初阶",scenario:"场景：你是智能座舱PM，想用AI分析用户在车载语音助手的对话日志，发现高频需求和痛点。日志含10万条脱敏对话。",q:"如何设计Prompt让AI高效分析？",opts:["A. 设定「车载语音体验分析师」角色→描述日志格式（时间/功能域/用户意图/是否成功/对话轮次）→要求：(1)高频意图TOP10 (2)失败率最高的功能域 (3)用户情绪变化模式 (4)提出3个产品优化建议","B. 把日志丢给AI说「分析一下」","C. 让AI只统计意图次数","D. 找实习生手动看1000条","E. 只看成功率最高的功能"],scores:[4,0,0,1,0],best:0,explain:"车载语音分析=格式解释+多维度输出。AI的关键价值是发现人工难以察觉的模式。"},{level:1,difficulty:"中阶",scenario:"场景：你要对比特斯拉、小鹏、理想的智能驾驶产品策略，数据来源：官网、评测视频、用户社区。",q:"Prompt最佳设计？",opts:["A. 分解为4个子任务：(1)产品功能矩阵提取（感知/决策/控制/交互） (2)定价策略对比（标配vs选装vs订阅） (3)用户口碑情感分析 (4)技术路线差异（纯视觉vs激光雷达vs融合），最后汇总为战略建议","B. 给AI三个链接让它总结","C. 用AI翻译竞品英文官网","D. 问AI谁家技术最强","E. 只对比硬件配置"],scores:[4,0,0,0,1],best:0,explain:"智驾竞品分析=功能+定价+口碑+技术路线四维分解。汽车产品对比的维度远超手机。"},{level:2,difficulty:"高阶",scenario:"场景：你要用Prompt链设计「智能座舱场景库」。从用户Journey出发，定义100+个车内场景。",q:"最佳Prompt链方案？",opts:["A. 5轮Prompt链：(1)用户旅程专家→定义上下班/接送孩子/长途自驾等场景分类 (2)场景设计师→每类展开为具体用例 (3)交互设计师→设计最佳交互方式(语音/触控/手势) (4)体验评估师→标注风险点 (5)优先级排序师→按频率×体验影响排序","B. 让AI枚举所有可能场景","C. 脑暴会然后AI记录","D. 参考竞品场景库改编","E. 按功能列表逐一设计"],scores:[4,0,1,2,1],best:0,explain:"场景库设计=用户体验×AI辅助。人定义场景分类和原则，AI负责大规模展开和交叉检查。"}],
+tools: [{level:0,difficulty:"初阶",scenario:"场景：你是智能驾驶PM，需要分析一份英文的Euro NCAP 2026自动驾驶安全评估标准（80页PDF）。",q:"最佳工具用法？",opts:["A. 上传PDF到Claude→设定「汽车安全标准分析师」角色→要求：(1)提取所有评分维度和权重 (2)对比2025版变化点 (3)标注影响我方产品设计的关键条款 (4)输出待办事项按优先级排列","B. 用翻译软件逐段翻译","C. 找海外同事帮忙解读","D. 只看摘要和结论","E. 等官方中文版"],scores:[4,0,0,0,0],best:0,explain:"安全标准分析=AI高价值场景。80页英文PDF→30分钟读透，且不易遗漏关键条款。"},{level:1,difficulty:"中阶",scenario:"场景：你要评估「把大模型部署到车端」的技术可行性。考虑：算力限制（<50TOPS）、实时性（<500ms）、离线可用、OTA更新。",q:"如何用AI组合工具评估？",opts:["A. 多工具协同：(1)Perplexity搜索最新车端大模型方案 (2)Claude分析技术白皮书→评估各方案可行性 (3)Cursor辅助写技术评估文档→画架构对比图 (4)用AI模拟推理延时估算","B. 等芯片厂商出方案","C. 让研发团队独立评估","D. 先在云端跑通再说","E. 看论文了解技术前沿"],scores:[4,0,0,1,0],best:0,explain:"车端AI评估=搜索+分析+文档+估算四件套。车端部署的约束比云端严苛10倍。"}],
+data: [{level:0,difficulty:"初阶",scenario:"场景：你拿到1000位车主的OTA升级行为数据：车型、升级类型（功能/安全/体验）、下载时间、安装时间、成功率、回滚率。",q:"如何用AI分析OTA升级体验？",opts:["A. 上传CSV→说明字段含义→AI分析：(1)各车型升级成功率对比 (2)下载/安装耗时分布 (3)回滚原因分类 (4)输出「OTA体验优化」的产品建议","B. 只看成功率一个指标","C. 用Excel画趋势图","D. 发问卷调研用户感受","E. 让售后团队反馈"],scores:[4,0,0,2,0],best:0,explain:"OTA数据分析=成功率+耗时+回滚原因三维度。AI能同时跑多个分析维度。"},{level:1,difficulty:"中阶",scenario:"场景：智能驾驶功能的用户使用数据分析：各功能的开启率、使用时长、接管率、用户反馈。",q:"如何找出「哪些智驾功能用户最爱用vs最不敢用」？",opts:["A. 四维交叉分析：(1)功能使用率×用户画像（新手vs老司机） (2)接管率×场景（拥堵/高速/泊车） (3)使用频次×使用时长 (4)用户反馈情感分析→输出：核心功能强化清单+体验优化优先级","B. 按使用率排个序","C. 只关注接管率","D. 看App Store评分","E. 问销售顾问用户反馈"],scores:[4,0,0,0,0],best:0,explain:"智驾数据分析=使用率+接管率+场景+用户画像四维交叉。「不敢用」比「不好用」更需要PM关注。"},{level:2,difficulty:"高阶",scenario:"场景：你要基于100万辆车的行驶数据（脱敏），设计「UBI车险」产品。涉及：风险评分模型、定价策略、隐私保护。",q:"产品设计中的数据策略？",opts:["A. 五步策略：(1)AI定义驾驶风险特征（急加速/急刹车/夜间行驶/高速占比） (2)AI辅助设计可解释风险评分模型 (3)AI分析不同用户群体的价格敏感度 (4)AI生成驾驶行为改善建议→将保险升级为安全服务 (5)隐私保护：数据不出车，只上传评分","B. 按里程定价","C. 学国外UBI模式照搬","D. 交给精算部门设计","E. 让用户自己选择保险套餐"],scores:[4,0,0,1,0],best:0,explain:"UBI=风险评分+定价+隐私+增值服务四合一。AI让保险从「统一定价」走向「千人千价」。"}],
+content: [{level:0,difficulty:"初阶",scenario:"场景：你要为OTA新版本写更新说明。更新包含：新增自动泊车2.0、修复CarPlay断连Bug、优化冬季续航算法。",q:"如何让用户愿意主动更新？",opts:["A. 三层输出：(1)给AI功能描述+技术要点→生成「一句话亮点」如「停车从此不用手」 (2)AI生成详细版更新说明 (3)AI生成不同版本供App推送/车内弹窗/官网详情页使用","B. 写「修复了若干问题」","C. 把研发的commit log给用户看","D. 只宣传新功能不提修复","E. 抄竞品的更新说明"],scores:[4,0,0,0,1],best:0,explain:"OTA更新说明=有吸引力的文案。让用户主动更新比强制更新效果好100倍。"}],
+dev: [{level:0,difficulty:"初阶",scenario:"场景：研发团队提议用「大模型做车载语音助手」，替代现有NLU方案。作为PM需要快速判断技术可行性和产品价值。",q:"AI辅助决策方式？",opts:["A. 三步决策：(1)AI对比两个方案：现有NLU vs大模型，列出准确率/延迟/成本/离线能力 (2)AI分析车载场景特殊需求：离线可用/唤醒词准确率/多轮对话/隐私 (3)综合判断：建议先用大模型增强云端能力，车端保持轻量方案","B. 直接相信研发的提案","C. 做一个Demo对比","D. 看业界趋势跟风决定","E. 让用户投票选方案"],scores:[4,0,0,2,0],best:0,explain:"技术决策=方案对比+场景分析+渐进策略。车载场景的特殊性决定了不能一刀切用大模型。"}],
+workflow: [{level:0,difficulty:"初阶",scenario:"场景：你每周需汇报「产品线周报」：覆盖座舱/智驾/网联三产品线，含关键指标、项目进度、风险和决策点。",q:"AI协同方案？",opts:["A. 搭建AI周报工作流：(1)定义周报模板（3板块×5个核心问题） (2)各产品线用AI先填各自部分 (3)汇总后用AI统一风格+提炼「本周最关键3件事」 (4)AI生成执行摘要→人工审核→10分钟完成","B. 手工收集数据做PPT","C. 让各产线负责人各自汇报","D. 缩成1-2页简要汇报","E. 只报亮点不报风险"],scores:[4,0,1,0,0],best:0,explain:"周报自动化=模板+AI填充+人工提炼。关键是定义好核心问题让AI有聚焦方向。"}],
+security: [{level:0,difficulty:"初阶",scenario:"场景：你想用公共AI分析一批车载摄像头采集的路测图片（含车牌和行人面部），来评估感知模型的表现。",q:"正确的做法？",opts:["A. 先用AI生成脱敏脚本→对车牌/人脸/地理标记做脱敏→确认所有敏感信息已去除→再将脱敏后图片上传企业版AI分析","B. 图片不是文本数据应该没事","C. 直接上传，就几张图片","D. 模糊处理后再上传","E. 把图片缩小到看不清楚"],scores:[4,0,0,0,0],best:0,explain:"车载数据处理=脱敏先行。车牌和人脸都是个人隐私，无论多少都必须脱敏。"}],
+strategy: [{level:0,difficulty:"初阶",scenario:"场景：CEO问：智能电动汽车的「产品定义」方式在AI时代会发生什么变化？",q:"作为PM的战略级回答？",opts:["A. AI让产品定义从「功能列举」到「体验持续进化」：(1)OTA让产品上市后还能持续升级 (2)用户数据分析让需求发现从调研变成数据驱动 (3)AI让千人千面的座舱体验成为可能 (4)PM的核心能力从「定义」变成「运营」","B. 变化不大，车还是那个车","C. 主要是软件定义汽车","D. AI让自动驾驶成为现实","E. 重要的是硬件不是软件"],scores:[4,0,0,0,0],best:0,explain:"汽车PM的战略转变：从「交付即终点」到「交付即起点」。产品持续进化，PM的核心能力变了。"},{level:1,difficulty:"中阶",scenario:"场景：华为、小米、百度都在做智能汽车。CEO问：我们的差异化策略？",q:"战略回答？",opts:["A. 差异化=深度×广度矩阵：(1)深度-在智驾/座舱/安全等某一领域做到极致 (2)广度-构建车-路-云协同生态 (3)AI加速-用AI缩短产品迭代周期 (4)用户运营-AI驱动的千人千面体验","B. 做性价比最高的车","C. 跟着华为的步伐走","D. 聚焦在某一细分市场","E. 全面对标特斯拉"],scores:[4,0,0,1,0],best:0,explain:"汽车PM的差异化=深度×广度×AI加速×用户运营。科技巨头的冲击力在于AI，防御策略是场景深度。"}]
+};
+
+// 日化快消×PM 测评数据
+const CPG_PM_QUIZ = {
+prompt: [{level:0,difficulty:"初阶",scenario:"场景：你是洗发水产品经理，手上有过去12个月的电商评论（10万条），想用AI分析消费者对「控油」功效的真实评价。",q:"如何设计Prompt？",opts:["A. 设定「快消品消费者洞察分析师」→描述评论数据格式→要求：(1)控油相关的正面关键词和场景 (2)负面关键词和痛点 (3)对比竞品评价中的控油口碑 (4)输出产品改良方向和营销话术建议","B. 让AI统计「控油」出现次数","C. 只看好评不用分析差评","D. 做消费者调研问卷","E. 看竞品的宣传文案"],scores:[4,0,0,1,0],best:0,explain:"快消品评论分析=正面+负面+竞品对比+可执行建议。消费者的真实语言是最好的产品需求来源。"},{level:1,difficulty:"中阶",scenario:"场景：你要做新品概念测试：AI可以生成多个产品概念，但如何确保筛选出的概念最有市场潜力？",q:"Prompt策略？",opts:["A. 三轮筛选：(1)AI基于行业趋势+消费者洞察生成20个概念 (2)设定「快消品市场分析师」角色，按差异化/可传播性/目标人群匹配度/生产成本可行性四维度打分 (3)选取Top5用AI模拟不同消费者画像的反应","B. 让AI生成然后挑喜欢的","C. 做大规模消费者调研","D. 看竞品做什么我们做类似的","E. 让销售团队投票"],scores:[4,0,0,1,0],best:0,explain:"概念筛选=AI生成+多维度评分+模拟验证。AI帮你扩大选项池，但「什么能卖」的判断需要经验。"}],
+tools: [{level:0,difficulty:"初阶",scenario:"场景：你要分析竞品新款沐浴露的定位策略。手上有：竞品电商页面、小红书种草笔记、抖音测评视频。",q:"最佳AI工具组合？",opts:["A. 三工具协同：(1)Claude分析电商页面→提取卖点和定价策略 (2)AI分析小红书/抖音内容→提取消费者关注点和情感倾向 (3)汇总→输出竞品定位地图+我们的差异化机会","B. 手动浏览各个平台做笔记","C. 只看电商价格和销量","D. 买一份市场调研报告","E. 关注竞品抖音号"],scores:[4,0,1,0,0],best:0,explain:"快消品竞品分析=电商+社交+视频多渠道交叉。AI让碎片化信息的整合效率提升10倍。"},{level:1,difficulty:"中阶",scenario:"场景：你要做新品上市前的定价策略。销量预测、价格弹性、促销效果、渠道利润分配都需要考虑。",q:"AI辅助定价方案？",opts:["A. 五步定价：(1)AI收集竞品价格带和促销数据 (2)AI分析历史价格-销量弹性 (3)AI按渠道(天猫/京东/抖音/线下)分别建模 (4)AI生成定价方案含促销节奏和利润预估 (5)人工结合品牌定位最终决策","B. 按成本加价率定价","C. 跟竞品定一样的价格","D. 让销售渠道定价","E. 高定价高促销"],scores:[4,0,0,0,0],best:0,explain:"快消品定价=竞品+弹性+渠道+品牌。AI帮你算清账，品牌定位你来掌舵。"}],
+data: [{level:0,difficulty:"初阶",scenario:"场景：你有某SKU过去6个月的销售数据：各渠道日销量、价格、促销力度、库存、退货率。想知道什么时候该补货、什么时候该促销？",q:"AI数据分析方法？",opts:["A. 上传数据→描述业务场景→AI分析：(1)销量趋势和季节性 (2)促销对销量的真实拉动效果 (3)库存周转与促销的关联 (4)输出：补货建议时间表+促销时机推荐+滞销SKU预警","B. 看销量曲线凭经验判断","C. 按固定周期补货","D. 库存低了就补货","E. 让渠道自己管理库存"],scores:[4,0,0,0,1],best:0,explain:"快消品数据分析=趋势+促销效果+库存优化。AI帮你从「凭经验」到「看数据」。"},{level:1,difficulty:"中阶",scenario:"场景：你管理的产品线有50+SKU，想知道哪些该砍、哪些该加大投入。数据：销量、毛利、增长率、复购率、退货率。",q:"AI分析策略？",opts:["A. AI四象限分析：(1)AI按增长×利润四象限分类 (2)结合复购率和退货率识别「伪爆款」 (3)分析SKU间的替代关系避免砍错 (4)输出：裁减清单+主推清单+升级方向+预计对收入的综合影响","B. 砍掉销量最低的10个","C. 每个都保留一些","D. 让销售决定砍哪些","E. 看竞争对手有哪些SKU"],scores:[4,0,0,0,0],best:0,explain:"SKU优化=四象限+复购+替代关系。砍SKU简单，砍对SKU需要数据支撑。"}],
+content: [{level:0,difficulty:"初阶",scenario:"场景：你要为新品洗发水写电商详情页。需要：差异化卖点+成分故事+使用场景+用户证言。",q:"AI协作方式？",opts:["A. 四步共创：(1)给AI产品brief(成分/功效/目标人群)→AI生成20个卖点方向 (2)选出最佳方向→AI生成3版详情页文案(情感型/理性型/场景型) (3)AI生成配套的小红书种草文案 (4)人工注入品牌声音和合规审核","B. 让AI自由发挥写一篇","C. 找一个参考竞品的改写","D. 请文案团队写不用AI","E. 只列功能和成分表"],scores:[4,0,0,1,1],best:0,explain:"电商详情页=AI发散+人工聚焦。AI擅长量产选项，你擅长挑出最能打动消费者的那个。"}],
+workflow: [{level:0,difficulty:"初阶",scenario:"场景：你每周需要出一份品类周报给管理层：含销售额、市场份额、新品表现、竞品动作。目前手工收集数据耗时3小时。",q:"AI自动化方案？",opts:["A. 搭建AI周报管线：(1)设定数据看板自动取数 (2)AI自动生成销量和市场份额的文字解读 (3)AI抓取竞品动向（新品/促销/社媒热度） (4)AI集成输出→你10分钟审核加评语","B. 继续手工做","C. 让数据分析师出报告","D. 缩减为月报","E. 只看销售额一个指标"],scores:[4,0,0,0,1],best:0,explain:"品类周报自动化=自动取数+AI解读+人工审核。从3小时→10分钟。"}],
+security: [{level:0,difficulty:"初阶",scenario:"场景：你想用公共AI分析竞品的配方成分表来推测其技术路线。这些配方信息是竞品公开在包装上的。",q:"需要注意什么？",opts:["A. 竞品公开信息分析是合法的，但注意：(1)仅使用公开信息，不要通过非公开渠道获取 (2)分析结果仅用于内部竞争策略 (3)不要用AI生成「某某竞品含有害成分」等不实信息 (4)配方推测结论需标注「基于公开信息分析」","B. 这样做不道德不应该做","C. 无所谓反正包装上都有","D. 让供应链去打听更准确","E. 用别的方法拿到更多配方信息"],scores:[4,0,0,0,0],best:0,explain:"竞品分析边界=公开信息OK+内部使用+不造谣+标注来源。合法竞争≠不正当竞争。"}],
+strategy: [{level:0,difficulty:"初阶",scenario:"场景：CEO问：AI对快消品行业最大的改变是什么？",q:"作为PM的最佳回答？",opts:["A. AI让快消品从「大规模标准化」走向「大规模个性化」：(1)消费者洞察-从问卷到海量社媒实时分析 (2)产品创新-从经验驱动到数据+AI驱动 (3)营销-从大众广告到AI千人千面 (4)供应链-从固定排产到AI预测驱动，全链路提效","B. AI让广告投放更精准","C. AI可以替代配方研发","D. AI主要影响电商渠道","E. 快消品不太需要AI"],scores:[4,0,0,0,0],best:0,explain:"快消品AI=洞察+创新+营销+供应链全链路。最大的变化是从「猜消费者要什么」到「知道消费者要什么」。"}]
+};
+
+// ==================== ADAPTIVE QUIZ ENGINE ====================
+const DIM_ORDER = ['prompt','tools','data','content','dev','workflow','security','strategy'];
+
+function startAdaptiveQuiz() {
+  S._quizWeights = getPMWeights();
+  const dimOrder = DIM_ORDER;
+  // Randomize dimension order for "every quiz is different"
+  S._quizDims = [...dimOrder].sort(() => Math.random() - 0.5);
+  S._quizByDim = getQuizData();
+  S._quizCurrentLevel = {};
+  dimOrder.forEach(d => { S._quizCurrentLevel[d] = 0; });
+  S.quizIdx = 0;
+  S.quizAnswers = {};
+  S._quizSelected = {};
+  S._quizResult = null;
+}
+
+function getCurrentQuestion() {
+  if (!S._quizDims || S.quizIdx >= S._quizDims.length) return null;
+  const dimKey = S._quizDims[S.quizIdx];
+  if (!S._quizByDim || !S._quizByDim[dimKey]) return null;
+  const hasAnswered = S.quizAnswers[dimKey] !== undefined;
+  let level = 0;
+  if (hasAnswered) {
+    // On revisit, show adapted level
+    level = S._quizCurrentLevel[dimKey] || 0;
+  }
+  const questions = S._quizByDim[dimKey];
+  // Ensure we have a question at this level
+  if (level >= questions.length) level = questions.length - 1;
+  return questions[level];
+}
+
+function answerCurrentQuestion(answerIdx) {
+  if (!S._quizDims) return;
+  const dimKey = S._quizDims[S.quizIdx];
+  S._quizSelected = S._quizSelected || {};
+  S._quizSelected[dimKey] = answerIdx;
+  const q = getCurrentQuestion();
+  if (q) {
+    const score = q.scores ? q.scores[answerIdx] : answerIdx;
+    S.quizAnswers[dimKey] = score;
+  }
+  render();
+}
+
+function adaptLevelForCurrentDim() {
+  if (!S._quizDims) return;
+  const dimKey = S._quizDims[S.quizIdx];
+  if (!dimKey) return;
+  const rawScore = S.quizAnswers[dimKey];
+  if (rawScore === undefined) return;
+  const normScore = rawScore / 4;
+  const currentLevel = S._quizCurrentLevel[dimKey] || 0;
+  if (normScore >= 0.75 && currentLevel < 2) {
+    S._quizCurrentLevel[dimKey] = currentLevel + 1;
+  } else if (normScore <= 0.25 && currentLevel > 0) {
+    S._quizCurrentLevel[dimKey] = currentLevel - 1;
+  }
+}
+
+function finishAdaptiveQuiz() {
+  const result = calculateAdaptiveScores();
+  S._quizResult = result;
+  S.view = 'results';
+  render();
+  setTimeout(initRadarChart, 150);
+}
+
+function calculateAdaptiveScores() {
+  const weights = S._quizWeights || getPMWeights();
+  const answers = S.quizAnswers || {};
+  let dimScores = {};
+  let weightedTotal = 0, totalWeight = 0;
+  for (const [dimKey, weight] of Object.entries(weights)) {
+    if (weight <= 0) continue;
+    const rawScore = answers[dimKey];
+    const score = (rawScore !== undefined) ? rawScore : 0;
+    dimScores[dimKey] = score;
+    weightedTotal += score / 4 * weight;
+    totalWeight += weight;
+  }
+  const overall = totalWeight > 0 ? Math.round(weightedTotal / totalWeight * 100) : 0;
+  return { dimScores, overall, weights };
+}
+
+// (replaced by getIndustryPMWeights)
+
+// ==================== COURSE DATA ====================
+
+
+
+const SLIDES_MFG = [
+  {
+    title: getCourseTitle(),
+    subtitle: '先进制造业产品经理的AI实战指南',
+    type: 'cover',
+    narration: '欢迎来到"AI重塑制造产品规划"课程。在接下来的45分钟里，我们将深入探讨如何用AI工具彻底改变制造业产品经理的工作方式。从产线数据到产品决策，AI正在重塑每一个环节。'
+  },
+  {
+    title: '为什么制造业PM必须拥抱AI？',
+    type: 'content',
+    content: [
+      {txt:'工业4.0浪潮下，制造企业数字化转型的核心驱动力', hl:false},
+      {txt:'产线产生海量数据，传统分析方法已无法满足决策速度', hl:false},
+      {txt:'竞品在用AI加速产品迭代，落后一步可能落后一个时代', hl:true},
+      {txt:'AI不是替代PM，而是让PM从"信息整理者"升级为"决策设计师"', hl:true}
+    ],
+    narration: '工业4.0时代，制造业产品经理面临的核心挑战是：数据太多、决策太慢、竞争太快。一条现代化产线每天产生TB级数据，但传统Excel分析只能覆盖冰山一角。竞品已经在用AI加速从需求发现到产品上线的全过程。AI不是要替代PM，而是让PM的决策能力获得10倍提升。'
+  },
+  {
+    title: '制造业PM的8维AI能力模型',
+    type: 'content',
+    content: [
+      {txt:'💬 提示词工程 — 精准描述制造业场景需求', hl:false},
+      {txt:'🛠️ AI工具实战 — 熟练运用Claude/GPT/Cursor等工具', hl:false},
+      {txt:'📊 数据分析与决策 — 从产线数据中提取产品洞察', hl:true},
+      {txt:'✍️ AI内容创作 — 高效撰写PRD、产品文档、汇报', hl:false},
+      {txt:'💻 AI辅助开发 — 理解技术可行性，推动方案落地', hl:false},
+      {txt:'⚡ AI协同工作流 — 将AI嵌入日常产品管理流程', hl:true},
+      {txt:'🔒 AI安全与合规 — 制造数据的安全使用边界', hl:false},
+      {txt:'🎯 AI战略思维 — 从战略层面规划AI产品路线图', hl:true}
+    ],
+    narration: '我们提炼了制造业PM必备的8维AI能力模型。其中数据分析、协同工作流和战略思维是制造业PM区别于其他行业PM的核心差异点。因为制造业的数据复杂度、跨部门协同难度和长周期决策特性，决定了制造业PM需要更强的AI武装。'
+  },
+  {
+    title: '市场对标：顶级AI课程在教什么',
+    type: 'content',
+    content: [
+      {txt:'DeepLearning.AI — "AI for Everyone"：非技术人员如何理解AI', hl:false},
+      {txt:'Andrew Ng "Generative AI for Everyone"：生成式AI的应用框架', hl:false},
+      {txt:'Google "AI Essentials"：AI工具在工作流中的嵌入模式', hl:true},
+      {txt:'我们的差异化：聚焦制造业场景，真实的产线数据+MES/ERP业务场景', hl:true}
+    ],
+    narration: '我们研究了市面上顶级AI课程的体系。DeepLearning.AI侧重AI基础概念，Andrew Ng的课程强调应用框架，Google的课程关注工具嵌入。但它们都有一个共同问题：缺乏垂直行业深度。本课程的不同之处在于，所有案例都来自真实的制造业场景：MES系统、产线数据、IoT平台、工业软件选型。'
+  },
+  {
+    title: '2026年制造业PM必备AI工具栈',
+    type: 'tools',
+    content: [
+      {tool:'Claude 4 / GPT-4o', use:'长文档分析(MES手册、竞品白皮书)、复杂数据分析、PRD生成'},
+      {tool:'Cursor / Copilot', use:'理解技术文档、辅助技术评审、生成API测试用例'},
+      {tool:'NotebookLM / Gemini', use:'深度研究竞品、行业趋势分析、多文档交叉对比'},
+      {tool:'Midjourney / DALL·E', use:'产品原型可视化、工厂布局概念图、数据大屏设计'},
+      {tool:'Perplexity / DeepSeek', use:'行业资讯实时搜索、技术方案调研、供应商背景调查'}
+    ],
+    narration: '2026年，制造业PM的工具栈已经非常成熟。Claude和GPT负责文档和数据分析，Cursor帮助理解技术方案，NotebookLM做深度研究，Midjourney做可视化，Perplexity做实时调研。这些工具组合起来，能覆盖PM日常80%的工作场景。关键不是每个工具都要精通，而是知道什么场景用什么工具。'
+  },
+  {
+    title: '实操一：用AI分析产线数据，发现产品机会',
+    subtitle: '从"被动接需求"到"主动发现需求"',
+    type: 'case',
+    content: [
+      {label:'背景', txt:'SMT贴片车间的良品率连续3个月下降，从98.5%降到96.2%。你拿到了5000行质检数据（含工序、班次、物料批次、缺陷类型）。'},
+      {label:'目标', txt:'找出良品率下降的根因，并转化为产品需求'},
+      {label:'方法', txt:'将CSV上传Claude → 描述业务背景 → AI自动分析趋势+相关性 → 发现"夜班+某批次物料"组合异常 → 提出"物料追溯+班次预警"功能需求'}
+    ],
+    narration: '第一个实操案例：SMT车间的良品率问题。传统做法是PM等质检部门出报告、找研发讨论、再写需求，周期至少2周。用AI的方式：把质检数据直接上传，描述"这是SMT产线、三班倒、最近换了新物料供应商"，AI能在30秒内跑出相关性分析，精准定位到"夜班+新物料"的组合异常。PM据此提出"物料批次追溯"和"班次质量预警"两个产品功能，从数据到需求只需1小时。'
+  },
+  {
+    title: '实操一（续）：AI分析的核心Prompt',
+    subtitle: '好的Prompt是制造业数据分析成功的关键',
+    type: 'code',
+    code: `你是精益生产和质量管理专家。
+以下是SMT贴片车间的质检数据（CSV格式），包含字段：
+- 工序名称、日期、班次(白/中/夜)、物料批次、缺陷类型、缺陷数量、总产量
+
+请执行以下分析：
+1. 计算每周良品率趋势并识别拐点
+2. 分析缺陷类型分布的变化
+3. 按班次和物料批次做交叉分析
+4. 给出最可能的根因假设（Top 3）
+5. 基于分析结果，建议2-3个产品功能需求`,
+    narration: '这是实操中用到的核心Prompt模板。注意几个关键点：第一，给AI设定"精益生产专家"角色，让它用制造业思维分析；第二，清楚描述数据字段含义，AI不知道你的CSV列名代表什么；第三，分析步骤结构化，从宏观趋势到微观交叉分析；第四，最后落地到产品需求。这套Prompt模板稍作修改就能复用到其他制造场景。'
+  },
+  {
+    title: '实操二：AI辅助生成MES智能排产PRD',
+    subtitle: '从业务约束到结构化需求文档',
+    type: 'case',
+    content: [
+      {label:'背景', txt:'要为MES系统新增"智能排产"模块。产线特点：5条产线、30+工序、换线时间15-45分钟、紧急插单频率每周3-5次。'},
+      {label:'挑战', txt:'排产规则极其复杂：工序依赖、设备约束、交期优先级、换线成本，传统PRD至少40页。'},
+      {label:'AI方案', txt:'分步生成：先喂业务规则→AI生成PRD框架→逐章节补充细节→AI统一润色→最终输出结构化PRD'}
+    ],
+    narration: '第二个实操：MES智能排产PRD。这是制造业PM最常见也最头疼的任务。排产规则有多复杂？5条产线×30道工序×多种约束=上千万种排产组合。传统写PRD至少要2周，而且容易遗漏边界情况。AI的方案是分步生成：先把所有业务规则喂给AI，让它理解约束条件，然后逐章生成并迭代优化。最终产出的PRD不仅速度快10倍，覆盖的边界情况也更全面。'
+  },
+  {
+    title: '实操二（续）：PRD生成的关键技巧',
+    type: 'code',
+    code: `第一步：喂入业务上下文
+"你是MES产品专家。目标用户是工厂排产员。以下是我们产线的业务约束：
+- 产线：SMT线、DIP线、组装线、测试线、包装线
+- 排产规则：同产品连续生产优先、换线时间按产品组计算、紧急订单可插队但需记录
+- 约束条件：设备每周保养4h、关键物料提前期3天..."
+
+第二步：生成PRD框架
+"请按以下结构生成PRD框架：
+1. 背景与目标 2. 用户场景 3. 功能需求 4. 非功能需求 5. 验收标准"
+
+第三步：逐章节迭代
+"请详细展开第3章功能需求，包含：自动排产、手动调整、异常预警三个子模块"`,
+    narration: '这是AI生成PRD的三步法。第一步最容易被忽略——很多PM直接说"写一份智能排产PRD"，AI当然写不好。必须先喂业务上下文：产线名称、排产规则、约束条件。第二步让AI出框架，你确认结构。第三步逐章展开，每个章节都可以独立迭代。在这个过程中，PM的角色是"把关人"和"行业专家"，AI负责"初稿输出"。'
+  },
+  {
+    title: '实操三：AI竞品分析与策略制定',
+    subtitle: '从"拍脑袋"到"数据驱动的竞品决策"',
+    type: 'case',
+    content: [
+      {label:'场景', txt:'评估3个工业IoT平台：PTC ThingWorx、AWS IoT SiteWise、阿里云IoT'},
+      {label:'维度', txt:'设备管理、数据分析、可视化、集成能力、定价、生态'},
+      {label:'AI辅助', txt:'收集各平台技术文档→AI提取功能矩阵→生成对比表→标注差异化机会→输出产品策略建议'}
+    ],
+    narration: '第三个实操：工业IoT平台竞品分析。制造业做竞品分析最大的痛点是信息太多太散。一个PTC ThingWorx的文档就有几百页。AI的做法是：收集所有公开技术文档→统一上传→让AI按6个维度提取功能→生成标准化对比表→标注我们和竞品的差异化空间。以前做一份竞品分析要2-3周，现在1天完成，而且每个结论都有文档引用支撑。'
+  },
+  {
+    title: '实操三（续）：竞品分析的AI工作流',
+    type: 'code',
+    code: `竞品分析 Prompt 模板：
+
+"你是工业IoT产品分析专家。请分析以下三个平台：
+
+【平台列表】
+1. PTC ThingWorx — 文档摘要：[上传白皮书关键页]
+2. AWS IoT SiteWise — 文档摘要：[上传产品页]
+3. 阿里云IoT — 文档摘要：[上传功能列表]
+
+【分析维度】（每项1-5分）
+- 设备接入：支持的协议、边缘计算能力
+- 数据分析：实时分析、ML集成、自定义仪表盘
+- 可视化：3D数字孪生、拖拽式看板
+- 集成：ERP/MES对接、API开放性
+- 定价：按设备？按数据量？隐藏成本？
+- 生态：合作伙伴、行业案例、开发者社区
+
+【输出】
+1. 三维度对比矩阵
+2. 每个平台的核心优势和致命短板
+3. 我们的差异化切入机会（Top 3）"`,
+    narration: '这是竞品分析的标准化Prompt模板。关键是分析维度要提前定义好，不能指望AI自己知道该比什么。6个维度覆盖了工业IoT平台的核心评估点。另外，文档摘要这一步很重要——不需要喂整本文档，只需要把跟每个维度相关的关键信息摘出来。这样AI的分析更聚焦，不会被无关信息干扰。'
+  },
+  {
+    title: '制造业PM用AI的三大黄金法则',
+    type: 'content',
+    content: [
+      {txt:'法则一：先喂上下文，再要产出。AI不了解你的产线、你的产品、你的客户。每次使用前，花30秒描述业务背景。', hl:true},
+      {txt:'法则二：分步迭代，别一次要太多。复杂的PRD或分析报告分3-5步生成，每步检查调整。', hl:false},
+      {txt:'法则三：你是决策者，AI是加速器。AI给出的是"最佳推理"，最终的产品决策必须结合你的行业经验和判断。', hl:true}
+    ],
+    narration: '总结制造业PM用AI的三大黄金法则。法则一：上下文是金。AI不知道你的SMT产线有几台贴片机、不知道你的客户是富士康还是比亚迪。法则二：分步迭代。AI一次性生成30页PRD大概率有严重问题，但分5步生成每步6页，质量会高很多。法则三：人机分工。AI负责信息处理和初稿输出，你负责产品判断和最终决策。这个分工边界不清晰，AI就会成为一个"看起来很聪明但不靠谱"的助手。'
+  },
+  {
+    title: '常见误区与避坑指南',
+    type: 'content',
+    content: [
+      {txt:'❌ 误区一：直接把公司数据上传公共AI → ✅ 先脱敏+使用企业版AI', hl:false},
+      {txt:'❌ 误区二：让AI替你做产品决策 → ✅ AI提供分析，你做决策', hl:false},
+      {txt:'❌ 误区三：只在一个环节用AI → ✅ 全流程嵌入：发现→定义→设计→验证', hl:true},
+      {txt:'❌ 误区四：期望AI第一次就完美 → ✅ 用迭代思维：初稿→反馈→优化', hl:false}
+    ],
+    narration: '最后分享四个最常见的坑。数据安全是第一位的，制造数据包含工艺参数和配方，绝不能直接上传公共AI。第二个坑是让AI做决策——AI给出的是"基于已知信息的最优推理"，但产品决策要考虑大量AI不知道的因素：客户关系、组织能力、历史包袱。第三个坑是只在某个环节用AI，比如只在写PRD时用，实际上AI在全流程都能发挥作用。第四个坑是完美主义——AI第一次输出大概率不完美，但迭代2-3次就能达到可用水平。'
+  },
+  {
+    title: '你的3个月AI落地路线图',
+    type: 'roadmap',
+    content: [
+      {phase:'Month 1 · 上手期', tasks:'掌握提示词工程基础、用AI辅助日常数据分析、尝试AI生成PRD初稿'},
+      {phase:'Month 2 · 提效期', tasks:'建立竞品分析AI工作流、AI嵌入需求评审流程、搭建个人AI工具链'},
+      {phase:'Month 3 · 进阶期', tasks:'输出团队AI使用SOP、推动数据安全规范落地、制定AI产品战略初稿'}
+    ],
+    narration: '这是给你制定的3个月落地路线图。第一个月，从最简单的开始：每天花30分钟用AI分析产线数据，替代手工Excel分析。第二个月，建立系统化的工作流：竞品分析模板、PRD生成SOP、需求评审AI辅助。第三个月，开始影响团队：输出团队SOP、推动数据安全规范、提出AI产品战略。记住，不需要三个月成为AI专家，只需要三个月的渐进实践，你的工作效率会有质的飞跃。'
+  },
+  {
+    title: '课程回顾与核心要点',
+    type: 'summary',
+    content: [
+      '制造业PM的AI能力模型：8个维度，数据分析最重要',
+      '三大实操技能：产线数据分析→AI辅助PRD→AI竞品分析',
+      '2026工具栈：Claude/GPT为首，Cursor/Copilot辅助，NotebookLM做研究',
+      '核心心法：先喂上下文、分步迭代、人机分工',
+      '立即开始：今天就用AI分析一份产线数据，体验改变'
+    ],
+    narration: '让我们回顾今天的核心收获。第一，理解了制造业PM的8维AI能力模型，其中数据分析能力最为关键。第二，掌握了三个实操技能：产线数据分析、AI辅助PRD撰写、AI竞品分析。第三，建立了2026年的工具栈认知。第四，记住了三大黄金法则。最后一个行动建议：今天下班前，就找一份产线数据用AI分析，哪怕只是10分钟的尝试，你都会被AI的效率震撼到。'
+  },
+  {
+    title: '开始你的AI转型之旅',
+    subtitle: '从下一个产品决策开始，用AI重新定义你的工作方式',
+    type: 'cover',
+    narration: '感谢你完成这45分钟的课程。AI不会替代制造业产品经理，但会用AI的产品经理会替代不会用的。从今天开始，让AI成为你的产品决策加速器。祝你转型顺利。'
+  }
+];
+
+// 金融×PM 课程幻灯片
+const SLIDES_FIN = [
+{title:"AI重塑金融产品：从数据洞察到智能决策",subtitle:"金融产品经理的AI实战指南",type:"cover",
+ narration:"欢迎来到「AI重塑金融产品」课程。在接下来的45分钟里，我们将深入探讨AI如何改变金融产品经理的工作方式——从信贷决策到财富管理，从风控合规到客户体验。"},
+{title:"为什么金融PM必须拥抱AI？",type:"content",content:[{txt:"金融行业天然是「数据密集型」——AI最适合的战场",hl:false},{txt:"监管趋严+竞争加剧→用AI提升风控精度和服务效率是必然",hl:false},{txt:"蚂蚁/微众/招商等已深度应用AI→不进则退",hl:true},{txt:"AI不替代金融PM，而是让PM的「金融判断力」获得数据增强",hl:true}],
+ narration:"金融行业的本质是处理信息和风险。AI的强项恰恰是处理海量信息、发现隐藏模式。监管环境越严格、竞争越激烈，AI作为「决策增强工具」的价值越大。"},
+{title:"金融PM的8维AI能力模型",type:"content",content:[{txt:"💬 提示词工程——精准描述金融业务场景",hl:false},{txt:"🛠️ AI工具实战——Claude/GPT/Cursor在金融场景的运用",hl:false},{txt:"📊 数据分析与决策——从信贷/理财/支付数据中提取洞察",hl:true},{txt:"✍️ AI内容创作——产品方案、合规文档、管理层汇报",hl:false},{txt:"💻 AI辅助开发——理解金融技术架构、评估AI方案",hl:false},{txt:"⚡ AI协同工作流——将AI嵌入产品评审/风控/运营流程",hl:true},{txt:"🔒 AI安全与合规——金融数据安全是生命线",hl:true},{txt:"🎯 AI战略思维——引领金融产品的智能化转型",hl:true}],
+ narration:"金融行业PM的AI能力模型中，数据分析、安全合规、战略思维是三大核心。金融产品的一行代码、一个决策偏差，影响的是真金白银和用户信任。"},
+{title:"市场对标：金融科技领域的AI应用",type:"content",content:[{txt:"Morgan Stanley AI助手——财富顾问用AI分析市场和客户",hl:false},{txt:"蚂蚁集团——AI驱动310信贷模式（3分钟申请-1秒审批-0人工）",hl:true},{txt:"招商银行摩羯智投——AI驱动的智能投顾",hl:false},{txt:"我们的差异化：聚焦金融PM日常场景，实操而非概念",hl:true}],
+ narration:"全球顶级金融机构已经在深度应用AI。摩根士丹利用AI武装财富顾问，蚂蚁用AI实现了310信贷模式。我们的课程聚焦金融PM的日常实操。"},
+{title:"2026年金融PM必备AI工具栈",type:"tools",content:[{tool:"Claude 4 / GPT-4o",use:"信贷审批数据分析、风控规则生成、合规文档审查、产品方案撰写"},{tool:"Cursor / Copilot",use:"理解金融API接口文档、辅助技术方案评审、评估安全架构"},{tool:"NotebookLM / Gemini",use:"深度研究监管新规、竞品分析、行业趋势报告"},{tool:"Perplexity / DeepSeek",use:"实时搜索金融政策、竞品动态、技术方案调研"}],
+ narration:"金融PM的工具栈需要特别关注安全和合规。企业版AI是标配，公共AI只能用于公开信息分析。记住：涉及客户数据的一律走私有化部署。"},
+{title:"实操一：用AI分析信贷审批数据",subtitle:"从审批日志中发现产品优化机会",type:"case",content:[{label:"背景",txt:"负责的消费贷产品，最近3个月审批通过率从72%降到58%。手上有10万条审批记录（已脱敏）。"},{label:"目标",txt:"找出通过率下降的真正原因，转化为产品优化方案"},{label:"AI方法",txt:"上传数据→描述字段→AI多维分析→定位特定客群通过率骤降→发现征信模型更新导致→提出模型回测+客群优化方案"}],
+ narration:"实操一：信贷审批分析。传统方法需要数据分析师花1-2周出报告。用AI的方法：上传脱敏数据，描述字段含义，AI在几分钟内完成多维交叉分析。"},
+{title:"实操一（续）：信贷分析Prompt模板",type:"code",code:"你是银行信贷审批策略分析师。\n以下是消费贷审批记录数据（已脱敏），包含字段：\n- 申请金额、审批额度、审批结果(通过/拒绝)\n- 拒绝原因码、用户年龄区间、性别、职业类型\n- 征信评分区间、月收入区间、申请渠道\n\n请执行：\n1. 整体审批率趋势分析\n2. 按拒绝原因码分布找到最大变化项\n3. 按年龄+职业+征信三维交叉分析\n4. 识别通过率显著下降的客户群体\n5. 提出审批策略优化建议（Top 3）",
+ narration:"这是信贷分析的Prompt模板。注意：每个字段都要解释业务含义；分析要有层次（整体→分类→交叉）；最终必须落地到可执行的产品建议。"},
+{title:"实操二：AI辅助生成智能风控引擎PRD",subtitle:"从风控规则到结构化需求文档",type:"case",content:[{label:"背景",txt:"为小微企业信贷产品设计智能风控引擎。数据源：工商信息、税务数据、发票数据、流水数据、行业风险指数。"},{label:"挑战",txt:"风控规则极其复杂：200+条规则、多层决策（自动/人工复核/拒绝）、监管合规要求。"},{label:"AI方案",txt:"分步生成：喂入监管要求→AI生成风控架构→逐模块展开→合规对齐→最终PRD"}],
+ narration:"实操二：智能风控PRD。金融产品的风控引擎是所有PM最头疼的需求——规则多、逻辑复杂、容错率为零。用AI分步生成：先从监管要求出发，再到风控架构，最后逐模块细化。"},
+{title:"实操二（续）：PRD生成三步法",type:"code",code:"第一步：喂入监管上下文\n「你是银行风控产品专家。目标产品是小微企业信贷风控引擎。\n监管要求：流动资金贷款管理办法、商业银行互联网贷款管理暂行办法...」\n\n第二步：生成PRD框架\n「请按以下结构生成PRD框架：\n1. 业务背景 2. 风控架构 3. 规则引擎设计 4. 数据需求\n5. 审批流程 6. 监控与预警 7. 合规对齐」\n\n第三步：逐模块展开\n「请详细展开第3章-规则引擎设计：包含硬规则、评分卡、\n机器学习模型三层，每层说明决策逻辑和兜底策略」",
+ narration:"风控PRD三步法。第一步最关键——监管要求必须前置，不能用AI的自由发挥替代合规约束。记住：金融产品的PRD，合规是第一优先级。"},
+{title:"实操三：AI辅助合规审查",subtitle:"金融PM最有价值的AI应用场景",type:"case",content:[{label:"场景",txt:"监管发布了新的《金融产品网络营销管理办法（征求意见稿）》，80页，涉及产品展示、风险揭示、适当性管理。"},{label:"挑战",txt:"需要评估对现有5个产品线的影响，制定整改计划。"},{label:"AI方法",txt:"上传法规→按产品线分别分析影响→生成差距分析表→制定整改计划"}],
+ narration:"实操三：合规审查。这是金融PM最独特也最有价值的AI应用。监管文件动辄几十上百页，用AI：上传法规，预设产品线信息，AI自动逐条比对并生成差距分析。"},
+{title:"金融PM用AI的三大纪律",type:"content",content:[{txt:"纪律一：数据安全是红线。客户数据坚决不上传公共AI，必须走企业版/私有化部署",hl:true},{txt:"纪律二：AI是分析师不是决策者。信贷审批/风险评级/投资建议的最终决策权永远在人",hl:true},{txt:"纪律三：合规先行。涉及监管要求的场景，AI输出必须对照法规原文核验",hl:true}],
+ narration:"总结金融PM用AI的三大纪律。这三条不是建议，是底线。数据安全是社会信任的基础，决策权是法律责任的分界线，合规是对监管的尊重。"},
+{title:"你的3个月AI落地路线图",type:"roadmap",content:[{phase:"Month 1 · 上手期",tasks:"掌握金融场景Prompt模板、用AI辅助数据分析、AI生成产品文档初稿"},{phase:"Month 2 · 提效期",tasks:"AI嵌入合规审查流程、建立竞品分析AI工作流、搭建团队Prompt库"},{phase:"Month 3 · 进阶期",tasks:"推动AI治理规范落地、输出团队AI使用SOP、制定AI产品战略初版"}],
+ narration:"三个月的落地路线图。第一个月从最常用的场景开始：数据分析、文档撰写。第二个月建立团队级的工作流。第三个月推动组织层面的AI应用。"},
+{title:"课程回顾",type:"summary",content:["金融PM的AI能力模型：8个维度，合规与安全是金融特色","三大实操：信贷审批分析→风控PRD→AI合规审查","2026工具栈：企业版AI是标配，公共AI仅限公开信息","三大纪律：数据安全+人机分工+合规先行","立即开始：今天就找一份审批数据分析试试AI的威力"],
+ narration:"让我们回顾核心收获。金融PM的AI应用，合规和安全是独特底色。三大实操技能覆盖了PM日常最高频的场景。从今天就开始实践。"},
+{title:"开启你的金融AI转型",subtitle:"让AI成为你最可靠的产品决策搭档",type:"cover",
+ narration:"感谢你完成这45分钟的课程。在金融行业，AI不会替你做决策，但会让你的每一个决策都有更充分的信息支撑。祝你转型顺利。"}
+];
+
+// 智能汽车×PM 课程幻灯片
+const SLIDES_AUTO = [
+{title:"AI重塑智能汽车产品：从驾驶数据到极致体验",subtitle:"智能汽车产品经理的AI实战指南",type:"cover",
+ narration:"欢迎来到「AI重塑智能汽车产品」课程。在接下来的45分钟里，我们将探索如何用AI重新定义汽车产品经理的工作方式。"},
+{title:"为什么汽车PM必须拥抱AI？",type:"content",content:[{txt:"智能汽车=移动的超级计算机——软件定义汽车的本质是AI定义体验",hl:false},{txt:"OTA让产品上市后还能持续进化——PM的工作从「定义」变成「运营」",hl:true},{txt:"用户每天产生TB级驾驶数据——传统分析手段完全不够用",hl:false},{txt:"竞品用AI加速迭代——OTA频率从季度级变成周级",hl:true}],
+ narration:"智能汽车与传统汽车最大的区别在于：产品上市不是结束而是开始。OTA让汽车像手机一样持续升级，而AI让PM有能力从海量用户数据中发现下一个版本该做什么。"},
+{title:"汽车PM的8维AI能力模型",type:"content",content:[{txt:"💬 提示词工程——精准描述自动驾驶/座舱场景",hl:false},{txt:"🛠️ AI工具实战——Claude分析智驾数据/Cursor辅助技术评估",hl:false},{txt:"📊 数据驱动决策——从TB级驾驶数据中提取产品洞察",hl:true},{txt:"✍️ AI内容创作——OTA更新说明/产品方案/管理层汇报",hl:false},{txt:"💻 AI辅助开发——理解感知/规划/控制的技术架构",hl:false},{txt:"⚡ AI协同工作流——OTA迭代/需求评审/风险管理的AI嵌入",hl:true},{txt:"🔒 AI安全与隐私——驾驶数据的隐私保护红线",hl:true},{txt:"🎯 AI战略思维——规划智能驾驶和座舱的AI产品路线图",hl:true}],
+ narration:"汽车PM的AI能力模型中，数据驱动决策和AI协同工作流是两大核心差异点。汽车产品涉及硬件+软件+AI的综合体，比纯软件产品复杂一个数量级。"},
+{title:"2026年汽车PM必备AI工具栈",type:"tools",content:[{tool:"Claude 4 / GPT-4o",use:"智驾数据分析、竞品文档解读、OTA需求文档生成、安全标准分析"},{tool:"Cursor / Copilot",use:"理解智驾技术文档、评估感知方案、生成模拟测试用例"},{tool:"NotebookLM",use:"深度研究NCAP/IIHS安全标准、行业趋势分析"},{tool:"Perplexity",use:"实时跟踪竞品OTA内容、供应链动态、法规变化"}],
+ narration:"汽车PM的工具栈需要兼顾软件和硬件。分析Euro NCAP最新标准、评估感知模型方案、撰写OTA需求——这些都需要不同的AI工具组合。"},
+{title:"实操一：用AI分析驾驶数据，发现体验痛点",subtitle:"从「等用户反馈」到「主动发现体验问题」",type:"case",content:[{label:"背景",txt:"智能驾驶功能已推送3个月，百万公里行驶数据。PM想知道：用户在什么场景下最频繁接管车辆？"},{label:"目标",txt:"找出智驾功能的体验痛点，定义下个版本的优化优先级"},{label:"AI方法",txt:"上传脱敏驾驶日志→AI多维分析→发现「夜间+雨天+弯道」场景接管率是平时的5倍→提出感知优化+用户提示方案"}],
+ narration:"实操一：驾驶数据分析。传统PM等用户投诉才知道问题，用AI主动发现体验痛点。百万公里的驾驶数据，AI能在分钟级完成多维度交叉分析。"},
+{title:"实操一（续）：驾驶数据分析Prompt",type:"code",code:"你是自动驾驶产品体验分析师。\n以下是脱敏后的智驾功能使用日志：\n- 功能模式(ACC/LCC/NOA)、车速、道路类型\n- 天气条件、光照条件、接管原因码\n- 接管前5秒的感知置信度\n\n请执行：\n1. 按道路类型×天气×时段的三维接管率分析\n2. 识别高接管场景Top 5\n3. 分析接管前感知系统的表现变化\n4. 提出产品优化优先级（含技术可行性初步判断）",
+ narration:"智驾数据分析的Prompt模板。注意技术字段（感知置信度）和产品字段（接管原因）都需要在Prompt中解释清楚。"},
+{title:"实操二：AI辅助OTA版本管理",subtitle:"从功能罗列到体验驱动",type:"case",content:[{label:"背景",txt:"下个OTA版本计划包含12项更新。如何排序？哪些必须做、哪些可以缓？"},{label:"挑战",txt:"涉及座舱/智驾/网联3个域+5个车型，复杂度高"},{label:"AI方法",txt:"AI按用户体验影响×技术复杂度×法规要求→三维排序→生成OTA策略方案"}],
+ narration:"实操二：OTA版本管理。当你有12项更新但资源只够做8项，怎么排序？AI可以从用户体验影响、技术复杂度、法规必要性三个维度帮你量化排序。"},
+{title:"实操三：AI辅助智能座舱场景设计",subtitle:"从功能思维到场景思维",type:"case",content:[{label:"场景",txt:"设计「带娃出行」的智能座舱体验。涉及：儿童安全监控、娱乐内容推荐、空调分区、语音交互优化。"},{label:"AI方法",txt:"AI分析用户场景→生成体验流程图→设计各触点的AI交互方案→输出体验评估矩阵"}],
+ narration:"实操三：场景设计。传统PM习惯于列出功能清单，但智能座舱的核心是场景体验。AI帮你从「带娃出行」这样的用户场景出发，设计完整的多触点体验。"},
+{title:"汽车PM用AI的三大原则",type:"content",content:[{txt:"原则一：数据不出车。驾驶行为数据涉及隐私，脱敏后使用且尽量车端处理",hl:true},{txt:"原则二：安全优先体验。涉及行车安全的功能，AI辅助分析但最终决策必须含人工审核",hl:true},{txt:"原则三：OTA不是万能药。AI让你迭代更快，但硬件能力有天花板——别承诺AI能解决硬件局限",hl:false}],
+ narration:"汽车PM用AI的三大原则。数据隐私和安全是出行行业的高压线；OTA的能力边界受限于硬件，AI加速了迭代但不能突破物理极限。"},
+{title:"你的3个月AI落地路线图",type:"roadmap",content:[{phase:"Month 1 · 上手期",tasks:"掌握驾驶数据分析Prompt、用AI辅助OTA需求撰写、建立竞品监控AI工作流"},{phase:"Month 2 · 提效期",tasks:"AI嵌入版本评审流程、搭建驾驶体验分析的自动化管线、场景库AI拓展"},{phase:"Month 3 · 进阶期",tasks:"制定AI产品战略、推动隐私合规规范、输出团队AI使用SOP"}],
+ narration:"三个月路线图。汽车行业的节奏比互联网慢，但AI可以让PM的分析和决策速度大幅提升。从数据分析开始，逐步建立系统化的AI工作体系。"},
+{title:"课程回顾",type:"summary",content:["汽车PM的AI能力模型：数据驱动和协同工作流是核心差异","三大实操：驾驶数据分析→OTA版本管理→智能座舱场景设计","三大原则：数据安全+安全优先+能力边界","立即开始：今天就找一组驾驶数据用AI分析"],
+ narration:"回顾核心要点。汽车PM的AI实践，既要有互联网的速度，也要有出行行业的严谨。从数据分析开始你的AI转型之旅。"},
+{title:"开启你的智能汽车AI之旅",subtitle:"让每一公里数据都成为产品进化的燃料",type:"cover",
+ narration:"感谢你完成这45分钟的课程。智能汽车的产品经理，是连接物理世界和数字智能的桥梁。AI让这座桥变得更宽、更快。祝你旅途愉快。"}
+];
+
+// ==================== VOICE ENGINE ====================
+let voiceUtterance = null;
+let voicePaused = false;
+
+function getBestChineseVoice() {
+  if (!window.speechSynthesis) return null;
+  const voices = speechSynthesis.getVoices();
+  // Prefer premium Chinese voices
+  const preferred = ['Tingting', 'Yating', 'Meijia', 'Zhiwei', 'Sin-ji', 'Google 普通话'];
+  for (const pref of preferred) {
+    const v = voices.find(v => v.name.includes(pref) && v.lang.startsWith('zh'));
+    if (v) return v;
+  }
+  // Fallback to any Chinese voice
+  return voices.find(v => v.lang.startsWith('zh')) || voices[0];
+}
+
+function speakSlide(idx) {
+  if (!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  if (idx < 0 || idx >= getSlides().length) return;
+  const slide = getSlides()[idx];
+  if (!slide.narration) return;
+
+  voiceUtterance = new SpeechSynthesisUtterance(slide.narration);
+  const voice = getBestChineseVoice();
+  if (voice) voiceUtterance.voice = voice;
+  voiceUtterance.rate = 0.95;
+  voiceUtterance.pitch = 1.0;
+  voiceUtterance.volume = 1.0;
+  voiceUtterance.lang = 'zh-CN';
+
+  voiceUtterance.onstart = () => { S.isSpeaking = true; renderPlayerBar(); };
+  voiceUtterance.onend = () => {
+    S.isSpeaking = false;
+    S.isPlaying = false;
+    renderPlayerBar();
+    // Auto-advance to next slide
+    if (S.courseSlide < getSlides().length - 1) {
+      setTimeout(() => {
+        S.courseSlide++;
+        renderSlide();
+        speakSlide(S.courseSlide);
+        S.isPlaying = true;
+        renderPlayerBar();
+      }, 800);
+    }
+  };
+  voiceUtterance.onerror = () => { S.isSpeaking = false; S.isPlaying = false; renderPlayerBar(); };
+
+  speechSynthesis.speak(voiceUtterance);
+}
+
+function togglePlay() {
+  if (!window.speechSynthesis) return;
+  if (voicePaused) {
+    speechSynthesis.resume();
+    voicePaused = false;
+    S.isPlaying = true;
+    S.isSpeaking = true;
+  } else if (S.isSpeaking) {
+    speechSynthesis.pause();
+    voicePaused = true;
+    S.isPlaying = false;
+    S.isSpeaking = false;
+  } else {
+    S.isPlaying = true;
+    speakSlide(S.courseSlide);
+  }
+  renderPlayerBar();
+}
+
+function stopVoice() {
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  S.isPlaying = false;
+  S.isSpeaking = false;
+  voicePaused = false;
+}
+
+
+const IND_INFO = {
+  mfg: {name:'先进制造', icon:'🏭', desc:'半导体 · 精密制造 · IoT', color:'amber'},
+  finance: {name:'金融数字化', icon:'🏦', desc:'银行 · 保险 · 证券', color:'blue'},
+  auto: {name:'智能汽车', icon:'🚗', desc:'整车 · 智驾 · 供应链', color:'cyan'},
+  cpg: {name:'日化快消', icon:'🧴', desc:'个护 · 食品 · 零售', color:'purple'},
+};
+
+const COURSES = {
+  mfg: {title:'AI重塑制造产品规划：从产线数据到产品决策', meta:{duration:'45分钟',level:'中高级',industry:'先进制造',role:'产品经理'}, slides: SLIDES_MFG},
+  finance: {title:'AI重塑金融产品：从数据洞察到智能决策', meta:{duration:'45分钟',level:'中高级',industry:'金融数字化',role:'产品经理'}, slides: SLIDES_FIN},
+  auto: {title:'AI重塑智能汽车产品：从驾驶数据到极致体验', meta:{duration:'45分钟',level:'中高级',industry:'智能汽车',role:'产品经理'}, slides: SLIDES_AUTO},
+};
+
+function getCourse() { return COURSES[S.industry] || COURSES.mfg; }
+function getCourseTitle() { return getCourse().title; }
+function getCourseMeta() { return getCourse().meta; }
+function getSlides() { return getCourse().slides; }
+
+function getQuizData() {
+  const map = { mfg: MFG_PM_QUIZ, finance: FIN_PM_QUIZ, auto: AUTO_PM_QUIZ, cpg: CPG_PM_QUIZ };
+  return map[S.industry] || MFG_PM_QUIZ;
+}
+
+function getIndustryPMWeights() {
+  const base = {prompt:18, tools:12, data:24, content:14, dev:5, workflow:13, security:6, strategy:8};
+  const mods = {
+    mfg: {data:30, workflow:16},
+    finance: {security:18, data:22, strategy:12},
+    auto: {data:26, dev:10, security:8},
+    cpg: {content:20, data:22, strategy:10},
+  };
+  const mod = mods[S.industry] || {};
+  let result = {};
+  for (let k of Object.keys(base)) result[k] = mod[k] || base[k];
+  let total = Object.values(result).reduce((a,b)=>a+b,0);
+  for (let k of Object.keys(result)) result[k] = Math.round(result[k]/total*100);
+  return result;
+}
+function getPMWeights() { return getIndustryPMWeights(); }
+
+// ==================== RENDER ====================
+function render() {
+  const app = document.getElementById('app');
+  let html = '';
+  switch (S.view) {
+    case 'industry': html = renderIndustry(); break;
+    case 'quiz': html = renderQuiz(); break;
+    case 'results': html = renderResults(); break;
+    case 'course': html = renderCourse(); break;
+    default: html = renderIndustry();
+  }
+  app.innerHTML = html;
+  // Bind slide click if in course view
+  if (S.view === 'course') {
+    setTimeout(bindSlideEvents, 50);
+  }
+}
+
+function renderIndustry() {
+  const curInd = IND_INFO[S.industry] || IND_INFO.mfg;
+  let h = `<div class="header slide-up"><h1>${curInd.icon} ${curInd.name} × 产品经理</h1><p>AI能力测评 & 实战课程 Demo</p></div>`;
+  h += `<div class="card slide-up"><h3 style="margin-bottom:12px;">选择行业</h3>`;
+  h += `<div class="industry-grid">`;
+  for (const [id, info] of Object.entries(IND_INFO)) {
+    h += `<div class="industry-card ${S.industry===id?'selected':''}" onclick="S.industry='${id}';S.role=null;render();">
+      <div style="font-size:28px;margin-bottom:6px;">${info.icon}</div>
+      <div style="font-weight:600;">${info.name}</div>
+      <div style="font-size:12px;color:var(--text2);">${info.desc}</div>
+    </div>`;
+  }
+  h += `</div></div>`;
+
+  h += `<div class="card slide-up"><h3 style="margin-bottom:12px;">选择岗位</h3>`;
+  h += `<div class="role-grid">`;
+  h += `<div class="role-card ${S.role==='pm'?'selected':''}" onclick="S.role='pm';render();">
+    <div style="font-size:24px;">📋</div><div style="font-weight:600;">产品经理</div>
+    <div style="font-size:11px;color:var(--text2);">需求 · 数据 · 策略</div></div>`;
+  h += `</div></div>`;
+
+  const ready = S.industry && S.role;
+  h += `<div class="text-center mt-4">
+    <button class="btn btn-primary" ${ready?'':'disabled'} onclick="if(!S.industry||!S.role)return; startAdaptiveQuiz(); S.view='quiz'; render();">
+      🧪 开始AI能力测评
+    </button>
+  </div>`;
+  return h;
+}
+
+function renderQuiz() {
+  if (!S._quizDims) { startAdaptiveQuiz(); }
+  const dimKey = S._quizDims[S.quizIdx];
+  const dimInfo = DIMS[dimKey];
+  const q = getCurrentQuestion();
+  if (!q) return '<div class="card">加载中...</div>';
+
+  const hasAnswered = S.quizAnswers[dimKey] !== undefined;
+  const displayLevel = hasAnswered ? (S._quizCurrentLevel[dimKey] || 0) : 0;
+  const levelNames = ['初阶','中阶','高阶'];
+  const totalDims = S._quizDims.length;
+  const dimIdx = S.quizIdx;
+  const sel = S._quizSelected ? S._quizSelected[dimKey] : undefined;
+  const hasSelected = sel !== undefined;
+
+  // Progress dots
+  let dots = '';
+  for (let i=0; i<totalDims; i++) {
+    let cls = i < dimIdx ? 'done' : (i === dimIdx ? 'current' : '');
+    dots += `<div class="quiz-dot ${cls}"></div>`;
+  }
+
+  // Title with navigation
+  let h = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;cursor:pointer;" onclick="stopVoice(); S.view='industry'; S._quizDims=null; render();">
+    <span style="font-size:13px;color:var(--text2);">← 返回重选</span>
+    <span style="font-size:12px;color:var(--text2);">${dimIdx+1}/${totalDims}</span>
+  </div>`;
+
+  h += `<div class="quiz-dots">${dots}</div>`;
+  h += `<div class="card slide-up">`;
+  h += `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+    <span style="font-size:22px;">${dimInfo.icon}</span>
+    <span style="font-size:18px;font-weight:700;">${dimInfo.name}</span>
+    <span class="tag tag-blue">${levelNames[displayLevel]}</span>
+    ${hasAnswered ? '<span class="tag tag-amber">已调整难度</span>' : ''}
+  </div>`;
+  h += `<p style="font-size:13px;color:var(--text2);margin-bottom:16px;">${q.scenario}</p>`;
+
+  // Question
+  h += `<p style="font-weight:600;margin-bottom:10px;">${q.q}</p>`;
+
+  // Options
+  q.opts.forEach((o, i) => {
+    let cls = 'quiz-option';
+    if (sel !== undefined && sel === i) cls += ' selected';
+    h += `<button class="${cls}" onclick="answerCurrentQuestion(${i})">${o}</button>`;
+  });
+
+  // Explanation (only show if answered)
+  if (hasSelected && q.explain) {
+    h += `<div class="highlight" style="margin-top:12px;">
+      <div style="font-weight:600;color:var(--green);margin-bottom:4px;">💡 解析</div>
+      <div style="font-size:13px;color:var(--text2);">${q.explain}</div>
+    </div>`;
+  }
+
+  // Navigation
+  h += `<div class="flex-between mt-4">
+    <button class="btn btn-outline" ${dimIdx===0?'disabled':''} onclick="if(S.quizIdx>0){S.quizIdx--;render();}">← 上一维度</button>
+    <span style="font-size:13px;color:${hasSelected?'var(--text2)':'var(--red)'};">${Object.keys(S.quizAnswers).length}/${totalDims} 已完成${hasSelected?'':'（请选择）'}</span>`;
+  if (dimIdx >= totalDims - 1) {
+    h += `<button class="btn btn-primary" ${hasSelected?'':'disabled'} onclick="adaptLevelForCurrentDim(); finishAdaptiveQuiz();">📊 查看结果</button>`;
+  } else {
+    h += `<button class="btn btn-primary" ${hasSelected?'':'disabled'} onclick="adaptLevelForCurrentDim(); S.quizIdx++; render();">下一维度 →</button>`;
+  }
+  h += `</div></div>`;
+  return h;
+}
+
+function renderResults() {
+  if (!S._quizResult) { S.view = 'industry'; return render(); }
+  const r = S._quizResult;
+  const gColor = r.overall >= 70 ? 'var(--green)' : r.overall >= 40 ? 'var(--amber)' : 'var(--red)';
+
+  let h = `<div class="text-center slide-up" style="padding:10px 0;">
+    <h2>📊 测评结果</h2><p style="color:var(--text2);">智能制造 × 产品经理 · AI能力画像</p>
+  </div>`;
+
+  // Overall score gauge
+  h += `<div class="card slide-up text-center">
+    <div class="gauge">
+      <svg width="140" height="140"><circle cx="70" cy="70" r="60" fill="none" stroke="var(--border)" stroke-width="10"/><circle cx="70" cy="70" r="60" fill="none" stroke="${gColor}" stroke-width="10" stroke-dasharray="${r.overall/100*377} 377" stroke-linecap="round"/></svg>
+      <div class="gauge-value" style="color:${gColor}">${r.overall}<span style="font-size:16px;">分</span></div>
+    </div>
+    <p style="color:var(--text2);margin-top:8px;">${r.overall>=70?'👏 AI能力扎实，继续保持！':r.overall>=40?'📈 有基础，在关键维度加强训练':'🎯 建议系统学习，潜力很大'}</p>
+  </div>`;
+
+  // Radar chart
+  h += `<div class="card slide-up"><h3 style="margin-bottom:12px;">8维能力雷达图</h3>
+    <div class="radar-container"><canvas id="radarChart" width="360" height="360"></canvas></div>
+  </div>`;
+
+  // Mastery cards
+  h += `<div class="card slide-up"><h3 style="margin-bottom:12px;">各维度掌握度</h3>
+    <div class="mastery-grid">`;
+  for (const dk of DIM_ORDER) {
+    const score = r.dimScores[dk] || 0;
+    const pct = Math.round(score/4*100);
+    const color = pct>=75?'var(--green)':pct>=40?'var(--amber)':'var(--red)';
+    h += `<div class="mastery-card"><div style="font-size:20px;">${DIMS[dk].icon}</div><div style="font-size:12px;color:var(--text2);">${DIMS[dk].short}</div><div class="score" style="color:${color}">${pct}%</div></div>`;
+  }
+  h += `</div></div>`;
+
+  // Weakest dimensions - gap analysis
+  const sorted = DIM_ORDER.map(dk => ({key:dk, score:r.dimScores[dk]||0})).sort((a,b)=>a.score-b.score);
+  h += `<div class="card slide-up"><h3 style="margin-bottom:12px;">📉 能力短板分析</h3>`;
+  for (const item of sorted.slice(0,4)) {
+    const pct = Math.round(item.score/4*100);
+    const color = pct>=75?'var(--green)':pct>=40?'var(--amber)':'var(--red)';
+    h += `<div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+        <span>${DIMS[item.key].icon} ${DIMS[item.key].name}</span><span style="color:${color};font-weight:600;">${pct}%</span>
+      </div>
+      <div class="gap-bar"><div class="gap-fill" style="width:${pct}%;background:${color};"></div></div>
+    </div>`;
+  }
+  h += `</div>`;
+
+  // Course recommendation
+  h += `<div class="card slide-up text-center">
+    <h3 style="margin-bottom:8px;">🎓 推荐课程</h3>
+    <p style="color:var(--text2);font-size:14px;margin-bottom:16px;">基于你的能力短板，推荐以下实战课程</p>
+    <button class="btn btn-primary" onclick="stopVoice(); S.view='course'; S.courseSlide=0; render();">
+      📖 ' + getCourseTitle() + '（' + getCourseMeta().duration + '）' + '
+    </button>
+    <p style="font-size:12px;color:var(--text2);margin-top:8px;">包含精美PPT + 真人语音讲解</p>
+  </div>`;
+
+  // Action buttons
+  h += `<div class="flex-between mt-4">
+    <button class="btn btn-outline" onclick="S.view='industry'; S._quizDims=null; render();">← 重新测评</button>
+    <button class="btn btn-primary" onclick="stopVoice(); S.view='course'; S.courseSlide=0; render();">📖 进入课程</button>
+  </div>`;
+  return h;
+}
+
+// ==================== COURSE PLAYER ====================
+function renderCourse() {
+  let h = '';
+  // Back button
+  h += `<div style="margin-bottom:12px;">
+    <span style="cursor:pointer;font-size:13px;color:var(--text2);" onclick="stopVoice(); S.view='results'; render();">← 返回测评结果</span>
+  </div>`;
+
+  // Hero section
+  h += `<div class="course-hero slide-up">
+    <h2>${getCourseTitle()}</h2>
+    <p class="sub">从产线数据到产品决策 — 制造业PM的AI实战指南</p>
+    <div class="meta">
+      <span>⏱ ${getCourseMeta().duration}</span>
+      <span>📊 ${getCourseMeta().level}</span>
+      <span>🏭 ${getCourseMeta().industry}</span>
+      <span>📋 ${getCourseMeta().role}</span>
+    </div>
+  </div>`;
+
+  // Slide viewer
+  h += `<div class="slide-container mt-4" id="slideViewer">`;
+  for (let i = 0; i < getSlides().length; i++) {
+    h += renderSlideHTML(i);
+  }
+  h += `</div>`;
+
+  // Player controls
+  h += `<div class="player-bar" id="playerBar">`;
+  h += renderPlayerBarHTML();
+  h += `</div>`;
+
+  return h;
+}
+
+function renderSlideHTML(idx) {
+  const slide = getSlides()[idx];
+  let cls = idx === S.courseSlide ? 'active' : '';
+  let h = `<div class="slide ${cls}" id="slide-${idx}">`;
+
+  switch (slide.type) {
+    case 'cover':
+      h += `<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:380px;text-align:center;">
+        <div style="font-size:48px;margin-bottom:16px;">🏭</div>
+        <h3 style="font-size:24px;text-align:center;">${slide.title}</h3>
+        ${slide.subtitle ? `<p style="font-size:16px;color:var(--blue);margin-top:8px;">${slide.subtitle}</p>` : ''}
+      </div>`;
+      break;
+
+    case 'content':
+      h += `<h3>${slide.title}</h3>`;
+      h += `<ul>`;
+      for (const item of slide.content) {
+        h += `<li style="${item.hl ? 'color:var(--blue);font-weight:600;' : ''}">${item.txt}</li>`;
+      }
+      h += `</ul>`;
+      break;
+
+    case 'tools':
+      h += `<h3>${slide.title}</h3>`;
+      h += `<div style="display:grid;gap:12px;">`;
+      for (const item of slide.content) {
+        h += `<div class="highlight"><strong>${item.tool}</strong><br><span style="font-size:13px;color:var(--text2);">${item.use}</span></div>`;
+      }
+      h += `</div>`;
+      break;
+
+    case 'case':
+      h += `<h3>${slide.title}</h3>`;
+      if (slide.subtitle) h += `<p style="color:var(--blue);font-weight:600;margin-bottom:8px;">${slide.subtitle}</p>`;
+      for (const item of slide.content) {
+        h += `<div style="margin-bottom:10px;"><span class="tag tag-blue">${item.label}</span><p style="margin-top:4px;font-size:14px;color:var(--text);">${item.txt}</p></div>`;
+      }
+      break;
+
+    case 'code':
+      h += `<h3>${slide.title}</h3>`;
+      if (slide.subtitle) h += `<p style="color:var(--blue);font-weight:600;margin-bottom:8px;">${slide.subtitle}</p>`;
+      h += `<pre style="background:#1e293b;color:#e2e8f0;padding:16px;border-radius:8px;font-size:12px;line-height:1.6;overflow-x:auto;max-height:300px;overflow-y:auto;">${slide.code.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>`;
+      break;
+
+    case 'roadmap':
+      h += `<h3>${slide.title}</h3>`;
+      h += `<div style="display:grid;gap:16px;">`;
+      for (const item of slide.content) {
+        h += `<div class="highlight"><strong>${item.phase}</strong><br><span style="font-size:13px;color:var(--text2);">${item.tasks}</span></div>`;
+      }
+      h += `</div>`;
+      break;
+
+    case 'summary':
+      h += `<h3>${slide.title}</h3>`;
+      h += `<ul>`;
+      for (const txt of slide.content) {
+        h += `<li>${txt}</li>`;
+      }
+      h += `</ul>`;
+      break;
+  }
+
+  h += `</div>`;
+  return h;
+}
+
+function renderSlide() {
+  const viewer = document.getElementById('slideViewer');
+  if (!viewer) return;
+  const slides = viewer.querySelectorAll('.slide');
+  slides.forEach((s, i) => {
+    s.className = 'slide' + (i === S.courseSlide ? ' active' : '');
+    if (i === S.courseSlide) {
+      s.style.animation = 'none';
+      s.offsetHeight; // trigger reflow
+      s.style.animation = 'fadeSlide .4s';
+    }
+  });
+}
+
+function renderPlayerBarHTML() {
+  const total = getSlides().length;
+  const pct = Math.round((S.courseSlide + 1) / total * 100);
+  const isPlaying = S.isPlaying;
+  const isSpeaking = S.isSpeaking;
+
+  return `
+    <button class="player-btn" onclick="prevSlide()" title="上一页">⏮</button>
+    <button class="player-btn ${isPlaying?'playing':''}" onclick="togglePlay()" title="${isPlaying?'暂停':'播放'}">${isPlaying?'⏸':'▶'}</button>
+    <button class="player-btn" onclick="nextSlide()" title="下一页">⏭</button>
+    <div class="progress-track" onclick="seekSlide(event)">
+      <div class="progress-fill" style="width:${pct}%"></div>
+    </div>
+    <span class="slide-counter">${S.courseSlide+1}/${total}</span>
+    <div class="speaking-indicator">
+      <div class="speaking-dot ${isSpeaking?'active':''}"></div>
+      <div class="speaking-dot ${isSpeaking?'active':''}" style="animation-delay:.2s"></div>
+      <div class="speaking-dot ${isSpeaking?'active':''}" style="animation-delay:.4s"></div>
+    </div>
+    <select class="voice-select" onchange="changeVoice(this.value)" title="切换语音">
+      <option value="">语音选择</option>
+    </select>
+  `;
+}
+
+function renderPlayerBar() {
+  const bar = document.getElementById('playerBar');
+  if (bar) bar.innerHTML = renderPlayerBarHTML();
+}
+
+function bindSlideEvents() {
+  // Initialize voice list
+  if (window.speechSynthesis) {
+    // Load voices (async on some browsers)
+    speechSynthesis.onvoiceschanged = () => {
+      const select = document.querySelector('.voice-select');
+      if (select) {
+        const voices = speechSynthesis.getVoices().filter(v => v.lang.startsWith('zh'));
+        select.innerHTML = '<option value="">语音选择</option>';
+        voices.forEach(v => {
+          select.innerHTML += `<option value="${v.name}" ${v.default?'selected':''}>${v.name} (${v.lang})</option>`;
+        });
+      }
+    };
+  }
+}
+
+function prevSlide() {
+  if (S.courseSlide > 0) {
+    stopVoice();
+    S.courseSlide--;
+    S.isPlaying = false;
+    renderSlide();
+    renderPlayerBar();
+  }
+}
+
+function nextSlide() {
+  if (S.courseSlide < getSlides().length - 1) {
+    stopVoice();
+    S.courseSlide++;
+    S.isPlaying = false;
+    renderSlide();
+    renderPlayerBar();
+  }
+}
+
+function seekSlide(event) {
+  const track = event.currentTarget;
+  const rect = track.getBoundingClientRect();
+  const pct = (event.clientX - rect.left) / rect.width;
+  const newIdx = Math.round(pct * (getSlides().length - 1));
+  if (newIdx !== S.courseSlide) {
+    stopVoice();
+    S.courseSlide = newIdx;
+    S.isPlaying = false;
+    renderSlide();
+    renderPlayerBar();
+  }
+}
+
+function changeVoice(name) {
+  // Just store preference
+  localStorage.setItem('aidax_pref_voice', name);
+}
+
+// ==================== RADAR CHART ====================
+function initRadarChart() {
+  const canvas = document.getElementById('radarChart');
+  if (!canvas || !S._quizResult) return;
+  const ctx = canvas.getContext('2d');
+  const r = S._quizResult;
+  const dims = DIM_ORDER;
+  const n = dims.length;
+  const cx = 180, cy = 180, radius = 140;
+
+  ctx.clearRect(0, 0, 360, 360);
+
+  // Draw grid circles
+  for (let lvl = 1; lvl <= 4; lvl++) {
+    const r2 = radius * lvl / 4;
+    ctx.beginPath();
+    for (let i = 0; i <= n; i++) {
+      const angle = Math.PI * 2 * i / n - Math.PI / 2;
+      const x = cx + r2 * Math.cos(angle);
+      const y = cy + r2 * Math.sin(angle);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  // Draw axis lines
+  const points = [];
+  for (let i = 0; i < n; i++) {
+    const angle = Math.PI * 2 * i / n - Math.PI / 2;
+    const x = cx + radius * Math.cos(angle);
+    const y = cy + radius * Math.sin(angle);
+    points.push({x, y, angle});
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(x, y);
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Label
+    const lx = cx + (radius + 18) * Math.cos(angle);
+    const ly = cy + (radius + 18) * Math.sin(angle);
+    ctx.fillStyle = '#64748b';
+    ctx.font = '11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(DIMS[dims[i]].short, lx, ly);
+  }
+
+  // Draw data polygon
+  ctx.beginPath();
+  for (let i = 0; i < n; i++) {
+    const score = (r.dimScores[dims[i]] || 0) / 4;
+    const x = cx + radius * score * Math.cos(points[i].angle);
+    const y = cy + radius * score * Math.sin(points[i].angle);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(37, 99, 235, 0.15)';
+  ctx.fill();
+  ctx.strokeStyle = '#2563eb';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Draw data points
+  for (let i = 0; i < n; i++) {
+    const score = (r.dimScores[dims[i]] || 0) / 4;
+    const x = cx + radius * score * Math.cos(points[i].angle);
+    const y = cy + radius * score * Math.sin(points[i].angle);
+    ctx.beginPath();
+    ctx.arc(x, y, 5, 0, Math.PI * 2);
+    const pct = Math.round(score * 100);
+    ctx.fillStyle = pct >= 75 ? '#059669' : pct >= 40 ? '#d97706' : '#dc2626';
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Score label
+    ctx.fillStyle = '#1e293b';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.fillText(pct + '%', x + 12, y - 6);
+  }
+}
+
+// ==================== INIT ====================
+// Pre-select manufacturing + PM for demo
+S.industry = 'mfg';
+S.role = 'pm';
+
+// Load voices early
+if (window.speechSynthesis) speechSynthesis.getVoices();
+
+render();
+</script>
+</body>
+</html>
