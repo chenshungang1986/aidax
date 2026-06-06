@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智能制造 × 产品经理 — AI能力测评与实战课程</title>
+<style>
+:root {
+  --blue: #2563eb; --blue2: #1d4ed8; --cyan: #0891b2; --amber: #d97706;
+  --green: #059669; --red: #dc2626; --purple: #7c3aed;
+  --bg: #f0f4f8; --card: #fff; --text: #1e293b; --text2: #64748b;
+  --border: #e2e8f0; --shadow: 0 2px 12px rgba(0,0,0,.06);
+  --radius: 14px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-height:100vh; }
+.app { max-width:900px; margin:0 auto; padding:20px; }
+.card { background: var(--card); border-radius: var(--radius); padding:24px; box-shadow: var(--shadow); margin-bottom:16px; }
+.btn { display:inline-flex; align-items:center; gap:6px; padding:10px 20px; border-radius:8px; border:none; font-size:15px; font-weight:600; cursor:pointer; transition: all .2s; }
+.btn-primary { background: var(--blue); color:#fff; }
+.btn-primary:hover { background: var(--blue2); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,.3); }
+.btn-outline { background: #fff; color: var(--text); border: 1.5px solid var(--border); }
+.btn-outline:hover { border-color: var(--blue); color: var(--blue); }
+.btn:disabled { opacity:.4; cursor:not-allowed; transform:none !important; }
+.tag { display:inline-block; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
+.tag-blue { background: #eff6ff; color: var(--blue); }
+.tag-green { background: #ecfdf5; color: var(--green); }
+.tag-amber { background: #fffbeb; color: var(--amber); }
+.tag-purple { background: #f5f3ff; color: var(--purple); }
+.header { text-align:center; padding:24px 0 12px; }
+.header h1 { font-size:26px; margin-bottom:6px; }
+.header p { color: var(--text2); font-size:14px; }
+.industry-card, .role-card { cursor:pointer; border:2px solid var(--border); border-radius:12px; padding:16px; transition: all .2s; text-align:center; }
+.industry-card:hover, .role-card:hover { border-color: var(--blue); box-shadow: 0 4px 16px rgba(37,99,235,.12); transform: translateY(-2px); }
+.industry-card.selected, .role-card.selected { border-color: var(--blue); background: #eff6ff; }
+.industry-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; }
+.role-grid { display:flex; gap:10px; flex-wrap:wrap; }
+.role-card { flex:1; min-width:100px; }
+.quiz-option { display:block; width:100%; text-align:left; padding:14px 16px; border:2px solid var(--border); border-radius:10px; background:#fff; cursor:pointer; font-size:14px; line-height:1.6; margin-bottom:8px; transition: all .15s; }
+.quiz-option:hover { border-color: var(--blue); background: #f8faff; }
+.quiz-option.selected { border-color: var(--blue); background: #eff6ff; font-weight:600; }
+.quiz-dots { display:flex; gap:6px; justify-content:center; margin-bottom:20px; }
+.quiz-dot { width:28px; height:4px; border-radius:2px; background: var(--border); transition: all .3s; }
+.quiz-dot.done { background: var(--green); }
+.quiz-dot.current { background: var(--blue); width:40px; }
+.flex-between { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.mt-2 { margin-top:8px; } .mt-3 { margin-top:12px; } .mt-4 { margin-top:16px; } .mt-6 { margin-top:24px; }
+.mb-2 { margin-bottom:8px; } .mb-3 { margin-bottom:12px; } .mb-4 { margin-bottom:16px; }
+.text-center { text-align:center; }
+.slide-up { animation: slideUp .4s ease-out; }
+@keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+.gauge { position:relative; width:140px; height:140px; margin:0 auto; }
+.gauge svg { transform:rotate(-90deg); }
+.gauge-value { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:32px; font-weight:700; }
+/* Radar chart */
+.radar-container { width:100%; max-width:400px; margin:0 auto; }
+/* Mastery cards */
+.mastery-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+@media (max-width:640px) { .mastery-grid { grid-template-columns:repeat(2,1fr); } }
+.mastery-card { background: #fff; border-radius:10px; padding:14px; text-align:center; border:1px solid var(--border); }
+.mastery-card .score { font-size:24px; font-weight:700; }
+/* Gap bars */
+.gap-bar { height:8px; border-radius:4px; background: var(--border); overflow:hidden; margin-top:4px; }
+.gap-fill { height:100%; border-radius:4px; transition: width .6s; }
+/* Course player */
+.course-hero { background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 50%, #0891b2 100%); color:#fff; border-radius: var(--radius); padding:40px 32px; text-align:center; position:relative; overflow:hidden; }
+.course-hero::before { content:''; position:absolute; top:-50%; right:-20%; width:300px; height:300px; background: rgba(255,255,255,.05); border-radius:50%; }
+.course-hero h2 { font-size:28px; margin-bottom:8px; }
+.course-hero .sub { opacity:.85; font-size:15px; margin-bottom:20px; }
+.course-hero .meta { display:flex; gap:16px; justify-content:center; flex-wrap:wrap; font-size:13px; opacity:.8; }
+.course-hero .meta span { background: rgba(255,255,255,.15); padding:4px 12px; border-radius:20px; }
+/* Slide viewer */
+.slide-container { position:relative; background: #fff; border-radius: var(--radius); box-shadow: var(--shadow); overflow:hidden; min-height:460px; }
+.slide { padding:40px; min-height:460px; display:none; animation: fadeSlide .4s; }
+.slide.active { display:block; }
+@keyframes fadeSlide { from { opacity:0; transform:translateX(30px); } to { opacity:1; transform:translateX(0); } }
+.slide h3 { font-size:22px; margin-bottom:16px; color: var(--text); }
+.slide p, .slide li { font-size:15px; line-height:1.8; color: var(--text2); }
+.slide ul { padding-left:20px; }
+.slide ul li { margin-bottom:6px; }
+.slide .highlight { background: linear-gradient(120deg, #eff6ff 0%, #f5f3ff 100%); border-left:4px solid var(--blue); padding:12px 16px; border-radius:0 8px 8px 0; margin:12px 0; }
+.slide .step-num { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; background: var(--blue); color:#fff; font-size:13px; font-weight:700; margin-right:8px; }
+/* Player controls */
+.player-bar { display:flex; align-items:center; gap:12px; padding:14px 20px; background: #fff; border-top:1px solid var(--border); border-radius:0 0 var(--radius) var(--radius); }
+.player-btn { width:36px; height:36px; border-radius:50%; border:1.5px solid var(--border); background:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px; transition: all .15s; }
+.player-btn:hover { border-color: var(--blue); color: var(--blue); }
+.player-btn.playing { background: var(--blue); color:#fff; border-color: var(--blue); }
+.progress-track { flex:1; height:6px; border-radius:3px; background: var(--border); cursor:pointer; position:relative; }
+.progress-fill { height:100%; border-radius:3px; background: var(--blue); transition: width .3s; }
+.slide-counter { font-size:13px; color: var(--text2); min-width:60px; text-align:center; }
+.speaking-indicator { display:flex; align-items:center; gap:4px; }
+.speaking-dot { width:6px; height:6px; border-radius:50%; background: var(--border); animation: none; }
+.speaking-dot.active { background: var(--green); animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.3; } }
+.voice-select { padding:6px 10px; border-radius:6px; border:1px solid var(--border); font-size:13px; background:#fff; }
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+// ==================== STATE ====================
+const S = { view:'industry', industry:null, role:null,
+  quizIdx:0, quizAnswers:{}, _quizSelected:{}, _quizDims:null,
+  _quizByDim:null, _quizCurrentLevel:{}, _quizWeights:null, _quizResult:null,
+  courseSlide:0, isPlaying:false, speechSynth:null, speechUtterance:null };
+
+// ==================== DATA ====================
+
+// AI 8-dimension model
+const DIMS = {
+  prompt:   {id:'prompt',   name:'提示词工程',     icon:'💬', short:'Prompt'},
+  tools:    {id:'tools',    name:'AI工具实战',     icon:'🛠️', short:'Tools'},
+  data:     {id:'data',     name:'数据分析与决策',  icon:'📊', short:'Data'},
+  content:  {id:'content',  name:'AI内容创作',     icon:'✍️', short:'Content'},
+  dev:      {id:'dev',      name:'AI辅助开发',     icon:'💻', short:'Dev'},
+  workflow: {id:'workflow', name:'AI协同工作流',   icon:'⚡', short:'Workflow'},
+  security: {id:'security', name:'AI安全与合规',   icon:'🔒', short:'Security'},
+  strategy: {id:'strategy', name:'AI战略思维',     icon:'🎯', short:'Strategy'}
+};
+
+// ==================== MANUFACTURING PM SCENARIO QUIZ ====================
+// 24 questions: 8 dimensions × 3 levels
+// Each question is a REAL manufacturing PM scenario
+const MFG_PM_QUIZ = {
+  prompt: [
+    { // Level 0 - 初阶
+      level:0, difficulty:'初阶',
+      scenario:'场景：你正在分析抛光车间的OEE数据（设备利用率85%、良品率92%、性能效率78%），需要AI帮你找出瓶颈。',
+      q:'以下哪个提示词最能让AI给出专业分析？',
+      opts:[
+        'A. "分析生产效率数据"',
+        'B. "帮我看看产线数据有什么问题"',
+        'C. "你是精益生产专家。抛光车间OEE数据：利用率85%、良品率92%、性能效率78%。请：(1)计算OEE (2)识别最大瓶颈 (3)给出3条改进建议，按ROI排序"',
+        'D. "OEE数据：85%, 92%, 78%。分析"',
+        'E. "write python code to analyze production efficiency"'
+      ],
+      scores:[0,1,4,2,0], best:2,
+      explain:'制造业场景的提示词需要结构化：角色设定→数据输入→分析指令→输出格式。选项C包含完整上下文和分析框架，产出质量最高。'
+    },
+    { // Level 1 - 中阶
+      level:1, difficulty:'中阶',
+      scenario:'场景：你需要AI同时分析3条产线的MES数据，识别产能瓶颈并给出产线调度建议。数据涉及工单、设备状态、人员排班。',
+      q:'如何设计提示词以获得最精准的分析？',
+      opts:[
+        'A. 分三轮：(1)让AI定义分析框架和关键指标 (2)逐产线输入数据 (3)让AI交叉对比并给出调度方案',
+        'B. 把所有数据一股脑丢给AI',
+        'C. 让AI写Python脚本自己分析',
+        'D. 只给AI看汇总数据',
+        'E. 分别问3条产线的问题，手工对比'
+      ],
+      scores:[4,1,3,2,2], best:0,
+      explain:'复杂制造业场景采用"分步渐进式提示"策略：框架先行→数据注入→交叉分析。这比一次性投喂更精准可控。'
+    },
+    { // Level 2 - 高阶
+      level:2, difficulty:'高阶',
+      scenario:'场景：你要让AI扮演"智能制造顾问"，针对公司3年内的数字化转型路线图（含ERP升级、MES重构、IoT平台建设），给出产品优先级建议。',
+      q:'最优的提示策略是？',
+      opts:[
+        'A. 用Chain-of-Thought：先让AI分析行业趋势→评估公司现状→对比ROI→排序建议',
+        'B. 直接问"我们该先做哪个系统"',
+        'C. 分别问每个系统的优先级，取平均',
+        'D. 让AI读3份行业报告后做答',
+        'E. 用投票法：生成5个回答取最优'
+      ],
+      scores:[4,0,1,3,2], best:0,
+      explain:'战略级问题需要CoT（思维链）：趋势→现状→ROI对比→决策。让AI展示推理过程比直接要答案更可靠。'
+    }
+  ],
+  tools: [
+    { // Level 0
+      level:0, difficulty:'初阶',
+      scenario:'场景：你需要快速理解竞品MES系统（西门子Opcenter）的功能架构。手头有一份300页的产品手册PDF。',
+      q:'最合适的AI工具使用方式是？',
+      opts:[
+        'A. 用ChatGPT直接问"西门子MES有什么功能"',
+        'B. 将手册PDF上传到Claude/GPT，让AI提取功能模块、架构图和核心卖点，生成结构化对比表',
+        'C. 用Midjourney画竞品界面',
+        'D. 问竞品销售要资料',
+        'E. 用Copilot写爬虫抓竞品官网'
+      ],
+      scores:[1,4,0,1,2], best:1,
+      explain:'制造业PM核心技能：用AI处理长文档。PDF上传+结构化提取是分析工业软件竞品最高效的方式。'
+    },
+    { // Level 1
+      level:1, difficulty:'中阶',
+      scenario:'场景：你要评估3个IoT平台（PTC ThingWorx、AWS IoT、阿里云IoT）在"设备管理+数据分析+可视化"三个维度的优劣势。',
+      q:'最优AI工具组合是？',
+      opts:[
+        'A. 用Claude分别分析3个平台的文档→让AI生成对比矩阵→用NotebookLM深度分析差异点',
+        'B. 只用ChatGPT问一遍',
+        'C. 分别用不同AI工具分析，手工汇总',
+        'D. 用Excel做对比表，AI帮忙填',
+        'E. 让技术团队做POC'
+      ],
+      scores:[4,1,2,2,0], best:0,
+      explain:'工业软件选型需要"AI多工具链"：文档分析→矩阵对比→深度差异分析。Claude+NotebookLM是黄金组合。'
+    },
+    { // Level 2
+      level:2, difficulty:'高阶',
+      scenario:'场景：你需要在公司内部搭建一个"AI产品助手"，集成产线数据查询、竞品情报、需求文档模板，供产品团队日常使用。',
+      q:'最佳技术方案是？',
+      opts:[
+        'A. 基于RAG架构：向量数据库存储内部文档+KPI数据，Claude/GPT作为推理引擎，前端搭建轻量查询界面',
+        'B. 让大家各自用ChatGPT',
+        'C. 开发一个完整的SaaS平台',
+        'D. 用飞书机器人实现',
+        'E. 做一个Excel插件'
+      ],
+      scores:[4,0,1,2,1], best:0,
+      explain:'企业级AI产品助手=内部知识库(RAG)+大模型推理+轻量UI。制造业PM需要理解RAG基础架构。'
+    }
+  ],
+  data: [
+    { // Level 0
+      level:0, difficulty:'初阶',
+      scenario:'场景：质检部门给了你过去6个月的缺陷数据（CSV，8000行），需要找出良品率下降的根因。',
+      q:'最优AI数据分析方式是？',
+      opts:[
+        'A. 手工在Excel做透视表',
+        'B. 将CSV导入Claude Code Interpreter，描述业务背景（工序、物料、班次），让AI运行探索性分析并可视化',
+        'C. 直接问质检部门',
+        'D. 用Python逐个分析',
+        'E. 只看最近一个月的'
+      ],
+      scores:[1,4,0,2,0], best:1,
+      explain:'AI数据分析的关键是把"业务上下文"告诉AI：工序名、物料类型、班次制度。AI会跑相关性分析找出根因。'
+    },
+    { // Level 1
+      level:1, difficulty:'中阶',
+      scenario:'场景：你有3条产线的实时MES数据流（设备OEE、工单完成率、异常停机时间），需要建立预测性维护模型的产品需求。',
+      q:'你如何用AI辅助需求分析？',
+      opts:[
+        'A. 让AI分析历史停机数据，识别高频故障模式→定义预测模型的特征工程需求→输出产品功能规格',
+        'B. 直接让开发团队实现',
+        'C. 参考行业白皮书照搬',
+        'D. 等设备厂商提供方案',
+        'E. 用Excel分析后写需求'
+      ],
+      scores:[4,0,1,1,2], best:0,
+      explain:'预测性维护的PM需求=历史数据分析(找模式)→特征定义(输入)→功能规格(输出)。AI全程辅助。'
+    },
+    { // Level 2
+      level:2, difficulty:'高阶',
+      scenario:'场景：CEO要求你用数据回答：新建一条产线的ROI预测 vs 改造现有产线的ROI预测，需要融合产能、质量、人力、能耗多维数据。',
+      q:'如何用AI做这个复杂决策分析？',
+      opts:[
+        'A. 构建决策模型：收集多维历史数据→用AI清洗和特征工程→多场景模拟（乐观/中性/悲观）→AI生成决策报告和可视化',
+        'B. 用Excel做简单估算',
+        'C. 请咨询公司做',
+        'D. 分别问AI各维度的问题，手工汇总',
+        'E. 根据经验判断'
+      ],
+      scores:[4,1,0,2,1], best:0,
+      explain:'高层决策分析=多维数据融合+场景模拟+可视化报告。用AI建立可复现的分析Pipeline。'
+    }
+  ],
+  content: [
+    { // Level 0
+      level:0, difficulty:'初阶',
+      scenario:'场景：你要为MES系统的"智能排产"新模块写一份PRD。产线特点：5条产线、30+工序、换线时间15-45分钟、紧急插单频繁。',
+      q:'如何用AI最优地生成PRD？',
+      opts:[
+        'A. 先给AI输入业务约束（产线数、工序、换线时间、插单规则），生成PRD框架，你补充业务细节和验收标准',
+        'B. 让AI直接生成完整PRD',
+        'C. 用竞品PRD模板手动改写',
+        'D. 让AI生成10份然后挑',
+        'E. 口头交代开发，不写PRD'
+      ],
+      scores:[4,1,2,0,0], best:0,
+      explain:'制造业PRD的铁律：先喂业务约束再让AI生成框架。无上下文的AI产出=不靠谱的通用模板。'
+    },
+    { // Level 1
+      level:1, difficulty:'中阶',
+      scenario:'场景：你要为IoT平台的"设备数字孪生"功能撰写产品介绍文档，面向客户（工厂厂长）+ 内部销售。',
+      q:'AI辅助的最佳策略是？',
+      opts:[
+        'A. 分两个版本：(1)客户版：用AI生成业务价值故事（降本XX%、减故障XX%）(2)销售版：生成技术亮点+竞品对比+话术',
+        'B. 写一份通用版就行',
+        'C. 让AI生成然后不改',
+        'D. 只用PPT展示',
+        'E. 让销售自己写'
+      ],
+      scores:[4,0,1,2,0], best:0,
+      explain:'B2B工业产品文档要分角色生成。客户看ROI故事，销售看技术卖点+对比。AI可以一键双版本。'
+    },
+    { // Level 2
+      level:2, difficulty:'高阶',
+      scenario:'场景：你要撰写年度产品规划报告（30页），涵盖：市场分析、竞品动态、年度产品路线图、资源需求、风险预案。',
+      q:'AI辅助撰写的最优工作流？',
+      opts:[
+        'A. 分章节协作：(1)AI生成大纲→你确认 (2)每章：AI生成初稿→你修改关键数据 (3)AI统一润色风格 (4)AI生成Executive Summary',
+        'B. 让AI一次性生成30页',
+        'C. 自己写完全部然后让AI改',
+        'D. 用PPT模板凑',
+        'E. 参考去年的报告改改'
+      ],
+      scores:[4,0,2,1,1], best:0,
+      explain:'长文档=大纲共创+分章迭代+统一风格。人机协作模式：你负责判断，AI负责初稿和润色。'
+    }
+  ],
+  dev: [
+    { // Level 0
+      level:0, difficulty:'初阶',
+      scenario:'场景：研发团队说"AI智能排产算法"技术上很难实现（需要处理约束满足问题）。作为PM，你需要评估可行性。',
+      q:'最优做法是？',
+      opts:[
+        'A. 用AI生成技术可行性报告：调研遗传算法、约束规划、OR-Tools等方案→对比适用场景和复杂度→输出"最小可行方案"建议',
+        'B. 相信研发，直接砍需求',
+        'C. 自己学算法去验证',
+        'D. 找外部供应商报价',
+        'E. 坚持做，不管技术难度'
+      ],
+      scores:[4,0,1,2,1], best:0,
+      explain:'PM不需要懂算法实现，但需要用AI调研技术方案→理解可行性边界→推动"最小可行方案"。'
+    },
+    { // Level 1
+      level:1, difficulty:'中阶',
+      scenario:'场景：你要评估供应商提供的"AI视觉检测方案"，包含技术白皮书和API文档（50页）。',
+      q:'如何用AI快速完成技术评估？',
+      opts:[
+        'A. 上传白皮书和API文档→让AI提取技术指标(检测精度/速度/支持缺陷类型)→生成评估报告(含优劣+风险+集成复杂度)',
+        'B. 让开发团队读文档评估',
+        'C. 只看PPT演示',
+        'D. 对比各家官网',
+        'E. 做POC等结果'
+      ],
+      scores:[4,1,0,2,2], best:0,
+      explain:'供应商技术评估的AI加速：文档解析+指标提取+风险评估。PM不再依赖"开发看完告诉我"。'
+    },
+    { // Level 2
+      level:2, difficulty:'高阶',
+      scenario:'场景：公司要自研MES核心模块 vs 采购SAP/西门子方案。你需要一份技术+商业的综合评估。',
+      q:'AI辅助决策的最佳方式？',
+      opts:[
+        'A. 构建多维评估框架→AI对比自研/采购在：技术壁垒、TCO(5年)、定制灵活性、上线时间、生态兼容性→生成决策矩阵和推荐方案',
+        'B. 让AI选一个',
+        'C. 看哪个便宜选哪个',
+        'D. 让老板决定',
+        'E. 内部投票'
+      ],
+      scores:[4,0,1,1,0], best:0,
+      explain:'Make-or-Buy决策=技术+商业多维评估。AI的价值是让你同时看到所有维度的权衡。'
+    }
+  ],
+  workflow: [
+    { // Level 0
+      level:0, difficulty:'初阶',
+      scenario:'场景：你的日常：每天早会看产线数据、处理异常工单、更新产品Backlog。花费大量时间在重复性工作上。',
+      q:'如何用AI优化这个工作流？',
+      opts:[
+        'A. AI自动化：(1)每天自动拉取MES数据生成日报摘要 (2)异常工单AI自动分类分级 (3)Backlog根据影响面AI自动排序',
+        'B. 保持现状，已经够高效了',
+        'C. 招一个助理',
+        'D. 用Excel宏',
+        'E. 只看异常'
+      ],
+      scores:[4,0,1,1,0], best:0,
+      explain:'PM日常60%是重复劳动。AI可以让数据报表自动化、异常分级化、优先级智能化。'
+    },
+    { // Level 1
+      level:1, difficulty:'中阶',
+      scenario:'场景：你要协调生产、质量、IT三个部门，推动MES新模块上线。每周有大量沟通和文档同步。',
+      q:'AI如何提升跨部门协同效率？',
+      opts:[
+        'A. AI工具链：会议纪要AI自动生成+任务分配到人→需求变更AI分析影响面→进度报告AI自动汇总各部门数据→风险预警自动触发',
+        'B. 多开会',
+        'C. 用企业微信',
+        'D. 建共享Excel',
+        'E. 写邮件'
+      ],
+      scores:[4,0,1,1,2], best:0,
+      explain:'制造业PM的跨部门协同=信息透明+影响评估+风险预警。AI让这三点自动化。'
+    },
+    { // Level 2
+      level:2, difficulty:'高阶',
+      scenario:'场景：你要设计一套"AI+产品"的工作SOP，覆盖从需求发现→方案设计→开发跟进→上线复盘的全流程。',
+      q:'SOP设计的最优思路是？',
+      opts:[
+        'A. 每个阶段定义AI介入点：需求发现(AI分析产线数据+用户反馈)→方案设计(AI生成PRD+原型)→开发跟进(AI辅助技术评审)→上线复盘(AI自动生成数据报告+改进建议)',
+        'B. 保持现有流程不变',
+        'C. AI随便用',
+        'D. 让每个PM自己决定怎么用AI',
+        'E. 只在需求阶段用AI'
+      ],
+      scores:[4,0,1,2,2], best:0,
+      explain:'成熟团队的标志=SOP化。为每个产品阶段定义明确的AI介入点和产出标准。'
+    }
+  ],
+  security: [
+    { // Level 0
+      level:0, difficulty:'初阶',
+      scenario:'场景：你计划将某产线的工艺参数上传到云端AI工具分析，但数据包含配方信息和工序参数。',
+      q:'正确的做法是？',
+      opts:[
+        'A. 先脱敏处理（去除配方比例、替换参数范围为区间），使用企业版AI（数据不用于训练），确认符合公司数据安全规范',
+        'B. 没关系，直接上传',
+        'C. 不传敏感数据就行',
+        'D. 放弃使用AI',
+        'E. 让IT处理，你不管'
+      ],
+      scores:[4,0,2,1,1], best:0,
+      explain:'制造业数据安全=脱敏+企业版AI+合规确认。三缺一不可。'
+    },
+    { // Level 1
+      level:1, difficulty:'中阶',
+      scenario:'场景：你发现竞品的产品经理用AI分析了你们公司官网的产品介绍，输出了详细的竞品分析报告。',
+      q:'这给你什么启示？',
+      opts:[
+        'A. 建立AI使用边界：(1)对外：规范公开信息脱敏策略 (2)对内：制定AI工具使用规范，敏感数据使用私有化部署 (3)竞品分析：合法合规收集公开信息',
+        'B. 无所谓',
+        'C. 禁止所有人用AI',
+        'D. 也去分析竞品',
+        'E. 加密官网'
+      ],
+      scores:[4,0,1,2,1], best:0,
+      explain:'AI让信息获取更便捷，也意味着你的公开信息也可能被AI分析。边界意识是双向的。'
+    },
+    { // Level 2
+      level:2, difficulty:'高阶',
+      scenario:'场景：你要推动公司在"AI使用规范"上制定制度。涉及到数据分级、工具白名单、员工培训。',
+      q:'作为PM，你的最佳推动策略？',
+      opts:[
+        'A. 三线并行：(1)联合IT/法务制定数据分级标准 (2)牵头梳理AI工具评估矩阵（安全等级+适用场景） (3)组织全员AI安全意识培训，用真实案例说明风险',
+        'B. 等IT部门出规范',
+        'C. 只关注自己的使用',
+        'D. 买最好的安全软件',
+        'E. 参考其他公司的抄一份'
+      ],
+      scores:[4,1,0,1,2], best:0,
+      explain:'AI治理=数据分级+工具评估+人员培训。PM需要推动制度，不只是遵守制度。'
+    }
+  ],
+  strategy: [
+    { // Level 0
+      level:0, difficulty:'初阶',
+      scenario:'场景：CTO问你：在工业4.0和AI大背景下，产品经理的工作方式会发生什么变化？',
+      q:'最佳回答是？',
+      opts:[
+        'A. 从"经验驱动"到"数据+AI驱动"：实时感知产线痛点→精准定义需求→AI辅助方案设计和验证→从卖功能进化到卖智能服务（预测性维护、智能排产、数字孪生）',
+        'B. AI可以替代产品经理',
+        'C. 没啥变化，还是写PRD',
+        'D. 需要所有PM学编程',
+        'E. 等AI成熟了再说'
+      ],
+      scores:[4,0,0,1,1], best:0,
+      explain:'工业4.0 PM的核心转变：感知方式变了（实时数据）、设计工具变了（AI辅助）、价值主张变了（功能→智能服务）。'
+    },
+    { // Level 1
+      level:1, difficulty:'中阶',
+      scenario:'场景：CEO说：竞争对手已经开始用AI做"预测性维护"和"智能排产"了，我们怎么应对？',
+      q:'作为产品负责人，你的战略级回答是？',
+      opts:[
+        'A. 三步走：(1)用AI快速完成竞品能力拆解 (2)识别我们的差异化优势（如行业know-how、客户关系） (3)提出"AI增强而非替代"策略：在现有产品上加AI层，而非推倒重建',
+        'B. 我们也马上做',
+        'C. 降价竞争',
+        'D. 请咨询公司',
+        'E. 观望'
+      ],
+      scores:[4,0,0,1,2], best:0,
+      explain:'AI竞争策略=知己知彼+差异化定位+"增强非替代"。制造业B2B产品切换成本高，AI增强是性价比最高的路线。'
+    },
+    { // Level 2
+      level:2, difficulty:'高阶',
+      scenario:'场景：公司要制定3年AI产品战略。你要在董事会上提出产品视角的AI路线图。',
+      q:'最能打动董事会的方案是？',
+      opts:[
+        'A. "AI产品三级火箭"：(1)Year1-效率提升：用AI优化现有产品体验(MES智能分析/IoT异常检测) (2)Year2-能力升级：推出AI原生模块(预测性维护/智能排产) (3)Year3-生态平台：开放AI能力API，构建工业APP生态，数据驱动的新商业模式',
+        'B. 大量招AI人才',
+        'C. 购买最先进的AI系统',
+        'D. 与AI独角兽合作',
+        'E. 跟随行业龙头'
+      ],
+      scores:[4,0,1,1,3], best:0,
+      explain:'董事会=战略+节奏+ROI。三级火箭清晰展示了渐进投入和递进产出，比"买买买"更有说服力。'
+    }
+  ]
+};
+
+// ==================== ADAPTIVE QUIZ ENGINE ====================
+const DIM_ORDER = ['prompt','tools','data','content','dev','workflow','security','strategy'];
+
+function startAdaptiveQuiz() {
+  S._quizWeights = getPMWeights();
+  const dimOrder = DIM_ORDER;
+  // Randomize dimension order for "every quiz is different"
+  S._quizDims = [...dimOrder].sort(() => Math.random() - 0.5);
+  S._quizByDim = MFG_PM_QUIZ;
+  S._quizCurrentLevel = {};
+  dimOrder.forEach(d => { S._quizCurrentLevel[d] = 0; });
+  S.quizIdx = 0;
+  S.quizAnswers = {};
+  S._quizSelected = {};
+  S._quizResult = null;
+}
+
+function getCurrentQuestion() {
+  if (!S._quizDims || S.quizIdx >= S._quizDims.length) return null;
+  const dimKey = S._quizDims[S.quizIdx];
+  if (!S._quizByDim || !S._quizByDim[dimKey]) return null;
+  const hasAnswered = S.quizAnswers[dimKey] !== undefined;
+  let level = 0;
+  if (hasAnswered) {
+    // On revisit, show adapted level
+    level = S._quizCurrentLevel[dimKey] || 0;
+  }
+  const questions = S._quizByDim[dimKey];
+  // Ensure we have a question at this level
+  if (level >= questions.length) level = questions.length - 1;
+  return questions[level];
+}
+
+function answerCurrentQuestion(answerIdx) {
+  if (!S._quizDims) return;
+  const dimKey = S._quizDims[S.quizIdx];
+  S._quizSelected = S._quizSelected || {};
+  S._quizSelected[dimKey] = answerIdx;
+  const q = getCurrentQuestion();
+  if (q) {
+    const score = q.scores ? q.scores[answerIdx] : answerIdx;
+    S.quizAnswers[dimKey] = score;
+  }
+  render();
+}
+
+function adaptLevelForCurrentDim() {
+  if (!S._quizDims) return;
+  const dimKey = S._quizDims[S.quizIdx];
+  if (!dimKey) return;
+  const rawScore = S.quizAnswers[dimKey];
+  if (rawScore === undefined) return;
+  const normScore = rawScore / 4;
+  const currentLevel = S._quizCurrentLevel[dimKey] || 0;
+  if (normScore >= 0.75 && currentLevel < 2) {
+    S._quizCurrentLevel[dimKey] = currentLevel + 1;
+  } else if (normScore <= 0.25 && currentLevel > 0) {
+    S._quizCurrentLevel[dimKey] = currentLevel - 1;
+  }
+}
+
+function finishAdaptiveQuiz() {
+  const result = calculateAdaptiveScores();
+  S._quizResult = result;
+  S.view = 'results';
+  render();
+  setTimeout(initRadarChart, 150);
+}
+
+function calculateAdaptiveScores() {
+  const weights = S._quizWeights || getPMWeights();
+  const answers = S.quizAnswers || {};
+  let dimScores = {};
+  let weightedTotal = 0, totalWeight = 0;
+  for (const [dimKey, weight] of Object.entries(weights)) {
+    if (weight <= 0) continue;
+    const rawScore = answers[dimKey];
+    const score = (rawScore !== undefined) ? rawScore : 0;
+    dimScores[dimKey] = score;
+    weightedTotal += score / 4 * weight;
+    totalWeight += weight;
+  }
+  const overall = totalWeight > 0 ? Math.round(weightedTotal / totalWeight * 100) : 0;
+  return { dimScores, overall, weights };
+}
+
+function getPMWeights() {
+  return {prompt:18, tools:12, data:24, content:14, dev:5, workflow:13, security:6, strategy:8};
+}
+
+// ==================== COURSE DATA ====================
+const COURSE_TITLE = 'AI重塑制造产品规划：从产线数据到产品决策';
+const COURSE_META = { duration:'45分钟', level:'中高级', industry:'先进制造', role:'产品经理' };
+
+const SLIDES = [
+  {
+    title: COURSE_TITLE,
+    subtitle: '先进制造业产品经理的AI实战指南',
+    type: 'cover',
+    narration: '欢迎来到"AI重塑制造产品规划"课程。在接下来的45分钟里，我们将深入探讨如何用AI工具彻底改变制造业产品经理的工作方式。从产线数据到产品决策，AI正在重塑每一个环节。'
+  },
+  {
+    title: '为什么制造业PM必须拥抱AI？',
+    type: 'content',
+    content: [
+      {txt:'工业4.0浪潮下，制造企业数字化转型的核心驱动力', hl:false},
+      {txt:'产线产生海量数据，传统分析方法已无法满足决策速度', hl:false},
+      {txt:'竞品在用AI加速产品迭代，落后一步可能落后一个时代', hl:true},
+      {txt:'AI不是替代PM，而是让PM从"信息整理者"升级为"决策设计师"', hl:true}
+    ],
+    narration: '工业4.0时代，制造业产品经理面临的核心挑战是：数据太多、决策太慢、竞争太快。一条现代化产线每天产生TB级数据，但传统Excel分析只能覆盖冰山一角。竞品已经在用AI加速从需求发现到产品上线的全过程。AI不是要替代PM，而是让PM的决策能力获得10倍提升。'
+  },
+  {
+    title: '制造业PM的8维AI能力模型',
+    type: 'content',
+    content: [
+      {txt:'💬 提示词工程 — 精准描述制造业场景需求', hl:false},
+      {txt:'🛠️ AI工具实战 — 熟练运用Claude/GPT/Cursor等工具', hl:false},
+      {txt:'📊 数据分析与决策 — 从产线数据中提取产品洞察', hl:true},
+      {txt:'✍️ AI内容创作 — 高效撰写PRD、产品文档、汇报', hl:false},
+      {txt:'💻 AI辅助开发 — 理解技术可行性，推动方案落地', hl:false},
+      {txt:'⚡ AI协同工作流 — 将AI嵌入日常产品管理流程', hl:true},
+      {txt:'🔒 AI安全与合规 — 制造数据的安全使用边界', hl:false},
+      {txt:'🎯 AI战略思维 — 从战略层面规划AI产品路线图', hl:true}
+    ],
+    narration: '我们提炼了制造业PM必备的8维AI能力模型。其中数据分析、协同工作流和战略思维是制造业PM区别于其他行业PM的核心差异点。因为制造业的数据复杂度、跨部门协同难度和长周期决策特性，决定了制造业PM需要更强的AI武装。'
+  },
+  {
+    title: '市场对标：顶级AI课程在教什么',
+    type: 'content',
+    content: [
+      {txt:'DeepLearning.AI — "AI for Everyone"：非技术人员如何理解AI', hl:false},
+      {txt:'Andrew Ng "Generative AI for Everyone"：生成式AI的应用框架', hl:false},
+      {txt:'Google "AI Essentials"：AI工具在工作流中的嵌入模式', hl:true},
+      {txt:'我们的差异化：聚焦制造业场景，真实的产线数据+MES/ERP业务场景', hl:true}
+    ],
+    narration: '我们研究了市面上顶级AI课程的体系。DeepLearning.AI侧重AI基础概念，Andrew Ng的课程强调应用框架，Google的课程关注工具嵌入。但它们都有一个共同问题：缺乏垂直行业深度。本课程的不同之处在于，所有案例都来自真实的制造业场景：MES系统、产线数据、IoT平台、工业软件选型。'
+  },
+  {
+    title: '2026年制造业PM必备AI工具栈',
+    type: 'tools',
+    content: [
+      {tool:'Claude 4 / GPT-4o', use:'长文档分析(MES手册、竞品白皮书)、复杂数据分析、PRD生成'},
+      {tool:'Cursor / Copilot', use:'理解技术文档、辅助技术评审、生成API测试用例'},
+      {tool:'NotebookLM / Gemini', use:'深度研究竞品、行业趋势分析、多文档交叉对比'},
+      {tool:'Midjourney / DALL·E', use:'产品原型可视化、工厂布局概念图、数据大屏设计'},
+      {tool:'Perplexity / DeepSeek', use:'行业资讯实时搜索、技术方案调研、供应商背景调查'}
+    ],
+    narration: '2026年，制造业PM的工具栈已经非常成熟。Claude和GPT负责文档和数据分析，Cursor帮助理解技术方案，NotebookLM做深度研究，Midjourney做可视化，Perplexity做实时调研。这些工具组合起来，能覆盖PM日常80%的工作场景。关键不是每个工具都要精通，而是知道什么场景用什么工具。'
+  },
+  {
+    title: '实操一：用AI分析产线数据，发现产品机会',
+    subtitle: '从"被动接需求"到"主动发现需求"',
+    type: 'case',
+    content: [
+      {label:'背景', txt:'SMT贴片车间的良品率连续3个月下降，从98.5%降到96.2%。你拿到了5000行质检数据（含工序、班次、物料批次、缺陷类型）。'},
+      {label:'目标', txt:'找出良品率下降的根因，并转化为产品需求'},
+      {label:'方法', txt:'将CSV上传Claude → 描述业务背景 → AI自动分析趋势+相关性 → 发现"夜班+某批次物料"组合异常 → 提出"物料追溯+班次预警"功能需求'}
+    ],
+    narration: '第一个实操案例：SMT车间的良品率问题。传统做法是PM等质检部门出报告、找研发讨论、再写需求，周期至少2周。用AI的方式：把质检数据直接上传，描述"这是SMT产线、三班倒、最近换了新物料供应商"，AI能在30秒内跑出相关性分析，精准定位到"夜班+新物料"的组合异常。PM据此提出"物料批次追溯"和"班次质量预警"两个产品功能，从数据到需求只需1小时。'
+  },
+  {
+    title: '实操一（续）：AI分析的核心Prompt',
+    subtitle: '好的Prompt是制造业数据分析成功的关键',
+    type: 'code',
+    code: `你是精益生产和质量管理专家。
+以下是SMT贴片车间的质检数据（CSV格式），包含字段：
+- 工序名称、日期、班次(白/中/夜)、物料批次、缺陷类型、缺陷数量、总产量
+
+请执行以下分析：
+1. 计算每周良品率趋势并识别拐点
+2. 分析缺陷类型分布的变化
+3. 按班次和物料批次做交叉分析
+4. 给出最可能的根因假设（Top 3）
+5. 基于分析结果，建议2-3个产品功能需求`,
+    narration: '这是实操中用到的核心Prompt模板。注意几个关键点：第一，给AI设定"精益生产专家"角色，让它用制造业思维分析；第二，清楚描述数据字段含义，AI不知道你的CSV列名代表什么；第三，分析步骤结构化，从宏观趋势到微观交叉分析；第四，最后落地到产品需求。这套Prompt模板稍作修改就能复用到其他制造场景。'
+  },
+  {
+    title: '实操二：AI辅助生成MES智能排产PRD',
+    subtitle: '从业务约束到结构化需求文档',
+    type: 'case',
+    content: [
+      {label:'背景', txt:'要为MES系统新增"智能排产"模块。产线特点：5条产线、30+工序、换线时间15-45分钟、紧急插单频率每周3-5次。'},
+      {label:'挑战', txt:'排产规则极其复杂：工序依赖、设备约束、交期优先级、换线成本，传统PRD至少40页。'},
+      {label:'AI方案', txt:'分步生成：先喂业务规则→AI生成PRD框架→逐章节补充细节→AI统一润色→最终输出结构化PRD'}
+    ],
+    narration: '第二个实操：MES智能排产PRD。这是制造业PM最常见也最头疼的任务。排产规则有多复杂？5条产线×30道工序×多种约束=上千万种排产组合。传统写PRD至少要2周，而且容易遗漏边界情况。AI的方案是分步生成：先把所有业务规则喂给AI，让它理解约束条件，然后逐章生成并迭代优化。最终产出的PRD不仅速度快10倍，覆盖的边界情况也更全面。'
+  },
+  {
+    title: '实操二（续）：PRD生成的关键技巧',
+    type: 'code',
+    code: `第一步：喂入业务上下文
+"你是MES产品专家。目标用户是工厂排产员。以下是我们产线的业务约束：
+- 产线：SMT线、DIP线、组装线、测试线、包装线
+- 排产规则：同产品连续生产优先、换线时间按产品组计算、紧急订单可插队但需记录
+- 约束条件：设备每周保养4h、关键物料提前期3天..."
+
+第二步：生成PRD框架
+"请按以下结构生成PRD框架：
+1. 背景与目标 2. 用户场景 3. 功能需求 4. 非功能需求 5. 验收标准"
+
+第三步：逐章节迭代
+"请详细展开第3章功能需求，包含：自动排产、手动调整、异常预警三个子模块"`,
+    narration: '这是AI生成PRD的三步法。第一步最容易被忽略——很多PM直接说"写一份智能排产PRD"，AI当然写不好。必须先喂业务上下文：产线名称、排产规则、约束条件。第二步让AI出框架，你确认结构。第三步逐章展开，每个章节都可以独立迭代。在这个过程中，PM的角色是"把关人"和"行业专家"，AI负责"初稿输出"。'
+  },
+  {
+    title: '实操三：AI竞品分析与策略制定',
+    subtitle: '从"拍脑袋"到"数据驱动的竞品决策"',
+    type: 'case',
+    content: [
+      {label:'场景', txt:'评估3个工业IoT平台：PTC ThingWorx、AWS IoT SiteWise、阿里云IoT'},
+      {label:'维度', txt:'设备管理、数据分析、可视化、集成能力、定价、生态'},
+      {label:'AI辅助', txt:'收集各平台技术文档→AI提取功能矩阵→生成对比表→标注差异化机会→输出产品策略建议'}
+    ],
+    narration: '第三个实操：工业IoT平台竞品分析。制造业做竞品分析最大的痛点是信息太多太散。一个PTC ThingWorx的文档就有几百页。AI的做法是：收集所有公开技术文档→统一上传→让AI按6个维度提取功能→生成标准化对比表→标注我们和竞品的差异化空间。以前做一份竞品分析要2-3周，现在1天完成，而且每个结论都有文档引用支撑。'
+  },
+  {
+    title: '实操三（续）：竞品分析的AI工作流',
+    type: 'code',
+    code: `竞品分析 Prompt 模板：
+
+"你是工业IoT产品分析专家。请分析以下三个平台：
+
+【平台列表】
+1. PTC ThingWorx — 文档摘要：[上传白皮书关键页]
+2. AWS IoT SiteWise — 文档摘要：[上传产品页]
+3. 阿里云IoT — 文档摘要：[上传功能列表]
+
+【分析维度】（每项1-5分）
+- 设备接入：支持的协议、边缘计算能力
+- 数据分析：实时分析、ML集成、自定义仪表盘
+- 可视化：3D数字孪生、拖拽式看板
+- 集成：ERP/MES对接、API开放性
+- 定价：按设备？按数据量？隐藏成本？
+- 生态：合作伙伴、行业案例、开发者社区
+
+【输出】
+1. 三维度对比矩阵
+2. 每个平台的核心优势和致命短板
+3. 我们的差异化切入机会（Top 3）"`,
+    narration: '这是竞品分析的标准化Prompt模板。关键是分析维度要提前定义好，不能指望AI自己知道该比什么。6个维度覆盖了工业IoT平台的核心评估点。另外，文档摘要这一步很重要——不需要喂整本文档，只需要把跟每个维度相关的关键信息摘出来。这样AI的分析更聚焦，不会被无关信息干扰。'
+  },
+  {
+    title: '制造业PM用AI的三大黄金法则',
+    type: 'content',
+    content: [
+      {txt:'法则一：先喂上下文，再要产出。AI不了解你的产线、你的产品、你的客户。每次使用前，花30秒描述业务背景。', hl:true},
+      {txt:'法则二：分步迭代，别一次要太多。复杂的PRD或分析报告分3-5步生成，每步检查调整。', hl:false},
+      {txt:'法则三：你是决策者，AI是加速器。AI给出的是"最佳推理"，最终的产品决策必须结合你的行业经验和判断。', hl:true}
+    ],
+    narration: '总结制造业PM用AI的三大黄金法则。法则一：上下文是金。AI不知道你的SMT产线有几台贴片机、不知道你的客户是富士康还是比亚迪。法则二：分步迭代。AI一次性生成30页PRD大概率有严重问题，但分5步生成每步6页，质量会高很多。法则三：人机分工。AI负责信息处理和初稿输出，你负责产品判断和最终决策。这个分工边界不清晰，AI就会成为一个"看起来很聪明但不靠谱"的助手。'
+  },
+  {
+    title: '常见误区与避坑指南',
+    type: 'content',
+    content: [
+      {txt:'❌ 误区一：直接把公司数据上传公共AI → ✅ 先脱敏+使用企业版AI', hl:false},
+      {txt:'❌ 误区二：让AI替你做产品决策 → ✅ AI提供分析，你做决策', hl:false},
+      {txt:'❌ 误区三：只在一个环节用AI → ✅ 全流程嵌入：发现→定义→设计→验证', hl:true},
+      {txt:'❌ 误区四：期望AI第一次就完美 → ✅ 用迭代思维：初稿→反馈→优化', hl:false}
+    ],
+    narration: '最后分享四个最常见的坑。数据安全是第一位的，制造数据包含工艺参数和配方，绝不能直接上传公共AI。第二个坑是让AI做决策——AI给出的是"基于已知信息的最优推理"，但产品决策要考虑大量AI不知道的因素：客户关系、组织能力、历史包袱。第三个坑是只在某个环节用AI，比如只在写PRD时用，实际上AI在全流程都能发挥作用。第四个坑是完美主义——AI第一次输出大概率不完美，但迭代2-3次就能达到可用水平。'
+  },
+  {
+    title: '你的3个月AI落地路线图',
+    type: 'roadmap',
+    content: [
+      {phase:'Month 1 · 上手期', tasks:'掌握提示词工程基础、用AI辅助日常数据分析、尝试AI生成PRD初稿'},
+      {phase:'Month 2 · 提效期', tasks:'建立竞品分析AI工作流、AI嵌入需求评审流程、搭建个人AI工具链'},
+      {phase:'Month 3 · 进阶期', tasks:'输出团队AI使用SOP、推动数据安全规范落地、制定AI产品战略初稿'}
+    ],
+    narration: '这是给你制定的3个月落地路线图。第一个月，从最简单的开始：每天花30分钟用AI分析产线数据，替代手工Excel分析。第二个月，建立系统化的工作流：竞品分析模板、PRD生成SOP、需求评审AI辅助。第三个月，开始影响团队：输出团队SOP、推动数据安全规范、提出AI产品战略。记住，不需要三个月成为AI专家，只需要三个月的渐进实践，你的工作效率会有质的飞跃。'
+  },
+  {
+    title: '课程回顾与核心要点',
+    type: 'summary',
+    content: [
+      '制造业PM的AI能力模型：8个维度，数据分析最重要',
+      '三大实操技能：产线数据分析→AI辅助PRD→AI竞品分析',
+      '2026工具栈：Claude/GPT为首，Cursor/Copilot辅助，NotebookLM做研究',
+      '核心心法：先喂上下文、分步迭代、人机分工',
+      '立即开始：今天就用AI分析一份产线数据，体验改变'
+    ],
+    narration: '让我们回顾今天的核心收获。第一，理解了制造业PM的8维AI能力模型，其中数据分析能力最为关键。第二，掌握了三个实操技能：产线数据分析、AI辅助PRD撰写、AI竞品分析。第三，建立了2026年的工具栈认知。第四，记住了三大黄金法则。最后一个行动建议：今天下班前，就找一份产线数据用AI分析，哪怕只是10分钟的尝试，你都会被AI的效率震撼到。'
+  },
+  {
+    title: '开始你的AI转型之旅',
+    subtitle: '从下一个产品决策开始，用AI重新定义你的工作方式',
+    type: 'cover',
+    narration: '感谢你完成这45分钟的课程。AI不会替代制造业产品经理，但会用AI的产品经理会替代不会用的。从今天开始，让AI成为你的产品决策加速器。祝你转型顺利。'
+  }
+];
+
+// ==================== VOICE ENGINE ====================
+let voiceUtterance = null;
+let voicePaused = false;
+
+function getBestChineseVoice() {
+  if (!window.speechSynthesis) return null;
+  const voices = speechSynthesis.getVoices();
+  // Prefer premium Chinese voices
+  const preferred = ['Tingting', 'Yating', 'Meijia', 'Zhiwei', 'Sin-ji', 'Google 普通话'];
+  for (const pref of preferred) {
+    const v = voices.find(v => v.name.includes(pref) && v.lang.startsWith('zh'));
+    if (v) return v;
+  }
+  // Fallback to any Chinese voice
+  return voices.find(v => v.lang.startsWith('zh')) || voices[0];
+}
+
+function speakSlide(idx) {
+  if (!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  if (idx < 0 || idx >= SLIDES.length) return;
+  const slide = SLIDES[idx];
+  if (!slide.narration) return;
+
+  voiceUtterance = new SpeechSynthesisUtterance(slide.narration);
+  const voice = getBestChineseVoice();
+  if (voice) voiceUtterance.voice = voice;
+  voiceUtterance.rate = 0.95;
+  voiceUtterance.pitch = 1.0;
+  voiceUtterance.volume = 1.0;
+  voiceUtterance.lang = 'zh-CN';
+
+  voiceUtterance.onstart = () => { S.isSpeaking = true; renderPlayerBar(); };
+  voiceUtterance.onend = () => {
+    S.isSpeaking = false;
+    S.isPlaying = false;
+    renderPlayerBar();
+    // Auto-advance to next slide
+    if (S.courseSlide < SLIDES.length - 1) {
+      setTimeout(() => {
+        S.courseSlide++;
+        renderSlide();
+        speakSlide(S.courseSlide);
+        S.isPlaying = true;
+        renderPlayerBar();
+      }, 800);
+    }
+  };
+  voiceUtterance.onerror = () => { S.isSpeaking = false; S.isPlaying = false; renderPlayerBar(); };
+
+  speechSynthesis.speak(voiceUtterance);
+}
+
+function togglePlay() {
+  if (!window.speechSynthesis) return;
+  if (voicePaused) {
+    speechSynthesis.resume();
+    voicePaused = false;
+    S.isPlaying = true;
+    S.isSpeaking = true;
+  } else if (S.isSpeaking) {
+    speechSynthesis.pause();
+    voicePaused = true;
+    S.isPlaying = false;
+    S.isSpeaking = false;
+  } else {
+    S.isPlaying = true;
+    speakSlide(S.courseSlide);
+  }
+  renderPlayerBar();
+}
+
+function stopVoice() {
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  S.isPlaying = false;
+  S.isSpeaking = false;
+  voicePaused = false;
+}
+
+// ==================== RENDER ====================
+function render() {
+  const app = document.getElementById('app');
+  let html = '';
+  switch (S.view) {
+    case 'industry': html = renderIndustry(); break;
+    case 'quiz': html = renderQuiz(); break;
+    case 'results': html = renderResults(); break;
+    case 'course': html = renderCourse(); break;
+    default: html = renderIndustry();
+  }
+  app.innerHTML = html;
+  // Bind slide click if in course view
+  if (S.view === 'course') {
+    setTimeout(bindSlideEvents, 50);
+  }
+}
+
+function renderIndustry() {
+  let h = `<div class="header slide-up"><h1>🏭 智能制造 × 产品经理</h1><p>AI能力测评 & 实战课程 Demo</p></div>`;
+  h += `<div class="card slide-up"><h3 style="margin-bottom:12px;">选择行业</h3>`;
+  h += `<div class="industry-grid">`;
+  const selected = S.industry || 'mfg';
+  h += `<div class="industry-card ${selected==='mfg'?'selected':''}" onclick="S.industry='mfg';render();">
+    <div style="font-size:28px;margin-bottom:6px;">🏭</div>
+    <div style="font-weight:600;">先进制造</div>
+    <div style="font-size:12px;color:var(--text2);">半导体 · 精密制造 · IoT</div>
+  </div>`;
+  h += `</div></div>`;
+
+  h += `<div class="card slide-up"><h3 style="margin-bottom:12px;">选择岗位</h3>`;
+  h += `<div class="role-grid">`;
+  h += `<div class="role-card ${S.role==='pm'?'selected':''}" onclick="S.role='pm';render();">
+    <div style="font-size:24px;">📋</div><div style="font-weight:600;">产品经理</div>
+    <div style="font-size:11px;color:var(--text2);">需求 · 数据 · 策略</div></div>`;
+  h += `</div></div>`;
+
+  const ready = S.industry && S.role;
+  h += `<div class="text-center mt-4">
+    <button class="btn btn-primary" ${ready?'':'disabled'} onclick="if(!S.industry||!S.role)return; startAdaptiveQuiz(); S.view='quiz'; render();">
+      🧪 开始AI能力测评
+    </button>
+  </div>`;
+  return h;
+}
+
+function renderQuiz() {
+  if (!S._quizDims) { startAdaptiveQuiz(); }
+  const dimKey = S._quizDims[S.quizIdx];
+  const dimInfo = DIMS[dimKey];
+  const q = getCurrentQuestion();
+  if (!q) return '<div class="card">加载中...</div>';
+
+  const hasAnswered = S.quizAnswers[dimKey] !== undefined;
+  const displayLevel = hasAnswered ? (S._quizCurrentLevel[dimKey] || 0) : 0;
+  const levelNames = ['初阶','中阶','高阶'];
+  const totalDims = S._quizDims.length;
+  const dimIdx = S.quizIdx;
+  const sel = S._quizSelected ? S._quizSelected[dimKey] : undefined;
+  const hasSelected = sel !== undefined;
+
+  // Progress dots
+  let dots = '';
+  for (let i=0; i<totalDims; i++) {
+    let cls = i < dimIdx ? 'done' : (i === dimIdx ? 'current' : '');
+    dots += `<div class="quiz-dot ${cls}"></div>`;
+  }
+
+  // Title with navigation
+  let h = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;cursor:pointer;" onclick="stopVoice(); S.view='industry'; S._quizDims=null; render();">
+    <span style="font-size:13px;color:var(--text2);">← 返回重选</span>
+    <span style="font-size:12px;color:var(--text2);">${dimIdx+1}/${totalDims}</span>
+  </div>`;
+
+  h += `<div class="quiz-dots">${dots}</div>`;
+  h += `<div class="card slide-up">`;
+  h += `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+    <span style="font-size:22px;">${dimInfo.icon}</span>
+    <span style="font-size:18px;font-weight:700;">${dimInfo.name}</span>
+    <span class="tag tag-blue">${levelNames[displayLevel]}</span>
+    ${hasAnswered ? '<span class="tag tag-amber">已调整难度</span>' : ''}
+  </div>`;
+  h += `<p style="font-size:13px;color:var(--text2);margin-bottom:16px;">${q.scenario}</p>`;
+
+  // Question
+  h += `<p style="font-weight:600;margin-bottom:10px;">${q.q}</p>`;
+
+  // Options
+  q.opts.forEach((o, i) => {
+    let cls = 'quiz-option';
+    if (sel !== undefined && sel === i) cls += ' selected';
+    h += `<button class="${cls}" onclick="answerCurrentQuestion(${i})">${o}</button>`;
+  });
+
+  // Explanation (only show if answered)
+  if (hasSelected && q.explain) {
+    h += `<div class="highlight" style="margin-top:12px;">
+      <div style="font-weight:600;color:var(--green);margin-bottom:4px;">💡 解析</div>
+      <div style="font-size:13px;color:var(--text2);">${q.explain}</div>
+    </div>`;
+  }
+
+  // Navigation
+  h += `<div class="flex-between mt-4">
+    <button class="btn btn-outline" ${dimIdx===0?'disabled':''} onclick="if(S.quizIdx>0){S.quizIdx--;render();}">← 上一维度</button>
+    <span style="font-size:13px;color:${hasSelected?'var(--text2)':'var(--red)'};">${Object.keys(S.quizAnswers).length}/${totalDims} 已完成${hasSelected?'':'（请选择）'}</span>`;
+  if (dimIdx >= totalDims - 1) {
+    h += `<button class="btn btn-primary" ${hasSelected?'':'disabled'} onclick="adaptLevelForCurrentDim(); finishAdaptiveQuiz();">📊 查看结果</button>`;
+  } else {
+    h += `<button class="btn btn-primary" ${hasSelected?'':'disabled'} onclick="adaptLevelForCurrentDim(); S.quizIdx++; render();">下一维度 →</button>`;
+  }
+  h += `</div></div>`;
+  return h;
+}
+
+function renderResults() {
+  if (!S._quizResult) { S.view = 'industry'; return render(); }
+  const r = S._quizResult;
+  const gColor = r.overall >= 70 ? 'var(--green)' : r.overall >= 40 ? 'var(--amber)' : 'var(--red)';
+
+  let h = `<div class="text-center slide-up" style="padding:10px 0;">
+    <h2>📊 测评结果</h2><p style="color:var(--text2);">智能制造 × 产品经理 · AI能力画像</p>
+  </div>`;
+
+  // Overall score gauge
+  h += `<div class="card slide-up text-center">
+    <div class="gauge">
+      <svg width="140" height="140"><circle cx="70" cy="70" r="60" fill="none" stroke="var(--border)" stroke-width="10"/><circle cx="70" cy="70" r="60" fill="none" stroke="${gColor}" stroke-width="10" stroke-dasharray="${r.overall/100*377} 377" stroke-linecap="round"/></svg>
+      <div class="gauge-value" style="color:${gColor}">${r.overall}<span style="font-size:16px;">分</span></div>
+    </div>
+    <p style="color:var(--text2);margin-top:8px;">${r.overall>=70?'👏 AI能力扎实，继续保持！':r.overall>=40?'📈 有基础，在关键维度加强训练':'🎯 建议系统学习，潜力很大'}</p>
+  </div>`;
+
+  // Radar chart
+  h += `<div class="card slide-up"><h3 style="margin-bottom:12px;">8维能力雷达图</h3>
+    <div class="radar-container"><canvas id="radarChart" width="360" height="360"></canvas></div>
+  </div>`;
+
+  // Mastery cards
+  h += `<div class="card slide-up"><h3 style="margin-bottom:12px;">各维度掌握度</h3>
+    <div class="mastery-grid">`;
+  for (const dk of DIM_ORDER) {
+    const score = r.dimScores[dk] || 0;
+    const pct = Math.round(score/4*100);
+    const color = pct>=75?'var(--green)':pct>=40?'var(--amber)':'var(--red)';
+    h += `<div class="mastery-card"><div style="font-size:20px;">${DIMS[dk].icon}</div><div style="font-size:12px;color:var(--text2);">${DIMS[dk].short}</div><div class="score" style="color:${color}">${pct}%</div></div>`;
+  }
+  h += `</div></div>`;
+
+  // Weakest dimensions - gap analysis
+  const sorted = DIM_ORDER.map(dk => ({key:dk, score:r.dimScores[dk]||0})).sort((a,b)=>a.score-b.score);
+  h += `<div class="card slide-up"><h3 style="margin-bottom:12px;">📉 能力短板分析</h3>`;
+  for (const item of sorted.slice(0,4)) {
+    const pct = Math.round(item.score/4*100);
+    const color = pct>=75?'var(--green)':pct>=40?'var(--amber)':'var(--red)';
+    h += `<div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+        <span>${DIMS[item.key].icon} ${DIMS[item.key].name}</span><span style="color:${color};font-weight:600;">${pct}%</span>
+      </div>
+      <div class="gap-bar"><div class="gap-fill" style="width:${pct}%;background:${color};"></div></div>
+    </div>`;
+  }
+  h += `</div>`;
+
+  // Course recommendation
+  h += `<div class="card slide-up text-center">
+    <h3 style="margin-bottom:8px;">🎓 推荐课程</h3>
+    <p style="color:var(--text2);font-size:14px;margin-bottom:16px;">基于你的能力短板，推荐以下实战课程</p>
+    <button class="btn btn-primary" onclick="stopVoice(); S.view='course'; S.courseSlide=0; render();">
+      📖 AI重塑制造产品规划（45分钟）
+    </button>
+    <p style="font-size:12px;color:var(--text2);margin-top:8px;">包含精美PPT + 真人语音讲解</p>
+  </div>`;
+
+  // Action buttons
+  h += `<div class="flex-between mt-4">
+    <button class="btn btn-outline" onclick="S.view='industry'; S._quizDims=null; render();">← 重新测评</button>
+    <button class="btn btn-primary" onclick="stopVoice(); S.view='course'; S.courseSlide=0; render();">📖 进入课程</button>
+  </div>`;
+  return h;
+}
+
+// ==================== COURSE PLAYER ====================
+function renderCourse() {
+  let h = '';
+  // Back button
+  h += `<div style="margin-bottom:12px;">
+    <span style="cursor:pointer;font-size:13px;color:var(--text2);" onclick="stopVoice(); S.view='results'; render();">← 返回测评结果</span>
+  </div>`;
+
+  // Hero section
+  h += `<div class="course-hero slide-up">
+    <h2>${COURSE_TITLE}</h2>
+    <p class="sub">从产线数据到产品决策 — 制造业PM的AI实战指南</p>
+    <div class="meta">
+      <span>⏱ ${COURSE_META.duration}</span>
+      <span>📊 ${COURSE_META.level}</span>
+      <span>🏭 ${COURSE_META.industry}</span>
+      <span>📋 ${COURSE_META.role}</span>
+    </div>
+  </div>`;
+
+  // Slide viewer
+  h += `<div class="slide-container mt-4" id="slideViewer">`;
+  for (let i = 0; i < SLIDES.length; i++) {
+    h += renderSlideHTML(i);
+  }
+  h += `</div>`;
+
+  // Player controls
+  h += `<div class="player-bar" id="playerBar">`;
+  h += renderPlayerBarHTML();
+  h += `</div>`;
+
+  return h;
+}
+
+function renderSlideHTML(idx) {
+  const slide = SLIDES[idx];
+  let cls = idx === S.courseSlide ? 'active' : '';
+  let h = `<div class="slide ${cls}" id="slide-${idx}">`;
+
+  switch (slide.type) {
+    case 'cover':
+      h += `<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:380px;text-align:center;">
+        <div style="font-size:48px;margin-bottom:16px;">🏭</div>
+        <h3 style="font-size:24px;text-align:center;">${slide.title}</h3>
+        ${slide.subtitle ? `<p style="font-size:16px;color:var(--blue);margin-top:8px;">${slide.subtitle}</p>` : ''}
+      </div>`;
+      break;
+
+    case 'content':
+      h += `<h3>${slide.title}</h3>`;
+      h += `<ul>`;
+      for (const item of slide.content) {
+        h += `<li style="${item.hl ? 'color:var(--blue);font-weight:600;' : ''}">${item.txt}</li>`;
+      }
+      h += `</ul>`;
+      break;
+
+    case 'tools':
+      h += `<h3>${slide.title}</h3>`;
+      h += `<div style="display:grid;gap:12px;">`;
+      for (const item of slide.content) {
+        h += `<div class="highlight"><strong>${item.tool}</strong><br><span style="font-size:13px;color:var(--text2);">${item.use}</span></div>`;
+      }
+      h += `</div>`;
+      break;
+
+    case 'case':
+      h += `<h3>${slide.title}</h3>`;
+      if (slide.subtitle) h += `<p style="color:var(--blue);font-weight:600;margin-bottom:8px;">${slide.subtitle}</p>`;
+      for (const item of slide.content) {
+        h += `<div style="margin-bottom:10px;"><span class="tag tag-blue">${item.label}</span><p style="margin-top:4px;font-size:14px;color:var(--text);">${item.txt}</p></div>`;
+      }
+      break;
+
+    case 'code':
+      h += `<h3>${slide.title}</h3>`;
+      if (slide.subtitle) h += `<p style="color:var(--blue);font-weight:600;margin-bottom:8px;">${slide.subtitle}</p>`;
+      h += `<pre style="background:#1e293b;color:#e2e8f0;padding:16px;border-radius:8px;font-size:12px;line-height:1.6;overflow-x:auto;max-height:300px;overflow-y:auto;">${slide.code.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>`;
+      break;
+
+    case 'roadmap':
+      h += `<h3>${slide.title}</h3>`;
+      h += `<div style="display:grid;gap:16px;">`;
+      for (const item of slide.content) {
+        h += `<div class="highlight"><strong>${item.phase}</strong><br><span style="font-size:13px;color:var(--text2);">${item.tasks}</span></div>`;
+      }
+      h += `</div>`;
+      break;
+
+    case 'summary':
+      h += `<h3>${slide.title}</h3>`;
+      h += `<ul>`;
+      for (const txt of slide.content) {
+        h += `<li>${txt}</li>`;
+      }
+      h += `</ul>`;
+      break;
+  }
+
+  h += `</div>`;
+  return h;
+}
+
+function renderSlide() {
+  const viewer = document.getElementById('slideViewer');
+  if (!viewer) return;
+  const slides = viewer.querySelectorAll('.slide');
+  slides.forEach((s, i) => {
+    s.className = 'slide' + (i === S.courseSlide ? ' active' : '');
+    if (i === S.courseSlide) {
+      s.style.animation = 'none';
+      s.offsetHeight; // trigger reflow
+      s.style.animation = 'fadeSlide .4s';
+    }
+  });
+}
+
+function renderPlayerBarHTML() {
+  const total = SLIDES.length;
+  const pct = Math.round((S.courseSlide + 1) / total * 100);
+  const isPlaying = S.isPlaying;
+  const isSpeaking = S.isSpeaking;
+
+  return `
+    <button class="player-btn" onclick="prevSlide()" title="上一页">⏮</button>
+    <button class="player-btn ${isPlaying?'playing':''}" onclick="togglePlay()" title="${isPlaying?'暂停':'播放'}">${isPlaying?'⏸':'▶'}</button>
+    <button class="player-btn" onclick="nextSlide()" title="下一页">⏭</button>
+    <div class="progress-track" onclick="seekSlide(event)">
+      <div class="progress-fill" style="width:${pct}%"></div>
+    </div>
+    <span class="slide-counter">${S.courseSlide+1}/${total}</span>
+    <div class="speaking-indicator">
+      <div class="speaking-dot ${isSpeaking?'active':''}"></div>
+      <div class="speaking-dot ${isSpeaking?'active':''}" style="animation-delay:.2s"></div>
+      <div class="speaking-dot ${isSpeaking?'active':''}" style="animation-delay:.4s"></div>
+    </div>
+    <select class="voice-select" onchange="changeVoice(this.value)" title="切换语音">
+      <option value="">语音选择</option>
+    </select>
+  `;
+}
+
+function renderPlayerBar() {
+  const bar = document.getElementById('playerBar');
+  if (bar) bar.innerHTML = renderPlayerBarHTML();
+}
+
+function bindSlideEvents() {
+  // Initialize voice list
+  if (window.speechSynthesis) {
+    // Load voices (async on some browsers)
+    speechSynthesis.onvoiceschanged = () => {
+      const select = document.querySelector('.voice-select');
+      if (select) {
+        const voices = speechSynthesis.getVoices().filter(v => v.lang.startsWith('zh'));
+        select.innerHTML = '<option value="">语音选择</option>';
+        voices.forEach(v => {
+          select.innerHTML += `<option value="${v.name}" ${v.default?'selected':''}>${v.name} (${v.lang})</option>`;
+        });
+      }
+    };
+  }
+}
+
+function prevSlide() {
+  if (S.courseSlide > 0) {
+    stopVoice();
+    S.courseSlide--;
+    S.isPlaying = false;
+    renderSlide();
+    renderPlayerBar();
+  }
+}
+
+function nextSlide() {
+  if (S.courseSlide < SLIDES.length - 1) {
+    stopVoice();
+    S.courseSlide++;
+    S.isPlaying = false;
+    renderSlide();
+    renderPlayerBar();
+  }
+}
+
+function seekSlide(event) {
+  const track = event.currentTarget;
+  const rect = track.getBoundingClientRect();
+  const pct = (event.clientX - rect.left) / rect.width;
+  const newIdx = Math.round(pct * (SLIDES.length - 1));
+  if (newIdx !== S.courseSlide) {
+    stopVoice();
+    S.courseSlide = newIdx;
+    S.isPlaying = false;
+    renderSlide();
+    renderPlayerBar();
+  }
+}
+
+function changeVoice(name) {
+  // Just store preference
+  localStorage.setItem('aidax_pref_voice', name);
+}
+
+// ==================== RADAR CHART ====================
+function initRadarChart() {
+  const canvas = document.getElementById('radarChart');
+  if (!canvas || !S._quizResult) return;
+  const ctx = canvas.getContext('2d');
+  const r = S._quizResult;
+  const dims = DIM_ORDER;
+  const n = dims.length;
+  const cx = 180, cy = 180, radius = 140;
+
+  ctx.clearRect(0, 0, 360, 360);
+
+  // Draw grid circles
+  for (let lvl = 1; lvl <= 4; lvl++) {
+    const r2 = radius * lvl / 4;
+    ctx.beginPath();
+    for (let i = 0; i <= n; i++) {
+      const angle = Math.PI * 2 * i / n - Math.PI / 2;
+      const x = cx + r2 * Math.cos(angle);
+      const y = cy + r2 * Math.sin(angle);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  // Draw axis lines
+  const points = [];
+  for (let i = 0; i < n; i++) {
+    const angle = Math.PI * 2 * i / n - Math.PI / 2;
+    const x = cx + radius * Math.cos(angle);
+    const y = cy + radius * Math.sin(angle);
+    points.push({x, y, angle});
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(x, y);
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Label
+    const lx = cx + (radius + 18) * Math.cos(angle);
+    const ly = cy + (radius + 18) * Math.sin(angle);
+    ctx.fillStyle = '#64748b';
+    ctx.font = '11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(DIMS[dims[i]].short, lx, ly);
+  }
+
+  // Draw data polygon
+  ctx.beginPath();
+  for (let i = 0; i < n; i++) {
+    const score = (r.dimScores[dims[i]] || 0) / 4;
+    const x = cx + radius * score * Math.cos(points[i].angle);
+    const y = cy + radius * score * Math.sin(points[i].angle);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(37, 99, 235, 0.15)';
+  ctx.fill();
+  ctx.strokeStyle = '#2563eb';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Draw data points
+  for (let i = 0; i < n; i++) {
+    const score = (r.dimScores[dims[i]] || 0) / 4;
+    const x = cx + radius * score * Math.cos(points[i].angle);
+    const y = cy + radius * score * Math.sin(points[i].angle);
+    ctx.beginPath();
+    ctx.arc(x, y, 5, 0, Math.PI * 2);
+    const pct = Math.round(score * 100);
+    ctx.fillStyle = pct >= 75 ? '#059669' : pct >= 40 ? '#d97706' : '#dc2626';
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Score label
+    ctx.fillStyle = '#1e293b';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.fillText(pct + '%', x + 12, y - 6);
+  }
+}
+
+// ==================== INIT ====================
+// Pre-select manufacturing + PM for demo
+S.industry = 'mfg';
+S.role = 'pm';
+
+// Load voices early
+if (window.speechSynthesis) speechSynthesis.getVoices();
+
+render();
+</script>
+</body>
+</html>
