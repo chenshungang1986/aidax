@@ -513,11 +513,59 @@ security: [{level:0,difficulty:"初阶",scenario:"场景：你想用公共AI分�
 strategy: [{level:0,difficulty:"初阶",scenario:"场景：CEO问：AI对快消品行业最大的改变是什么？",q:"作为PM的最佳回答？",opts:["A. AI让快消品从「大规模标准化」走向「大规模个性化」：(1)消费者洞察-从问卷到海量社媒实时分析 (2)产品创新-从经验驱动到数据+AI驱动 (3)营销-从大众广告到AI千人千面 (4)供应链-从固定排产到AI预测驱动，全链路提效","B. AI让广告投放更精准","C. AI可以替代配方研发","D. AI主要影响电商渠道","E. 快消品不太需要AI"],scores:[4,0,0,0,0],best:0,explain:"快消品AI=洞察+创新+营销+供应链全链路。最大的变化是从「猜消费者要什么」到「知道消费者要什么」。"}]
 };
 
+// 研发×AI能力测评数据 (8维度×3级=24题)
+const DEV_QUIZ = {
+prompt: [{level:0,difficulty:"初阶",scenario:"场景：你需要在项目中集成一个REST API客户端。手上有第三方API文档（30页PDF），你需要快速理解接口并写出调用代码。",q:"如何用Prompt让AI最高效地完成任务？",opts:["A. 上传PDF→设定「高级后端工程师」角色→描述项目技术栈（Node.js+TypeScript）→要求：(1)提取所有接口的请求/响应格式 (2)生成带类型定义的API客户端代码 (3)添加错误处理和重试逻辑","B. 让AI读文档然后自己写代码","C. 把文档贴进去让AI总结","D. 只看几个主要接口先写着","E. 问AI「这个API怎么用」"],scores:[4,0,1,1,0],best:0,explain:"技术文档→代码的Prompt=角色+技术栈+结构化输出。带类型定义和错误处理的代码才是生产级的。"},{level:1,difficulty:"中阶",scenario:"场景：你要优化一个N+1查询的数据库性能问题。涉及复杂的ORM关系：User→Order→OrderItem→Product。需要AI帮你设计高效的查询方案。",q:"最佳Prompt策略？",opts:["A. 三步法：(1)描述数据模型和访问模式→AI分析N+1问题位置 (2)AI生成优化方案对比（eager loading/batch query/DataLoader/caching）(3)AI输出带benchmark注释的优化代码+迁移风险评估","B. 让AI直接写SQL替代ORM","C. 问AI「怎么优化数据库查询」","D. 把所有关联都改成lazy loading","E. 加更多索引解决问题"],scores:[4,0,0,0,1],best:0,explain:"性能优化Prompt=数据模型→问题分析→方案对比→代码输出。关键是展示完整的访问模式而非孤立查询。"},{level:2,difficulty:"高阶",scenario:"场景：CTO要求你用AI辅助完成微服务拆分的架构设计。现有单体应用（Java Spring），需拆分为5-8个微服务。涉及：数据拆分、通信模式、事务处理。",q:"Prompt链设计？",opts:["A. 4轮Prompt链：(1)「系统架构分析师」→理解现有单体架构→提取限界上下文 (2)「分布式系统专家」→设计服务边界+通信协议(同步/异步/事件驱动) (3)「数据架构师」→数据拆分策略(Saga/CQRS/Outbox) (4)「技术评审员」→评估方案的风险/复杂度/迁移成本","B. 一次性把所有需求描述给AI","C. 先参考Netflix的微服务架构","D. 让AI推荐开源微服务框架","E. 拆成越多服务越好"],scores:[4,0,1,0,0],best:0,explain:"架构设计Prompt链=理解现状→边界定义→技术方案→风险评估。微服务拆分最难的部分是数据，所以需要专门的「数据架构师」角色。"}],
+tools: [{level:0,difficulty:"初阶",scenario:"场景：你接手了一个遗留代码库（5万行Python），没有任何单元测试。需要快速理解核心逻辑并开始安全重构。",q:"AI工具组合的最佳用法？",opts:["A. 用Claude/Cursor分析代码库→生成模块依赖图和核心流程文档→AI辅助生成关键路径的单元测试→用测试保护重构","B. 逐行读代码直到理解","C. 直接开始重构遇到问题再改","D. 让AI重写整个代码库","E. 找原开发者做交接"],scores:[4,0,0,0,1],best:0,explain:"遗留代码接手=AI理解+文档化+测试保护+重构。测试是重构的安全网，AI帮你快速建立这张网。"},{level:1,difficulty:"中阶",scenario:"场景：团队要从JavaScript迁移到TypeScript。项目有200+文件，你作为Tech Lead需要评估工具和方案。",q:"AI辅助迁移方案？",opts:["A. 多工具协同：(1)用AI分析项目结构→识别迁移难点(动态类型/第三方库无类型) (2)AI生成分阶段迁移计划→从叶子模块开始 (3)Cursor辅助逐文件迁移 (4)AI自动生成缺失的类型声明","B. 一次性全部改为.ts","C. 用ts-migrate自动跑然后人工修","D. 只在新代码用TypeScript","E. 让每个开发者自己迁移"],scores:[4,0,2,0,0],best:0,explain:"大规模迁移=分析+计划+工具+自动化四件套。AI帮你做最枯燥的类型声明生成。"}],
+data: [{level:0,difficulty:"初阶",scenario:"场景：生产环境出现了API响应延迟飙升（P99从200ms升到2s）。你拿到了Nginx日志、应用日志和数据库慢查询日志。",q:"如何用AI快速定位问题？",opts:["A. 上传三类日志→描述系统架构（Nginx→Node.js→PostgreSQL）→要求：(1)按时间线关联分析 (2)找出延迟突变的精确时间点 (3)分析该时间点前后各层的异常模式 (4)输出根因假设Top3","B. 肉眼逐条看日志","C. 只查数据库慢查询","D. 重启服务试试","E. 逐个下线服务节点排查"],scores:[4,0,1,0,0],best:0,explain:"故障定位=多源日志+架构描述+时间线关联。AI擅长在海量日志中找出异常模式。"},{level:1,difficulty:"中阶",scenario:"场景：你要为系统建立性能基线和告警阈值。历史数据：6个月的CPU/内存/QPS/延迟/错误率时序数据。",q:"AI辅助方案？",opts:["A. 上传时序数据→AI分析：(1)识别周期性模式(按天/周) (2)计算各时段的正常波动范围 (3)基于3-sigma或IQR建议告警阈值 (4)标注历史异常点和根因→生成告警规则配置","B. 凭经验设置固定阈值","C. 只监控CPU和内存","D. 等出了事故再加监控","E. 用云厂商默认规则"],scores:[4,0,0,0,1],best:0,explain:"性能基线=时序分析+周期识别+异常检测。AI让阈值设定从「拍脑袋」到「数据驱动」。"}],
+content: [{level:0,difficulty:"初阶",scenario:"场景：你要为一个内部微服务写API文档。接口15个，需要包含：路径、参数、返回值、错误码、调用示例。",q:"AI辅助生成方案？",opts:["A. 把Controller代码喂给AI→AI提取所有接口→生成OpenAPI 3.0规范→同时输出Markdown文档+示例curl命令→人工补充业务说明","B. 手工写每个接口的文档","C. 只写主要接口的文档","D. 用Swagger自动生成裸文档","E. 让调用方自己看代码理解"],scores:[4,0,0,2,0],best:0,explain:"API文档生成=代码→OpenAPI→多格式输出。从代码自动提取保证文档与实现一致。"},{level:1,difficulty:"中阶",scenario:"场景：你要写一份技术方案评审文档（ADR-Architecture Decision Record），决策点：选用消息队列RabbitMQ vs Kafka。",q:"AI辅助ADR的方式？",opts:["A. 四步生成：(1)AI对比两个方案在吞吐量/延迟/消息持久化/运维复杂度/生态集成 (2)结合业务场景(订单处理10K TPS/事件溯源需求)做适配分析 (3)AI按ADR模板生成文档 (4)用AI模拟技术评审挑漏洞","B. 选大家都在用的那个","C. 直接写结论不给分析过程","D. 让架构师决定不用文档","E. 两个都用"],scores:[4,0,0,0,0],best:0,explain:"ADR=方案对比+场景适配+模板生成+评审挑战。好的技术决策值得好的文档来记录。"}],
+dev: [{level:0,difficulty:"初阶",scenario:"场景：Code Review时发现一段复杂的业务逻辑，需要确认是否覆盖了所有边界条件（空值/并发/超时/异常）。",q:"AI辅助Code Review的方式？",opts:["A. 把代码和业务规则描述一起给AI→要求：(1)逐行分析逻辑正确性 (2)枚举未覆盖的边界条件 (3)标注潜在的并发问题 (4)生成对应的单元测试用例","B. 肉眼仔细看代码","C. 让写代码的人自己检查","D. 只看明显的语法错误","E. 跑一下看有没有Bug"],scores:[4,0,0,0,1],best:0,explain:"AI Code Review=代码+业务规则→逻辑分析+边界枚举+测试生成。AI不会疲劳，能把所有边界条件枚举出来。"},{level:1,difficulty:"中阶",scenario:"场景：团队要引入一个新的微服务框架。作为Tech Lead需要评估：学习曲线、性能基准、社区活跃度、与现有技术栈的兼容性。",q:"AI辅助技术选型方案？",opts:["A. 多维评估：(1)AI收集各框架的GitHub数据(star/issue/PR频率)→活跃度评分 (2)AI搜索技术博客→提取生产环境经验 (3)AI对比性能基准 (4)AI生成评估报告含推荐方案和迁移路径","B. 用团队最熟悉的框架","C. 看哪个框架Star最多","D. 每个都做POC","E. 让每个组员投票"],scores:[4,0,0,1,0],best:0,explain:"技术选型=社区数据+生产经验+性能基准+迁移评估。AI帮你从感性投票变成数据驱动决策。"}],
+workflow: [{level:0,difficulty:"初阶",scenario:"场景：每天站会后需要整理：昨日完成/今日计划/阻塞项。目前手动整理耗时30分钟。",q:"如何用AI优化每日工作流？",opts:["A. 搭建AI日报管线：(1)Git Commit自动提取昨日变更摘要 (2)Jira/TAPD自动拉取任务状态 (3)AI合并生成日报草稿 (4)你审核修改→一键发送","B. 继续手工整理","C. 让每个人自己发日报然后汇总","D. 减少日报频率","E. 只记录完成的任务"],scores:[4,0,0,0,1],best:0,explain:"日报自动化=工具集成+AI汇总+人工审核。从30分钟→3分钟。"},{level:1,difficulty:"中阶",scenario:"场景：你们团队在做Sprint Planning，需要评估5个用户故事的开发工作量。故事描述模糊，跨多个模块。",q:"AI辅助工作量评估的方式？",opts:["A. 四步评估：(1)AI分析每个故事→拆解为技术子任务 (2)AI预估每个子任务复杂度(基于历史数据) (3)AI标注技术风险和依赖 (4)输出结构化评估→人工调整并确认","B. 让每个人凭经验估算","C. 按故事点数拍脑袋","D. 先做再说不用估","E. 只估简单的故事"],scores:[4,0,0,0,0],best:0,explain:"AI辅助估点=任务拆解+历史参照+风险标注。AI让估点从玄学变得有据可依。"}],
+security: [{level:0,difficulty:"初阶",scenario:"场景：你发现团队成员习惯把公司代码贴到公共ChatGPT中调试。",q:"正确的做法是？",opts:["A. 立即制止+三步行动：(1)组织团队安全培训，用真实数据泄露案例说明风险 (2)推动配置企业版AI工具（数据不用于训练）(3)建立代码分享规范：敏感逻辑脱敏/使用私有化部署的AI","B. 没什么大不了的","C. 禁止所有AI工具的使用","D. 口头提醒一下就好","E. 只限制核心代码"],scores:[4,0,0,1,0],best:0,explain:"代码安全=培训+工具+规范。禁止AI是因噎废食，配置企业版AI才是正道。"},{level:1,difficulty:"中阶",scenario:"场景：你要为团队建立AI辅助开发的安全规范。涉及：代码分享边界、第三方依赖审查、AI生成代码的安全审查。",q:"安全规范的核心要点？",opts:["A. 三层防护：(1)代码层-AI生成代码必须经过安全扫描和不信任原则审查 (2)依赖层-AI推荐的第三方库必须验证来源/许可证/已知漏洞 (3)数据层-禁止在公共AI中输入密钥/Token/客户数据、生产数据必须脱敏","B. 信任AI生成的代码","C. 只要不用公共AI就行","D. 只靠Code Review保证安全","E. 依赖安全扫描工具就够了"],scores:[4,0,0,0,0],best:0,explain:"AI开发安全=代码+依赖+数据三层防护。AI生成的代码可能包含不安全的模式，必须审查。"}],
+strategy: [{level:0,difficulty:"初阶",scenario:"场景：CTO问：AI对研发工程师的工作方式最大的改变是什么？",q:"最佳回答？",opts:["A. AI让研发从「写代码」升级为「设计系统」：(1)重复代码由AI生成→工程师聚焦架构设计 (2)Code Review从人工到AI+人工 (3)调试从看日志到AI辅助根因分析 (4)文档从负担到自动生成→工程师的核心竞争力从「写得快」变为「想得深」","B. AI能替代初级程序员","C. AI让写代码更快","D. AI主要影响前端开发","E. 变化不大还是要写代码"],scores:[4,0,0,0,0],best:0,explain:"研发的战略转变：AI承担重复劳动，人的价值转移到架构设计和系统思维。核心能力从「执行力」到「判断力」。"},{level:1,difficulty:"中阶",scenario:"场景：公司要制定「AI Native研发体系」的建设路线图。你作为Tech Lead提出方案。",q:"最佳路线图？",opts:["A. 三阶段：(1)工具普及期-全员配置Cursor/Copilot，建立Prompt最佳实践 (2)流程嵌入期-AI嵌入Code Review/测试生成/文档编写流程 (3)能力升级期-AI辅助架构设计/性能优化/安全审查→建立团队AI能力度量体系","B. 一次性全面引入AI","C. 先观望等AI技术更成熟","D. 只给高级工程师用AI","E. 买最好的AI工具就行了"],scores:[4,0,0,0,0],best:0,explain:"AI Native研发体系=工具→流程→能力渐进升级。关键是建立度量体系，知道AI到底提升了什么。"}]
+};
+
+// 运营×AI能力测评数据 (8维度×3级=24题)
+const OPS_QUIZ = {
+prompt: [{level:0,difficulty:"初阶",scenario:"场景：你负责App的「用户促活」运营。手上有近3个月未活跃的50万用户画像数据，需要设计精准召回策略。",q:"如何用Prompt让AI设计召回方案？",opts:["A. 设定「用户运营专家」角色→描述数据字段（最后活跃时间/历史行为/付费等级/渠道来源）→要求：(1)用户分层策略 (2)每层的召回钩子设计 (3)触达渠道和时间建议 (4)预期召回率和ROI预估","B. 给所有沉默用户发Push","C. 让AI生成一条通用短信群发","D. 参考竞品怎么做","E. 做满减活动吸引回来"],scores:[4,0,0,1,1],best:0,explain:"用户召回Prompt=角色+数据+分层+多渠道。精准召回比广撒网效果好10倍。"},{level:1,difficulty:"中阶",scenario:"场景：你要策划618大促活动。需要AI辅助完成：活动主题→玩法设计→用户分层策略→触达节奏→效果预估。",q:"Prompt链设计？",opts:["A. 5轮Prompt链：(1)「电商运营专家」→分析历史大促数据提炼成功要素 (2)「活动策划师」→生成5个活动创意 (3)「用户分层分析师」→定义不同用户群的激励策略 (4)「效果预估师」→基于历史数据预估GMV/ROI (5)「风控专家」→标注可能的刷单和羊毛党风险","B. 让AI直接生成活动方案","C. 参考去年的方案改一改","D. 做一个全场满减活动","E. 看竞品怎么搞然后跟进"],scores:[4,0,2,0,0],best:0,explain:"大促策划=历史分析+创意+分层+预估+风控五步。AI让活动从拍脑袋变成有数据支撑的系统工程。"},{level:2,difficulty:"高阶",scenario:"场景：你要设计一个「AI驱动的自动化运营体系」：基于用户实时行为自动触发个性化运营动作。",q:"Prompt策略？",opts:["A. 四层Prompt：(1)「用户行为分析师」→定义关键行为事件和用户意图映射 (2)「策略引擎设计师」→设计触发规则和自动化流程（if-this-then-that） (3)「内容生成器」→为每个触发场景自动生成个性化文案 (4)「效果优化师」→建立AB测试框架持续优化转化率","B. 用固定规则发Push和短信","C. 让运营手动判断什么时候发什么","D. 所有用户同一时间发同样的内容","E. 外包给第三方营销公司"],scores:[4,0,0,0,0],best:0,explain:"自动化运营体系=行为识别+规则引擎+内容生成+持续优化。AI让运营从手动操作变成自动驾驶。"}],
+tools: [{level:0,difficulty:"初阶",scenario:"场景：你要做竞品分析：分析3个竞品App最近3个月的功能迭代和用户口碑变化。数据来源：App Store评论/社媒/竞品更新日志。",q:"AI工具组合方案？",opts:["A. 三工具协同：(1)AI抓取和分析App Store评论→提取高频关键词和情感趋势 (2)AI分析社媒讨论→识别用户对竞品新功能的真实反应 (3)汇总→输出竞品动态地图+我们的应对策略","B. 手动翻App Store评论","C. 只看竞品的版本更新日志","D. 买一份市场分析报告","E. 下载竞品App体验一下"],scores:[4,0,1,0,0],best:0,explain:"竞品分析=多渠道数据+AI分析+策略输出。多渠道交叉分析能发现单一渠道看不到的竞争信号。"}],
+data: [{level:0,difficulty:"初阶",scenario:"场景：上周的DAU突然下降15%。你有最近30天的日活数据、各渠道来源、功能使用数据、用户反馈。",q:"AI分析方案？",opts:["A. 上传数据→描述下降的时间点→AI分析：(1)按渠道拆解DAU变化→定位下降来源 (2)分析下降前后功能使用的变化 (3)交叉用户反馈时间线 (4)输出：根因假设+紧急修复建议+止损方案","B. 再观察一周看看","C. 加大投放预算拉新补","D. 发问卷调研用户为什么离开","E. 做促销活动拉回用户"],scores:[4,0,0,1,0],best:0,explain:"DAU下降分析=渠道拆解+行为变化+反馈交叉。AI能在10分钟内跑完所有维度，而人工可能需要2天。"},{level:1,difficulty:"中阶",scenario:"场景：你在做AB测试：两个版本的App首页设计。A版（原版）和B版（个性化推荐），需要分析哪个版本的转化率更高。",q:"AI辅助AB测试分析？",opts:["A. 上传AB测试数据→AI分析：(1)整体转化率对比+统计显著性检验 (2)按用户分层分析(新老用户/付费/免费) (3)分析各功能模块的点击变化 (4)输出：哪个版本赢+在哪些人群赢+为什么赢","B. 看哪个版本的转化率高就选哪个","C. 两个版本都上线","D. 让设计师决定","E. 做用户调研不跑AB测试"],scores:[4,0,0,0,0],best:0,explain:"AB测试分析=统计检验+分层分析+行为解释。AI让你知道「谁赢了」，更知道「为什么赢」。"}],
+content: [{level:0,difficulty:"初阶",scenario:"场景：你要为App的新功能「AI智能推荐」写推送文案。需要3个版本：弹窗版(30字)、Push版(50字)、App内横幅版(80字)。",q:"AI协作方式？",opts:["A. 给AI功能描述+用户价值+品牌调性→AI生成3版×3格式共9条文案→AI自我评分排序→你选最佳的微调","B. 自己写一版然后改长度","C. 只写一条通用的","D. 让设计师顺手写","E. 用竞品的文案改一改"],scores:[4,0,0,0,0],best:0,explain:"多版本文案=AI量产+评分筛选+人工定稿。运营最大的痛苦不是没创意，是没时间量产。"}],
+dev: [{level:0,difficulty:"初阶",scenario:"场景：研发说「这个需求技术上做不了/需要2个月」。作为运营，你需要判断技术难度是否被夸大。",q:"AI辅助判断？",opts:["A. 用AI分析：(1)描述需求→AI评估技术复杂度 (2)AI调研类似功能的技术实现方案 (3)输出「最小可行方案」建议：砍哪些可以快速上线→带着方案和研发二次沟通","B. 直接相信研发","C. 坚持要做不管技术难度","D. 找CTO施压","E. 砍掉这个需求"],scores:[4,0,1,0,2],best:0,explain:"运营不需要懂代码，但需要用AI建立技术判断力。带着「最小可行方案」沟通比单纯push有效得多。"}],
+workflow: [{level:0,difficulty:"初阶",scenario:"场景：你每天需要监控核心运营指标（DAU/留存/转化/GMV），收集竞品动态，写运营日报。目前耗时2小时。",q:"AI优化方案？",opts:["A. 搭建AI运营驾驶舱：(1)数据看板自动取数+异常自动标红 (2)AI自动抓取竞品动态 (3)AI生成日报初稿含「今日重点关注」 (4)你花10分钟审核补充策略建议","B. 继续手工做","C. 只关注DAU一个指标","D. 改成周报减少频率","E. 让数据分析师帮你做"],scores:[4,0,0,0,1],best:0,explain:"运营日报自动化=自动监控+AI分析+人工策略。从2小时→10分钟，而且AI能捕捉人眼可能忽略的异常。"}],
+security: [{level:0,difficulty:"初阶",scenario:"场景：你想用公共AI分析用户行为数据来优化推荐策略。但数据包含用户设备ID和浏览记录。",q:"正确的做法？",opts:["A. 先脱敏：设备ID哈希化、浏览记录聚合为品类偏好标签→确认无法反推个人信息→使用企业版AI分析","B. 直接上传分析","C. 只用统计级数据不用个体数据","D. 让研发在内部环境做分析","E. 加密后上传"],scores:[4,0,2,3,0],best:0,explain:"用户数据分析=脱敏+企业版AI。设备ID和浏览记录都是个人信息，必须脱敏后才能使用外部AI。"}],
+strategy: [{level:0,difficulty:"初阶",scenario:"场景：CEO问：AI对运营岗位最大的改变是什么？",q:"最佳回答？",opts:["A. AI让运营从「经验驱动」升级为「数据+AI驱动」：(1)用户洞察从抽样调研到全量实时分析 (2)内容生产从人工创作到AI辅助量产+个性化 (3)活动策划从「猜用户喜欢什么」到「知道用户需要什么」 (4)运营的核心能力从「勤奋执行」到「策略设计」","B. AI可以替代运营岗位","C. AI让发Push更智能","D. AI主要影响内容运营","E. 运营还是要靠经验"],scores:[4,0,0,0,0],best:0,explain:"运营的战略转变：从执行者到策略者。AI处理执行，人专注于策略和创意。"},{level:1,difficulty:"中阶",scenario:"场景：COO让你提出「AI驱动用户增长」的年度策略。",q:"策略框架？",opts:["A. AARRR×AI：(1)Acquisition-AI优化投放素材和人群定向 (2)Activation-AI个性化新用户引导 (3)Retention-AI预测流失风险自动干预 (4)Revenue-AI动态定价和推荐 (5)Referral-AI识别高传播意愿用户，每阶段配KPI","B. 投更多广告","C. 做更多促销活动","D. 优化App体验","E. 靠自然增长"],scores:[4,0,0,0,0],best:0,explain:"AI增长策略=AARRR全链路AI化。关键不是每个环节都用AI，而是每个环节都能量化AI的增量贡献。"}]
+};
+
+// 销售×AI能力测评数据 (8维度×3级=24题)
+const SALES_QUIZ = {
+prompt: [{level:0,difficulty:"初阶",scenario:"场景：你明天要拜访一家制造企业的CIO，推销MES解决方案。你需要快速了解：客户行业痛点、决策链、竞品在客户那里的情况。",q:"如何用Prompt做拜访准备？",opts:["A. 设定「B2B销售顾问」角色→输入客户信息（行业/规模/现有系统/已知痛点）→要求：(1)该行业3大核心痛点 (2)可能决策链和关键人关注点 (3)竞品在该客户的潜在切入点 (4)定制首次拜访的谈话策略+3个必问问题","B. 网上搜一下客户的基本信息","C. 准备通用的话术就去拜访","D. 让销售助理准备材料","E. 现场随机应变"],scores:[4,0,0,1,0],best:0,explain:"拜访准备Prompt=客户画像+痛点+决策链+策略。30分钟的准备可以大幅提高首次拜访成功率。"},{level:1,difficulty:"中阶",scenario:"场景：客户发来一封邮件，提出5个技术疑问+3个商务顾虑+2个竞品对比问题。需要专业、有说服力地回复。",q:"AI辅助回复策略？",opts:["A. 先分类：(1)技术问题→AI根据产品文档生成专业答复 (2)商务顾虑→AI分析类似客户的成交案例生成应对话术 (3)竞品对比→AI生成客观对比表(优势+差异化，避免贬低竞品)→汇总后统一润色语气再发出","B. 逐一回复每个问题","C. 约客户电话沟通","D. 让售前工程师解答技术部分","E. 发产品手册让客户自己看"],scores:[4,1,0,2,0],best:0,explain:"客户邮件回复=分类+AI生成+人工润色。关键技术问题要准确，商务顾虑要让人放心，竞品对比要客观。"},{level:2,difficulty:"高阶",scenario:"场景：你负责一个千万级大客户的全年销售策略。客户组织复杂、决策链长、涉及多部门。",q:"如何设计AI辅助的大客户策略？",opts:["A. Prompt链：(1)「客户组织分析师」→基于公开信息构建客户组织架构和决策链地图 (2)「需求分析师」→分析客户年报/财报/新闻推断战略需求和预算方向 (3)「竞争态势分析师」→评估我方在各关键人处的优劣势 (4)「策略师」→设计分阶段攻单路线和各关键人的差异化沟通策略","B. 维持好关系等机会","C. 每个部门都拜访一遍","D. 重点攻克一把手","E. 走低价策略"],scores:[4,0,0,0,0],best:0,explain:"大客户策略=组织分析+需求推断+竞争评估+攻单路线。AI让你看清战场全貌。"}],
+tools: [{level:0,difficulty:"初阶",scenario:"场景：你需要从领英/行业报告中找到某行业Top50潜在客户的联系方式和关键信息。",q:"AI工具组合？",opts:["A. 三工具协同：(1)AI搜索行业报告→提取Top企业名单 (2)AI分析企业官网/年报→提取业务重点和潜在需求 (3)结合CRM数据→生成潜在客户优先级排序和首次触达策略","B. 手动在领英一个个搜索","C. 买一份企业名录","D. 广撒网群发邮件","E. 等市场部给线索"],scores:[4,0,1,0,0],best:0,explain:"潜客挖掘=行业扫描+需求分析+优先级排序。AI让销售从盲目扫街到精准打击。"}],
+data: [{level:0,difficulty:"初阶",scenario:"场景：你手上有过去半年的销售数据：线索量、转化率、客单价、成交周期、丢单原因。需要找出销售漏斗的瓶颈。",q:"AI分析方案？",opts:["A. 上传数据→描述销售流程阶段→AI分析：(1)各阶段转化率漏斗 (2)丢单原因归类和高频丢单节点 (3)高转化销售的行为特征 (4)输出：瓶颈节点+改进建议+预期提升","B. 凭感觉判断哪个环节有问题","C. 只看总成交额","D. 每个销售自己分析自己的","E. 增加线索量试一下"],scores:[4,0,0,0,1],best:0,explain:"销售漏斗分析=阶段转化+丢因归类+行为特征。AI能从数据中找到最好的销售在做什么不同的事。"}],
+content: [{level:0,difficulty:"初阶",scenario:"场景：你要为客户定制一份解决方案PPT（20页）。需要体现：客户痛点→我们的方案→价值证明→实施路径。",q:"AI辅助方案？",opts:["A. 四步生成：(1)给AI客户背景+产品能力→AI生成PPT大纲 (2)AI按章节生成初稿内容 (3)AI润色统一专业风格 (4)AI生成执行摘要和ROI计算→人工审核关键数据和客户化细节","B. 用公司通用模板填充","C. 让售前团队写","D. 只做产品介绍","E. 口头介绍不做PPT"],scores:[4,0,1,0,0],best:0,explain:"解决方案PPT=大纲+初稿+润色+ROI。AI让你1小时产出过去需要1天的工作。"}],
+dev: [{level:0,difficulty:"初阶",scenario:"场景：客户问「你们产品的AI能力和其他家比有什么技术优势？」你不太确定。",q:"AI辅助准备？",opts:["A. 三步准备：(1)AI分析自家产品文档提取AI能力要点 (2)AI对比竞品公开的AI功能介绍 (3)生成「技术优势一张图」：用通俗语言解释差异化→让客户听懂而非听懂技术","B. 照着产品手册念","C. 说「我们的AI最好」","D. 让技术团队来回答","E. 避开不谈技术话题"],scores:[4,0,0,2,0],best:0,explain:"技术优势表达=自身分析+竞品对比+通俗化。最好的销售话术让客户的老板都能听懂。"}],
+workflow: [{level:0,difficulty:"初阶",scenario:"场景：你每周需要整理销售Pipeline报告：各阶段商机数量/金额/预计成交时间/风险。目前手工从CRM导出整理耗时2小时。",q:"AI优化方案？",opts:["A. AI自动化：(1)CRM数据自动同步 (2)AI分析Pipeline健康度（转化率/周期/金额分布） (3)AI标注高风险商机（停滞超期/关键人变动/竞品介入） (4)AI生成周报含「本周必做3件事」","B. 继续手工整理","C. 让每个销售自己报","D. 只看金额不看质量","E. 减少商机数量只看大的"],scores:[4,0,0,0,0],best:0,explain:"销售Pipeline自动化=数据同步+健康分析+风险预警+行动建议。AI让你把时间花在销售上而非做表上。"}],
+security: [{level:0,difficulty:"初阶",scenario:"场景：你想把客户会议录音上传到公共AI生成会议纪要。但录音涉及客户内部信息。",q:"正确做法？",opts:["A. 三不原则：(1)未经客户同意不上传 (2)必须使用时，先脱敏（替换公司名/人名/数字） (3)优先使用企业版AI（数据不用于训练），或者先用本地AI工具做语音转文字","B. 直接上传，就我们自己听","C. 录音而已没关系","D. 手动记录不用AI","E. 只上传不敏感的部分"],scores:[4,0,0,2,0],best:0,explain:"客户数据安全=客户同意+脱敏+企业版AI。销售手握客户信任，安全底线不可破。"}],
+strategy: [{level:0,difficulty:"初阶",scenario:"场景：销售VP问：AI对我们销售团队最大的价值是什么？",q:"最佳回答？",opts:["A. AI让销售从「勤奋跑量」升级为「精准命中」：(1)客户洞察-从主观判断到数据驱动的需求预测 (2)话术-从通用模板到千人千面的个性化沟通 (3)流程-从手工跟单到AI自动提醒和风险预警 (4)核心能力-从「关系维护」到「AI加持的关系+洞察」","B. AI可以写销售话术","C. AI让发邮件更高效","D. AI主要帮助新人上手","E. 销售本质还是靠人"],scores:[4,0,0,0,0],best:0,explain:"销售的战略转变：AI不是替代关系，是增强洞察力。最好的销售+AI=无敌。"}]
+};
+
+// 人资×AI能力测评数据 (8维度×3级=24题)
+const HR_QUIZ = {
+prompt: [{level:0,difficulty:"初阶",scenario:"场景：你要为「高级算法工程师」岗位写一份有吸引力的JD。需要在200个JD中脱颖而出。",q:"Prompt设计？",opts:["A. 设定「顶尖科技公司HR」角色→输入岗位信息（技术栈/项目类型/团队文化/薪资范围）→要求：(1)用技术人才喜欢的语言风格 (2)突出项目挑战性和成长空间 (3)明确区别于通用JD的差异化亮点 (4)生成3个版本供选择","B. 参考竞品公司的JD改一改","C. 把岗位要求全部列出来","D. 写「薪资优厚、团队氛围好」","E. 用公司标准模板填充"],scores:[4,0,0,0,1],best:0,explain:"JD写作Prompt=角色+岗位细节+差异化亮点+多版本。好JD不是罗列要求，是让候选人想象自己在这里工作的样子。"},{level:1,difficulty:"中阶",scenario:"场景：你要设计一套「AI辅助面试」的评估体系。需要为5个岗位分别定义能力模型和AI辅助的面试问题库。",q:"Prompt策略？",opts:["A. 四步生成：(1)给AI岗位JD→AI提取核心能力维度 (2)给AI公司文化和团队特点→AI为每个维度设计行为面试题 (3)AI生成评分标准（0-4分的行为锚定） (4)AI模拟候选人回答→校准评分一致性","B. 用通用面试题库","C. 让用人部门出题","D. 用AI直接面试候选人","E. 参考网上题库"],scores:[4,0,1,0,0],best:0,explain:"面试体系设计=能力提取+场景化出题+评分标准+校准。AI让面试从主观判断走向结构化评估。"},{level:2,difficulty:"高阶",scenario:"场景：CEO要求你提出「AI时代的人才战略」：AI如何改变我们的招聘/培养/保留人才的方式？",q:"Prompt链方案？",opts:["A. 3轮Prompt链：(1)「未来学家」→分析AI对各岗位的替代/增强效应→识别未来3年核心人才画像 (2)「组织发展专家」→设计AI增强的人才培养体系（AI导师/技能图谱/学习路径） (3)「人才战略师」→输出完整的人才AI战略：招聘标准升级→AI技能培训→AI驱动的人才保留策略","B. 增加AI相关岗位的招聘","C. 让现有员工自学AI","D. 引进AI领域的高管","E. 等AI成熟了再考虑"],scores:[4,0,0,0,0],best:0,explain:"AI人才战略=岗位重构+培养体系+保留策略。不是多招几个AI工程师就够了，是全方位的组织能力升级。"}],
+tools: [{level:0,difficulty:"初阶",scenario:"场景：你要从500份简历中筛选出20份匹配「AI产品经理」岗位的候选人。",q:"AI工具方案？",opts:["A. 三步筛选：(1)AI提取岗位核心能力要求→生成评分标准 (2)AI批量分析简历→按匹配度排序+标注每份简历的亮点和风险 (3)人工审核Top30→确定面试名单","B. 逐份阅读所有简历","C. 用关键词筛选","D. 让猎头初筛","E. 只看学历和工作年限"],scores:[4,0,1,1,0],best:0,explain:"简历筛选=能力提取+批量匹配+人工复审。AI的初筛让HR从500份读到30份，从3天到3小时。"}],
+data: [{level:0,difficulty:"初阶",scenario:"场景：你要分析员工离职数据（2年×500人）：离职率按部门/职级/司龄/绩效分布。找出离职规律。",q:"AI分析方案？",opts:["A. 上传脱敏数据→描述分析目标→AI分析：(1)离职率趋势和季节性 (2)高离职人群画像（哪个部门/职级/司龄段） (3)离职前行为信号（请假增多/绩效波动/参与度下降） (4)输出：重点保留人群+干预时机建议","B. 看整体离职率","C. 做离职面谈汇总","D. 和行业平均水平对比","E. 只关注核心人才离职"],scores:[4,0,1,0,0],best:0,explain:"离职分析=趋势+画像+前兆信号+干预建议。AI能发现「离职前30天的行为模式」，为主动保留创造窗口期。"}],
+content: [{level:0,difficulty:"初阶",scenario:"场景：你要撰写季度「企业文化内刊」：涵盖优秀员工故事+团队活动+公司动态+行业趋势。",q:"AI协同方案？",opts:["A. 四步共创：(1)收集素材→AI提取亮点和故事线 (2)AI按「人物故事/团队/趋势」结构生成初稿 (3)AI润色使风格温暖而有感染力 (4)人工注入真实细节和个人风格→发布","B. 让各部门投稿然后汇编","C. 行政人员手动编写","D. 只发几篇优秀员工故事","E. 外包给内容公司"],scores:[4,0,0,0,0],best:0,explain:"文化内刊=素材提取+结构生成+风格润色+人工灵魂。AI负责框架和初稿，人负责温度和真实。"}],
+dev: [{level:0,difficulty:"初阶",scenario:"场景：你想引入一套「AI驱动的HR系统」，但需要评估技术方案的可行性和ROI。",q:"AI辅助选型？",opts:["A. 三步评估：(1)AI分析市面HR SaaS产品的AI能力对比 (2)AI评估内部IT系统的对接难度 (3)AI生成ROI预估：减少的手工工时×人力成本→回报周期→输出选型推荐","B. 看哪个最便宜","C. 让IT部门选","D. 买功能最多的","E. 自己做开发"],scores:[4,0,1,0,0],best:0,explain:"HR系统选型=产品对比+对接评估+ROI分析。AI让你带着数据和逻辑去说服管理层批预算。"}],
+workflow: [{level:0,difficulty:"初阶",scenario:"场景：你负责的新员工入职流程（Onboarding）涉及7个部门的审批和配置。目前线下流转耗时2周。",q:"AI优化方案？",opts:["A. AI自动化：(1)AI分析现有流程→识别冗余环节 (2)AI设计简化流程+自动流转规则 (3)AI生成标准化入职包（欢迎信/账号/设备/培训日程） (4)AI自动追踪入职进度并预警延迟","B. 多发催办邮件","C. 让新员工自己跑各部门","D. 减少入职手续","E. 集中一天统一办理"],scores:[4,0,0,0,0],best:0,explain:"入职流程自动化=流程分析+自动流转+标准化+预警。新员工的第一体验决定了他们对公司的第一印象。"}],
+security: [{level:0,difficulty:"初阶",scenario:"场景：你想用公共AI分析员工绩效数据来识别高潜人才。数据含：绩效评分/晋升记录/培训成绩/360评价。",q:"正确做法？",opts:["A. 绝不使用公共AI→数据必须脱敏后在企业内部环境处理：(1)姓名/工号替换为匿名ID (2)部门只保留大类不保留具体团队 (3)使用企业版AI或内部BI工具分析","B. 脱敏后上传公共AI","C. 只分析不包含姓名","D. 数据不多没关系","E. 让外部咨询公司分析"],scores:[4,0,0,0,0],best:0,explain:"员工数据=最高敏感级。绩效/评价涉及个人隐私和职场公平，绝不能用公共AI处理。"}],
+strategy: [{level:0,difficulty:"初阶",scenario:"场景：CEO问：AI对HR最大的改变是什么？",q:"最佳回答？",opts:["A. AI让HR从「行政服务中心」升级为「人才战略中心」：(1)招聘-从筛简历到AI精准匹配 (2)培训-从统一课表到AI个性化学习路径 (3)绩效-从年度考核到AI持续反馈 (4)核心转变-HR的时间从70%行政→70%战略","B. AI可以替代基础HR工作","C. AI让招聘更快","D. AI主要在培训领域有影响","E. HR不太需要AI"],scores:[4,0,0,0,0],best:0,explain:"HR的战略转变：AI解放行政劳动力，让HR真正成为人才战略的设计者和推动者。"}]
+};
+
 // ==================== ADAPTIVE QUIZ ENGINE ====================
 const DIM_ORDER = ['prompt','tools','data','content','dev','workflow','security','strategy'];
 
 function startAdaptiveQuiz() {
-  S._quizWeights = getPMWeights();
+  S._quizWeights = getWeights();
   const dimOrder = DIM_ORDER;
   // Randomize dimension order for "every quiz is different"
   S._quizDims = [...dimOrder].sort(() => Math.random() - 0.5);
@@ -583,7 +631,7 @@ function finishAdaptiveQuiz() {
 }
 
 function calculateAdaptiveScores() {
-  const weights = S._quizWeights || getPMWeights();
+  const weights = S._quizWeights || getWeights();
   const answers = S.quizAnswers || {};
   let dimScores = {};
   let weightedTotal = 0, totalWeight = 0;
@@ -598,8 +646,6 @@ function calculateAdaptiveScores() {
   const overall = totalWeight > 0 ? Math.round(weightedTotal / totalWeight * 100) : 0;
   return { dimScores, overall, weights };
 }
-
-// (replaced by getIndustryPMWeights)
 
 // ==================== COURSE DATA ====================
 const COURSE_TITLE = 'AI重塑制造产品规划：从产线数据到产品决策';
@@ -864,6 +910,363 @@ const SLIDES_AUTO = [
  narration:"感谢你完成这45分钟的课程。智能汽车的产品经理，是连接物理世界和数字智能的桥梁。AI让这座桥变得更宽、更快。祝你旅途愉快。"}
 ];
 
+// 研发岗位课程：「AI驱动的高效研发：从写代码到设计系统」
+const SLIDES_DEV = [
+  {
+    title: 'AI驱动的高效研发：从写代码到设计系统',
+    subtitle: '研发工程师的AI实战指南',
+    type: 'cover',
+    narration: '欢迎来到"AI驱动的高效研发"课程。在接下来的40分钟里，我们将深入探讨如何用AI工具彻底改变研发工作方式。从日常编码到架构设计，AI正在让每个研发工程师的效率获得数量级的提升。'
+  },
+  {
+    title: '为什么研发必须拥抱AI？',
+    type: 'content',
+    content: [
+      {txt:'2026年，AI辅助编程已成为研发标配，不用AI就是降维竞争', hl:true},
+      {txt:'Cursor/Copilot等工具让代码生成效率提升50-300%', hl:false},
+      {txt:'AI不仅写代码，还能Code Review、生成测试、诊断故障', hl:true},
+      {txt:'核心转变：从"写代码的人"升级为"设计系统的人"', hl:true}
+    ],
+    narration: '2026年的研发格局已经剧变。AI辅助编程不再是可选项，而是生存必备技能。业界数据显示，熟练使用AI的研发工程师效率提升50%到300%。但更重要的是角色转变：AI承担了"实现"的工作，研发工程师的价值转移到"设计"和"判断"上。'
+  },
+  {
+    title: '2026研发必需AI工具栈',
+    type: 'tools',
+    content: [
+      {tool:'Cursor / GitHub Copilot', use:'AI辅助编码、智能补全、上下文感知重构'},
+      {tool:'Claude Code / GPT-Engineer', use:'复杂逻辑生成、架构建议、代码解释'},
+      {tool:'AI Code Review', use:'自动Code Review、安全漏洞检测、最佳实践检查'},
+      {tool:'AI Test Generator', use:'自动生成单元测试、集成测试、边界条件覆盖'},
+      {tool:'AI Debug Assistant', use:'日志分析、异常定位、根因推断'}
+    ],
+    narration: '现代研发工程师的工具栈已经高度AI化。Cursor和Copilot负责日常编码加速，Claude负责复杂逻辑和架构建议，AI Code Review保证代码质量，AI Test Generator自动覆盖边界条件。这些工具组合起来，构成了研发的AI"外骨骼"。'
+  },
+  {
+    title: '实操一：用AI接手遗留代码库',
+    subtitle: '从恐惧到掌控 — 5万行代码的AI征服之旅',
+    type: 'case',
+    content: [
+      {label:'痛点', txt:'接手5万行Python遗留代码，零文档、零测试、原团队已离职'},
+      {label:'AI方案', txt:'(1)用AI生成模块依赖图和核心流程文档 (2)AI识别高风险代码区域 (3)自动生成关键路径单元测试 (4)在测试保护下安全重构'},
+      {label:'效果', txt:'理解代码的时间从2周缩短到2天，重构风险降低80%'}
+    ],
+    narration: '接手遗留代码是每个研发工程师的噩梦。用传统方式理解5万行代码至少需要2周。用AI的方法：先让AI通读代码库生成依赖图和流程文档，再识别代码坏味道和高风险区域，然后自动生成关键路径的测试，最后在测试的保护下逐步重构。整个过程从2周变成2天，而且重构风险大幅降低。'
+  },
+  {
+    title: '实操二：AI辅助性能优化',
+    subtitle: '从日志到方案 — 系统性能问题的AI诊断',
+    type: 'case',
+    content: [
+      {label:'场景', txt:'生产环境API P99延迟从200ms飙升到2s'},
+      {label:'AI诊断', txt:'上传Nginx日志+应用日志+DB慢查询→AI交叉分析时间线→定位到"某次部署引入的N+1查询+连接池耗尽"'},
+      {label:'产出', txt:'AI给出优化方案（批量查询+连接池扩容+缓存策略）+代码修改建议'}
+    ],
+    narration: '性能问题是最让研发头疼的故障之一。传统方式需要在海量日志中人力排查，有时需要数小时。AI的方法：一次性上传Nginx、应用、数据库三层日志，描述系统架构，AI自动进行时间线关联分析。在这个案例中，AI在30秒内定位到了一次部署引入的N+1查询，连带发现了连接池耗尽问题，并给出了完整的优化方案。'
+  },
+  {
+    title: '实操三：AI驱动架构决策',
+    subtitle: '微服务拆分的AI辅助设计',
+    type: 'case',
+    content: [
+      {label:'挑战', txt:'单体Spring应用需拆分为微服务，涉及数据拆分和事务处理'},
+      {label:'AI方法', txt:'(1)AI分析代码库提取限界上下文 (2)评估拆分方案的耦合度和数据依赖 (3)推荐Saga/CQRS模式处理分布式事务 (4)生成迁移路径和风险评估'},
+      {label:'价值', txt:'架构决策从"拍脑袋"变成"有数据支撑的系统分析"'}
+    ],
+    narration: '架构决策是研发工作中最有价值也最需要经验的部分。微服务拆分更是公认的难题。用AI辅助：先分析代码库的模块依赖和数据库访问模式，自动识别限界上下文，然后评估不同拆分方案的耦合度，推荐合适的事务处理模式。AI不会替你决策，但它让你在决策前看到所有维度的权衡。'
+  },
+  {
+    title: '研发AI安全红线',
+    type: 'content',
+    content: [
+      {txt:'🚫 绝不将生产代码粘贴到公共AI工具', hl:true},
+      {txt:'🚫 绝不将密钥/Token/密码输入AI对话', hl:true},
+      {txt:'✅ 使用企业版AI工具（数据不用于训练）', hl:false},
+      {txt:'✅ AI生成代码必须经安全扫描和人工审查', hl:true},
+      {txt:'✅ 建立团队AI使用规范和代码分享边界', hl:false}
+    ],
+    narration: 'AI辅助研发带来了巨大的效率提升，但也带来了新的安全挑战。三条红线必须牢记：不贴生产代码到公共AI、不输入任何密钥凭证、AI生成的代码必须经过安全审查。使用企业版AI工具是最基本的安全保障。记住：效率提升不能以安全为代价。'
+  },
+  {
+    title: '你的AI研发升级路线图',
+    type: 'content',
+    content: [
+      {txt:'第1周：配置Cursor/Copilot，建立日常AI编码习惯', hl:false},
+      {txt:'第2周：掌握Prompt工程，让AI输出高质量代码', hl:false},
+      {txt:'第3周：AI融入Code Review和测试生成流程', hl:true},
+      {txt:'第4周：AI辅助架构设计和性能优化', hl:true},
+      {txt:'持续：积累团队的Prompt库和AI最佳实践', hl:true}
+    ],
+    narration: '最后，我们来看你的AI研发升级路线图。第一周从工具配置和日常编码开始，第二周深入Prompt工程，第三周把AI融入Code Review和测试流程，第四周上升到架构设计层面。AI不会替代优秀的研发工程师，但会用AI的研发工程师一定会替代不会用的。让我们现在就开始这段旅程。'
+  }
+];
+
+// 运营岗位课程：「AI驱动智能运营：从经验驱动到数据驱动」
+const SLIDES_OPS = [
+  {
+    title: 'AI驱动智能运营：从经验驱动到数据驱动',
+    subtitle: '运营岗位的AI实战指南',
+    type: 'cover',
+    narration: '欢迎来到"AI驱动智能运营"课程。在接下来的40分钟里，我们将探讨如何用AI彻底升级运营工作方式——从拍脑袋做活动到数据驱动决策，从手动操作到自动化运营体系。'
+  },
+  {
+    title: '运营岗位的AI变革',
+    type: 'content',
+    content: [
+      {txt:'用户洞察：从抽样调研到全量实时分析', hl:true},
+      {txt:'内容生产：从人工创作到AI辅助量产+个性化', hl:true},
+      {txt:'活动策划：从「猜用户喜欢什么」到「知道用户需要什么」', hl:true},
+      {txt:'核心转变：运营从「勤奋执行者」升级为「策略设计师」', hl:true}
+    ],
+    narration: 'AI对运营岗位的改变是根本性的。过去我们靠经验和直觉做决策，现在AI让我们能基于全量数据做精准判断。内容生产从人工创作变成了AI辅助的量产，活动策划从拍脑袋变成了有数据支撑的系统工程。运营的核心能力正在从执行力转向策略设计能力。'
+  },
+  {
+    title: '2026运营必备AI工具栈',
+    type: 'tools',
+    content: [
+      {tool:'Claude / GPT-4o', use:'活动方案策划、文案生成、竞品分析、数据解读'},
+      {tool:'AI数据分析工具', use:'用户行为分析、漏斗分析、AB测试、预测模型'},
+      {tool:'AI内容创作', use:'Push文案、社媒内容、详情页、邮件营销'},
+      {tool:'AI用户洞察', use:'评论分析、情感分析、用户分群、流失预测'},
+      {tool:'自动化运营平台', use:'触发式营销、个性化推荐、智能投放'}
+    ],
+    narration: '2026年运营的工具栈已全面AI化。Claude负责策略和内容，数据分析工具负责洞察，自动化平台负责执行。这个工具栈让运营从「每天忙到焦头烂额的手工劳动」变成「设计策略、AI执行」的新模式。'
+  },
+  {
+    title: '实操一：AI辅助用户召回战役',
+    subtitle: '从盲目群发到精准召回',
+    type: 'case',
+    content: [
+      {label:'痛点', txt:'50万沉默用户需要召回，传统做法是群发Push/短信，召回率不到3%'},
+      {label:'AI方案', txt:'(1)AI分析沉默用户画像 (2)按流失原因分层 (3)为每层设计个性化召回钩子 (4)AI生成多版本文案+推送时机优化'},
+      {label:'效果', txt:'召回率从3%提升到12%，且用户留存率提高40%'}
+    ],
+    narration: '用户召回是运营的经典场景。传统做法是群发Push或短信，召回率通常只有2-3%。用AI的方法：先分析沉默用户的画像和可能的流失原因，将用户分为「价格敏感型」「功能不满足型」「竞品迁移型」等层次，然后为每层设计个性化的召回钩子和文案。在真实案例中，AI驱动的精准召回将召回率提升了4倍。'
+  },
+  {
+    title: '实操二：AI自动化运营体系',
+    subtitle: '从手动操作到自动驾驶',
+    type: 'case',
+    content: [
+      {label:'挑战', txt:'如何基于用户实时行为自动触发个性化运营动作'},
+      {label:'AI方案', txt:'(1)定义关键行为事件 (2)设计触发规则和自动化流程 (3)AI为每个场景实时生成个性化文案 (4)AB测试持续优化'},
+      {label:'落地', txt:'新用户注册→AI判断兴趣→自动推送相关内容→7日留存提升25%'}
+    ],
+    narration: '自动化运营是AI给运营带来的最大效率革命。核心思路是：定义用户的关键行为事件，设计触发规则，让AI在每个触发点实时生成个性化内容。比如用户注册后的前7天，AI根据浏览行为判断兴趣方向，自动推送最相关的内容。这种「自动驾驶」模式让一个运营可以管理过去需要10个人才能完成的工作量。'
+  },
+  {
+    title: '实操三：AI竞品动态监控',
+    subtitle: '从手动刷App到AI自动监控',
+    type: 'case',
+    content: [
+      {label:'痛点', txt:'需要持续关注5个竞品的功能更新、用户口碑、营销动作，人工无法全覆盖'},
+      {label:'AI方案', txt:'(1)AI自动抓取竞品更新日志/App Store评论/社媒讨论 (2)AI分析情感趋势和功能热度 (3)每周自动生成「竞品动态周报」'},
+      {label:'价值', txt:'竞品情报从「偶尔看一眼」变成「实时感知+趋势预判」'}
+    ],
+    narration: '竞品监控是运营的重要工作，但人工很难持续覆盖多个竞品的全渠道信息。AI可以自动抓取竞品的更新日志、用户评论和社媒讨论，分析情感趋势和功能热度，每周自动生成竞品动态周报。这让运营从「被动知道竞品做了什么」变成「主动预判竞品下一步」。'
+  },
+  {
+    title: '运营数据安全红线',
+    type: 'content',
+    content: [
+      {txt:'🚫 绝不将用户个人数据（设备ID/手机号/浏览记录）上传公共AI', hl:true},
+      {txt:'✅ 使用聚合数据和脱敏后的统计数据进行AI分析', hl:false},
+      {txt:'✅ 使用企业版AI工具处理业务数据', hl:true},
+      {txt:'✅ AI生成的用户触达内容需人工审核后发送', hl:false}
+    ],
+    narration: '运营工作中接触大量用户数据，安全是底线。用户设备ID、手机号、浏览记录等个人数据绝不能用公共AI处理。正确做法是：使用聚合级别的统计数据，或者先脱敏再分析。另外，AI生成的用户触达内容在发送前必须人工审核，避免出现不合时宜的推送。'
+  },
+  {
+    title: '你的AI运营升级路线图',
+    type: 'content',
+    content: [
+      {txt:'第1周：用AI辅助日常数据分析，替代手工做表', hl:false},
+      {txt:'第2周：AI生成多版本文案和活动创意，从写手变策展人', hl:false},
+      {txt:'第3周：搭建AI竞品监控和用户洞察自动化', hl:true},
+      {txt:'第4周：设计自动化运营触发规则，启动「自动驾驶」模式', hl:true},
+      {txt:'持续：积累用户分群策略和自动化运营最佳实践', hl:true}
+    ],
+    narration: '你的AI运营升级路线图：从数据分析开始，到内容生产，再到自动监控，最后实现自动化运营体系。每一步都是效率的数量级提升。记住，AI不会替代有策略思维的运营，但会用AI的运营一定会替代不会用的。'
+  }
+];
+
+// 销售岗位课程：「AI赋能销售：从关系驱动到洞察驱动」
+const SLIDES_SALES = [
+  {
+    title: 'AI赋能销售：从关系驱动到洞察驱动',
+    subtitle: '销售岗位的AI实战指南',
+    type: 'cover',
+    narration: '欢迎来到"AI赋能销售"课程。在接下来的40分钟里，我们将探讨如何用AI让销售从盲目跑量升级为精准命中，从经验销售升级为洞察销售。'
+  },
+  {
+    title: 'AI如何改变销售？',
+    type: 'content',
+    content: [
+      {txt:'客户洞察：从主观判断到数据驱动的需求预测', hl:true},
+      {txt:'沟通：从通用话术到千人千面的个性化沟通', hl:true},
+      {txt:'Pipeline管理：从手工跟单到AI自动预警和推进建议', hl:true},
+      {txt:'核心转变：最好的销售+AI=降维打击', hl:true}
+    ],
+    narration: 'AI给销售带来的最大改变不是替代关系，而是增强洞察力。过去销售靠经验判断客户的兴趣和预算，现在AI能从客户的公开信息中推断需求。过去销售用同一套话术面对所有客户，现在AI能为每个客户生成个性化的沟通策略。最好的销售加上AI，就是降维打击。'
+  },
+  {
+    title: '2026销售必备AI工具栈',
+    type: 'tools',
+    content: [
+      {tool:'AI客户洞察', use:'企业背景分析、需求推断、关键人画像、采购信号识别'},
+      {tool:'AI沟通助手', use:'个性化话术生成、邮件撰写、异议处理、谈判策略'},
+      {tool:'AI方案助手', use:'定制化提案生成、ROI计算、竞品对比、案例匹配'},
+      {tool:'AI Pipeline管理', use:'商机评分、成交预测、流失预警、下一步建议'},
+      {tool:'AI销售教练', use:'模拟客户对话、话术训练、录音分析、技巧提升'}
+    ],
+    narration: '2026年销售的工具栈全面升级。AI客户洞察帮你在拜访前做好功课，AI沟通助手让每封邮件和每通电话都精准有效，AI方案助手快速生成定制化提案，AI Pipeline管理让跟单不再遗漏。这些工具不会替代你去见客户，但会让你每次见客户时的胜率大幅提高。'
+  },
+  {
+    title: '实操一：AI辅助拜访准备',
+    subtitle: '30分钟准备，胜率提升50%',
+    type: 'case',
+    content: [
+      {label:'场景', txt:'明天拜访某制造企业CIO，推销MES解决方案'},
+      {label:'AI方案', txt:'(1)分析客户年报/新闻→推断战略重点和预算方向 (2)构建决策链地图 (3)生成定制化谈话策略+必问问题 (4)模拟客户可能的顾虑和最佳应对'},
+      {label:'效果', txt:'首次拜访的有效信息获取量提升3倍'}
+    ],
+    narration: '拜访前的准备时间投入，是ROI最高的销售动作。用AI花30分钟：分析客户的公开信息推断战略重点，构建决策链地图识别关键人，生成定制化的谈话策略。这样走进客户办公室时，你不是在「了解客户」，而是在「验证假设」。信息获取效率提升3倍。'
+  },
+  {
+    title: '实操二：AI生成定制化方案',
+    subtitle: '从通用PPT到"就是为我写的"方案',
+    type: 'case',
+    content: [
+      {label:'痛点', txt:'每个客户都要定制方案，好的方案至少需要1天时间'},
+      {label:'AI方案', txt:'(1)输入客户背景+产品能力→AI生成方案大纲 (2)AI生成客户化内容+ROI计算 (3)AI插入相似行业成功案例 (4)人工注入个性化细节'},
+      {label:'效果', txt:'方案制作从1天→1小时，客户反馈"就像是为我们量身定做的"'}
+    ],
+    narration: '定制化方案是打动客户的关键，但手工制作一份高质量方案至少需要1天。用AI的方法：输入客户背景和我们的产品能力，AI自动生成方案框架、客户化的价值主张和ROI计算，再自动匹配相似行业的成功案例。你只需要花30分钟注入个性化细节和策略判断。这让每份方案都像"为客户量身定做"的一样。'
+  },
+  {
+    title: '实操三：AI驱动的Pipeline管理',
+    subtitle: '从凭感觉跟单到数据驱动推进',
+    type: 'case',
+    content: [
+      {label:'痛点', txt:'商机太多跟不过来，不知道该优先跟进哪个'},
+      {label:'AI方案', txt:'(1)AI自动对商机评分(热度/预算/决策速度) (2)标注停滞预警（超过X天无进展） (3)为每个商机推荐下一步行动 (4)预测本月成交概率和金额'},
+      {label:'价值', txt:'商机流失率降低30%，成交预测准确率提升到85%'}
+    ],
+    narration: 'Pipeline管理是销售最大的时间黑洞。AI可以自动对商机进行评分和排序，标注哪些商机需要紧急跟进，哪些已经停滞需要新的推进策略，并预测本月可能的成交金额。这让销售从「跟着感觉走」变成「精准导航」，把有限的时间投入到最可能成交的商机上。'
+  },
+  {
+    title: '销售AI使用红线',
+    type: 'content',
+    content: [
+      {txt:'🚫 绝不将客户未公开信息上传公共AI', hl:true},
+      {txt:'🚫 绝不将客户会议录音直接上传公共AI', hl:true},
+      {txt:'✅ AI生成的客户沟通内容需人工审核后发送', hl:false},
+      {txt:'✅ 竞品对比要保持客观，不贬低、不造谣', hl:true}
+    ],
+    narration: '销售工作中AI使用的安全红线：客户的未公开信息和会议录音绝不能上传公共AI。AI生成的客户沟通内容在发送前需要人工审核，确保语气和内容的恰当性。竞品对比时保持客观，不要用AI生成不实的竞品负面信息。记住：销售的核心是信任，一次数据泄露就能毁掉多年的客户关系。'
+  },
+  {
+    title: '你的AI销售升级路线图',
+    type: 'content',
+    content: [
+      {txt:'第1周：用AI做拜访前准备，每次见客户前花15分钟', hl:false},
+      {txt:'第2周：AI生成个性化邮件和方案，提升沟通效率', hl:false},
+      {txt:'第3周：搭建AI Pipeline管理体系，数据驱动跟单', hl:true},
+      {txt:'第4周：AI销售教练辅助话术训练和复盘', hl:true},
+      {txt:'持续：积累客户洞察模板和最佳沟通策略', hl:true}
+    ],
+    narration: '你的AI销售升级路线图：从拜访准备开始，到沟通和方案，再到Pipeline管理，最后用AI做销售技能训练。每一步都能带来可见的效率和质量提升。未来已来，最好的销售已经在用AI了。'
+  }
+];
+
+// 人资岗位课程：「AI赋能人力资源管理：从行政中心到战略中心」
+const SLIDES_HR = [
+  {
+    title: 'AI赋能人力资源管理：从行政中心到战略中心',
+    subtitle: 'HR岗位的AI实战指南',
+    type: 'cover',
+    narration: '欢迎来到"AI赋能人力资源管理"课程。在接下来的40分钟里，我们将探讨如何用AI将HR从繁琐的行政事务中解放出来，真正成为组织的人才战略设计者。'
+  },
+  {
+    title: 'AI如何重塑HR？',
+    type: 'content',
+    content: [
+      {txt:'招聘：从「筛简历」到AI精准匹配+智能面试辅助', hl:true},
+      {txt:'培训：从「统一课表」到AI个性化学习路径', hl:true},
+      {txt:'绩效：从「年度考核」到AI驱动的持续反馈', hl:true},
+      {txt:'核心转变：HR的时间从70%行政→70%战略', hl:true}
+    ],
+    narration: 'AI对HR的改变是颠覆性的。招聘不再是海量筛简历，而是AI精准匹配。培训不再是所有人上同一门课，而是AI为每个人定制学习路径。绩效管理从一年一次的考核变成了AI驱动的持续反馈。最重要的是，AI让HR从繁琐行政中解放出来，把70%的时间用于真正的人才战略。'
+  },
+  {
+    title: '2026 HR必备AI工具栈',
+    type: 'tools',
+    content: [
+      {tool:'AI招聘助手', use:'JD生成、简历匹配、面试题生成、候选人沟通'},
+      {tool:'AI培训平台', use:'个性化学习路径、技能图谱、AI导师、知识库'},
+      {tool:'AI绩效管理', use:'目标追踪、持续反馈、绩效分析、人才盘点'},
+      {tool:'AI员工洞察', use:'敬业度分析、离职预测、组织网络分析、文化诊断'},
+      {tool:'AI HR助手', use:'政策问答、入职流程自动化、员工服务、数据分析'}
+    ],
+    narration: '2026年HR的工具栈已经全面AI化。招聘助手让找人从大海捞针变成精准匹配，培训平台让每个人都有一条个性化的成长路径，绩效管理从年度大考变成日常反馈，员工洞察让你提前发现人才风险。这个工具栈让一个HR可以做过去一个团队的工作。'
+  },
+  {
+    title: '实操一：AI辅助精准招聘',
+    subtitle: '从500份简历中快速找到最匹配的5个人',
+    type: 'case',
+    content: [
+      {label:'痛点', txt:'高级算法工程师岗位收到500份简历，人工筛选需要3天'},
+      {label:'AI方案', txt:'(1)AI提取岗位核心能力→生成评分标准 (2)AI批量分析简历→按匹配度排序 (3)自动标注每份简历的亮点和风险 (4)人工审核Top20→确定面试'},
+      {label:'效果', txt:'筛选时间从3天→3小时，面试到场匹配度显著提升'}
+    ],
+    narration: '简历筛选是HR最耗时的重复劳动。用AI的方式：先让AI分析JD提取核心能力维度，然后批量分析所有简历按匹配度排序，自动标注每份简历的技术亮点和潜在风险。HR只需要审核排名前20的简历。500份简历从3天变成3小时，而且筛选质量更高。'
+  },
+  {
+    title: '实操二：AI驱动的个性化培训',
+    subtitle: '从"一刀切"到"千人千面"的学习体验',
+    type: 'case',
+    content: [
+      {label:'痛点', txt:'现有培训是统一课表，员工参与度低、效果难衡量'},
+      {label:'AI方案', txt:'(1)AI评估每个员工的技能现状和岗位需求 (2)自动生成个性化学习路径 (3)AI生成微课内容 (4)追踪学习效果并动态调整'},
+      {label:'效果', txt:'培训完成率从35%提升到78%，技能提升可量化'}
+    ],
+    narration: '传统的企业培训往往是"一刀切"：所有人上同样的课，参与度低，效果难以衡量。AI驱动的培训完全不同：先评估每个人的技能现状和岗位需求，自动生成个性化的学习路径，AI还能生成针对性的微课内容。最重要的是，学习效果可以被追踪和量化，培训ROI第一次变得清晰可见。'
+  },
+  {
+    title: '实操三：AI人才保留预警',
+    subtitle: '在员工提出离职前，你已经知道该做什么',
+    type: 'case',
+    content: [
+      {label:'痛点', txt:'员工突然提离职，HR措手不及，错失最佳挽留时机'},
+      {label:'AI方案', txt:'(1)AI分析离职前行为信号（请假增多/绩效波动/参与度下降） (2)建立离职风险评分 (3)为高风险员工推荐个性化保留方案'},
+      {label:'价值', txt:'核心人才保留率提升，从"被动应对"到"主动干预"'}
+    ],
+    narration: '人才保留是HR最具战略价值的工作。AI可以通过分析员工的行为模式——包括请假频率变化、绩效波动、内部社交参与度下降等——提前30-60天识别离职风险信号。当AI预警时，HR有充足的时间窗口进行主动干预，而不是在员工已经决定离开后措手不及。'
+  },
+  {
+    title: 'HR AI安全红线',
+    type: 'content',
+    content: [
+      {txt:'🚫 绝不将员工个人信息（绩效/薪酬/评价）上传公共AI', hl:true},
+      {txt:'🚫 绝不让AI直接做出影响员工职业发展的决定', hl:true},
+      {txt:'✅ 使用企业级HR系统处理所有员工数据', hl:false},
+      {txt:'✅ AI是辅助决策工具，最终人事决策必须由人做出', hl:true}
+    ],
+    narration: 'HR工作的安全红线比任何岗位都更严格。员工绩效、薪酬、360评价等数据属于最高敏感级别，绝不能用公共AI处理。更重要的是，AI是辅助工具而非决策者——影响员工职业发展的所有决定，最终都必须由人来做出。AI可以告诉你"数据显示这位员工有60%的离职概率"，但不能替你说"我们放弃挽留他"。'
+  },
+  {
+    title: '你的AI HR升级路线图',
+    type: 'content',
+    content: [
+      {txt:'第1周：用AI优化JD和简历筛选流程', hl:false},
+      {txt:'第2周：AI辅助面试评估和候选人沟通', hl:false},
+      {txt:'第3周：搭建AI驱动的培训体系', hl:true},
+      {txt:'第4周：启动AI人才分析和预警系统', hl:true},
+      {txt:'持续：建立AI时代的人才战略和HR数据分析能力', hl:true}
+    ],
+    narration: '你的AI HR升级路线图：从招聘优化起步，到培训体系搭建，再到人才分析和预警，最终建立完整的AI人才战略。每一步都让HR从行政事务中多解放一点，向真正的战略合作伙伴多靠近一步。AI时代的HR，不是少了一个行政，而是多了一个战略家。'
+  }
+];
+
 // ==================== VOICE ENGINE ====================
 let voiceUtterance = null;
 let voicePaused = false;
@@ -951,38 +1354,75 @@ var IND_INFO = {
   cpg: {name:'日化快消', icon:'🧴', desc:'个护 · 食品 · 零售', color:'purple'},
 };
 
-var COURSES = {
-  mfg: {title:'AI重塑制造产品规划：从产线数据到产品决策', meta:{duration:'45分钟',level:'中高级',industry:'先进制造',role:'产品经理'}, slides: SLIDES_MFG},
-  finance: {title:'AI重塑金融产品：从数据洞察到智能决策', meta:{duration:'45分钟',level:'中高级',industry:'金融数字化',role:'产品经理'}, slides: SLIDES_FIN},
-  auto: {title:'AI重塑智能汽车产品：从驾驶数据到极致体验', meta:{duration:'45分钟',level:'中高级',industry:'智能汽车',role:'产品经理'}, slides: SLIDES_AUTO},
+var ROLE_INFO = {
+  pm: {name:'产品经理', icon:'📋', desc:'需求 · 数据 · 策略'},
+  dev: {name:'研发工程师', icon:'💻', desc:'架构 · 编码 · 交付'},
+  ops: {name:'运营', icon:'📊', desc:'用户 · 内容 · 增长'},
+  sales: {name:'销售', icon:'🤝', desc:'客户 · 方案 · 业绩'},
+  hr: {name:'人力资源', icon:'👥', desc:'招聘 · 培训 · 文化'},
 };
 
-function getCourse() { return COURSES[S.industry] || COURSES.mfg; }
+// Courses: keyed by industry_role
+var COURSES = {
+  mfg_pm: {title:'AI重塑制造产品规划：从产线数据到产品决策', meta:{duration:'45分钟',level:'中高级',industry:'先进制造',role:'产品经理'}, slides: SLIDES_MFG},
+  finance_pm: {title:'AI重塑金融产品：从数据洞察到智能决策', meta:{duration:'45分钟',level:'中高级',industry:'金融数字化',role:'产品经理'}, slides: SLIDES_FIN},
+  auto_pm: {title:'AI重塑智能汽车产品：从驾驶数据到极致体验', meta:{duration:'45分钟',level:'中高级',industry:'智能汽车',role:'产品经理'}, slides: SLIDES_AUTO},
+  dev: {title:'AI驱动的高效研发：从写代码到设计系统', meta:{duration:'35分钟',level:'中高级',industry:'通用',role:'研发工程师'}, slides: SLIDES_DEV},
+  ops: {title:'AI驱动智能运营：从经验驱动到数据驱动', meta:{duration:'35分钟',level:'中高级',industry:'通用',role:'运营'}, slides: SLIDES_OPS},
+  sales: {title:'AI赋能销售：从关系驱动到洞察驱动', meta:{duration:'35分钟',level:'中高级',industry:'通用',role:'销售'}, slides: SLIDES_SALES},
+  hr: {title:'AI赋能人力资源管理：从行政中心到战略中心', meta:{duration:'35分钟',level:'中高级',industry:'通用',role:'人力资源'}, slides: SLIDES_HR},
+};
+
+function getCourse() {
+  const key = S.industry + '_' + (S.role||'pm');
+  // Try industry+role specific, then role-only, then mfg_pm fallback
+  return COURSES[key] || COURSES[S.role] || COURSES.mfg_pm;
+}
 function getCourseTitle() { return getCourse().title; }
 function getCourseMeta() { return getCourse().meta; }
 function getSlides() { return getCourse().slides; }
 
 function getQuizData() {
-  const map = { mfg: MFG_PM_QUIZ, finance: FIN_PM_QUIZ, auto: AUTO_PM_QUIZ, cpg: CPG_PM_QUIZ };
-  return map[S.industry] || MFG_PM_QUIZ;
+  // PM: industry-specific quiz. Other roles: role-specific quiz.
+  if (S.role === 'pm') {
+    const map = { mfg: MFG_PM_QUIZ, finance: FIN_PM_QUIZ, auto: AUTO_PM_QUIZ, cpg: CPG_PM_QUIZ };
+    return map[S.industry] || MFG_PM_QUIZ;
+  }
+  const roleMap = { dev: DEV_QUIZ, ops: OPS_QUIZ, sales: SALES_QUIZ, hr: HR_QUIZ };
+  return roleMap[S.role] || MFG_PM_QUIZ;
 }
 
-function getIndustryPMWeights() {
-  const base = {prompt:18, tools:12, data:24, content:14, dev:5, workflow:13, security:6, strategy:8};
-  const mods = {
-    mfg: {data:30, workflow:16},
-    finance: {security:18, data:22, strategy:12},
-    auto: {data:26, dev:10, security:8},
-    cpg: {content:20, data:22, strategy:10},
+function getWeights() {
+  // Role-specific 8-dimension weights
+  const weightsMap = {
+    pm: {prompt:18, tools:12, data:24, content:14, dev:5, workflow:13, security:6, strategy:8},
+    dev: {prompt:14, tools:18, data:12, content:6, dev:24, workflow:10, security:8, strategy:8},
+    ops: {prompt:16, tools:12, data:24, content:16, dev:4, workflow:14, security:6, strategy:8},
+    sales: {prompt:14, tools:12, data:18, content:14, dev:4, workflow:14, security:10, strategy:14},
+    hr: {prompt:14, tools:12, data:14, content:14, dev:4, workflow:14, security:16, strategy:12},
   };
-  const mod = mods[S.industry] || {};
+  const base = weightsMap[S.role] || weightsMap.pm;
+  // Apply industry modifiers for PM
+  if (S.role === 'pm') {
+    const mods = {
+      mfg: {data:30, workflow:16},
+      finance: {security:18, data:22, strategy:12},
+      auto: {data:26, dev:10, security:8},
+      cpg: {content:20, data:22, strategy:10},
+    };
+    const mod = mods[S.industry] || {};
+    let result = {};
+    for (let k of Object.keys(base)) result[k] = mod[k] || base[k];
+    let total = Object.values(result).reduce((a,b)=>a+b,0);
+    for (let k of Object.keys(result)) result[k] = Math.round(result[k]/total*100);
+    return result;
+  }
+  // For non-PM roles, just normalize base weights
+  let total = Object.values(base).reduce((a,b)=>a+b,0);
   let result = {};
-  for (let k of Object.keys(base)) result[k] = mod[k] || base[k];
-  let total = Object.values(result).reduce((a,b)=>a+b,0);
-  for (let k of Object.keys(result)) result[k] = Math.round(result[k]/total*100);
+  for (let k of Object.keys(base)) result[k] = Math.round(base[k]/total*100);
   return result;
 }
-function getPMWeights() { return getIndustryPMWeights(); }
 
 // ==================== RENDER ====================
 function render() {
@@ -1004,7 +1444,9 @@ function render() {
 
 function renderIndustry() {
   const curInd = IND_INFO[S.industry] || IND_INFO.mfg;
-  let h = `<div class="header slide-up"><h1>${curInd.icon} ${curInd.name} × 产品经理</h1><p>AI能力测评 & 实战课程 Demo</p></div>`;
+  const curRole = ROLE_INFO[S.role] || ROLE_INFO.pm;
+  let h = `<div class="header slide-up"><h1>${curInd.icon} ${curInd.name} × ${curRole.icon} ${curRole.name}</h1><p>AI能力测评 & 实战课程 Demo</p></div>`;
+  // Industry selection
   h += `<div class="card slide-up"><h3 style="margin-bottom:12px;">选择行业</h3>`;
   h += `<div class="industry-grid">`;
   for (const [id, info] of Object.entries(IND_INFO)) {
@@ -1016,11 +1458,14 @@ function renderIndustry() {
   }
   h += `</div></div>`;
 
+  // Role selection
   h += `<div class="card slide-up"><h3 style="margin-bottom:12px;">选择岗位</h3>`;
   h += `<div class="role-grid">`;
-  h += `<div class="role-card ${S.role==='pm'?'selected':''}" onclick="S.role='pm';render();">
-    <div style="font-size:24px;">📋</div><div style="font-weight:600;">产品经理</div>
-    <div style="font-size:11px;color:var(--text2);">需求 · 数据 · 策略</div></div>`;
+  for (const [id, info] of Object.entries(ROLE_INFO)) {
+    h += `<div class="role-card ${S.role===id?'selected':''}" onclick="S.role='${id}';render();">
+      <div style="font-size:24px;">${info.icon}</div><div style="font-weight:600;">${info.name}</div>
+      <div style="font-size:11px;color:var(--text2);">${info.desc}</div></div>`;
+  }
   h += `</div></div>`;
 
   const ready = S.industry && S.role;
