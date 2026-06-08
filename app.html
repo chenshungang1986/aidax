@@ -878,6 +878,24 @@ function startAdaptiveQuiz() {
       resolved[dim] = dimData;
     }
   }
+  // Shuffle options on every question — prevent "always pick A" pattern
+  for (const dim of dimOrder) {
+    for (const q of (resolved[dim] || [])) {
+      if (!q.opts || !q.scores || q.opts.length < 2) continue;
+      const n = q.opts.length;
+      const indices = q.opts.map((_, i) => i);
+      // Fisher-Yates shuffle
+      for (let i = n - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [indices[i], indices[j]] = [indices[j], indices[i]];
+      }
+      // Reorder opts, scores, and best index to match shuffled order
+      q.opts = indices.map(i => q.opts[i]);
+      q.scores = indices.map(i => q.scores[i]);
+      if (q.best !== undefined) q.best = indices.indexOf(q.best);
+    }
+  }
+
   S._quizByDim = resolved;
   S._quizCurrentLevel = {};
   dimOrder.forEach(d => { S._quizCurrentLevel[d] = 0; });
@@ -1909,6 +1927,199 @@ const SLIDES_HR_FIN = [
    narration:'5个金融HR专属Prompt模板，在合规框架内最大化AI的使用效率。金融行业HR的特殊性在于：每一项人事决策都可能涉及监管合规。AI帮你建立系统性的工作流，但最终的判断和签字责任始终在你这里。把这些模板收藏起来，在JD设计、面试准备、培训分析时使用，你会发现工作质量和效率都有显著提升。'}
 ];
 
+const SLIDES_FINANCE_DEV = [
+  {title:'AI金融研发实战：从交易系统到智能风控', type:'cover', subtitle:'用AI加速金融系统开发', meta:'金融数字化 · 研发工程师'},
+  {title:'金融研发工程师的AI转型机遇', type:'content', subtitle:'AI正在重塑金融研发工程师的工作方式', bullets:`    • 交易系统：AI辅助高性能代码生成与优化
+    • 风控引擎：智能规则编写与模型评估
+    • 合规审计：自动化监管规则解析与系统适配
+    • 数据处理：AI驱动的实时数据管道搭建`},
+  {title:'金融研发工程师AI工具栈', type:'content', subtitle:'推荐AI工具组合', bullets:`    <b>Claude/GPT</b>：代码审查·安全漏洞扫描·合规文档生成
+    <b>Cursor/Copilot</b>：金融接口开发·单元测试自动生成
+    <b>Perplexity</b>：金融技术标准检索·开源方案对比`},
+  {title:'实操：AI辅助构建实时交易风控系统', type:'case', subtitle:'手把手教你用AI完成真实任务', case:{title:'实操：AI辅助构建实时交易风控系统', steps:`step1: 上传监管规则PDF→AI提取风控约束条件<br>step2: AI生成风控规则引擎伪代码→人工审核关键逻辑<br>step3: AI生成测试用例覆盖边界场景（并发/超时/异常）<br>step4: AI辅助Code Review检查安全漏洞和性能瓶颈`, tip:'核心思路：用AI做80%的重复工作，把精力放在20%的关键判断上'}},
+  {title:'金融研发工程师Prompt实操模板', type:'prompt_template', subtitle:'即学即用的Prompt公式', templates:[
+    {icon:'🔍', name:'金融代码安全审查', prompt:'角色：你是金融系统安全架构师。任务：审查以下交易接口代码，检查OWASP Top 10风险、并发安全、敏感数据加密。输出：风险清单+修复代码。'}
+    {icon:'⚙️', name:'监管规则→代码转译', prompt:'角色：你是金融技术合规专家。输入：[监管规则描述]。输出：1)技术约束清单 2)系统改造点 3)合规检查脚本伪代码。'}
+    {icon:'📊', name:'性能压测用例生成', prompt:'角色：你是金融系统性能测试专家。输入：[接口定义+并发量要求]。输出：JMeter测试脚本+性能基线+瓶颈预测。'}
+  ]},
+];
+const SLIDES_AUTO_DEV = [
+  {title:'AI汽车研发实战：从ECU到智能座舱', type:'cover', subtitle:'用AI加速车辆软件开发', meta:'智能汽车 · 研发工程师'},
+  {title:'汽车研发工程师的AI转型机遇', type:'content', subtitle:'AI正在重塑汽车研发工程师的工作方式', bullets:`    • 嵌入式开发：AI辅助C/C++代码生成与优化
+    • OTA升级：智能差分算法与可靠性验证
+    • 车载通信：AI解析CAN/LIN/以太网协议栈
+    • 安全测试：AI驱动的功能安全(ISO 26262)验证`},
+  {title:'汽车研发工程师AI工具栈', type:'content', subtitle:'推荐AI工具组合', bullets:`    <b>Cursor/Copilot</b>：嵌入式代码生成·CAN协议解析
+    <b>Claude</b>：安全标准解读·代码审查·技术文档
+    <b>AI+Simulink</b>：模型验证·测试用例生成`},
+  {title:'实操：AI辅助OTA升级系统开发', type:'case', subtitle:'手把手教你用AI完成真实任务', case:{title:'实操：AI辅助OTA升级系统开发', steps:`step1: AI分析现有ECU固件结构→生成升级兼容性矩阵<br>step2: AI设计差分升级算法→生成带校验的代码<br>step3: AI生成回滚逻辑和异常处理代码<br>step4: AI辅助功能安全测试→覆盖ISO 26262场景`, tip:'核心思路：用AI做80%的重复工作，把精力放在20%的关键判断上'}},
+  {title:'汽车研发工程师Prompt实操模板', type:'prompt_template', subtitle:'即学即用的Prompt公式', templates:[
+    {icon:'🔍', name:'CAN协议解析助手', prompt:'角色：你是汽车电子工程师。输入：[CAN DBC文件/协议描述]。任务：解析报文结构，生成C语言解析代码+单元测试。'}
+    {icon:'⚙️', name:'功能安全代码审查', prompt:'角色：你是汽车功能安全(ISO 26262)审核员。输入：[代码片段]。审查项：内存保护/看门狗/冗余设计/故障注入处理。'}
+    {icon:'📊', name:'OTA差分算法设计', prompt:'角色：你是嵌入式系统架构师。需求：设计OTA差分升级方案，支持断点续传+完整性校验+回滚。输出：算法伪代码+状态机图。'}
+  ]},
+];
+const SLIDES_CPG_DEV = [
+  {title:'AI快消研发实战：从配方到供应链数字化', type:'cover', subtitle:'用AI加速消费品研发数字化', meta:'日化快消 · 研发工程师'},
+  {title:'快消研发工程师的AI转型机遇', type:'content', subtitle:'AI正在重塑快消研发工程师的工作方式', bullets:`    • 配方研发：AI辅助成分分析和新配方模拟
+    • 供应链系统：智能预测与库存优化算法
+    • IoT集成：AI驱动的产线数据采集与监控
+    • 质量检测：AI视觉检测系统开发`},
+  {title:'快消研发工程师AI工具栈', type:'content', subtitle:'推荐AI工具组合', bullets:`    <b>Cursor/Copilot</b>：数据分析脚本·API接口开发
+    <b>Claude</b>：系统架构设计·技术方案评审
+    <b>AI+Python</b>：数据管道搭建·预测模型开发`},
+  {title:'实操：AI辅助构建智能排产系统', type:'case', subtitle:'手把手教你用AI完成真实任务', case:{title:'实操：AI辅助构建智能排产系统', steps:`step1: AI分析历史生产数据→提取排产约束条件<br>step2: AI设计优化算法→生成排产引擎代码<br>step3: AI生成物料需求预测模型→集成到ERP<br>step4: AI辅助测试→模拟10000次排产验证稳定性`, tip:'核心思路：用AI做80%的重复工作，把精力放在20%的关键判断上'}},
+  {title:'快消研发工程师Prompt实操模板', type:'prompt_template', subtitle:'即学即用的Prompt公式', templates:[
+    {icon:'🔍', name:'配方数据AI分析', prompt:'角色：你是数据工程师。输入：[配方数据CSV结构]。任务：设计数据pipeline，分析成分组合与产品效果的相关性，输出Python代码。'}
+    {icon:'⚙️', name:'供应链算法设计', prompt:'角色：你是算法工程师。需求：设计多工厂多SKU的智能补货算法。考虑：季节性/促销/库存成本。输出：算法方案+伪代码。'}
+    {icon:'📊', name:'IoT数据采集方案', prompt:'角色：你是IoT系统架构师。需求：设计产线传感器数据实时采集系统，支持10000点/秒。输出：技术方案+MQTT协议设计+代码框架。'}
+  ]},
+];
+const SLIDES_MFG_OPS = [
+  {title:'AI制造运营实战：从排产报表到智能决策', type:'cover', subtitle:'用AI驱动制造运营效率革命', meta:'先进制造 · 运营'},
+  {title:'制造运营的AI转型机遇', type:'content', subtitle:'AI正在重塑制造运营的工作方式', bullets:`    • 生产计划：AI预测订单波动自动调整排产
+    • 质量管控：AI实时分析质检数据预警异常
+    • 设备管理：AI预测性维护降低非计划停机
+    • 供应链协同：AI驱动多工厂物料调度`},
+  {title:'制造运营AI工具栈', type:'content', subtitle:'推荐AI工具组合', bullets:`    <b>Claude</b>：生产数据分析·运营报告生成
+    <b>AI+Excel</b>：排产优化·库存分析·成本核算
+    <b>AI BI工具</b>：生产看板自动化·异常预警`},
+  {title:'实操：AI分析产线效率瓶颈', type:'case', subtitle:'手把手教你用AI完成真实任务', case:{title:'实操：AI分析产线效率瓶颈', steps:`step1: 上传3个月产线OEE数据→AI识别效率波动规律<br>step2: AI分析停机原因分布→生成根因树状图<br>step3: AI推荐设备维保计划优化→减少换线时间<br>step4: AI生成改进报告→含ROI预估和行动计划`, tip:'核心思路：用AI做80%的重复工作，把精力放在20%的关键判断上'}},
+  {title:'制造运营Prompt实操模板', type:'prompt_template', subtitle:'即学即用的Prompt公式', templates:[
+    {icon:'🔍', name:'产线效率分析', prompt:'角色：你是精益生产分析师。输入：[产线OEE数据字段说明]。分析：识别瓶颈工序，计算改进潜力，输出按优先级排序的改善建议。'}
+    {icon:'⚙️', name:'物料需求预测', prompt:'角色：你是供应链分析师。输入：[过去12个月物料消耗数据]。任务：预测未来3个月各物料需求量，标注波动风险。'}
+    {icon:'📊', name:'质量报告自动生成', prompt:'角色：你是质量工程师。输入：[本月质检数据摘要]。输出：1)质检合格率趋势 2)Top3缺陷类型及根因 3)改进建议。'}
+  ]},
+];
+const SLIDES_FINANCE_OPS = [
+  {title:'AI金融运营实战：从报表到智能风控运营', type:'cover', subtitle:'用AI提升金融运营效率', meta:'金融数字化 · 运营'},
+  {title:'金融运营的AI转型机遇', type:'content', subtitle:'AI正在重塑金融运营的工作方式', bullets:`    • 客户运营：AI驱动的精准营销和客户分层
+    • 风险运营：自动化风险监控与预警流程
+    • 合规运营：AI辅助监管报表自动生成
+    • 渠道运营：多渠道数据整合与效果分析`},
+  {title:'金融运营AI工具栈', type:'content', subtitle:'推荐AI工具组合', bullets:`    <b>Claude</b>：客户数据分析·运营策略制定
+    <b>AI+Tableau</b>：可视化报表·运营看板
+    <b>Perplexity</b>：行业趋势·竞品运营策略`},
+  {title:'实操：AI优化信用卡激活率', type:'case', subtitle:'手把手教你用AI完成真实任务', case:{title:'实操：AI优化信用卡激活率', steps:`step1: AI分析未激活用户画像→识别激活转化关键因素<br>step2: AI设计分层触达策略：短信/App推送/外呼<br>step3: AI生成个性化激活话术→AB测试不同版本<br>step4: AI追踪效果→输出持续优化方案`, tip:'核心思路：用AI做80%的重复工作，把精力放在20%的关键判断上'}},
+  {title:'金融运营Prompt实操模板', type:'prompt_template', subtitle:'即学即用的Prompt公式', templates:[
+    {icon:'🔍', name:'用户分层分析', prompt:'角色：你是金融用户运营分析师。输入：[用户行为数据字段]。任务：按活跃度/资产/风险偏好分层，每层设计差异化运营策略。'}
+    {icon:'⚙️', name:'监管报表生成', prompt:'角色：你是金融合规运营专员。输入：[监管报表模板要求]。任务：生成自动化的数据提取和报表生成方案，标注需要人工审核的数据点。'}
+    {icon:'📊', name:'渠道ROI分析', prompt:'角色：你是金融渠道运营专家。输入：[各渠道投放数据]。分析：CPA/转化率/留存率，输出渠道优化建议和预算分配方案。'}
+  ]},
+];
+const SLIDES_AUTO_OPS = [
+  {title:'AI汽车运营实战：从用户数据到智能服务', type:'cover', subtitle:'用AI打造智能出行运营体系', meta:'智能汽车 · 运营'},
+  {title:'汽车运营的AI转型机遇', type:'content', subtitle:'AI正在重塑汽车运营的工作方式', bullets:`    • 用户运营：AI分析驾驶行为实现千人千面服务
+    • OTA运营：智能推送升级策略与用户触达
+    • 售后服务：AI预测维修需求主动服务
+    • 社区运营：AI分析车主讨论提炼产品洞察`},
+  {title:'汽车运营AI工具栈', type:'content', subtitle:'推荐AI工具组合', bullets:`    <b>Claude</b>：用户数据分析·运营方案策划
+    <b>AI BI</b>：运营看板·数据监控
+    <b>AI+CRM</b>：用户标签体系·自动触达`},
+  {title:'实操：AI提升OTA升级完成率', type:'case', subtitle:'手把手教你用AI完成真实任务', case:{title:'实操：AI提升OTA升级完成率', steps:`step1: AI分析未升级用户的特征和行为模式<br>step2: AI设计差异化升级提醒策略<br>step3: AI生成升级亮点文案进行AB测试<br>step4: AI追踪升级率变化→优化推送时机和内容`, tip:'核心思路：用AI做80%的重复工作，把精力放在20%的关键判断上'}},
+  {title:'汽车运营Prompt实操模板', type:'prompt_template', subtitle:'即学即用的Prompt公式', templates:[
+    {icon:'🔍', name:'车主画像分析', prompt:'角色：你是汽车用户运营分析师。输入：[车主数据字段]。任务：按用车频率/功能偏好/品牌忠诚度聚类，提出差异化服务方案。'}
+    {icon:'⚙️', name:'OTA推送策略', prompt:'角色：你是产品运营专家。目标：提升OTA升级率。输入：[用户分群+升级历史]。设计：个性化推送时机/文案/频次策略。'}
+    {icon:'📊', name:'社区舆情分析', prompt:'角色：你是社交媒体分析师。输入：[车主社区讨论内容]。分析：功能需求热度/痛点Top5/竞品对比口碑，输出产品改进建议。'}
+  ]},
+];
+const SLIDES_MFG_SALES = [
+  {title:'AI制造销售实战：从关系销售到解决方案顾问', type:'cover', subtitle:'用AI赋能B2B制造销售', meta:'先进制造 · 销售'},
+  {title:'制造销售的AI转型机遇', type:'content', subtitle:'AI正在重塑制造销售的工作方式', bullets:`    • 客户洞察：AI分析客户产线数据发现销售机会
+    • 方案设计：AI辅助生成定制化产线升级方案
+    • 投标支持：AI优化技术标书和商务方案
+    • 售后跟进：AI预测客户需求主动服务`},
+  {title:'制造销售AI工具栈', type:'content', subtitle:'推荐AI工具组合', bullets:`    <b>Claude/GPT</b>：客户分析·方案撰写·标书优化
+    <b>AI+CRM</b>：销售机会评分·客户优先级排序
+    <b>Perplexity</b>：行业资讯·竞品情报收集`},
+  {title:'实操：AI辅助自动化产线销售方案', type:'case', subtitle:'手把手教你用AI完成真实任务', case:{title:'实操：AI辅助自动化产线销售方案', steps:`step1: AI分析客户工厂的公开信息→识别可能的痛点<br>step2: AI生成初步方案框架→含技术规格和ROI估算<br>step3: AI对比竞品方案→提炼差异化优势<br>step4: AI生成商务提案→含谈判策略和风险预案`, tip:'核心思路：用AI做80%的重复工作，把精力放在20%的关键判断上'}},
+  {title:'制造销售Prompt实操模板', type:'prompt_template', subtitle:'即学即用的Prompt公式', templates:[
+    {icon:'🔍', name:'客户需求挖掘', prompt:'角色：你是B2B制造销售顾问。输入：[客户公司+行业信息]。任务：分析潜在需求，设计初次拜访的问题框架和产品切入点。'}
+    {icon:'⚙️', name:'技术方案撰写', prompt:'角色：你是自动化产线方案专家。输入：[客户需求概要]。输出：方案框架（技术规格/实施周期/投资回报/风险控制），含客户可能提出的问题及应答。'}
+    {icon:'📊', name:'竞品对比话术', prompt:'角色：你是销售策略师。输入：[我方产品+竞品信息]。输出：对比矩阵、竞争话术、应对竞品攻击的防守话术、差异化卖点。'}
+  ]},
+];
+const SLIDES_FINANCE_SALES = [
+  {title:'AI金融销售实战：从产品推销到智能顾问', type:'cover', subtitle:'用AI打造金融产品顾问式销售', meta:'金融数字化 · 销售'},
+  {title:'金融销售的AI转型机遇', type:'content', subtitle:'AI正在重塑金融销售的工作方式', bullets:`    • 客户KYC：AI画像分析精准识别客户需求
+    • 产品匹配：AI推荐最适合的金融产品组合
+    • 合规销售：AI实时话术合规性检查
+    • 客户维护：AI预测流失风险并主动干预`},
+  {title:'金融销售AI工具栈', type:'content', subtitle:'推荐AI工具组合', bullets:`    <b>Claude</b>：客户画像分析·合规话术审核
+    <b>AI+CRM</b>：销售漏斗管理·跟进提醒
+    <b>AI分析工具</b>：客户资产分析·产品适配`},
+  {title:'实操：AI辅助高净值客户理财方案', type:'case', subtitle:'手把手教你用AI完成真实任务', case:{title:'实操：AI辅助高净值客户理财方案', steps:`step1: AI分析客户资产结构和风险偏好→生成画像<br>step2: AI推荐产品组合→含收益预估和风险说明<br>step3: AI生成合规销售话术→自动标注风险揭示要点<br>step4: AI模拟客户异议→准备应答策略`, tip:'核心思路：用AI做80%的重复工作，把精力放在20%的关键判断上'}},
+  {title:'金融销售Prompt实操模板', type:'prompt_template', subtitle:'即学即用的Prompt公式', templates:[
+    {icon:'🔍', name:'客户KYC分析', prompt:'角色：你是财富管理顾问。输入：[客户基本信息+资产概要]。分析：风险承受能力/流动性需求/投资目标，推荐产品组合方向。'}
+    {icon:'⚙️', name:'合规话术检查', prompt:'角色：你是金融合规审查员。输入：[销售话术]。检查：是否包含必要风险提示/是否存在误导性表述/是否符合适当性管理要求。'}
+    {icon:'📊', name:'异议处理脚本', prompt:'角色：你是金融销售培训师。客户提出：[异议内容]。生成：3种回应策略（数据说服/案例证明/风险对比），含话术模板。'}
+  ]},
+];
+const SLIDES_CPG_SALES = [
+  {title:'AI快消销售实战：从渠道铺货到数据驱动增长', type:'cover', subtitle:'用AI赋能快消渠道销售', meta:'日化快消 · 销售'},
+  {title:'快消销售的AI转型机遇', type:'content', subtitle:'AI正在重塑快消销售的工作方式', bullets:`    • 渠道管理：AI分析各渠道ROI优化资源分配
+    • 促销策略：AI预测促销效果制定最优方案
+    • 经销商赋能：AI辅助经销商库存管理和动销
+    • 零售执行：AI分析货架数据优化陈列和补货`},
+  {title:'快消销售AI工具栈', type:'content', subtitle:'推荐AI工具组合', bullets:`    <b>Claude</b>：渠道分析·促销方案策划
+    <b>AI+销售系统</b>：销售预测·拜访路线优化
+    <b>AI Excel</b>：销售数据分析·GTN核算`},
+  {title:'实操：AI优化经销商促销方案', type:'case', subtitle:'手把手教你用AI完成真实任务', case:{title:'实操：AI优化经销商促销方案', steps:`step1: AI分析历史促销数据→识别高效促销类型<br>step2: AI预测不同促销方案的销量和利润影响<br>step3: AI生成经销商个性化促销日历<br>step4: AI追踪执行效果→实时调整策略`, tip:'核心思路：用AI做80%的重复工作，把精力放在20%的关键判断上'}},
+  {title:'快消销售Prompt实操模板', type:'prompt_template', subtitle:'即学即用的Prompt公式', templates:[
+    {icon:'🔍', name:'渠道效率分析', prompt:'角色：你是快消渠道销售总监。输入：[各渠道销售数据]。分析：渠道利润率/增长潜力/资源效率，输出渠道策略优化方案。'}
+    {icon:'⚙️', name:'促销方案生成', prompt:'角色：你是促销策划专家。输入：[产品+目标+预算]。输出：3套促销方案对比（满减/赠品/组合装），含预期ROI和风险提示。'}
+    {icon:'📊', name:'经销商沟通话术', prompt:'角色：你是渠道销售经理。场景：向经销商推广[新产品]。输出：产品卖点+利润分析+动销方案+支持政策，含常见反对意见应答。'}
+  ]},
+];
+const SLIDES_MFG_HR = [
+  {title:'AI制造HR实战：从考勤管理到人才数字化', type:'cover', subtitle:'用AI升级制造业人力资源管理', meta:'先进制造 · 人力资源'},
+  {title:'制造人力资源的AI转型机遇', type:'content', subtitle:'AI正在重塑制造人力资源的工作方式', bullets:`    • 蓝领招聘：AI筛选技工简历和技能评估
+    • 技能培训：AI驱动的在线培训和生产认证
+    • 排班优化：AI智能排班兼顾生产需求和劳动合规
+    • 安全培训：AI生成产线安全案例和考核`},
+  {title:'制造人力资源AI工具栈', type:'content', subtitle:'推荐AI工具组合', bullets:`    <b>Claude/GPT</b>：JD优化·培训内容生成
+    <b>AI+HR系统</b>：简历筛选·面试题库·绩效分析
+    <b>AI分析工具</b>：人员流失预测·技能差距分析`},
+  {title:'实操：AI优化技工招聘流程', type:'case', subtitle:'手把手教你用AI完成真实任务', case:{title:'实操：AI优化技工招聘流程', steps:`step1: AI分析岗位要求→生成精准JD和技能关键词<br>step2: AI筛选简历→按技能匹配度和经验分级<br>step3: AI生成技能测试题→包含实操场景<br>step4: AI汇总面试评价→生成候选人与岗位匹配度报告`, tip:'核心思路：用AI做80%的重复工作，把精力放在20%的关键判断上'}},
+  {title:'制造人力资源Prompt实操模板', type:'prompt_template', subtitle:'即学即用的Prompt公式', templates:[
+    {icon:'🔍', name:'技工JD生成', prompt:'角色：你是制造业招聘专家。输入：[岗位名称+产线信息]。输出：精准JD(职责/技能要求/认证需求/薪资参考)，突出"能做什么"而非"学过什么"。'}
+    {icon:'⚙️', name:'技能培训方案', prompt:'角色：你是制造业培训经理。需求：为[岗位]设计AI辅助技能培训方案。输出：培训大纲+实操考核标准+AI辅助学习路径。'}
+    {icon:'📊', name:'员工流失预警', prompt:'角色：你是HR数据分析师。输入：[近12个月员工离职数据]。分析：离职原因模式/高风险群体特征/保留策略建议。'}
+  ]},
+];
+const SLIDES_AUTO_HR = [
+  {title:'AI汽车HR实战：从招聘到智能人才管理', type:'cover', subtitle:'用AI构建汽车行业人才竞争力', meta:'智能汽车 · 人力资源'},
+  {title:'汽车人力资源的AI转型机遇', type:'content', subtitle:'AI正在重塑汽车人力资源的工作方式', bullets:`    • 跨界招聘：AI精准定位软件+汽车复合型人才
+    • 人才发展：AI驱动的技能图谱和成长路径
+    • 组织效能：AI分析团队协作模式优化架构
+    • 薪酬对标：AI实时追踪行业薪酬动态`},
+  {title:'汽车人力资源AI工具栈', type:'content', subtitle:'推荐AI工具组合', bullets:`    <b>Claude/GPT</b>：岗位JD·面试设计·培训内容
+    <b>AI+ATS</b>：简历解析·智能推荐
+    <b>AI分析</b>：人才盘点·组织诊断`},
+  {title:'实操：AI设计智能驾驶人才招聘方案', type:'case', subtitle:'手把手教你用AI完成真实任务', case:{title:'实操：AI设计智能驾驶人才招聘方案', steps:`step1: AI分析智驾团队岗位需求→生成能力模型<br>step2: AI搜索行业人才分布→生成人才地图<br>step3: AI设计面试流程→含技术测试和系统设计题目<br>step4: AI生成offer方案→含薪酬对标和竞品对比`, tip:'核心思路：用AI做80%的重复工作，把精力放在20%的关键判断上'}},
+  {title:'汽车人力资源Prompt实操模板', type:'prompt_template', subtitle:'即学即用的Prompt公式', templates:[
+    {icon:'🔍', name:'跨界人才画像', prompt:'角色：你是汽车行业招聘专家。需求：自动驾驶感知算法工程师。输出：1)核心技能清单 2)目标公司人才分布 3)吸引策略 4)面试评估维度。'}
+    {icon:'⚙️', name:'技术面试题设计', prompt:'角色：你是技术面试官。岗位：[智驾系统工程师]。输出：3轮面试题目（基础/系统设计/场景分析），含评分标准和优秀答案参考。'}
+    {icon:'📊', name:'人才盘点分析', prompt:'角色：你是组织发展专家。输入：[团队技能矩阵]。分析：技能缺口/关键人才风险/梯队健康度，输出人才发展和外部招聘建议。'}
+  ]},
+];
+const SLIDES_CPG_HR = [
+  {title:'AI快消HR实战：从招聘到消费者导向人才体系', type:'cover', subtitle:'用AI打造快消行业敏捷人才管理', meta:'日化快消 · 人力资源'},
+  {title:'快消人力资源的AI转型机遇', type:'content', subtitle:'AI正在重塑快消人力资源的工作方式', bullets:`    • 校园招聘：AI批量筛选管培生简历和评估
+    • 销售培训：AI生成场景化销售培训内容
+    • 绩效考核：AI辅助OKR制定和绩效面谈
+    • 文化建设：AI分析员工反馈驱动组织改善`},
+  {title:'快消人力资源AI工具栈', type:'content', subtitle:'推荐AI工具组合', bullets:`    <b>Claude/GPT</b>：简历筛选·培训设计·绩效分析
+    <b>AI+HRIS</b>：人才库管理·学习路径推荐
+    <b>AI问卷分析</b>：员工满意度·敬业度分析`},
+  {title:'实操：AI设计管培生加速培养计划', type:'case', subtitle:'手把手教你用AI完成真实任务', case:{title:'实操：AI设计管培生加速培养计划', steps:`step1: AI分析优秀管培生的能力成长曲线→提取关键经验<br>step2: AI设计轮岗路线图→匹配业务需求和人才特点<br>step3: AI生成各阶段学习任务和考核标准<br>step4: AI追踪培养效果→动态调整计划`, tip:'核心思路：用AI做80%的重复工作，把精力放在20%的关键判断上'}},
+  {title:'快消人力资源Prompt实操模板', type:'prompt_template', subtitle:'即学即用的Prompt公式', templates:[
+    {icon:'🔍', name:'管培生评估', prompt:'角色：你是快消行业人才评估专家。输入：[管培生个人信息+测评结果]。输出：发展潜力评分/推荐轮岗方向/重点发展能力/个性化培养建议。'}
+    {icon:'⚙️', name:'绩效面谈话术', prompt:'角色：你是HRBP。场景：[员工绩效情况]。生成：1)面谈框架 2)正面反馈话术 3)改进建议话术 4)目标设定对话引导。'}
+    {icon:'📊', name:'员工敬业度分析', prompt:'角色：你是组织发展顾问。输入：[员工调研数据摘要]。分析：敬业度驱动因素/高风险团队预警/改进优先级和行动计划。'}
+  ]},
+];
+
 // ==================== VOICE ENGINE ====================
 let voiceUtterance = null;
 let voicePaused = false;
@@ -2020,6 +2231,19 @@ var COURSES = {
   cpg_ops: {title:'AI驱动快消运营：从货架数据到消费者连接', meta:{duration:'40分钟',level:'中高级',industry:'日化快消',role:'运营'}, slides: SLIDES_OPS_CPG},
   auto_sales: {title:'AI赋能汽车销售：从产品专家到客户顾问', meta:{duration:'40分钟',level:'中高级',industry:'智能汽车',role:'销售'}, slides: SLIDES_SALES_AUTO},
   finance_hr: {title:'AI赋能金融人才管理：从合规筛选到数字化HR', meta:{duration:'40分钟',level:'中高级',industry:'金融数字化',role:'人力资源'}, slides: SLIDES_HR_FIN},
+  // 非PM岗位×行业专属课程（补充12套 — 全部行业×岗位组合完整覆盖）
+  finance_dev: {title:'AI金融研发实战：从交易系统到智能风控', meta:{duration:'30分钟',level:'中高级',industry:'金融数字化',role:'研发工程师'}, slides: SLIDES_FINANCE_DEV},
+  auto_dev: {title:'AI汽车研发实战：从ECU到智能座舱', meta:{duration:'30分钟',level:'中高级',industry:'智能汽车',role:'研发工程师'}, slides: SLIDES_AUTO_DEV},
+  cpg_dev: {title:'AI快消研发实战：从配方到供应链数字化', meta:{duration:'30分钟',level:'中高级',industry:'日化快消',role:'研发工程师'}, slides: SLIDES_CPG_DEV},
+  mfg_ops: {title:'AI制造运营实战：从排产报表到智能决策', meta:{duration:'30分钟',level:'中高级',industry:'先进制造',role:'运营'}, slides: SLIDES_MFG_OPS},
+  finance_ops: {title:'AI金融运营实战：从报表到智能风控运营', meta:{duration:'30分钟',level:'中高级',industry:'金融数字化',role:'运营'}, slides: SLIDES_FINANCE_OPS},
+  auto_ops: {title:'AI汽车运营实战：从用户数据到智能服务', meta:{duration:'30分钟',level:'中高级',industry:'智能汽车',role:'运营'}, slides: SLIDES_AUTO_OPS},
+  mfg_sales: {title:'AI制造销售实战：从关系销售到解决方案顾问', meta:{duration:'30分钟',level:'中高级',industry:'先进制造',role:'销售'}, slides: SLIDES_MFG_SALES},
+  finance_sales: {title:'AI金融销售实战：从产品推销到智能顾问', meta:{duration:'30分钟',level:'中高级',industry:'金融数字化',role:'销售'}, slides: SLIDES_FINANCE_SALES},
+  cpg_sales: {title:'AI快消销售实战：从渠道铺货到数据驱动增长', meta:{duration:'30分钟',level:'中高级',industry:'日化快消',role:'销售'}, slides: SLIDES_CPG_SALES},
+  mfg_hr: {title:'AI制造HR实战：从考勤管理到人才数字化', meta:{duration:'30分钟',level:'中高级',industry:'先进制造',role:'人力资源'}, slides: SLIDES_MFG_HR},
+  auto_hr: {title:'AI汽车HR实战：从招聘到智能人才管理', meta:{duration:'30分钟',level:'中高级',industry:'智能汽车',role:'人力资源'}, slides: SLIDES_AUTO_HR},
+  cpg_hr: {title:'AI快消HR实战：从招聘到消费者导向人才体系', meta:{duration:'30分钟',level:'中高级',industry:'日化快消',role:'人力资源'}, slides: SLIDES_CPG_HR},
 };
 
 function getCourse() {
