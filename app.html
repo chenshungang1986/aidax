@@ -1193,6 +1193,37 @@ const ADAPTIVE_QUIZ = {
   ]
 };
 
+function getIndustryContext(roleId, industryId) {
+  // Provide role+industry context prefix for quiz scenarios
+  const ctx = {
+    dev: {
+      mfg: '🏭 你是一家智能制造工厂的研发工程师。',
+      finance: '🏦 你是一家金融科技公司的后端开发工程师。',
+      auto: '🚗 你是一家智能汽车公司的研发工程师。',
+      cpg: '🧴 你是一家日化快消公司的数字化研发工程师。'
+    },
+    ops: {
+      mfg: '🏭 你是一家智能制造企业的运营负责人。',
+      finance: '🏦 你是一家金融科技公司的运营经理。',
+      auto: '🚗 你是一家新能源汽车品牌的运营经理。',
+      cpg: '🧴 你是一家日化快消品牌的市场运营负责人。'
+    },
+    sales: {
+      mfg: '🏭 你是一家工业软件公司的B2B大客户销售。',
+      finance: '🏦 你是一家金融SaaS公司的解决方案销售。',
+      auto: '🚗 你是一家汽车零部件供应商的销售经理。',
+      cpg: '🧴 你是一家快消品牌的渠道销售负责人。'
+    },
+    hr: {
+      mfg: '🏭 你是一家大型制造集团的人力资源经理。',
+      finance: '🏦 你是一家金融控股集团的人力资源总监。',
+      auto: '🚗 你是一家汽车集团的人力资源BP。',
+      cpg: '🧴 你是一家快消集团的人力资源培训负责人。'
+    }
+  };
+  return (ctx[roleId] && ctx[roleId][industryId]) || '';
+}
+
 function getQuizQuestions(roleId, industryId) {
   // Map industry+role to the right quiz data
   var quizObj = null;
@@ -1905,6 +1936,11 @@ function renderQuiz() {
     finishAdaptiveQuiz();
     return '';
   }
+  // Inject industry context for non-PM roles to make questions industry-specific
+  const indCtx = getIndustryContext(S.role, S.industry);
+  const scenarioHtml = q.scenario
+    ? `<div style="font-size:13px;color:var(--accent);margin-bottom:12px;padding:10px 14px;background:var(--bg2);border-radius:8px;border-left:3px solid var(--accent);">${indCtx}${q.scenario.replace('场景：','')}</div>`
+    : '';
   const hasAnswered = S.quizAnswers[dimKey] !== undefined;
   // On first visit always show 中阶 (level 1); on revisit show adapted level
   const displayLevel = hasAnswered ? level : 1;
@@ -1929,6 +1965,7 @@ function renderQuiz() {
       <span style="font-size:12px;color:var(--text2);">${levelName} · 难度 ${['低','中','高'][displayLevel]}${hasAnswered ? '<span style="color:var(--amber);margin-left:4px;">(根据你上次的回答已调整)</span>' : ''}</span>
     </div>
     <div class="quiz-progress">${dots}</div>
+    ${scenarioHtml}
     <div class="quiz-question">${q.q}</div>
     <div style="display:flex;flex-direction:column;">`;
   const sel = S._quizSelected ? S._quizSelected[dimKey] : undefined;
