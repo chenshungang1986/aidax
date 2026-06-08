@@ -3099,6 +3099,8 @@ function bindEvents() {
       while (el && el !== app) {
         const action = el.getAttribute('data-action');
         if (action) {
+          // Skip if element has inline onclick to avoid double-firing
+          if (el.hasAttribute('onclick')) return;
           const id = el.getAttribute('data-id') || el.getAttribute('data-idx');
           const idx = parseInt(el.getAttribute('data-idx'));
           switch (action) {
