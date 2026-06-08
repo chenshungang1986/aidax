@@ -109,14 +109,38 @@ const S = { view:'industry', industry:null, role:null,
 
 // AI 8-dimension model
 const DIMS = {
-  prompt:   {id:'prompt',   name:'提示词工程',     icon:'💬', short:'Prompt'},
-  tools:    {id:'tools',    name:'AI工具实战',     icon:'🛠️', short:'Tools'},
-  data:     {id:'data',     name:'数据分析与决策',  icon:'📊', short:'Data'},
-  content:  {id:'content',  name:'AI内容创作',     icon:'✍️', short:'Content'},
-  dev:      {id:'dev',      name:'AI辅助开发',     icon:'💻', short:'Dev'},
-  workflow: {id:'workflow', name:'AI协同工作流',   icon:'⚡', short:'Workflow'},
-  security: {id:'security', name:'AI安全与合规',   icon:'🔒', short:'Security'},
-  strategy: {id:'strategy', name:'AI战略思维',     icon:'🎯', short:'Strategy'}
+  prompt:   {id:'prompt',   name:'提示词工程',     icon:'💬', short:'Prompt',
+    weakness:'你的提示词还停留在"模糊描述"阶段，AI给出的回答往往很泛泛。',
+    tip:'学会「角色-背景-任务-格式」四要素结构，并在每个业务场景下建立自己的Prompt模板库。',
+    module:'课程第2-3页：行业场景Prompt设计+工厂/金融/汽车实操模板'},
+  tools:    {id:'tools',    name:'AI工具实战',     icon:'🛠️', short:'Tools',
+    weakness:'你对主流AI工具的能力边界还不清晰，容易用错工具或重复造轮子。',
+    tip:'核心工具链：Claude/GPT-4o负责分析推理，Perplexity负责实时搜索，AI图像工具负责快速视觉原型。每个工具有自己最擅长的场景。',
+    module:'课程第4页：2026年必备AI工具栈+实操选型决策树'},
+  data:     {id:'data',     name:'数据分析与决策',  icon:'📊', short:'Data',
+    weakness:'你还在用人工方式处理数据，没有把AI作为数据分析的加速器。',
+    tip:'从「数据→洞察→决策」三步走：先让AI做数据清洗和摘要，再让AI识别异常和趋势，最后让AI生成决策选项和权衡分析。',
+    module:'课程第5-6页：AI数据分析三步法+评论/指标批量分析实操'},
+  content:  {id:'content',  name:'AI内容创作',     icon:'✍️', short:'Content',
+    weakness:'你写文档还是靠自己从头到尾敲字，没有充分利用AI的「快速起草+多版本生成」能力。',
+    tip:'标准流程：先用AI生成3个风格不同的初稿版本，选出最接近的一个，再补充行业细节和个人判断。AI是起草机器，你是审核者。',
+    module:'课程第7页：AI内容创作工作流+行业专属文案模板'},
+  dev:      {id:'dev',      name:'AI辅助开发',     icon:'💻', short:'Dev',
+    weakness:'你和技术团队的对话还停留在"需求传递"层面，没有用AI来缩短理解鸿沟。',
+    tip:'学会用AI翻译技术文档、评估技术方案可行性、生成测试用例，让你在评审会上能问出有深度的问题。',
+    module:'课程第8页：非技术PM评估技术方案指南+AI辅助代码Review'},
+  workflow: {id:'workflow', name:'AI协同工作流',   icon:'⚡', short:'Workflow',
+    weakness:'你用AI还是「单点工具」模式，没有把AI整合到日常工作流程中，导致效率提升有限。',
+    tip:'目标是「AI原生工作流」：每个重复性任务都设计一个AI快捷流程，从季度规划到会议纪要，逐步把AI嵌入所有环节。',
+    module:'课程第9-10页：AI工作流设计方法论+季度规划/项目管理模板'},
+  security: {id:'security', name:'AI安全与合规',   icon:'🔒', short:'Security',
+    weakness:'你在AI使用中存在数据安全意识盲区，可能在不知不觉中把敏感数据喂给了公共AI。',
+    tip:'记住三条红线：①个人数据不上传公共AI ②商业机密用企业版AI或私有部署 ③AI生成的内容需人工确认准确性再对外发布。',
+    module:'课程第11页：企业AI合规使用指南+数据分级处理流程'},
+  strategy: {id:'strategy', name:'AI战略思维',     icon:'🎯', short:'Strategy',
+    weakness:'你对AI的认知还停留在「工具使用」层面，缺乏从战略高度判断AI如何重塑你的行业和角色。',
+    tip:'AI战略思维的核心是「竞争优势重构」：哪些环节AI能做到行业最优？哪些环节仍需人的判断？你的不可替代性在哪里？',
+    module:'课程第12页：AI时代岗位价值重构+3年AI转型路线图模板'}
 };
 
 // ==================== MANUFACTURING PM SCENARIO QUIZ ====================
@@ -1705,12 +1729,18 @@ function renderResults() {
   </div>`;
 
   // Overall score gauge
+  const levelLabel = r.overall>=80?'AI原住民 🚀':r.overall>=60?'AI进阶者 📈':r.overall>=40?'AI探索者 🔍':'AI入门者 🌱';
+  const levelDesc = r.overall>=80?'你已经能熟练运用AI完成大多数工作任务，现在要思考如何用AI建立个人竞争壁垒。':
+                    r.overall>=60?'你掌握了AI的基础用法，有几个维度已经相当不错。建议集中突破1-2个薄弱点，快速进入高手区间。':
+                    r.overall>=40?'你对AI有基础认知，但还没有形成系统的工作方法。看完这门课，你会有质的跨越。':
+                    '你现在处于最好的起点——从零开始意味着没有坏习惯。按照个性化学习计划，3个月内完全可以进入进阶者行列。';
   h += `<div class="card slide-up text-center">
     <div class="gauge">
       <svg width="140" height="140"><circle cx="70" cy="70" r="60" fill="none" stroke="var(--border)" stroke-width="10"/><circle cx="70" cy="70" r="60" fill="none" stroke="${gColor}" stroke-width="10" stroke-dasharray="${r.overall/100*377} 377" stroke-linecap="round"/></svg>
       <div class="gauge-value" style="color:${gColor}">${r.overall}<span style="font-size:16px;">分</span></div>
     </div>
-    <p style="color:var(--text2);margin-top:8px;">${r.overall>=70?'👏 AI能力扎实，继续保持！':r.overall>=40?'📈 有基础，在关键维度加强训练':'🎯 建议系统学习，潜力很大'}</p>
+    <div style="font-size:16px;font-weight:700;color:${gColor};margin:8px 0 6px;">${levelLabel}</div>
+    <p style="color:var(--text2);font-size:13px;line-height:1.6;">${levelDesc}</p>
   </div>`;
 
   // Radar chart
@@ -1729,8 +1759,11 @@ function renderResults() {
   }
   h += `</div></div>`;
 
-  // Weakest dimensions - gap analysis
+  // Weakest dimensions - gap analysis with actionable tips
   const sorted = DIM_ORDER.map(dk => ({key:dk, score:r.dimScores[dk]||0})).sort((a,b)=>a.score-b.score);
+  const weakest = sorted.slice(0,3); // Top 3 weakest
+  const strongest = sorted.slice(-2).reverse(); // Top 2 strongest
+
   h += `<div class="card slide-up"><h3 style="margin-bottom:12px;">📉 能力短板分析</h3>`;
   for (const item of sorted.slice(0,4)) {
     const pct = Math.round(item.score/4*100);
@@ -1744,14 +1777,69 @@ function renderResults() {
   }
   h += `</div>`;
 
-  // Course recommendation
-  h += `<div class="card slide-up text-center">
+  // ===== NEW: Personalized Learning Plan =====
+  h += `<div class="card slide-up">
+    <h3 style="margin-bottom:4px;">🗺️ 个性化学习计划</h3>
+    <p style="color:var(--text2);font-size:13px;margin-bottom:16px;">基于你的测评结果，以下是针对你最薄弱的3个维度的精准提升建议</p>`;
+
+  const priorityLabels = ['🔴 优先突破', '🟡 重点加强', '🔵 持续改进'];
+  weakest.forEach((item, idx) => {
+    const pct = Math.round(item.score/4*100);
+    const dim = DIMS[item.key];
+    h += `<div style="border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <span style="font-size:20px;">${dim.icon}</span>
+        <div>
+          <div style="font-size:14px;font-weight:600;">${dim.name}</div>
+          <div style="font-size:11px;color:var(--text2);">${priorityLabels[idx]} · 当前掌握度 ${pct}%</div>
+        </div>
+      </div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:8px;">
+        <strong style="color:var(--text);">📍 诊断：</strong>${dim.weakness}
+      </div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:8px;">
+        <strong style="color:var(--text);">💡 提升方法：</strong>${dim.tip}
+      </div>
+      <div style="font-size:12px;background:var(--bg);border-radius:8px;padding:8px;color:var(--primary);">
+        📖 ${dim.module}
+      </div>
+    </div>`;
+  });
+
+  // Show strengths
+  if (strongest.some(s => Math.round(s.score/4*100) >= 60)) {
+    h += `<div style="font-size:13px;color:var(--text2);padding:10px;border-radius:8px;background:var(--bg);">
+      ✨ <strong>你的优势维度：</strong>
+      ${strongest.filter(s => Math.round(s.score/4*100) >= 40).map(s => `${DIMS[s.key].icon} ${DIMS[s.key].name}（${Math.round(s.score/4*100)}%）`).join('、')}
+      — 在工作中继续发挥这些优势！
+    </div>`;
+  }
+  h += `</div>`;
+
+  // ===== Upgraded Course Recommendation =====
+  const topWeak = weakest[0];
+  const topWeakPct = Math.round(topWeak.score/4*100);
+  const urgency = topWeakPct < 30 ? '⚡ 这门课正好能补齐你最薄弱的环节' :
+                  topWeakPct < 55 ? '📈 课程重点覆盖你的主要提升区间' :
+                  '🎓 巩固提升，迈向专家级';
+
+  h += `<div class="card slide-up">
     <h3 style="margin-bottom:8px;">🎓 推荐课程</h3>
-    <p style="color:var(--text2);font-size:14px;margin-bottom:16px;">基于你的能力短板，推荐以下实战课程</p>
-    <button class="btn btn-primary" onclick="stopVoice(); S.view='course'; S.courseSlide=0; render();">
-      📖 ${getCourseTitle()}（${getCourseMeta().duration}）
+    <div style="display:flex;align-items:flex-start;gap:12px;padding:12px;border-radius:10px;background:var(--bg);margin-bottom:12px;">
+      <div style="font-size:36px;flex-shrink:0;">${(IND_INFO[S.industry]||{}).icon||'🎓'}</div>
+      <div>
+        <div style="font-weight:600;font-size:15px;margin-bottom:4px;">${getCourseTitle()}</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:6px;">${getCourseMeta().industry} · ${getCourseMeta().role} · ${getCourseMeta().duration} · ${getCourseMeta().level}</div>
+        <div style="font-size:12px;color:var(--primary);">${urgency}</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6;">
+      重点学习课程中关于 <strong>${weakest.slice(0,2).map(w=>DIMS[w.key].name).join('、')}</strong> 的章节，这是你当前最需要提升的两个维度。
+    </div>
+    <button class="btn btn-primary" style="width:100%;" onclick="stopVoice(); S.view='course'; S.courseSlide=0; render();">
+      📖 立即开始学习（${getCourseMeta().duration}）
     </button>
-    <p style="font-size:12px;color:var(--text2);margin-top:8px;">包含精美PPT + 真人语音讲解</p>
+    <p style="font-size:12px;color:var(--text2);margin-top:8px;text-align:center;">精美PPT + 真人语音讲解 · 随时暂停继续</p>
   </div>`;
 
   // Action buttons
