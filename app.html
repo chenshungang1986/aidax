@@ -99,6 +99,18 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; b
 <div class="app" id="app"></div>
 
 <script>
+// ===== Session Check =====
+(function(){
+  if(window.location.pathname.indexOf('index.html') !== -1) return;
+  var s = localStorage.getItem('ai_training_session');
+  if(!s) { window.location.replace('index.html'); return; }
+  try {
+    var d = JSON.parse(s);
+    if(!d.loggedIn) { localStorage.removeItem('ai_training_session'); window.location.replace('index.html'); return; }
+    if(Date.now() - d.timestamp > 12*3600*1000) { localStorage.removeItem('ai_training_session'); window.location.replace('index.html'); return; }
+  } catch(e) { localStorage.removeItem('ai_training_session'); window.location.replace('index.html'); return; }
+})();
+
 // ==================== STATE ====================
 const S = { view:'industry', industry:null, role:null,
   quizIdx:0, quizAnswers:{}, _quizSelected:{}, _quizDims:null,
