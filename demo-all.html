@@ -910,6 +910,34 @@ const SLIDES_AUTO = [
  narration:"感谢你完成这45分钟的课程。智能汽车的产品经理，是连接物理世界和数字智能的桥梁。AI让这座桥变得更宽、更快。祝你旅途愉快。"}
 ];
 
+// 日化快消×PM 课程幻灯片
+const SLIDES_CPG = [
+{title:"AI重塑快消产品：从货架数据到消费者洞察",subtitle:"日化快消产品经理的AI实战指南",type:"cover",
+ narration:"欢迎来到「AI重塑快消产品」课程。在接下来的45分钟里，我们将探索快消行业产品经理如何用AI从海量渠道数据和消费者行为中找到增长机会。"},
+{title:"为什么快消PM必须拥抱AI？",type:"content",content:[{txt:"消费者注意力窗口缩短至8秒——产品洞察速度决定生死",hl:true},{txt:"电商+社媒每天产生亿级SKU行为数据——人工分析远不够用",hl:false},{txt:"从年度新品到月度快速测试——需求洞察节奏提升10倍",hl:true},{txt:"竞品用AI做选品和定价，传统数据团队已被甩开两个身位",hl:false}],
+ narration:"快消行业的竞争已进入毫秒级。消费者在货架前或刷到内容的8秒内做出决策，PM需要以同等速度理解消费者。AI让快消PM第一次有能力做到「日级洞察、周级迭代」。"},
+{title:"快消PM的8维AI能力模型",type:"content",content:[{txt:"💬 提示词工程——精准描述消费者场景和需求研究任务",hl:false},{txt:"🛠️ AI工具实战——Claude分析电商评论/Perplexity追踪趋势",hl:false},{txt:"📊 数据驱动决策——从销售+评论+社媒的三层数据中提取洞察",hl:true},{txt:"✍️ AI内容创作——卖点文案/产品Brief/竞品对比报告",hl:true},{txt:"💻 AI辅助开发——理解电商算法逻辑，配合技术团队",hl:false},{txt:"⚡ AI协同工作流——从消费者洞察到新品上市的AI全流程",hl:true},{txt:"🔒 AI安全与合规——消费者数据合规使用红线",hl:false},{txt:"🎯 AI战略思维——用AI规划品牌和品类的3年AI转型路线图",hl:true}],
+ narration:"快消PM的AI能力模型中，数据驱动决策、AI内容创作和协同工作流是最关键的三个维度。快消行业的特点是SKU多、节奏快、消费者数据海量，这三个能力直接决定了PM能不能跟上行业节奏。"},
+{title:"2026年快消PM必备AI工具栈",type:"tools",content:[{tool:"Claude 4 / GPT-4o",use:"消费者评论分析、竞品文案对比、新品Brief生成、渠道策略方案"},{tool:"Perplexity / 联网搜索AI",use:"实时追踪成分趋势、竞品上新动态、行业报告摘要"},{tool:"AI图像生成（Midjourney/DALL-E）",use:"快速出包装概念稿、卖点海报原型、A/B测试视觉"},{tool:"NotebookLM / AI知识库",use:"品类研究报告深读、消费者访谈转录分析、专家观点整合"}],
+ narration:"快消PM的工具栈需要覆盖「洞察→定义→验证→上市」的全链路。Claude负责分析和内容，Perplexity负责实时趋势，AI图像工具让PM自己就能快速出视觉原型。"},
+{title:"实操一：用AI分析万条电商评论，找产品痛点",subtitle:"从「看几条典型评论」到「全量数据洞察」",type:"case",content:[{label:"背景",txt:"某洗发水品牌在天猫有5万条评论，PM想找核心痛点和产品升级机会"},{label:"目标",txt:"识别用户对「留香」「控油」「发质改善」等核心诉求的满意度分布"},{label:"AI方法",txt:"导出评论CSV→AI多维情感分析→痛点优先级矩阵→挖掘「控油保湿两难全」的未满足需求→新品立项"}],
+ narration:"实操一：评论分析。快消PM过去最多看几十条典型评论，靠直觉总结痛点。用AI分析5万条评论，可以在30分钟内得到精准的痛点优先级矩阵。在这个案例中，AI从「控油」和「保湿」的大量同时出现中，发现了一个未被满足的「控油同时不干燥」需求，直接指向了新品立项方向。"},
+{title:"实操一（续）：电商评论分析Prompt",type:"code",code:"你是快消品消费者洞察分析师。\n以下是某洗发水产品的用户评论数据：\n[粘贴500-1000条评论]\n\n请执行：\n1. 识别评论中最高频的功效诉求（Top 10）\n2. 为每个诉求打满意度分（1-5分）\n3. 发现「高重要性但低满意度」的未满足需求\n4. 提取3个最有价值的产品升级机会\n5. 按「市场机会大小×开发可行性」矩阵排序",
+ narration:"评论分析的Prompt模板。注意要求AI同时分析重要性（提及频率）和满意度（情感倾向），两个维度的交叉才能找到真正的产品机会。"},
+{title:"实操二：AI辅助新品趋势捕捉",subtitle:"从「行业报告滞后」到「实时趋势感知」",type:"case",content:[{label:"背景",txt:"PM需要判断「益生菌护肤」是否值得押注——是真趋势还是昙花一现"},{label:"挑战",txt:"传统调研周期3个月，竞品已经上市了"},{label:"AI方法",txt:"AI抓取6个月的小红书/抖音/海外TikTok讨论量→分析人群画像和使用场景→对比成分专利申请趋势→7天内完成趋势验证报告"}],
+ narration:"实操二：趋势捕捉。快消行业的趋势窗口越来越短，等传统市调报告出来，机会可能已经错过。用AI组合联网搜索+社媒分析，可以在一周内完成传统3个月才能做完的趋势验证。"},
+{title:"实操三：AI加速新品上市流程",subtitle:"从产品定义到上市Brief，效率提升5倍",type:"case",content:[{label:"挑战",txt:"新品从消费者洞察到完整上市Brief，传统流程需要3-4周"},{label:"AI方法",txt:"(1)AI整合评论洞察+趋势分析+竞品对比，生成产品定义草稿 (2)AI生成3个差异化卖点方向 (3)AI辅助撰写产品开发Brief和渠道策略 (4)AI生成卖点文案初稿供品牌团队润色"},{label:"效果",txt:"上市Brief从3周缩短到5天，且覆盖了更全面的数据支撑"}],
+ narration:"实操三：新品上市提速。当AI承担了信息整合和文档撰写的工作，PM可以把精力聚焦在最需要创造力和判断力的环节——产品定义和差异化方向。在真实案例中，一个人用AI完成的上市Brief，质量超过了过去三人团队的产出。"},
+{title:"快消PM的数据合规红线",type:"content",content:[{txt:"🚫 绝不上传含手机号/地址的用户购买数据到公共AI",hl:true},{txt:"🚫 竞品分析只用公开可获取的信息，不使用内部渠道数据",hl:true},{txt:"✅ 电商评论是公开数据，可以脱敏处理后分析",hl:false},{txt:"✅ 社媒讨论数据使用聚合统计，不追踪个人用户",hl:false},{txt:"✅ AI生成的产品文案须经法务确认成分/功效宣称合规",hl:true}],
+ narration:"快消行业有特殊的合规要求：成分宣称和功效描述受到严格监管。AI生成的产品文案必须经法务确认，避免虚假宣传风险。个人购买数据绝不能上传公共AI，但公开的电商评论和社媒讨论是可以合规使用的分析素材。"},
+{title:"你的3个月AI落地路线图",type:"roadmap",content:[{phase:"Month 1 · 洞察提速",tasks:"掌握电商评论AI分析、搭建社媒趋势监控工作流、AI辅助竞品周报自动化"},{phase:"Month 2 · 决策升级",tasks:"AI辅助新品趋势验证、消费者洞察报告自动生成、AI嵌入新品评审流程"},{phase:"Month 3 · 全链路AI化",tasks:"从洞察到Brief的AI全流程、推动团队AI使用规范、输出品类AI转型路线图"}],
+ narration:"三个月路线图。快消行业节奏快，AI的红利立竿见影。从评论分析和竞品监控开始，逐步建立从洞察到上市Brief的AI全流程，最终让整个品类团队都用上AI。"},
+{title:"课程回顾",type:"summary",content:["快消PM的AI核心：日级洞察、周级迭代，跑赢竞品速度","三大实操：评论分析→趋势捕捉→上市Brief加速","数据合规红线：个人购买数据不上传，产品文案法务确认","立即开始：今天就用AI分析你产品的电商评论Top 100条"],
+ narration:"课程回顾。快消PM的AI实践，核心是「速度」和「洞察深度」。从今天开始，把你最头疼的那个数据分析任务交给AI试试，感受一下效率的质变。"},
+{title:"开启你的快消AI增长之旅",subtitle:"让每一条消费者声音都成为产品进化的信号",type:"cover",
+ narration:"感谢你完成这45分钟的课程。快消行业的竞争本质是对消费者心智的争夺，AI让你第一次有机会用数据而非直觉来做这件事。祝你的下一款新品大卖。"}
+];
+
 // 研发岗位课程：「AI驱动的高效研发：从写代码到设计系统」
 const SLIDES_DEV = [
   {
@@ -1367,6 +1395,7 @@ var COURSES = {
   mfg_pm: {title:'AI重塑制造产品规划：从产线数据到产品决策', meta:{duration:'45分钟',level:'中高级',industry:'先进制造',role:'产品经理'}, slides: SLIDES_MFG},
   finance_pm: {title:'AI重塑金融产品：从数据洞察到智能决策', meta:{duration:'45分钟',level:'中高级',industry:'金融数字化',role:'产品经理'}, slides: SLIDES_FIN},
   auto_pm: {title:'AI重塑智能汽车产品：从驾驶数据到极致体验', meta:{duration:'45分钟',level:'中高级',industry:'智能汽车',role:'产品经理'}, slides: SLIDES_AUTO},
+  cpg_pm: {title:'AI重塑快消产品：从货架数据到消费者洞察', meta:{duration:'45分钟',level:'中高级',industry:'日化快消',role:'产品经理'}, slides: SLIDES_CPG},
   dev: {title:'AI驱动的高效研发：从写代码到设计系统', meta:{duration:'35分钟',level:'中高级',industry:'通用',role:'研发工程师'}, slides: SLIDES_DEV},
   ops: {title:'AI驱动智能运营：从经验驱动到数据驱动', meta:{duration:'35分钟',level:'中高级',industry:'通用',role:'运营'}, slides: SLIDES_OPS},
   sales: {title:'AI赋能销售：从关系驱动到洞察驱动', meta:{duration:'35分钟',level:'中高级',industry:'通用',role:'销售'}, slides: SLIDES_SALES},
@@ -1552,7 +1581,7 @@ function renderResults() {
   const gColor = r.overall >= 70 ? 'var(--green)' : r.overall >= 40 ? 'var(--amber)' : 'var(--red)';
 
   let h = `<div class="text-center slide-up" style="padding:10px 0;">
-    <h2>📊 测评结果</h2><p style="color:var(--text2);">智能制造 × 产品经理 · AI能力画像</p>
+    <h2>📊 测评结果</h2><p style="color:var(--text2);">${(IND_INFO[S.industry]||{}).name||''} × ${(ROLE_INFO[S.role]||{}).name||''} · AI能力画像</p>
   </div>`;
 
   // Overall score gauge
@@ -1600,7 +1629,7 @@ function renderResults() {
     <h3 style="margin-bottom:8px;">🎓 推荐课程</h3>
     <p style="color:var(--text2);font-size:14px;margin-bottom:16px;">基于你的能力短板，推荐以下实战课程</p>
     <button class="btn btn-primary" onclick="stopVoice(); S.view='course'; S.courseSlide=0; render();">
-      📖 AI重塑制造产品规划（45分钟）
+      📖 ${getCourseTitle()}（${getCourseMeta().duration}）
     </button>
     <p style="font-size:12px;color:var(--text2);margin-top:8px;">包含精美PPT + 真人语音讲解</p>
   </div>`;
@@ -1624,7 +1653,7 @@ function renderCourse() {
   // Hero section
   h += `<div class="course-hero slide-up">
     <h2>${getCourseTitle()}</h2>
-    <p class="sub">从产线数据到产品决策 — 制造业PM的AI实战指南</p>
+    <p class="sub">${(IND_INFO[S.industry]||{}).desc||'多行业'} · ${(ROLE_INFO[S.role]||{}).name||''} 的AI实战指南</p>
     <div class="meta">
       <span>⏱ ${getCourseMeta().duration}</span>
       <span>📊 ${getCourseMeta().level}</span>
@@ -1656,7 +1685,7 @@ function renderSlideHTML(idx) {
   switch (slide.type) {
     case 'cover':
       h += `<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;height:380px;text-align:center;">
-        <div style="font-size:48px;margin-bottom:16px;">🏭</div>
+        <div style="font-size:48px;margin-bottom:16px;">${(IND_INFO[S.industry]||{}).icon||'🎓'}</div>
         <h3 style="font-size:24px;text-align:center;">${slide.title}</h3>
         ${slide.subtitle ? `<p style="font-size:16px;color:var(--blue);margin-top:8px;">${slide.subtitle}</p>` : ''}
       </div>`;
