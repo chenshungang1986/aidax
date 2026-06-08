@@ -1207,7 +1207,7 @@ function getQuizQuestions(roleId, industryId) {
     quizObj = roleMap[roleId] || DEV_QUIZ_V2;
   }
   
-  // Flatten dim-based quiz to byDim format
+  // Flatten dim-based quiz to byDim format, picking ONE random question per level
   var byDim = {};
   var dims = ['prompt','tools','data','content','dev','workflow','security','strategy'];
   dims.forEach(function(d) {
@@ -1218,11 +1218,19 @@ function getQuizQuestions(roleId, industryId) {
     dims.forEach(function(d) {
       var arr = quizObj[d];
       if (arr && arr.length) {
+        // Group by level first, then pick ONE random question per level
+        var byLevel = {};
         arr.forEach(function(q) {
           var lv = q.level || 0;
-          if (!byDim[d][lv]) byDim[d][lv] = [];
-          byDim[d][lv].push(q);
+          if (!byLevel[lv]) byLevel[lv] = [];
+          byLevel[lv].push(q);
         });
+        for (var lv = 0; lv <= 2; lv++) {
+          if (byLevel[lv] && byLevel[lv].length > 0) {
+            var pool = byLevel[lv];
+            byDim[d][lv] = pool[Math.floor(Math.random() * pool.length)];
+          }
+        }
       }
     });
   }
@@ -1238,23 +1246,20 @@ function startAdaptiveQuiz() {
   const dims = Object.keys(byDim);
   dims.forEach(function(d) {
     for (var lv = 0; lv <= 2; lv++) {
-      var pool = byDim[d] && byDim[d][lv];
-      if (!pool) continue;
-      pool.forEach(function(q) {
-        if (!q.opts || !q.scores || q.opts.length < 2) return;
-        var n = q.opts.length;
-        var indices = q.opts.map(function(_, i) { return i; });
-        // Fisher-Yates shuffle
-        for (var i = n - 1; i > 0; i--) {
-          var j = Math.floor(Math.random() * (i + 1));
-          var tmp = indices[i];
-          indices[i] = indices[j];
-          indices[j] = tmp;
-        }
-        q.opts = indices.map(function(i) { return q.opts[i]; });
-        q.scores = indices.map(function(i) { return q.scores[i]; });
-        if (q.best !== undefined) q.best = indices.indexOf(q.best);
-      });
+      var q = byDim[d] && byDim[d][lv];
+      if (!q || !q.opts || !q.scores || q.opts.length < 2) continue;
+      var n = q.opts.length;
+      var indices = q.opts.map(function(_, i) { return i; });
+      // Fisher-Yates shuffle
+      for (var i = n - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = indices[i];
+        indices[i] = indices[j];
+        indices[j] = tmp;
+      }
+      q.opts = indices.map(function(i) { return q.opts[i]; });
+      q.scores = indices.map(function(i) { return q.scores[i]; });
+      if (q.best !== undefined) q.best = indices.indexOf(q.best);
     }
   });
   
