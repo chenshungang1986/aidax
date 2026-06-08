@@ -2037,6 +2037,7 @@ function initRadarChart() {
 function renderLearningMap() {
   const role = ROLES[S.role];
   const courses = COURSES[S.role];
+  const scores = S.quizScores || null;
 
   // Sort courses by priority (weakest skill first) using adaptive dim scores
   const ordered = courses.map((c, idx) => {
@@ -2809,7 +2810,7 @@ S.goBack = function() {
   if (S.view === 'quiz') { S.view='role'; }
   else if (S.view === 'results') { S.view='role'; }
   else if (S.view === 'final') { S.goDashboard(); return; }
-  else if (S.view === 'map') { S.view='results'; }
+  else if (S.view === 'map') { S.goDashboard(); return; }
   else if (S.view === 'schedule') { S.view='map'; }
   else { S.goDashboard(); return; }
   render();
