@@ -561,6 +561,102 @@ security: [{level:0,difficulty:"初阶",scenario:"场景：你想用公共AI分�
 strategy: [{level:0,difficulty:"初阶",scenario:"场景：CEO问：AI对HR最大的改变是什么？",q:"最佳回答？",opts:["A. AI让HR从「行政服务中心」升级为「人才战略中心」：(1)招聘-从筛简历到AI精准匹配 (2)培训-从统一课表到AI个性化学习路径 (3)绩效-从年度考核到AI持续反馈 (4)核心转变-HR的时间从70%行政→70%战略","B. AI可以替代基础HR工作","C. AI让招聘更快","D. AI主要在培训领域有影响","E. HR不太需要AI"],scores:[4,0,0,0,0],best:0,explain:"HR的战略转变：AI解放行政劳动力，让HR真正成为人才战略的设计者和推动者。"}]
 };
 
+// ==================== EXTRA QUIZ BANK (备用题库，每维度额外2道) ====================
+// Format: { dimKey: [ {level, difficulty, scenario, q, opts, scores, best, explain}, ... ] }
+// Each extra question is merged into a pool with the main quiz; one random question is selected per level per quiz session.
+
+const MFG_PM_EXTRA = {
+  prompt:[
+    {level:0,difficulty:'初阶',scenario:'场景：你需要让AI帮你分析竞品的产品路线图（从公开发布会视频+官网更新日志中提取）。',q:'最有效的提示词策略是？',opts:['A. 设定「制造业竞品分析专家」角色→粘贴视频摘要和更新日志→要求：(1)按时间线提取产品迭代方向 (2)推断竞品的技术投入优先级 (3)识别我们的差异化机会窗口','B. 直接问AI「竞品路线图是什么」','C. 让AI搜索竞品官网','D. 自己看视频记录要点','E. 只关注最新版本的功能'],scores:[4,0,0,1,0],best:0,explain:'竞品路线图分析=时间线+投入推断+差异化机会。AI最擅长从大量文本中提取结构化的时间线信息。'},
+    {level:1,difficulty:'中阶',scenario:'场景：你负责MES系统的AI升级项目，需要和用研团队合作设计用户访谈大纲。研究对象是工厂生产调度员（对AI工具陌生）。',q:'如何用Prompt帮你高效完成访谈大纲设计？',opts:['A. 给AI背景（访谈对象+他们的日常工作流程）→要求：(1)从业务痛点角度设计开放性问题（避开技术词汇） (2)设计情境还原题（「请描述上次设备故障时你是怎么做的」） (3)设计5分钟快速原型测试环节','B. 让AI生成通用的用户访谈模板','C. 参考其他项目的访谈大纲','D. 只问「你觉得AI有用吗」','E. 直接做问卷调研替代访谈'],scores:[4,0,1,0,0],best:0,explain:'访谈大纲Prompt=对象背景+开放题设计+情境还原。访谈设备操作员关键是用他们的语言，而非技术语言。'}
+  ],
+  tools:[
+    {level:0,difficulty:'初阶',scenario:'场景：你收到一个智能排产系统的技术白皮书（英文，60页），需要在明天的评审会上发表意见。',q:'如何最快掌握核心要点？',opts:['A. 上传PDF到Claude→要求：(1)提取3页以内的核心摘要 (2)识别算法核心原理（用简单比喻解释）(3)标注制造业落地的5大挑战 (4)生成5个我应该向供应商提的尖锐问题','B. 连夜通读60页英文','C. 找翻译工具逐页翻译','D. 只看摘要和结论部分','E. 让技术团队提前帮我看'],scores:[4,0,0,2,0],best:0,explain:'技术文档快读=AI提炼+专项问题。重要的是让AI生成「尖锐问题」，这能快速暴露方案的弱点。'},
+    {level:1,difficulty:'中阶',scenario:'场景：你要组织一个跨部门的AI立项评审会。参会者：产品、研发、工厂IT、生产运营、财务。你需要用AI工具帮你准备会议材料和主持思路。',q:'最优的AI工具应用方案？',opts:['A. 三步准备：(1)Claude生成会议议程+每个角色的关注点画像 (2)根据各方关注点准备针对性答疑材料 (3)AI模拟会议中可能出现的反对意见并准备应对策略','B. 准备通用PPT然后讲','C. 只和技术团队确认就行','D. 让助理发邀请然后临场发挥','E. 邮件提前收集各方意见再开会'],scores:[4,0,0,0,1],best:0,explain:'跨部门会议准备=角色画像+针对性材料+预判反对意见。AI让你在开会前就「赢了」。'}
+  ],
+  data:[
+    {level:0,difficulty:'初阶',scenario:'场景：你刚接手一个新产品线，需要快速了解该产品过去12个月的市场表现（销售数据、客户满意度、投诉率、竞品对比）。',q:'如何用AI加速这个新人上手过程？',opts:['A. AI辅助四步「数据地图」构建：(1)上传12个月历史数据→AI生成整体趋势摘要 (2)AI识别关键转折点和异常月份 (3)AI生成「必须了解的5件事」结构化清单 (4)AI为每个问题生成深挖分析建议','B. 逐个找相关同事问','C. 从头读所有历史报告','D. 只关注最近3个月','E. 先做用户调研再说'],scores:[4,0,0,0,1],best:0,explain:'新人数据上手=AI加速认知建立。「必须了解的5件事」比「所有数据一起看」效率高10倍。'},
+    {level:1,difficulty:'中阶',scenario:'场景：制造业客户提出一个需求：希望在MES系统加入「AI预测性维护」功能，可以提前7天预警设备故障。你需要评估这个需求的可行性和优先级。',q:'如何用AI辅助做需求可行性分析？',opts:["A. 五维评估：(1)AI检索「预测性维护」的技术方案成熟度 (2)AI分析所需数据（传感器类型/采集频率/历史数量）是否可获取 (3)AI对比「7天预警」在行业内的准确率基准 (4)AI估算实施成本和ROI (5)输出「可行性矩阵+优先级建议」",'B. 问研发团队能不能做','C. 参考竞品是否有这个功能','D. 问客户愿意付多少钱','E. 先做一个Demo验证可行性'],scores:[4,0,1,0,1],best:0,explain:'需求可行性=技术成熟度+数据可用性+精度基准+ROI估算。AI让PM快速建立行业知识，不再依赖「问研发」。'}
+  ],
+  content:[
+    {level:0,difficulty:'初阶',scenario:'场景：你要写一个面向工厂生产总监的AI产品Demo展示脚本（5分钟）。对方不懂AI，只关心能解决什么问题。',q:'如何用AI写出有说服力的演示脚本？',opts:["A. 给AI受众画像（生产总监，关注：设备利用率/人工成本/交货期）→要求：(1)用工厂日常痛点开场 (2)每个功能点配一个真实数字（如'减少50%的计划会议时间'） (3)设计一个「让他亲手操作」的互动环节 (4)以「如果下周就能上线...」结尾引发紧迫感",'B. 按功能点逐个介绍','C. 展示一堆技术指标','D. 让技术同事演示','E. 用通用的AI产品演讲模板'],scores:[4,0,0,1,0],best:0,explain:'Demo脚本=受众痛点+量化数字+互动设计+紧迫感。生产总监最怕「看不到与自己有关」的演示。'},
+    {level:1,difficulty:'中阶',scenario:'场景：你需要为产品迭代V2.0撰写一份「用户价值声明」（面向现有客户），解释为什么新版本值得升级。同时要避免技术术语。',q:'AI辅助创作的最优方式？',opts:["A. 双视角创作：(1)给AI「V2.0功能清单+技术改进点」→AI转译为「用户语言的价值描述」 (2)用AI模拟「生产总监视角」来审读并找出不清楚的表述 (3)AI生成3个不同语气版本（理性分析型/情感共鸣型/行动召唤型） (4)选取最佳版本人工优化",'B. 按功能点写用户价值','C. 让市场团队来写','D. 先找现有用户访谈再写','E. 直接说「全面升级更好用」'],scores:[4,0,1,0,0],best:0,explain:'用户价值声明=功能→价值转译+双视角审读+多风格版本。「双视角」是关键：先写，再模拟客户来挑毛病。'}
+  ],
+  dev:[
+    {level:0,difficulty:'初阶',scenario:'场景：研发团队给你发来一份「智能质检系统」的技术方案，包含卷积神经网络架构、训练数据集要求和GPU算力需求。你需要评估是否批准立项。',q:'作为不懂深度学习的PM，如何用AI辅助做判断？',opts:["A. AI辅助三步评估：(1)让AI用「简单比喻」解释卷积神经网络在质检中的工作原理 (2)AI分析数据集要求的可行性（现有标注数据量是否够） (3)AI对比「CV质检」vs「传统机器视觉」的成本和准确率区别，形成判断依据",'B. 让技术同事解释给我听','C. 批准：既然研发说可行就做','D. 先问客户是否接受AI质检','E. 要求研发做一个POC'],scores:[4,0,0,0,2],best:0,explain:'非技术PM评估技术方案=AI科普+可行性分析+方案对比。不懂技术不代表不能做好判断。'},
+    {level:1,difficulty:'中阶',scenario:'场景：你要推动公司建立「AI辅助产品开发」的技术标准。包括：AI工具选型原则、API使用规范、AI生成代码的review流程。',q:'如何用AI帮你起草这套标准？',opts:["A. 三层标准体系：(1)AI研究行业领先公司的AI开发规范最佳实践 (2)AI根据公司技术栈定制工具选型原则 (3)AI生成规范文档草稿，人工审核添加公司特定场景 (4)用AI做规范审查：找出遗漏场景和逻辑矛盾",'B. 让研发自己定规范','C. 购买一套外部合规工具','D. 先试用3个月再总结','E. 抄一份开源的AI规范模板'],scores:[4,0,0,1,0],best:0,explain:'技术标准制定=行业最佳实践+定制化+文档生成+自我审查。让AI起草再让AI挑毛病，是最高效的文档迭代方式。'}
+  ],
+  workflow:[
+    {level:0,difficulty:'初阶',scenario:'场景：你负责一个制造业AI产品的季度规划。每季度需要整理：用户反馈汇总、Bug优先级排序、需求积压分析、下季度目标设定。目前耗时3天。',q:'如何用AI压缩到1天内完成？',opts:["A. AI四步加速：(1)AI批量分析客服工单和用户反馈→提取高频痛点 (2)AI按「影响用户数×严重程度」自动评分Bug (3)AI分析需求积压→按「战略对齐度×开发成本」生成优先级矩阵 (4)AI生成季度规划初稿→你在2小时内审核调整",'B. 逐条看完所有反馈','C. 开评审会让大家讨论优先级','D. 只看最近一个月的反馈','E. 延长季度规划的时间'],scores:[4,0,1,0,0],best:0,explain:'季度规划AI化=批量分析+自动评分+矩阵优先级+初稿生成。AI把3天的整理工作压缩到半天，你花半天做决策。'},
+    {level:1,difficulty:'中阶',scenario:'场景：你的团队需要在2周内完成一个新功能的0→1：需求确认→技术方案→UI设计→研发→测试→发布。',q:'如何用AI工具链贯通整个流程？',opts:["A. AI全链路协同：(1)需求阶段-AI辅助用户故事编写和验收标准设计 (2)技术阶段-AI辅助架构评审和接口文档生成 (3)设计阶段-AI生成UI规范和可用性检查清单 (4)测试阶段-AI生成测试用例覆盖边界条件 (5)每阶段AI生成交接文档，减少信息损耗",'B. 按传统流程快速推进','C. 减少设计阶段节省时间','D. 让研发直接开始写代码','E. 先发布再测试'],scores:[4,0,0,0,0],best:0,explain:'0→1全链AI化=每阶段嵌入+减少信息损耗。AI最大的价值不是代替人，而是保证每个交接点信息完整。'}
+  ],
+  security:[
+    {level:0,difficulty:'初阶',scenario:'场景：你要把公司内部的「产线异常报告」（含生产KPI、设备序列号、不良品照片）上传到AI工具做分析。',q:'正确的做法是什么？',opts:["A. 三步安全处理：(1)确认是否属于公司敏感数据（生产KPI和设备信息通常属于商业机密） (2)使用企业内部部署的AI或企业版API（数据不用于模型训练） (3)不良品照片需确认是否含有可追溯到特定人员或地点的信息，如有则模糊处理",'B. 直接上传到公共ChatGPT，对方有保密义务','C. 把数据发给咨询公司让他们用AI分析','D. 只上传不含数字的文字描述部分','E. 打印出来手动分析避免数字化风险'],scores:[4,0,0,2,0],best:0,explain:'制造业数据安全=商业机密识别+企业版AI+图片脱敏。生产KPI和异常记录在竞争对手眼中有极高价值。'},
+    {level:1,difficulty:'中阶',scenario:'场景：你在推动公司把AI嵌入供应链管理系统。供应商提供了一个「SaaS版AI供应链优化工具」，需要接入你们的ERP数据（含采购订单、库存、供应商评分）。',q:'如何评估这个SaaS工具的数据安全风险？',opts:["A. 五点安全评估：(1)数据存储位置（境内/境外，是否合规） (2)数据加密标准（传输+静止状态） (3)数据访问权限（供应商员工是否能看你的数据） (4)数据删除权利（合同终止后的数据处理方式） (5)合规认证（ISO27001/SOC2等）",'B. 看价格合理就用','C. 让IT部门审查一下就行','D. 签NDA然后接入','E. 要求供应商提供安全承诺函'],scores:[4,0,0,0,1],best:0,explain:'SaaS安全评估=存储+加密+访问+删除+认证五点。供应链数据泄露的代价远超这个评估的时间成本。'}
+  ],
+  strategy:[
+    {level:0,difficulty:'初阶',scenario:'场景：公司高层问你：「我们的制造业AI产品，未来3年最大的市场机会在哪里？」',q:'如何用AI快速准备出有深度的战略分析？',opts:["A. AI辅助四步：(1)Perplexity检索「工业AI市场」2024-2026年市场预测报告 (2)Claude分析主要竞争对手的战略方向 (3)AI识别「有技术突破但市场渗透率低」的蓝海机会 (4)结合公司现有优势，AI生成「差异化战略机会图谱」，人工判断取舍",'B. 分析自己的现有优势','C. 看行业研究报告的结论部分','D. 问销售反馈客户需求','E. 跟随头部厂商的战略方向'],scores:[4,0,1,0,0],best:0,explain:'市场机会分析=市场数据+竞对分析+蓝海识别+差异化匹配。AI让你在2小时内建立行业视野。'},
+    {level:1,difficulty:'中阶',scenario:'场景：你们公司要做「AI出海」战略，把制造业AI产品卖到东南亚。你需要评估泰国、越南、印尼三个市场。',q:'如何用AI加速这个市场评估工作？',opts:["A. AI多维度评估：(1)AI搜索三国制造业数字化政策和补贴 (2)AI分析三国主要竞争对手（本地+跨国） (3)AI评估每个市场的技术接受度和IT基础设施 (4)AI生成市场优先级建议+本地化改造清单，每个分析环节补充人工判断",'B. 只看GDP和制造业规模排序','C. 先找当地代理商问','D. 先在一个国家试点','E. 参考其他软件公司的出海经验'],scores:[4,0,0,1,0],best:0,explain:'出海市场评估=政策+竞对+技术接受度+优先级。AI加速信息收集，但本地市场的nuance仍需人工判断。'}
+  ]
+};
+
+// Extra quiz for non-PM roles (generic AI skills)
+const DEV_QUIZ_EXTRA = {
+  prompt:[
+    {level:0,difficulty:'初阶',scenario:'场景：你需要用AI帮你写一个复杂的正则表达式，用于解析日志中的错误信息（含时间戳、错误码、堆栈信息）。',q:'最高效的Prompt策略是？',opts:["A. 给AI示例日志（含真实数据）→描述要提取的字段→要求：(1)先解释正则表达式含义 (2)提供正则字符串 (3)提供单元测试用例 (4)给出可能的边界情况",'B. 让AI直接给我一个正则表达式','C. 问AI「怎么写解析日志的正则」','D. 自己逐步尝试','E. 用split方法手动解析'],scores:[4,0,0,0,0],best:0,explain:'正则Prompt=示例数据+字段说明+含义解释+测试用例。让AI给出「可理解+可维护」的正则，而不是一串看不懂的字符。'},
+    {level:1,difficulty:'中阶',scenario:'场景：你要设计一个分布式缓存失效策略，涉及：缓存穿透、缓存雪崩、缓存击穿三种场景的应对方案。',q:'如何让AI输出最全面的解决方案？',opts:["A. 三场景Prompt链：(1)分别描述每种场景的业务背景→AI分析每种的根因 (2)对每种场景，让AI对比2-3个解决方案的优缺点和适用条件 (3)给出你的系统现状→AI推荐最适合的组合方案+实现代码",'B. 问AI「分布式缓存怎么做」','C. 直接让AI给代码','D. 只关注缓存雪崩','E. 用布隆过滤器解决所有问题'],scores:[4,0,0,0,0],best:0,explain:'技术方案设计=场景拆解+方案对比+系统适配。「分别分析每个场景」比「一次性问所有问题」的回答质量高得多。'}
+  ],
+  tools:[
+    {level:0,difficulty:'初阶',scenario:'场景：你需要为一个复杂函数写文档注释。这个函数有5个参数，有复杂的业务逻辑，已被多个模块依赖。',q:'最佳AI辅助方案？',opts:["A. 把函数代码粘贴给AI→设定「资深技术文档工程师」角色→要求：(1)理解函数的业务意图（不只是技术逻辑） (2)按JSDoc/Google风格生成注释 (3)重点说明每个参数的约束条件和边界值 (4)给出3个调用示例（正常/边界/异常）",'B. 让AI自动添加注释','C. 只注释最复杂的那几行','D. 写注释说「这个函数很复杂」','E. 添加inline注释解释每行'],scores:[4,0,0,0,0],best:0,explain:'函数文档=业务意图+参数约束+调用示例。最差的注释是「这个变量是个变量」，最好的注释让下一个人不需要再来问你。'}
+  ]
+};
+
+const OPS_QUIZ_EXTRA = {
+  prompt:[
+    {level:0,difficulty:'初阶',scenario:'场景：你要分析某个App功能的用户留存曲线：次日留存38%，7日留存22%，30日留存12%。需要找出流失根因并提出优化方案。',q:'如何用Prompt让AI做出深度分析？',opts:["A. 给AI用户画像+功能描述+留存数据→要求：(1)对比行业基准（该类功能的留存健康范围） (2)推断主要流失节点（次日流失的用户最可能卡在哪个步骤） (3)列出3个最高优先级的优化假设 (4)为每个假设设计可验证的AB测试方案",'B. 问AI「怎么提升留存率」','C. 只看7日留存','D. 做用户调研问为什么不用','E. 增加推送提升活跃'],scores:[4,0,0,1,0],best:0,explain:'留存分析Prompt=行业对标+节点推断+优化假设+可验证方案。留存不只是数字，要找到用户「放弃」的那一刻。'}
+  ],
+  tools:[
+    {level:0,difficulty:'初阶',scenario:'场景：运营活动结束后需要做复盘报告。你有：活动期间的日活、GMV、新增用户、渠道ROI数据，以及用户反馈的截图。',q:'AI工具最优组合方案是？',opts:["A. 两工具协同：(1)上传数据→AI生成结构化复盘报告（背景→目标→结果→分析→反思→下次改进） (2)AI分析用户反馈截图→提取情感词和核心诉求→补充定性分析，人工审核并添加个人判断",'B. 自己写Excel报告','C. 只报告GMV数字','D. 让数据分析师出报告','E. 口头汇报不用写报告'],scores:[4,0,0,1,0],best:0,explain:'复盘报告=结构化数据分析+定性反馈提取。AI能同时处理定量和定性数据，让复盘真正有学习价值。'}
+  ]
+};
+
+const SALES_QUIZ_EXTRA = {
+  prompt:[
+    {level:0,difficulty:'初阶',scenario:'场景：你要给一个潜在大客户发第一封开发信（Cold Email）。客户公司最近完成B轮融资，核心业务是供应链数字化。',q:'如何用AI写出打开率和回复率都高的开发信？',opts:["A. 给AI客户背景（行业/融资轮次/业务方向）→要求：(1)开头提及客户最近的动态（融资/新产品）体现你做过功课 (2)用一句话说清楚你的价值主张 (3)控制在150字内 (4)结尾提一个低门槛的行动（15分钟电话vs提案vs合作）→生成3个版本选择",'B. 用通用模板发','C. 介绍公司产品功能','D. 说「合作共赢」','E. 先加微信再发信'],scores:[4,0,0,0,1],best:0,explain:'开发信=客户研究+一句话价值+低门槛行动。AI让你的开发信从「垃圾邮件」变成「值得回复」。'}
+  ],
+  tools:[
+    {level:0,difficulty:'初阶',scenario:'场景：你需要在1小时内了解一个陌生行业（化工）的采购决策特点，为明天的拜访做准备。',q:'AI工具最快上手方案？',opts:["A. AI两步快速学习：(1)Perplexity搜索「化工行业采购决策特点」→提取：决策链/核心关注点/合规要求/行业术语 (2)Claude生成「化工行业销售话术禁区」清单（避免说错话）→生成拜访对话预演脚本",'B. 网上搜索化工行业资料','C. 找有化工经验的同事','D. 到现场再临机应变','E. 只准备产品介绍'],scores:[4,0,0,1,0],best:0,explain:'陌生行业快速学习=搜索+提炼+话术预演。AI让你在1小时内变成「懂你行业」的销售，而非「推产品」的销售。'}
+  ]
+};
+
+const HR_QUIZ_EXTRA = {
+  prompt:[
+    {level:0,difficulty:'初阶',scenario:'场景：你需要为公司举办的「AI赋能人才发展」工作坊设计一份全天的学习方案（8小时）。参与者：HR团队（20人，AI小白）。',q:'如何用Prompt让AI帮你设计这个工作坊？',opts:["A. 给AI受众画像（HR，AI零基础，最关心招聘和培训效率）→要求：(1)8小时分模块安排（理论+动手+反思） (2)每个模块设计可当天落地的实践任务 (3)识别「AI小白」最容易卡住的认知障碍 (4)设计3个让参与者立刻感受到AI价值的「啊哈时刻」",'B. 用通用AI培训课程模板','C. 找外部讲师来讲','D. 只讲ChatGPT怎么用','E. 发一份AI工具推荐清单'],scores:[4,0,0,0,0],best:0,explain:'工作坊设计Prompt=受众画像+模块安排+实践任务+啊哈时刻。设计给AI小白的课程关键：让他们在第一天就感受到AI改变工作效率的真实感。'}
+  ],
+  tools:[
+    {level:0,difficulty:'初阶',scenario:'场景：你需要对20位参加管培项目的候选人进行「AI能力初评」。你只有1小时的面试时间。',q:'如何用AI工具快速设计有效的能力评估方案？',opts:["A. AI辅助三步设计：(1)让AI生成「管培生AI能力快速评估量表」（5个核心维度，每维度2道行为面试题） (2)AI为每道题设计3级评分标准（初级/中级/高级行为锚定） (3)AI生成快速评分工具（Excel评分表），确保20人评估数据可汇总分析",'B. 凭直觉判断候选人的AI能力','C. 只问「你会用ChatGPT吗」','D. 让候选人自评','E. 只看候选人的项目经历'],scores:[4,0,0,0,0],best:0,explain:'快速能力评估=量表设计+评分标准+数据化工具。1小时能有效评估20人的关键是：事先设计好结构化评估工具。'}
+  ]
+};
+
+// Merge extra questions into Format B pools
+function buildQuizWithPools(baseQuiz, extraQuiz) {
+  if (!extraQuiz) return baseQuiz; // no extras, use as-is (Format A)
+  const result = {};
+  for (const dim of Object.keys(baseQuiz)) {
+    const base = baseQuiz[dim]; // Format A: [q0, q1, q2]
+    const extras = extraQuiz[dim] || []; // extra questions
+    // Group extras by level
+    const extraByLevel = {};
+    for (const q of extras) { (extraByLevel[q.level] = extraByLevel[q.level]||[]).push(q); }
+    // Build pools: [[q0,q0extra?], [q1,q1extra?], [q2]]
+    result[dim] = base.map((q, idx) => {
+      const pool = [q, ...(extraByLevel[q.level]||[])];
+      return pool;
+    });
+  }
+  return result;
+}
+
 // ==================== ADAPTIVE QUIZ ENGINE ====================
 const DIM_ORDER = ['prompt','tools','data','content','dev','workflow','security','strategy'];
 
@@ -569,7 +665,24 @@ function startAdaptiveQuiz() {
   const dimOrder = DIM_ORDER;
   // Randomize dimension order for "every quiz is different"
   S._quizDims = [...dimOrder].sort(() => Math.random() - 0.5);
-  S._quizByDim = getQuizData();
+  // Build per-dim question arrays with random selection from each level pool
+  const rawQuizData = getQuizData();
+  const resolved = {};
+  for (const dim of dimOrder) {
+    const dimData = rawQuizData[dim];
+    if (!dimData) { resolved[dim] = []; continue; }
+    // Support two formats:
+    // Format A (legacy): [q_lvl0, q_lvl1, q_lvl2]  — plain array of question objects
+    // Format B (pool):   [[q_lvl0a, q_lvl0b], [q_lvl1a, q_lvl1b], [q_lvl2a]]  — array of pools
+    if (Array.isArray(dimData[0])) {
+      // Format B: pick one random question from each level pool
+      resolved[dim] = dimData.map(pool => pool[Math.floor(Math.random() * pool.length)]);
+    } else {
+      // Format A: use as-is
+      resolved[dim] = dimData;
+    }
+  }
+  S._quizByDim = resolved;
   S._quizCurrentLevel = {};
   dimOrder.forEach(d => { S._quizCurrentLevel[d] = 0; });
   S.quizIdx = 0;
@@ -1413,12 +1526,19 @@ function getSlides() { return getCourse().slides; }
 
 function getQuizData() {
   // PM: industry-specific quiz. Other roles: role-specific quiz.
+  // Returns quiz with Format B pools where extra questions exist
   if (S.role === 'pm') {
     const map = { mfg: MFG_PM_QUIZ, finance: FIN_PM_QUIZ, auto: AUTO_PM_QUIZ, cpg: CPG_PM_QUIZ };
-    return map[S.industry] || MFG_PM_QUIZ;
+    const base = map[S.industry] || MFG_PM_QUIZ;
+    // Only MFG PM has extra bank for now; others use Format A (compatible with engine)
+    const extra = S.industry === 'mfg' ? MFG_PM_EXTRA : null;
+    return buildQuizWithPools(base, extra);
   }
   const roleMap = { dev: DEV_QUIZ, ops: OPS_QUIZ, sales: SALES_QUIZ, hr: HR_QUIZ };
-  return roleMap[S.role] || MFG_PM_QUIZ;
+  const base = roleMap[S.role] || MFG_PM_QUIZ;
+  const extraMap = { dev: DEV_QUIZ_EXTRA, ops: OPS_QUIZ_EXTRA, sales: SALES_QUIZ_EXTRA, hr: HR_QUIZ_EXTRA };
+  const extra = extraMap[S.role] || null;
+  return buildQuizWithPools(base, extra);
 }
 
 function getWeights() {
