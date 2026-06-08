@@ -762,6 +762,8 @@ function adaptLevelForCurrentDim() {
 function finishAdaptiveQuiz() {
   const result = calculateAdaptiveScores();
   S._quizResult = result;
+  S._hasSavedResult = true;
+  saveResultToStorage(); // Persist to localStorage
   S.view = 'results';
   render();
   setTimeout(initRadarChart, 150);
@@ -1619,6 +1621,41 @@ function renderIndustry() {
   const curInd = IND_INFO[S.industry] || IND_INFO.mfg;
   const curRole = ROLE_INFO[S.role] || ROLE_INFO.pm;
   let h = `<div class="header slide-up"><h1>${curInd.icon} ${curInd.name} × ${curRole.icon} ${curRole.name}</h1><p>AI能力测评 & 实战课程 Demo</p></div>`;
+
+  // ===== Resume banner (if previous result exists) =====
+  if (S._hasSavedResult && S._quizResult) {
+    const r = S._quizResult;
+    const gColor = r.overall >= 70 ? 'var(--green)' : r.overall >= 40 ? 'var(--amber)' : 'var(--red)';
+    const levelLabel = r.overall>=80?'AI原住民':r.overall>=60?'AI进阶者':r.overall>=40?'AI探索者':'AI入门者';
+    const savedInd = IND_INFO[S.industry] || IND_INFO.mfg;
+    const savedRole = ROLE_INFO[S.role] || ROLE_INFO.pm;
+    const timeStr = (() => {
+      const saved = loadResultFromStorage();
+      if (!saved) return '上次';
+      const diff = Date.now() - saved.ts;
+      if (diff < 3600000) return Math.round(diff/60000) + '分钟前';
+      if (diff < 86400000) return Math.round(diff/3600000) + '小时前';
+      return Math.round(diff/86400000) + '天前';
+    })();
+    h += `<div class="card slide-up" style="border:1.5px solid var(--primary);background:linear-gradient(135deg,rgba(99,102,241,0.06),rgba(16,185,129,0.04));">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="font-size:13px;font-weight:600;color:var(--primary);">📌 继续上次的测评</div>
+        <div style="font-size:11px;color:var(--text2);">${timeStr}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+        <div style="font-size:28px;font-weight:700;color:${gColor};">${r.overall}<span style="font-size:14px;">分</span></div>
+        <div>
+          <div style="font-size:13px;font-weight:600;">${savedInd.name} × ${savedRole.name}</div>
+          <div style="font-size:12px;color:var(--text2);">${levelLabel} · ${timeStr}完成</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-primary" style="flex:1;" onclick="S.view='results'; render(); setTimeout(initRadarChart,150);">📊 查看上次结果</button>
+        <button class="btn btn-outline" style="flex:1;" onclick="clearStoredResult();">🔄 重新测评</button>
+      </div>
+    </div>`;
+  }
+
   // Industry selection
   h += `<div class="card slide-up"><h3 style="margin-bottom:12px;">选择行业</h3>`;
   h += `<div class="industry-grid">`;
@@ -2142,13 +2179,57 @@ function initRadarChart() {
   }
 }
 
-// ==================== INIT ====================
-// Pre-select manufacturing + PM for demo
-S.industry = 'mfg';
-S.role = 'pm';
+// ==================== PERSISTENCE ====================
+const STORAGE_KEY = 'aidax_last_result_v2';
 
+function saveResultToStorage() {
+  if (!S._quizResult) return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      ts: Date.now(),
+      industry: S.industry,
+      role: S.role,
+      result: S._quizResult
+    }));
+  } catch(e) {}
+}
+
+function loadResultFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const saved = JSON.parse(raw);
+    // Expire after 30 days
+    if (Date.now() - saved.ts > 30 * 24 * 3600 * 1000) { localStorage.removeItem(STORAGE_KEY); return null; }
+    return saved;
+  } catch(e) { return null; }
+}
+
+function clearStoredResult() {
+  localStorage.removeItem(STORAGE_KEY);
+  S._quizResult = null;
+  S.view = 'industry';
+  render();
+}
+
+// ==================== INIT ====================
 // Load voices early
 if (window.speechSynthesis) speechSynthesis.getVoices();
+
+// Try to restore last session
+const _saved = loadResultFromStorage();
+if (_saved) {
+  S.industry = _saved.industry || 'mfg';
+  S.role = _saved.role || 'pm';
+  S._quizResult = _saved.result;
+  // Show welcome back screen by staying on industry view, but add resume banner
+  S.view = 'industry';
+  S._hasSavedResult = true;
+} else {
+  S.industry = 'mfg';
+  S.role = 'pm';
+  S._hasSavedResult = false;
+}
 
 render();
 </script>
