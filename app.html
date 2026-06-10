@@ -305,6 +305,51 @@
   .voice-progress { flex:1; height:4px; background:var(--border); border-radius:2px; overflow:hidden; }
   .voice-progress-fill { height:100%; background:var(--blue); border-radius:2px; transition:width .3s; }
 
+  /* ===== Chapter markers (P2.2) ===== */
+  .chapter-strip { display:flex; gap:2px; padding:8px 12px; background:rgba(0,0,0,0.85); overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .chapter-dot { flex-shrink:0; padding:5px 12px; border-radius:14px; font-size:11px; font-weight:500; cursor:pointer; transition:all .2s; white-space:nowrap; color:rgba(255,255,255,0.5); background:rgba(255,255,255,0.06); border:1px solid transparent; }
+  .chapter-dot:hover { color:rgba(255,255,255,0.8); background:rgba(255,255,255,0.12); }
+  .chapter-dot.active { color:#fff; background:var(--blue); border-color:var(--blue); }
+  .chapter-dot.current { color:#fff; background:rgba(99,102,241,0.5); border-color:rgba(99,102,241,0.4); }
+
+  /* ===== Transcript panel (P2.2) ===== */
+  .transcript-toggle { display:inline-flex; align-items:center; gap:4px; padding:6px 12px; border-radius:20px; border:1px solid var(--border); background:var(--card); color:var(--text2); font-size:12px; cursor:pointer; margin:8px 0; transition:all .15s; }
+  .transcript-toggle:hover { border-color:var(--blue); color:var(--blue); }
+  .transcript-panel { background:var(--bg); border-radius:var(--radius-sm); padding:16px; margin-bottom:12px; max-height:300px; overflow-y:auto; border:1px solid var(--border); display:none; }
+  .transcript-panel.show { display:block; }
+  .transcript-entry { padding:10px 12px; border-radius:8px; margin-bottom:8px; cursor:pointer; transition:all .15s; border-left:3px solid transparent; }
+  .transcript-entry:hover { background:var(--card-hover); }
+  .transcript-entry.active { background:var(--blue-bg); border-left-color:var(--blue); }
+  .transcript-entry .ts-num { display:inline-block; width:20px; height:20px; border-radius:50%; background:var(--blue); color:#fff; font-size:10px; font-weight:700; text-align:center; line-height:20px; margin-right:8px; }
+  .transcript-entry .ts-title { font-size:13px; font-weight:600; color:var(--text); }
+  .transcript-entry .ts-text { font-size:12px; color:var(--text2); margin-top:4px; line-height:1.5; }
+
+  /* ===== In-Course Quiz Popup ===== */
+  .quiz-popup-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; z-index:100; animation:quizFadeIn .3s ease; }
+  @keyframes quizFadeIn { from { opacity:0; } to { opacity:1; } }
+  .quiz-popup-card { background:#fff; border-radius:16px; padding:28px 24px 20px; width:min(440px, 90%); max-height:90%; overflow-y:auto; box-shadow:0 12px 48px rgba(0,0,0,0.25); }
+  .quiz-popup-card .qp-badge { display:inline-block; padding:3px 12px; border-radius:12px; font-size:11px; font-weight:700; letter-spacing:.03em; margin-bottom:12px; background:var(--blue-bg); color:var(--blue); }
+  .quiz-popup-card .qp-question { font-size:15px; font-weight:700; color:var(--text); line-height:1.6; margin-bottom:16px; }
+  .quiz-popup-card .qp-option { display:block; width:100%; text-align:left; padding:12px 16px; border:2px solid var(--border); border-radius:10px; background:var(--card); cursor:pointer; font-size:14px; color:var(--text); transition:all .15s; margin-bottom:8px; }
+  .quiz-popup-card .qp-option:hover { border-color:var(--blue); background:var(--blue-bg); }
+  .quiz-popup-card .qp-option.selected-correct { border-color:var(--green); background:var(--green-bg); color:var(--green); }
+  .quiz-popup-card .qp-option.selected-wrong { border-color:var(--red); background:#fef2f2; color:var(--red); }
+  .quiz-popup-card .qp-option.reveal-correct { border-color:var(--green); background:var(--green-bg); }
+  .quiz-popup-card .qp-option:disabled { cursor:default; opacity:0.6; }
+  .quiz-popup-card .qp-option:disabled:hover { border-color:var(--border); background:var(--card); }
+  .quiz-popup-card .qp-option:disabled.selected-correct:hover, .quiz-popup-card .qp-option:disabled.selected-wrong:hover { border-color:inherit; background:inherit; }
+  .quiz-popup-card .qp-feedback { padding:12px 14px; border-radius:10px; margin-top:12px; font-size:13px; line-height:1.7; }
+  .quiz-popup-card .qp-feedback.correct { background:var(--green-bg); color:var(--green); }
+  .quiz-popup-card .qp-feedback.wrong { background:#fef2f2; color:var(--red); }
+  .quiz-popup-card .qp-explain { font-size:12px; color:var(--text2); margin-top:8px; line-height:1.6; }
+  .quiz-popup-card .qp-btn { display:block; width:100%; padding:10px; border-radius:8px; border:none; background:var(--blue); color:#fff; font-size:14px; font-weight:600; cursor:pointer; margin-top:12px; transition:all .15s; }
+  .quiz-popup-card .qp-btn:hover { background:#4f46e5; }
+  .quiz-popup-card .qp-btn:disabled { background:var(--border); cursor:not-allowed; }
+  .quiz-popup-card .qp-score-row { display:flex; gap:8px; margin-top:10px; }
+  .quiz-popup-card .qp-score-badge { flex:1; text-align:center; padding:8px 4px; border-radius:8px; font-size:12px; font-weight:600; }
+  .quiz-popup-card .qp-score-badge.good { background:var(--green-bg); color:var(--green); }
+  .quiz-popup-card .qp-score-badge.bad { background:#fef2f2; color:var(--red); }
+
   /* ===== Quiz type tabs ===== */
   .quiz-type-badge { display:inline-flex; align-items:center; gap:4px; padding:2px 10px; border-radius:12px; font-size:11px; font-weight:600; }
   .quiz-type-choice { background:var(--blue-bg); color:var(--blue); }
@@ -4485,25 +4530,38 @@ function getCourseContent(courseId) {
       steps:[{t:'第一步：建立清晰的上下文',d:'在开始编码前，用注释明确描述需求、输入输出格式、边界条件、性能要求。例如："// 需要实现一个用户注册接口，POST /api/register，接收username（3-20位字母数字）、password（8位以上，含大小写和数字）、email。返回JSON包含userId和token。需校验参数，密码需BCrypt加密存储。"'},{t:'第二步：分模块迭代生成',d:'不要试图让AI一次生成整个项目。采用"自顶向下"策略：先生成类型定义和接口→再生成核心业务逻辑→然后生成错误处理→最后生成测试。每步都在前一步基础上迭代。'},{t:'第三步：人工审查与定向优化',d:'AI生成的代码不是终点。检查：逻辑是否正确（特别是边界条件）、安全是否到位（输入验证、权限控制）、性能是否合理（N+1查询、内存泄漏）。发现问题后，用精准的提示词让AI针对性修复，而不是手动改代码——这样下次AI能生成更好的代码。'},{t:'第四步：沉淀团队提示词库',d:'将高频场景的优质提示词整理成团队知识库：API生成模板、数据库迁移模板、测试生成模板。统一团队的AI使用规范，提升整体效率。」'}],
       cases:[{s:'场景：新人接到一个"实现文件上传功能"的任务，第一次用AI',sol:'好的做法：先整理需求（支持哪些文件类型、最大大小、存储位置、是否需要缩略图、安全性要求），将这些信息写成详细的注释块，再让AI生成代码。结果：一次生成的代码就达到了80%完成度，剩下20%是业务特有的安全策略调整。'},{s:'场景：重构一个历史遗留的订单处理模块',sol:'策略：先让AI分析现有代码，生成重构方案（不直接改代码），人工确认方案后，再逐步让AI执行重构。每步review后继续。这样避免了AI不理解业务逻辑就乱改的风险。'}],
       tools:[{n:'GitHub Copilot',d:'IDE内置，代码补全和对话最强，支持VS Code/JetBrains'},{n:'Cursor',d:'AI-first编辑器，内置Chat和Composer，适合项目级开发'},{n:'Claude Code/Aider',d:'命令行AI编程，适合重构和批量修改'},{n:'Windsurf',d:'AI原生IDE，Context-aware代码生成'}],
-      tips:['始终添加清晰的需求注释，AI产出的质量与输入质量正相关','分而治之：大需求拆小模块，逐个攻破','养成"先看方案再改代码"的习惯，不要盲目信任AI输出','团队应统一AI工具和提示词规范，形成协作标准','定期回顾AI生成的代码，总结经验优化提示词策略'] },
+      tips:['始终添加清晰的需求注释，AI产出的质量与输入质量正相关','分而治之：大需求拆小模块，逐个攻破','养成"先看方案再改代码"的习惯，不要盲目信任AI输出','团队应统一AI工具和提示词规范，形成协作标准','定期回顾AI生成的代码，总结经验优化提示词策略'],
+      quizzes:[
+        {triggerSlide:2, q:'AI编程助手实现"从补全到架构思维跃迁"的关键是？',opts:['让AI一次性生成整个项目','将AI视为结对编程伙伴，先描述需求再迭代优化','只让AI补全单行代码','完全信任AI输出不做审查'],ans:1, explain:'正确做法是将AI视作结对编程伙伴——先描述需求→让AI生成方案→审查并细化→迭代优化。关键是定义问题而非手工写代码。'},
+        {triggerSlide:4, q:'使用AI生成代码后，以下哪项是必要的审查步骤？',opts:['直接部署，相信AI的代码','只检查语法是否正确','检查逻辑正确性、安全性、性能和边界条件','只看代码风格是否统一'],ans:2, explain:'AI生成的代码必须审查：逻辑是否正确（边界条件）、安全是否到位（输入验证、权限控制）、性能是否合理（N+1查询、内存泄漏）。'}
+      ] },
     dev2: { objectives:['建立AI代码审查的系统方法论','学会用AI发现代码坏味道、安全漏洞和性能瓶颈','能生成结构化的代码审查报告并指导改进'],
       concepts:[{t:'AI代码审查的价值',c:'传统代码审查依赖审查者的经验和精力，容易遗漏隐蔽问题。AI代码审查可以系统性地扫描：命名规范、代码复杂度、安全漏洞、性能模式、API误用等。它不是替代人工审查，而是作为"第一道防线"，让人工审查聚焦在架构和业务逻辑层面。'},{t:'审查维度与标准',c:'AI代码审查应覆盖六个维度：安全性（注入、鉴权、敏感信息）、性能（N+1查询、内存泄漏、循环优化）、可维护性（圈复杂度、重复代码、注释质量）、正确性（边界条件、异常处理）、规范性（代码风格、API设计）、可测试性（依赖注入、职责分离）。'}],
       steps:[{t:'第一步：建立审查上下文',d:'提交代码审查时，给AI提供完整背景：这个PR解决了什么问题、涉及哪些模块、有什么特别需要注意的地方。提供PR的描述链接或文字。'},{t:'第二步：分维度系统审查',d:'不要一次性让AI审查所有维度。分轮进行：第一轮关注安全→第二轮关注性能→第三轮关注可维护性。每轮生成独立的问题清单，按严重程度分级。'},{t:'第三步：生成可执行的修复建议',d:'对于每个发现的问题，要求AI不仅指出问题，还生成具体的修复代码。包含"问题描述→影响范围→修复方案→修改后代码"。这样开发者可以直接应用。'},{t:'第四步：沉淀审查规范',d:'基于AI发现的问题模式，总结团队的代码规范文档。将高频问题加入lint规则，形成自动化检测。逐步减少同类问题重复出现。'}],
       cases:[{s:'场景：一个电商系统PR，涉及支付接口改造',sol:'审查指令示例："这是一个支付接口改造的PR，涉及资金安全，请重点审查：1)金额计算是否安全（防止浮点精度问题）；2)支付回调的幂等性处理；3)敏感数据是否脱敏；4)SQL是否有注入风险。对每个问题给出严重级别和修复代码。"'}],
       tools:[{n:'CodeRabbit',d:'AI代码审查机器人，自动审查PR并生成评论'},{n:'SonarQube+AI',d:'静态代码分析+AI智能化建议'},{n:'GitHub Copilot Chat',d:'在IDE中直接对PR进行对话式审查'}],
-      tips:['审查不是找茬，是帮助团队写出更好的代码','永远不能让AI审查替代人工审查，尤其涉及业务逻辑','建立团队的审查维度checklist，AI和人工共用','审查报告要简明扼要，优先列出高严重性问题','定期复盘审查发现，优化开发规范'] },
+      tips:['审查不是找茬，是帮助团队写出更好的代码','永远不能让AI审查替代人工审查，尤其涉及业务逻辑','建立团队的审查维度checklist，AI和人工共用','审查报告要简明扼要，优先列出高严重性问题','定期复盘审查发现，优化开发规范'],
+      quizzes:[
+        {triggerSlide:2, q:'AI代码审查应覆盖哪些核心维度？',opts:['只需检查代码风格','安全性+性能+可维护性+正确性+规范性+可测试性','只关注安全漏洞','检查编译是否通过即可'],ans:1, explain:'AI代码审查应系统覆盖六维度：安全性（注入/鉴权）、性能（N+1/内存）、可维护性（复杂度/重复代码）、正确性（边界/异常）、规范性（风格/API设计）、可测试性。'}
+      ] },
     dev3: { objectives:['掌握AI生成测试用例的系统方法','学会用AI分析测试覆盖率并补充用例','建立AI驱动的持续测试流程'],
       concepts:[{t:'AI在测试中的角色',c:'测试是AI最能产生价值的领域之一。AI可以：1)从代码逻辑自动推导测试场景（正常、边界、异常、并发）；2)根据覆盖率报告生成缺失的测试用例；3)维护测试代码（重构导致的测试更新）。这大大减少了编写测试的枯燥感，让开发者更愿意写测试。'},{t:'测试用例的完整性',c:'一个好的测试策略应覆盖：正向用例（happy path）、边界用例（极值、空值、零值）、异常用例（错误输入、网络超时、资源不足）、并发用例（多线程安全问题）。AI可以帮助系统性地生成这些用例，确保不遗漏任何维度。'}],
       steps:[{t:'第一步：让AI分析目标代码',d:'将要测试的代码输入AI，让它分析：函数签名和参数类型、业务逻辑分支、依赖的外部服务、可能的异常情况。AI会生成一个测试方案概述。'},{t:'第二步：生成测试用例矩阵',d:'基于分析结果，让AI生成测试用例矩阵。包含：用例ID、测试场景描述、输入参数、预期输出、覆盖的代码路径。人工review这个矩阵，补充AI未想到的业务场景。'},{t:'第三步：逐个生成测试代码',d:'按用例矩阵，逐个让AI生成测试代码。每个测试用例独立管理，方便后续维护。特别注意mock/stub外部依赖。'},{t:'第四步：CI集成与持续维护',d:'将测试集成到CI流水线。当代码变更导致测试失败时，让AI分析失败原因并建议修复方案。定期让AI扫描新增代码并生成对应测试。'}],
       cases:[{s:'场景：一个支付服务有几十个分支条件，手动写测试太耗时',sol:'将支付服务的核心代码和业务文档一起提供给AI，要求它生成完整的测试用例矩阵。AI识别出7个主流程分支和23个边界条件，生成了30个测试用例。人工review后发现还需要增加退款和重复支付的并发测试，补充后覆盖率达到92%。'}],
       tools:[{n:'Jest + Copilot',d:'JavaScript/TypeScript测试，AI辅助生成'},{n:'pytest + Claude/Cursor',d:'Python测试框架，AI生成pytest用例'},{n:'Playwright + AI',d:'E2E测试，AI生成浏览器操作脚本'}],
-      tips:['先让AI生成测试方案，人工确认后再生成代码','测试数据和业务逻辑分离，提高可维护性','利用AI分析覆盖率报告，针对性地补充缺失用例','复杂业务场景必须人工review AI生成的测试','将测试生成整合到日常开发流程中，不是一次性任务'] },
+      tips:['先让AI生成测试方案，人工确认后再生成代码','测试数据和业务逻辑分离，提高可维护性','利用AI分析覆盖率报告，针对性地补充缺失用例','复杂业务场景必须人工review AI生成的测试','将测试生成整合到日常开发流程中，不是一次性任务'],
+      quizzes:[
+        {triggerSlide:2, q:'一个好的AI驱动测试策略应覆盖哪些用例类型？',opts:['只需覆盖正常路径(happy path)','正向+边界+异常+并发用例全覆盖','只测试最常用的功能','让AI随机生成测试'],ans:1, explain:'完整测试策略需覆盖：正向用例（正常场景）、边界用例（极值/空值/零值）、异常用例（错误输入/超时/资源不足）、并发用例（线程安全），AI可系统性生成这些用例。'}
+      ] },
     dev4: { objectives:['掌握提示词工程的核心方法论','学会角色设定、few-shot和链式推理等高级技巧','建立个人和团队的提示词模板库'],
       concepts:[{t:'提示词工程的本质',c:'提示词工程（Prompt Engineering）不是"跟AI好好说话"，而是结构化地表达需求。核心要素：角色设定（告诉AI它是谁）、任务描述（要做什么）、输出格式（怎么呈现）、约束条件（不能做什么）、示例（few-shot，给出范例）。好的提示词能提升AI产出质量30-50%。'},{t:'链式思维推理',c:'Chain-of-Thought（CoT）是让AI"逐步思考"的技巧。不要直接问结果，而是要求AI"先分析问题→拆解步骤→逐步推理→得出结论"。例如调试复杂bug时："分析错误日志→列出可能原因→逐个排查→给出结论和修复方案"。这种分步推理大幅提升复杂问题的准确率。'},{t:'Few-shot学习',c:'给AI提供2-5个"输入→期望输出"的范例，AI会模仿范例的风格和结构。例如，给出3个代码审查的范例（问题→严重级别→修复方案），之后AI会按照相同格式输出。Few-shot的关键是范例要覆盖不同类型的场景。'}],
       steps:[{t:'第一步：定义AI角色',d:'清晰的角色设定至关重要。不只说"你是程序员"，而是"你是一位有15年经验的资深后端架构师，精通Java和分布式系统，重视代码质量和安全性"。越具体，AI的行为越符合预期。'},{t:'第二步：结构化任务描述',d:'用分点、标题、代码块等方式组织你的请求。例如："【任务】审查以下代码【关注点】1)SQL注入 2)并发安全 3)异常处理【输出格式】问题描述+严重级别+修复代码【代码】{...}"。结构化的请求减少歧义。'},{t:'第三步：设计Few-shot示例',d:'对于团队的重复性任务，设计标准化的few-shot示例。每个示例包含：输入场景→AI的正确输出。维护3-5个高质量示例覆盖不同情况。'},{t:'第四步：链式推理调试',d:'当问题复杂时，拆成多轮对话：第一轮让AI分析问题、第二轮制定方案、第三轮执行方案、第四轮验证结果。每轮基于前一轮的产出继续深入。'}],
       cases:[{s:'场景：一段复杂代码出现难以定位的内存泄漏',sol:'使用链式推理：第1轮"分析这段代码的内存分配模式"→AI识别出3个可疑点；第2轮"对可疑点1深入分析对象生命周期"→AI发现闭包未释放；第3轮"给出修复方案"→AI提供代码修复。这种分步方式比一次提问效果好几倍。'}],
       tools:[{n:'PromptPerfect',d:'提示词自动优化工具'},{n:'Anthropic Prompt Library',d:'官方提示词模板库'},{n:'Cursor Rules/Notion',d:'个人提示词知识库管理'}],
-      tips:['角色设定是提示词最被低估的部分，花30秒写好角色','复杂问题一定用链式推理，拆成多步让AI思考','few-shot示例要精选，覆盖不同的失败和成功情况','建立团队提示词库，新人可以继承最佳实践','定期回顾哪些提示词效果好，哪些需要优化'] },
+      tips:['角色设定是提示词最被低估的部分，花30秒写好角色','复杂问题一定用链式推理，拆成多步让AI思考','few-shot示例要精选，覆盖不同的失败和成功情况','建立团队提示词库，新人可以继承最佳实践','定期回顾哪些提示词效果好，哪些需要优化'],
+      quizzes:[
+        {triggerSlide:2, q:'Chain-of-Thought (CoT) 链式推理的核心技巧是？',opts:['一次问所有问题让AI回答','要求AI逐步分析→拆解→推理→得出结论','只用简短的问题','让AI自由发挥不设约束'],ans:1, explain:'CoT关键是让AI"逐步思考"——先分析问题→拆解步骤→逐步推理→得出结论。例如调试bug："分析错误日志→列出可能原因→逐个排查→给出结论和修复方案"。分步推理大幅提升复杂问题准确率。'}
+      ] },
     dev5: { objectives:['学会用AI从代码自动生成API文档','掌握用AI撰写高质量技术方案的方法','建立团队AI文档生成规范和知识库管理'],
       concepts:[{t:'AI文档生成的价值',c:'文档是开发中被忽视最多的环节。AI改变了文档编写的成本结构：从"写文档要1小时"变成"审文档要10分钟"。关键转变：从代码生成文档→从需求生成方案→从变更生成更新记录。AI让文档可以像代码一样被持续维护。'},{t:'从代码到文档的自动化',c:'AI可以分析代码的注释、函数签名、类型定义，自动生成结构化的API文档。关键是：代码中的注释要规范、类型定义要完整、要有清晰的模块分层。投入写好注释，AI就能产出好的文档。'}],
       steps:[{t:'第一步：建立代码注释规范',d:'制定团队的注释标准：每个公共函数必须有JSDoc/docstring，包含参数说明、返回值、异常说明、使用示例。AI生成的文档质量完全取决于注释质量。'},{t:'第二步：AI生成API文档',d:'将代码模块和注释提供给AI，要求它按照OpenAPI/Swagger格式生成接口文档。包含：接口路径、请求方法、参数定义、响应格式、错误码、使用示例。'}],
@@ -4523,7 +4581,11 @@ function getCourseContent(courseId) {
       steps:[{t:'第一步：收集并清洗用户反馈',d:'从多个渠道（客服系统、App评论、NPS反馈、用户访谈录音）收集原始反馈。用AI去除无效信息（纯情绪宣泄、重复内容），保留有实质性内容的反馈。'},{t:'第二步：AI聚类分析',d:'将清洗后的反馈提供给AI，要求它按主题聚类。例如：将所有关于"登录体验"的反馈归为一类，"支付流程"的归为另一类。AI会生成聚类结果和每类的典型用户语录。'},{t:'第三步：提取核心需求',d:'对每个聚类，让AI提取"用户真正的需求是什么"。区分表面需求（"我要更快"）和底层需求（"订单确认页加载超过3秒"）。AI会生成用户故事和需求背景。'},{t:'第四步：生成PRD',d:'基于确认的需求，让AI生成结构化PRD。包含：需求背景、用户故事、功能描述、交互逻辑、验收标准、影响评估。人工review后补充业务策略和排期信息。'}],
       cases:[{s:'场景：App收到了200条关于"搜索不好用"的反馈',sol:'将200条反馈输入AI，要求聚类分析。AI识别出4个子问题：搜索速度慢（35%）、结果不相关（30%）、无法按类别筛选（20%）、历史搜索无法清除（15%）。每个子问题都给出了3-5条典型用户语录。PM据此制定分阶段优化计划。'}],
       tools:[{n:'ChatGPT/Claude',d:'需求分析和PRD生成'},{n:'Notion AI',d:'需求文档协同和AI写作'},{n:'飞书智能文档',d:'PRD模板+AI辅助'}],
-      tips:['反馈分析要区分"高频问题"和"高价值问题"，两者不总一致','AI生成的需求背景需要人工核实——用户的表述和真实需求可能有差距','PRD要有验收标准，AI可以帮助生成但需要PM确认','需求优先级评估要结合业务战略，AI提供数据参考而非最终决策','定期让AI分析需求趋势，发现产品演进方向'] },
+      tips:['反馈分析要区分"高频问题"和"高价值问题"，两者不总一致','AI生成的需求背景需要人工核实——用户的表述和真实需求可能有差距','PRD要有验收标准，AI可以帮助生成但需要PM确认','需求优先级评估要结合业务战略，AI提供数据参考而非最终决策','定期让AI分析需求趋势，发现产品演进方向'],
+      quizzes:[
+        {triggerSlide:2, q:'用AI做需求挖掘时，从"用户说"到"功能规格"的正确转化流程是？',opts:['直接让AI写PRD','用户原话→AI提取核心诉求→判断需求类型→AI生成功能描述→人工review','跳过用户反馈直接设计','只做关键词统计'],ans:1, explain:'完整流程：用户原话→AI提取核心诉求→AI判断是大需求/小优化/bug→AI生成需求背景和目标→AI撰写详细功能描述→人工review补充业务上下文。每个环节都需要AI辅助+人工判断。'},
+        {triggerSlide:4, q:'用RICE框架做需求优先级排序时，AI最适合辅助哪个环节？',opts:['替PM做最终决策','基于数据和信息为每个需求打分，生成优先级矩阵','忽略投入成本只看影响力','只做排序不做解释'],ans:1, explain:'AI按RICE框架（Reach覆盖/Impact影响/Confidence信心/Effort成本）为每个需求打分，生成优先级矩阵。但最终决策要结合业务战略和团队判断——AI提供数据参考而非替你做决定。'}
+      ] },
     pm2: { objectives:['用AI设计高效的用研方案','学会用AI分析调研数据并提取洞察','能基于AI分析生成精准的用户画像'],
       concepts:[{t:'AI如何赋能用户研究',c:'传统用户研究面临三大难题：样本量有限（每次调研只能覆盖部分用户）、分析耗时长（从数据到洞察需要数天）、洞察碎片化（不同研究之间的关联难以发现）。AI的优势在于：快速处理大量非结构化数据（文本、语音）、发现数据中的隐性模式、跨越不同研究形成全局洞察。'},{t:'用户画像的AI构建方法',c:'AI构建用户画像不是凭空想象，而是基于真实数据：行为日志→用户分群→特征提取→画像生成→验证迭代。AI可以分析用户的行为数据（点击、购买、留存），识别出不同的行为模式，再结合调研数据丰富画像的社会属性（动机、偏好、痛点）。'}],
       steps:[{t:'第一步：设计调研方案',d:'告诉AI你的调研目标（了解某功能的使用障碍），让它生成方案：调研方法建议（问卷/访谈/可用性测试）、问卷问题设计、访谈提纲、用户招募标准、样本量建议。'},{t:'第二步：执行调研并收集数据',d:'按照AI设计的方案执行调研。将收集到的数据（问卷结果、访谈录音转文字）整理后提供给AI分析。'},{t:'第三步：AI深度分析',d:'让AI从数据中提取关键发现：按主题分类洞察、标记频率（多少人提到）、发现矛盾点（用户说的和做的不同）、识别隐性需求（用户没说出来但行为表明的）。'},{t:'第四步：生成用户画像',d:'综合行为数据+调研洞察，让AI生成用户画像。每个画像包含：人口属性、行为特征、核心需求、典型场景、使用障碍、决策因素。给出代表性用户语录。'}],
@@ -4556,7 +4618,11 @@ function getCourseContent(courseId) {
       steps:[{t:'第一步：产线数据探索',d:'获取产线的核心数据指标：产量、良率、设备综合效率OEE、换线时间。将这些数据描述给AI，让它做初步的趋势分析和异常检测。'},{t:'第二步：AI根因分析',d:'对发现的异常（良率突然下降、某设备频繁故障），用AI做根因分析。提供相关数据维度（班次、物料批次、操作员、环境参数），AI会给出可能的根因和验证方法。'},{t:'第三步：需求优先级排序',d:'基于分析结果，将需求按"价值×可行性"排序。高价值高可行（先做）、高价值低可行（技术预研）、低价值高可行（快速迭代）、低价值低可行（暂缓）。'},{t:'第四步：PRD撰写',d:'用AI生成结构化的产线数字化需求PRD。包含：业务背景（当前问题）、需求描述（功能和技术要求）、预期效果（量化目标如良率提升X%）、实施约束（不能影响正常生产）。'}],
       cases:[{s:'场景：SMT贴片产线良率从98.5%降到96.2%，需要快速定位原因',sol:'将3个月的产线数据输入AI（按设备/班次/物料供应商/时间段分维度）→AI发现周二晚班一批PCB板材的锡膏印刷厚度偏差超标→定位到供应商批次问题→需求：SPI检测设备的AI异常预警功能。从发现到定位用了2小时（传统方式需要1周）。'}],
       tools:[{n:'Claude/GPT-4o',d:'工业数据分析与PRD生成'},{n:'Power BI + AI',d:'产线数据可视化看板'},{n:'飞书多维表格',d:'需求管理和优先级排序'},{n:'Figma + AI',d:'工业看板原型设计'}],
-      tips:['产线数据要脱敏后再传给AI——遵守公司数据安全规定','AI分析的结果需要工艺工程师验证——AI不懂物理约束','数字化需求的ROI要量化：节省多少时间/提升多少良率/减少多少浪费','产线改造要考虑"不停机部署"——制造业容错率极低','跟产线操作员多聊——他们知道机器在什么情况下"脾气不好"'] },
+      tips:['产线数据要脱敏后再传给AI——遵守公司数据安全规定','AI分析的结果需要工艺工程师验证——AI不懂物理约束','数字化需求的ROI要量化：节省多少时间/提升多少良率/减少多少浪费','产线改造要考虑"不停机部署"——制造业容错率极低','跟产线操作员多聊——他们知道机器在什么情况下"脾气不好"'],
+      quizzes:[
+        {triggerSlide:2, q:'制造业PM从产线数据中挖掘需求时，以下哪个是正确的思路？',opts:['直接问厂长需要什么系统','从OEE/良率/MTBF/MTTR等指标中识别"哪里需要数字化改造"','把所有设备都接入IoT','让AI替代工艺工程师做决策'],ans:1, explain:'PM的工作是从产线核心指标（OEE/良率/MTBF/MTTR/换线时间）中识别数字化机会——不是技术实现，而是定义问题和评估ROI。如"良率从98%降到96%"→定位原因→数字化改造需求→量化预期收益。'},
+        {triggerSlide:4, q:'制造业需求定义与C端产品的最大区别是？',opts:['制造业不需要PRD','高可靠性+强约束+长期价值+多角色需求','制造需求更简单','不需要考虑ROI'],ans:1, explain:'制造业需求有独特特征：高可靠性（停机1小时损失百万）、强约束（不能随意停机改造）、长期价值（系统服务5-10年）、多角色（操作员/班组长/工程师/厂长需求各不相同）、ROI必须量化。'}
+      ] },
     mfg_pm2: { objectives:['学会用AI分析产线操作员和工艺工程师的行为数据','掌握工业用户研究方法','能生成数据驱动的用户画像和改进建议'],
       concepts:[{t:'工业用户研究的独特挑战',c:'制造业的用户研究跟C端产品完全不同：用户（操作员/工程师）没有时间接受访谈、工作场景高度专业化（外行很难理解）、数据散落在各种系统里、用户习惯"忍着不说"（工厂文化）。AI的价值在于：不需要漫长访谈，从操作日志、故障记录、排班数据中就能发现行为模式。'},{t:'人机协作的优化方向',c:'工业场景的人机协作要考虑：认知负荷（操作员一次要关注多少信息）、操作便利性（戴手套时能否点击、环境噪音下能否听清）、安全隐患（任何交互不能分散安全注意力）、学习成本（新操作员的上手时间）。AI可以分析：哪些操作步骤最常出错、哪些界面信息操作员根本不看、什么情况下操作员绕过系统。'}],
       steps:[{t:'第一步：操作日志分析',d:'收集操作员的操作日志（点击路径、页面停留时间、操作时间分布），用AI分析操作模式和效率瓶颈。'},{t:'第二步：识别痛点场景',d:'让AI识别：重复操作最多的步骤、出错频率最高的环节、操作员主动绕过的功能（说明设计有问题）、新手vs老手操作差异大的地方。'},{t:'第三步：用户画像构建',d:'基于行为数据构建工业用户画像：新手操作员（需要引导和防错）、熟练操作员（需要效率工具和快捷键）、工程师（需要深度数据和诊断工具）、班组长（需要全局视图和异常告警）。'},{t:'第四步：改进方案设计',d:'针对每个画像的痛点，用AI生成界面优化和功能改进方案。包含：改进前vs改进后的操作对比、预期效率提升、实施难度评估。'}],
@@ -4788,7 +4854,11 @@ function getCourseContent(courseId) {
       steps: generic.steps,
       cases: override.cases || generic.cases,
       tools: override.tools || generic.tools,
-      tips: override.tips || generic.tips
+      tips: override.tips || generic.tips,
+      // P2.1: Preserve in-course quizzes from generic content
+      quizzes: generic.quizzes || override.quizzes,
+      // P1.1: Preserve summary
+      summary: generic.summary
     };
   }
   return CONTENTS[courseId] || null;
@@ -5088,7 +5158,7 @@ function gradeAnswer(userAnswer, taskDesc, refAnswer) {
 }
 // ==================== END AUTO-GRADING ENGINE ====================
 
-// Final assessment — 3 choice + 2 subjective per role
+// ==================== FINAL QUIZ DATA ====================
 const FINAL_QUIZZES = {
   dev: [
     {type:'choice', q:'在AI辅助编程中，以下哪个是生成高质量代码的最佳实践？',opts:['完全信任AI，不做人工检查','写最短的提示词','提供清晰的技术要求和上下文','只使用一种AI工具'],ans:2, explain:'提供清晰的上下文是AI生成高质量代码的基础。提示词越具体（技术栈、输入输出、边界条件），AI产出越好。'},
@@ -5165,6 +5235,8 @@ const S = {
   courseIdx:null, courseTaskIdx:0, courseProgress: JSON.parse(localStorage.getItem('ai_training_progress') || '{}'),
   finalAnswers:[], finalSubjAnswers:{}, finalScore:null, finalSubmitted:false, finalShowHint:{},
   taskShowHint:{}, taskShowAnswer:{},
+  quizShown:{}, quizActive:-1,
+  transcriptOpen: false,
   employees: JSON.parse(localStorage.getItem('ai_training_employees') || '[]'),
   currentEmployee: null,
   pptCurrentSlide:0, voicePlaying:false, voicePaused:false, voiceRate:1.0
@@ -5176,6 +5248,141 @@ function saveEmployees() {
 
 function saveProgress() {
   localStorage.setItem('ai_training_progress', JSON.stringify(S.courseProgress));
+}
+
+// ==================== IN-COURSE QUIZ ENGINE (P2.1) ====================
+function getCourseQuizzes(courseId) {
+  const content = getCourseContent(courseId);
+  return (content && content.quizzes) ? content.quizzes : [];
+}
+
+function getQuizResult(courseId, quizIdx) {
+  var prog = S.courseProgress[courseId] || {};
+  var results = prog.quizResults || {};
+  return results[quizIdx] || null;
+}
+
+function saveQuizResult(courseId, quizIdx, result) {
+  var prog = S.courseProgress[courseId] || {};
+  if (!prog.quizResults) prog.quizResults = {};
+  prog.quizResults[quizIdx] = result;
+  S.courseProgress[courseId] = prog;
+  saveProgress();
+}
+
+function getTotalQuizStats(courseId) {
+  var prog = S.courseProgress[courseId] || {};
+  var results = prog.quizResults || {};
+  var total = Object.keys(results).length;
+  var correct = 0;
+  for (var k in results) { if (results[k].correct) correct++; }
+  return { total: total, correct: correct, rate: total > 0 ? Math.round(correct/total*100) : 0 };
+}
+
+function renderQuizPopup(courseId, quizIdx) {
+  var quizzes = getCourseQuizzes(courseId);
+  if (!quizzes || quizIdx >= quizzes.length) return '';
+  var quiz = quizzes[quizIdx];
+  var prevResult = getQuizResult(courseId, quizIdx);
+  var answered = !!prevResult;
+  var isCorrect = answered && prevResult.correct;
+  var labels = ['A', 'B', 'C', 'D'];
+
+  var html = '<div class="quiz-popup-overlay" id="quizPopup'+quizIdx+'">';
+  html += '<div class="quiz-popup-card">';
+  html += '<span class="qp-badge">课中测验 '+(quizIdx+1)+'/'+quizzes.length+'</span>';
+  html += '<div class="qp-question">'+escapeHtml(quiz.q)+'</div>';
+
+  quiz.opts.forEach(function(opt, oi) {
+    var cls = 'qp-option';
+    if (answered) {
+      if (oi === quiz.ans) cls += ' reveal-correct';
+      if (oi === prevResult.answer && !isCorrect) cls += ' selected-wrong';
+      if (oi === prevResult.answer && isCorrect) cls += ' selected-correct';
+    }
+    html += '<button class="'+cls+'" '+(answered?'disabled':'')+' data-action="answerQuizQ" data-cid="'+courseId+'" data-qidx="'+quizIdx+'" data-ans="'+oi+'">'+labels[oi]+'. '+escapeHtml(opt)+'</button>';
+  });
+
+  if (answered) {
+    html += '<div class="qp-feedback '+(isCorrect?'correct':'wrong')+'">';
+    html += isCorrect ? '✅ 回答正确！' : '❌ 回答错误';
+    html += '</div>';
+    html += '<div class="qp-explain">'+escapeHtml(quiz.explain)+'</div>';
+    html += '<button class="qp-btn" data-action="closeQuiz">继续学习 →</button>';
+  } else {
+    html += '<div class="qp-explain" style="text-align:center;margin-top:12px;color:var(--text3);">请选择一个答案</div>';
+  }
+
+  html += '</div></div>';
+  return html;
+}
+
+S.submitQuizAnswer = function(courseId, quizIdx, answer) {
+  var quizzes = getCourseQuizzes(courseId);
+  if (!quizzes || quizIdx >= quizzes.length) return;
+  var quiz = quizzes[quizIdx];
+  var correct = (answer === quiz.ans);
+
+  saveQuizResult(courseId, quizIdx, { answer: answer, correct: correct, time: Date.now() });
+
+  // Re-render the quiz popup with result
+  var oldPopup = document.getElementById('quizPopup'+quizIdx);
+  if (oldPopup) {
+    oldPopup.outerHTML = renderQuizPopup(courseId, quizIdx);
+    // Re-bind events since we replaced HTML
+    bindQuizEvents();
+  }
+};
+
+S.closeQuizPopup = function() {
+  var popups = document.querySelectorAll('.quiz-popup-overlay');
+  popups.forEach(function(p) { p.remove(); });
+  S.quizActive = -1;
+};
+
+function bindQuizEvents() {
+  // Re-bind quiz answer and close buttons after HTML replacement
+  document.querySelectorAll('[data-action="answerQuizQ"]').forEach(function(btn) {
+    btn.onclick = function() {
+      var cid = btn.getAttribute('data-cid');
+      var qidx = parseInt(btn.getAttribute('data-qidx'));
+      var ans = parseInt(btn.getAttribute('data-ans'));
+      S.submitQuizAnswer(cid, qidx, ans);
+    };
+  });
+  document.querySelectorAll('[data-action="closeQuiz"]').forEach(function(btn) {
+    btn.onclick = function() { S.closeQuizPopup(); };
+  });
+}
+
+function checkQuizTrigger(courseId) {
+  var quizzes = getCourseQuizzes(courseId);
+  if (!quizzes || quizzes.length === 0) return;
+  var currentSlide = S.pptCurrentSlide;
+
+  // Find the first unanswered quiz whose triggerSlide <= currentSlide
+  for (var i = 0; i < quizzes.length; i++) {
+    if (quizzes[i].triggerSlide === currentSlide) {
+      var key = S.courseIdx+'_'+courseId+'_q'+i;
+      if (!S.quizShown[key]) {
+        S.quizShown[key] = true;
+        S.quizActive = i;
+        showQuizOnSlide(courseId, i);
+        return;
+      }
+    }
+  }
+}
+
+function showQuizOnSlide(courseId, quizIdx) {
+  // Insert quiz popup into the PPT container
+  var container = document.getElementById('pptContainer');
+  if (!container) return;
+  var existing = container.querySelector('.quiz-popup-overlay');
+  if (existing) existing.remove();
+  var quizHTML = renderQuizPopup(courseId, quizIdx);
+  container.insertAdjacentHTML('beforeend', quizHTML);
+  bindQuizEvents();
 }
 
 // ==================== RENDER ====================
@@ -5851,6 +6058,15 @@ function renderDashboard() {
     const priority = getCoursePriority(c);
     return {...c, origIdx: idx, priority};
   }).sort((a,b) => b.priority - a.priority);
+
+  // P2.3: Calculate adaptive learning stats
+  let totalQuizAttempted = 0, totalQuizCorrect = 0;
+  courses.forEach(c => {
+    const stats = getTotalQuizStats(c.id);
+    totalQuizAttempted += stats.total;
+    totalQuizCorrect += stats.correct;
+  });
+
   ordered.forEach((c, i) => {
     const prog = S.courseProgress[c.id];
     const isDone = prog?.done;
@@ -5859,14 +6075,57 @@ function renderDashboard() {
     const cls = isDone ? 'completed' : locked ? 'locked' : '';
     const tagCls = c.type==='video' ? 'tag-blue' : 'tag-purple';
     const statusLabel = isDone ? '已完成' : locked ? '🔒 需前置' : '待学习';
+
+    // P2.3: Quiz stats for adaptive feedback
+    const quizStats = getTotalQuizStats(c.id);
+    const hasQuizData = quizStats.total > 0;
+    const quizWarning = hasQuizData && quizStats.rate < 70;
+    const quizOk = hasQuizData && quizStats.rate >= 70;
+    let quizBadge = '';
+    if (quizWarning) quizBadge = `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;background:#fef2f2;color:var(--red);font-size:11px;font-weight:600;margin-left:6px;">⚠️ 需复习 (${quizStats.rate}%)</span>`;
+    else if (quizOk) quizBadge = `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;background:var(--green-bg);color:var(--green);font-size:11px;font-weight:600;margin-left:6px;">✓ 已掌握 (${quizStats.rate}%)</span>`;
+
     html += `<div class="course-card ${cls}" ${locked?'':'data-action="openCourse" data-idx="'+c.origIdx+'"'}>
       <div class="course-num">${i+1}</div>
-      <div style="flex:1;min-width:0;"><div class="course-title">${c.title}</div><div class="course-meta">${c.dur}</div></div>
+      <div style="flex:1;min-width:0;"><div class="course-title">${c.title}${quizBadge}</div><div class="course-meta">${c.dur}${c.requires?.length?' · 前置：'+c.requires.map(r=>getRoleCourses().find(rc=>rc.id===r)?.title||r).join('+ '):''}</div></div>
       <span class="tag ${tagCls}">${c.type==='video'?'视频':'图文'}</span>
       <span style="font-size:12px;margin-left:8px;">${statusLabel}</span>
     </div>`;
   });
   html += `</div>`;
+
+  // P2.3: Adaptive review recommendations
+  const needReview = ordered.filter(c => {
+    const stats = getTotalQuizStats(c.id);
+    return stats.total > 0 && stats.rate < 70;
+  });
+  if (needReview.length > 0) {
+    html += `<div class="card mt-3 slide-up" style="border-left:4px solid var(--red);">
+      <p style="font-weight:600;font-size:14px;margin-bottom:8px;color:var(--red);">📋 需重点复习</p>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:12px;">以下课程的课中测验正确率偏低，建议重新学习</p>`;
+    needReview.forEach(c => {
+      const stats = getTotalQuizStats(c.id);
+      html += `<div style="padding:8px 12px;background:var(--bg);border-radius:8px;margin-bottom:6px;display:flex;align-items:center;gap:10px;cursor:pointer;" data-action="openCourse" data-idx="${ordered.indexOf(c)}">
+        <span style="font-weight:600;font-size:13px;flex:1;">${c.title}</span>
+        <span style="font-size:12px;color:var(--red);">${stats.correct}/${stats.total} 正确 (${stats.rate}%)</span>
+        <span style="font-size:11px;color:var(--blue);">→ 重新学习</span>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // P2.3: Overall quiz stats card
+  if (totalQuizAttempted > 0) {
+    const quizRate = Math.round(totalQuizCorrect/totalQuizAttempted*100);
+    html += `<div class="card mt-3 slide-up">
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-value" style="color:var(--blue);">${totalQuizAttempted}</div><div class="stat-label">课中测验总数</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:${quizRate>=70?'var(--green)':'var(--red)'};">${totalQuizCorrect}</div><div class="stat-label">答对数量</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:${quizRate>=70?'var(--green)':'var(--orange)'};">${quizRate}%</div><div class="stat-label">综合正确率</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:${needReview.length===0?'var(--green)':'var(--orange)'};">${needReview.length}</div><div class="stat-label">需复习课程</div></div>
+      </div>
+    </div>`;
+  }
 
   if (done === total) {
     html += `<div class="card mt-3 slide-up text-center">
@@ -5895,6 +6154,16 @@ function renderCourseDetail() {
 
   if (c.type === 'video' && content) {
     const slides = getPPTSlides(c.id, c.title, c.desc);
+
+    // P2.2: Chapter markers
+    const chapterNames = ['封面', '学习目标', '核心概念', '实操方法', '小结'];
+    const chapterSlides = [0, 1, 2, 3, 4]; // slide indices for each chapter
+    html += `<div class="chapter-strip" id="chapterStrip">`;
+    chapterNames.forEach((name, ci) => {
+      html += `<span class="chapter-dot${S.pptCurrentSlide===chapterSlides[ci]?' active':''}" onclick="S.pptCurrentSlide=${chapterSlides[ci]};stopVoice();updatePPTUI();" title="跳转到：${name}">${name}</span>`;
+    });
+    html += `</div>`;
+
     // PPT Player
     html += `<div class="ppt-container" id="pptContainer">
       <div class="ppt-frame" id="pptFrame">`;
@@ -5916,8 +6185,29 @@ function renderCourseDetail() {
         <span class="voice-slide-counter" id="slideCounter">1/${slides.length}</span>
       </div>
     </div>`;
-    // Full content below PPT
-    html += `<div class="mt-4">${buildContentHTML(content)}</div>`;
+
+    // P2.2: Transcript toggle + panel
+    html += `<button class="transcript-toggle" id="transcriptToggle" onclick="S.toggleTranscript()">📜 查看字幕文本</button>`;
+    html += `<div class="transcript-panel" id="transcriptPanel">`;
+    slides.forEach((s, i) => {
+      html += `<div class="transcript-entry" onclick="S.pptCurrentSlide=${i};stopVoice();updatePPTUI();S.toggleTranscript();" data-tslide="${i}">
+        <span class="ts-num">${i+1}</span>
+        <span class="ts-title">${s.type==='cover'?c.title:'章节 '+(i+1)}</span>
+        <div class="ts-text">${escapeHtml(s.notes || '')}</div>
+      </div>`;
+    });
+    html += `</div>`;
+
+    // P2.3: Quiz score summary if any quizzes taken
+    const quizStats = getTotalQuizStats(c.id);
+    if (quizStats.total > 0) {
+      html += `<div class="alert alert-${quizStats.rate>=70?'success':quizStats.rate>=40?'warning':'danger'} mt-2" style="font-size:13px;">
+        课中测验：${quizStats.correct}/${quizStats.total} 正确（正确率 ${quizStats.rate}%）${quizStats.rate<70?' — 建议复习相关章节':''}
+      </div>`;
+    }
+
+    // Full content below PPT (only show if transcript is hidden)
+    html += `<div class="mt-4" id="courseFullContent">${buildContentHTML(content)}</div>`;
   } else if (c.type === 'video') {
     html += `<div class="video-placeholder"><div class="play-btn">▶</div><p style="font-weight:600;font-size:16px;">${c.title}</p><p style="font-size:13px;opacity:0.8;">课程PPT视频演示</p></div>`;
   } else {
@@ -6383,7 +6673,19 @@ S.finishCourse = function() {
   const c = getRoleCourses()[S.courseIdx];
   if (!S.courseProgress[c.id]) S.courseProgress[c.id] = {tasksDone:0};
   S.courseProgress[c.id].done = true;
+  S.courseProgress[c.id].completedAt = Date.now();
   saveProgress();
+
+  // P2.3: Adaptive recommendation based on quiz performance
+  const quizStats = getTotalQuizStats(c.id);
+  if (quizStats.total > 0) {
+    var msg = quizStats.rate >= 70
+      ? '课中测验正确率 ' + quizStats.rate + '% — 掌握良好，可以进入下一门课程！'
+      : '课中测验正确率仅 ' + quizStats.rate + '% — 建议在仪表盘查看详细错题并重新学习相关章节。';
+    // Store recommendation for dashboard display
+    S._lastCourseFinishMsg = msg;
+    S._lastCourseFinishQuizRate = quizStats.rate;
+  }
   S.goDashboard();
 };
 S.startFinalQuiz = function() { S.finalAnswers = []; S.finalSubjAnswers = {}; S.finalShowHint = {}; S.finalSubmitted = false; S.view = 'final'; render(); };
@@ -6547,12 +6849,47 @@ function playCurrentSlide() {
 }
 
 function updatePPTUI() {
-  const slides = document.querySelectorAll('.ppt-slide');
+  var slides = document.querySelectorAll('.ppt-slide');
   slides.forEach(function(s, i) { s.classList.toggle('active', i === S.pptCurrentSlide); });
-  const counter = document.getElementById('slideCounter');
+  var counter = document.getElementById('slideCounter');
   if (counter) counter.textContent = (S.pptCurrentSlide+1) + '/' + slides.length;
-  const prog = document.getElementById('voiceProgress');
+  var prog = document.getElementById('voiceProgress');
   if (prog && slides.length > 1) prog.style.width = Math.round(S.pptCurrentSlide/(slides.length-1)*100) + '%';
+  // P2.1: Check for in-course quiz trigger
+  var c = getRoleCourses()?.[S.courseIdx];
+  if (c) checkQuizTrigger(c.id);
+  // P2.2: Update chapter markers
+  updateChapterMarkers();
+  // P2.2: Update transcript highlights
+  updateTranscriptHighlight();
+}
+
+S.toggleTranscript = function() {
+  S.transcriptOpen = !S.transcriptOpen;
+  var panel = document.getElementById('transcriptPanel');
+  var toggle = document.getElementById('transcriptToggle');
+  if (panel) panel.classList.toggle('show', S.transcriptOpen);
+  if (toggle) toggle.textContent = S.transcriptOpen ? '📜 收起字幕文本' : '📜 查看字幕文本';
+};
+
+function updateChapterMarkers() {
+  var strip = document.getElementById('chapterStrip');
+  if (!strip) return;
+  var dots = strip.querySelectorAll('.chapter-dot');
+  // Map slide to chapter index
+  var chapterSlides = [0, 1, 2, 3, 4];
+  dots.forEach(function(d, i) {
+    d.classList.remove('active', 'current');
+    if (S.pptCurrentSlide === chapterSlides[i]) d.classList.add('active');
+    else if (S.pptCurrentSlide > chapterSlides[i]) d.classList.add('current');
+  });
+}
+
+function updateTranscriptHighlight() {
+  var entries = document.querySelectorAll('.transcript-entry');
+  entries.forEach(function(e) {
+    e.classList.toggle('active', parseInt(e.getAttribute('data-tslide')) === S.pptCurrentSlide);
+  });
 }
 
 function updateSubtitle(text) {
