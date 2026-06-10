@@ -4797,7 +4797,7 @@ const S = {
   view:'role', // role|quiz|results|dashboard|course|task|final|admin|map|schedule
   industry:null, role:null,
   quizIdx:0, quizAnswers:[], quizScores:null,
-  courseIdx:null, courseTaskIdx:0, courseProgress:{},
+  courseIdx:null, courseTaskIdx:0, courseProgress: JSON.parse(localStorage.getItem('ai_training_progress') || '{}'),
   finalAnswers:[], finalSubjAnswers:{}, finalScore:null, finalSubmitted:false, finalShowHint:{},
   taskShowHint:{}, taskShowAnswer:{},
   employees: JSON.parse(localStorage.getItem('ai_training_employees') || '[]'),
@@ -4807,6 +4807,10 @@ const S = {
 
 function saveEmployees() {
   localStorage.setItem('ai_training_employees', JSON.stringify(S.employees));
+}
+
+function saveProgress() {
+  localStorage.setItem('ai_training_progress', JSON.stringify(S.courseProgress));
 }
 
 // ==================== RENDER ====================
@@ -5922,6 +5926,7 @@ S.submitTask = function() {
   const feedbacks = ['任务完成度较高，操作流程清晰。建议补充边界情况处理。','AI工具使用得当，产出质量良好。可以尝试更多工具组合。','任务执行规范，思路清晰。继续加油！'];
   prog['taskFeedback'+S.courseTaskIdx] = feedbacks[Math.floor(Math.random()*feedbacks.length)];
   if (S.courseTaskIdx >= prog.tasksDone) prog.tasksDone = S.courseTaskIdx + 1;
+  saveProgress();
   render();
 };
 S.prevTask = function() { if(S.courseTaskIdx>0) S.courseTaskIdx--; render(); };
@@ -5930,6 +5935,7 @@ S.finishCourse = function() {
   const c = getRoleCourses()[S.courseIdx];
   if (!S.courseProgress[c.id]) S.courseProgress[c.id] = {tasksDone:0};
   S.courseProgress[c.id].done = true;
+  saveProgress();
   S.goDashboard();
 };
 S.startFinalQuiz = function() { S.finalAnswers = []; S.finalSubjAnswers = {}; S.finalShowHint = {}; S.finalSubmitted = false; S.view = 'final'; render(); };
@@ -5991,7 +5997,11 @@ S.loadEmployee = function(idx) {
 };
 S.goBack = function() {
   stopVoice();
-  if (S.view === 'quiz') { S.view='role'; }
+  if (S.view === 'quiz') {
+    if (confirm('返回将丢失当前测评进度，确定返回？')) {
+      S.view='role';
+    } else { return; }
+  }
   else if (S.view === 'results') { S.view='role'; }
   else if (S.view === 'final') { S.goDashboard(); return; }
   else if (S.view === 'map') { S.view='results'; }
