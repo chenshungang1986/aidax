@@ -132,6 +132,14 @@
   .course-meta { font-size:12px; color:var(--text2); }
   .course-tag { margin-left:auto; flex-shrink:0; }
 
+  /* Confirm Dialog (v34 测评可信度增强) */
+  .confirm-overlay { position:fixed; inset:0; background:rgba(15,23,42,.5); z-index:9999; display:flex; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(2px); }
+  .confirm-card { background:var(--card); border-radius:16px; padding:22px; max-width:380px; width:100%; box-shadow:0 16px 60px rgba(0,0,0,.2); border:1px solid var(--border); }
+  .confirm-title { font-weight:700; font-size:15px; margin-bottom:10px; }
+  .confirm-msg { font-size:13px; color:var(--text2); margin-bottom:18px; line-height:1.7; }
+  .confirm-msg b { color:var(--text); }
+  .confirm-actions { display:flex; gap:8px; justify-content:flex-end; }
+
   /* Task Modal */
   .task-step { display:flex; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); align-items:flex-start; }
   .task-step:last-child { border-bottom:none; }
@@ -1389,10 +1397,43 @@ function getCurrentQuestion() {
   return S._quizByDim[dimKey][level] || S._quizByDim[dimKey][0] || S._quizByDim[dimKey][1] || S._quizByDim[dimKey][2];
 }
 
-function answerCurrentQuestion(answerIdx) {
-  // Record the selected option index for the current dimension
-  if (!S._quizDims) return;
-  const dimKey = S._quizDims[S.quizIdx];
+// ===== 测评可信度增强 (v34): 防猜题 + 作答质量报告 =====
+const FAST_ANSWER_MS = 2500; // 快速作答判定阈值（毫秒）
+
+// 轻量确认弹层（替代原生 confirm，支持自定义按钮/回调）
+function showConfirm(opts) {
+  const { title = '请确认', msg = '', okText = '确定', cancelText = '取消', danger = false, onOk, onCancel } = opts || {};
+  const old = document.getElementById('confirmOverlay');
+  if (old) old.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'confirmOverlay';
+  overlay.className = 'confirm-overlay';
+  overlay.innerHTML = `<div class="confirm-card" style="animation:modalSlideIn .2s ease">
+    <div class="confirm-title">${title}</div>
+    <div class="confirm-msg">${msg}</div>
+    <div class="confirm-actions">
+      <button class="btn btn-outline" id="confirmCancel">${cancelText}</button>
+      <button class="btn" id="confirmOk" style="${danger ? 'background:var(--red);color:#fff;' : ''}">${okText}</button>
+    </div>
+  </div>`;
+  document.body.appendChild(overlay);
+  const close = () => overlay.remove();
+  overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+  overlay.querySelector('#confirmCancel').onclick = () => { close(); if (onCancel) onCancel(); };
+  overlay.querySelector('#confirmOk').onclick = () => { close(); if (onOk) onOk(); };
+  return overlay;
+}
+
+// 记录题目开始展示时间（每次渲染当前题目时确保存在，已作答则不重置）
+function ensureQuizTiming(dimKey) {
+  S._quizStartAt = S._quizStartAt || {};
+  if (S._quizStartAt[dimKey] === undefined && !(S._quizSelected && S._quizSelected[dimKey] !== undefined)) {
+    S._quizStartAt[dimKey] = Date.now();
+  }
+}
+
+// 真正提交答案（防猜题确认通过后走这里）
+function commitAnswer(dimKey, answerIdx) {
   S._quizSelected = S._quizSelected || {};
   S._quizSelected[dimKey] = answerIdx;
   // Also compute and store score so partial answers are preserved
@@ -1402,6 +1443,48 @@ function answerCurrentQuestion(answerIdx) {
     S.quizAnswers[dimKey] = score;
   }
   render();
+}
+
+function answerCurrentQuestion(answerIdx) {
+  // Record the selected option index for the current dimension
+  if (!S._quizDims) return;
+  const dimKey = S._quizDims[S.quizIdx];
+  const isFirst = !(S._quizSelected && S._quizSelected[dimKey] !== undefined);
+  if (isFirst) {
+    // 防猜题：首次作答计时，快速作答需二次确认
+    const start = (S._quizStartAt && S._quizStartAt[dimKey]) || Date.now();
+    const dur = Date.now() - start;
+    S._quizTiming = S._quizTiming || {};
+    S._quizTiming[dimKey] = dur;
+    if (dur < FAST_ANSWER_MS) {
+      showConfirm({
+        title: '⏱️ 检测到快速作答',
+        msg: `本维度仅用 <b>${(dur / 1000).toFixed(1)} 秒</b>作答，可能未仔细审题。<br>请确认是否提交该答案？`,
+        okText: '确认提交',
+        cancelText: '返回重新审题',
+        danger: true,
+        onOk: () => commitAnswer(dimKey, answerIdx)
+      });
+      return;
+    }
+  }
+  commitAnswer(dimKey, answerIdx);
+}
+
+// 汇总作答质量：平均用时 / 快速作答数 / 可信度评级
+function calcQuizQuality() {
+  const timing = S._quizTiming || {};
+  const vals = Object.values(timing).filter(v => typeof v === 'number');
+  if (!vals.length) return null;
+  const totalMs = vals.reduce((a, b) => a + b, 0);
+  const avgMs = Math.round(totalMs / vals.length);
+  const fastCount = vals.filter(v => v < FAST_ANSWER_MS).length;
+  const fastRatio = fastCount / vals.length;
+  const fastestMs = Math.min.apply(null, vals);
+  let level = 'good';
+  if (fastRatio >= 0.3 || avgMs < 2000) level = 'low';
+  else if (fastRatio >= 0.15 || avgMs < 3500) level = 'mid';
+  return { totalMs, avgMs, fastCount, fastRatio, fastestMs, level, n: vals.length };
 }
 
 // Adapt difficulty level for current dimension based on answer score.
@@ -1423,6 +1506,7 @@ function adaptLevelForCurrentDim() {
 
 function finishAdaptiveQuiz() {
   const result = calculateAdaptiveScores();
+  result.quality = calcQuizQuality(); // v34: 作答质量报告
   S.quizScores = result.dimScores;
   S._quizResult = result;
   S.view = 'results';
@@ -5782,6 +5866,7 @@ function renderQuiz() {
     finishAdaptiveQuiz();
     return '';
   }
+  ensureQuizTiming(dimKey); // v34: 记录题目展示起始时间（防猜题计时）
   const dimInfo = AI_DIMS[dimKey];
   const level = S._quizCurrentLevel[dimKey] !== undefined ? S._quizCurrentLevel[dimKey] : 0;
   const q = getCurrentQuestion();
@@ -5846,6 +5931,37 @@ function getCourseSkillScore(role, course) {
 }
 
 // ---- RESULTS ----
+
+// v34: 作答质量卡片 + 重新测评入口
+function renderQuizQualityCard(result) {
+  const q = result && result.quality;
+  if (!q) return '';
+  const avgSec = (q.avgMs / 1000).toFixed(1);
+  let icon, title, msg;
+  if (q.level === 'low') {
+    icon = '🔴'; title = '作答可信度较低';
+    msg = `有 <b>${q.fastCount}/${q.n}</b> 题作答过快（&lt;2.5秒），平均每题仅 ${avgSec} 秒。快速作答可能无法真实反映你的能力，建议重新认真测评一次。`;
+  } else if (q.level === 'mid') {
+    icon = '🟡'; title = '作答可信度一般';
+    msg = `平均每题 ${avgSec} 秒，其中 ${q.fastCount} 题作答较快。结果可作参考，建议结合后续课程学习持续验证。`;
+  } else {
+    icon = '🟢'; title = '作答认真，结果可信';
+    msg = `平均每题 ${avgSec} 秒，全部维度均仔细作答。本测评结果可信度高，可直接据此制定学习计划。`;
+  }
+  return `<div class="card slide-up" style="margin-top:14px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <span style="font-size:18px;">${icon}</span>
+      <span style="font-weight:600;font-size:14px;">${title}</span>
+      <span class="tag ${q.level==='low'?'tag-red':q.level==='mid'?'tag-amber':'tag-green'}" style="margin-left:auto;">${(q.avgMs/1000).toFixed(1)}s/题 · 最快${(q.fastestMs/1000).toFixed(1)}s</span>
+    </div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.6;">${msg}</p>
+    <div style="display:flex;gap:8px;">
+      <button class="btn ${q.level==='low'?'':'btn-outline'}" style="${q.level==='low'?'background:var(--red);color:#fff;flex:1;':'flex:1;'}" data-action="retakeQuiz">🔄 重新测评</button>
+      <button class="btn btn-outline" style="flex:1;" data-action="goDashboard">📚 开始学习</button>
+    </div>
+  </div>`;
+}
+
 function renderResults() {
   const role = ROLES[S.role];
   const result = S._quizResult;
@@ -5895,6 +6011,8 @@ function renderResults() {
     <div class="alert ${overall>=80?'alert-success':overall>=60?'alert-warning':'alert-info'}">
       ${overall>=80 ? '🎯 你的AI能力较强，课程将聚焦高阶应用和体系化建设' : overall>=60 ? '📈 你的AI能力有较好基础，课程将帮助你将能力转化为生产力' : '🚀 你处于AI应用起步阶段，课程将从基础开始帮助你建立AI思维'}
     </div>
+
+    ${renderQuizQualityCard(result)}<!-- v34: 作答质量卡片 -->
 
     <!-- Radar Chart -->
     <p style="font-weight:600;font-size:14px;margin:20px 0 8px;">能力雷达图（8维度）</p>
@@ -6893,6 +7011,27 @@ function renderAdmin() {
 S.selectIndustry = function(id) { S.industry = id; render(); };
 S.selectRole = function(id) { S.role = id; render(); };
 S.startQuiz = function() { startAdaptiveQuiz(); S.view = 'quiz'; render(); };
+S.retakeQuiz = function() { // v34: 重新测评（带确认，防误触清成绩）
+  showConfirm({
+    title: '🔄 重新测评',
+    msg: '重新测评将<b>清空当前测评成绩</b>，并重新开始 8 维度自适应测评。<br>确定继续吗？',
+    okText: '重新测评',
+    cancelText: '再想想',
+    danger: true,
+    onOk: () => {
+      S.quizScores = null;
+      S._quizResult = null;
+      S.quizAnswers = {};
+      S._quizSelected = {};
+      S._quizStartAt = {};
+      S._quizTiming = {};
+      S._quizCurrentLevel = {};
+      S.view = 'quiz';
+      startAdaptiveQuiz();
+      render();
+    }
+  });
+};
 S.answerQuiz = function(i) { answerCurrentQuestion(i); };
 S.prevQuestion = function() { if(S._quizDims && S.quizIdx>0) { S.quizIdx--; render(); } };
 S.nextQuestion = function() { adaptLevelForCurrentDim(); if(S._quizDims && S.quizIdx < S._quizDims.length-1) { S.quizIdx++; render(); } else { finishAdaptiveQuiz(); } };
@@ -7271,6 +7410,7 @@ function bindEvents() {
             case 'selectRole': S.selectRole(id); break;
             case 'startQuiz': S.startQuiz(); break;
             case 'answerQuiz': S.answerQuiz(idx); break;
+            case 'retakeQuiz': S.retakeQuiz(); break;
             case 'prevQuestion': S.prevQuestion(); break;
             case 'nextQuestion': S.nextQuestion(); break;
             case 'loadEmployee': S.loadEmployee(idx); break;
