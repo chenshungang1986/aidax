@@ -1408,8 +1408,7 @@ function startAdaptiveQuiz() {
   const byDim = getQuizQuestions(S.role, S.industry);
   
   // Fisher-Yates shuffle: randomize options on every question to prevent "always pick last" pattern
-  const dims = Object.keys(byDim);
-  dims.forEach(function(d) {
+  Object.keys(byDim).forEach(function(d) {
     for (var lv = 0; lv <= 2; lv++) {
       var q = byDim[d] && byDim[d][lv];
       if (!q || !q.opts || !q.scores || q.opts.length < 2) continue;
@@ -1428,27 +1427,119 @@ function startAdaptiveQuiz() {
     }
   });
   
+  // v41 D4 修复：维度必须"至少有一个级别存在题目"才算可测（杜绝空维度提前结束测评）
   const dimOrder = Object.entries(weights)
-    .filter(([k,w]) => w > 0 && byDim[k])
+    .filter(([k,w]) => w > 0 && dimHasAnyQuestion(byDim, k))
     .sort((a,b) => b[1] - a[1])
     .map(([k]) => k);
+
+  // ===== v41 自适应引擎状态：同维连答 ≤2 题，按表现升降难度，证据链映射 0-4 =====
   S._quizDims = dimOrder;
   S._quizByDim = byDim;
   S._quizWeights = weights;
-  S._quizCurrentLevel = {};
-  dimOrder.forEach(d => { S._quizCurrentLevel[d] = 0; }); // 0=初阶 1=中阶 2=高阶
-  S.quizIdx = 0;
-  S.quizAnswers = {};
-  S._quizSelected = {};
+  S.quizIdx = 0;                    // 语义：_quizPlan 题序列索引
+  S.quizAnswers = {};               // {dimKey: 0-4 定级分}（最终定级，非单题原始分）
+  S._quizDone = {};                 // {dimKey: grade} 已定级维度
+  S._quizLog = {};                  // {dimKey: [{lv, score, dur, ansIdx, step}]} 证据链
+  S._quizPlan = [];                 // [{d, lv, q}] 动态题序列（题对象取自 _quizByDim）
+  S._quizSelectedStep = {};         // {step: ansIdx} 每题已选
+  S._quizStartAt = {};              // {step: ts} 每题开始展示时间（防猜题按题独立）
+  S._quizTiming = {};               // {step: durMs} 每题作答耗时
+  S._quizAllDone = false;           // 全部维度定级完成
   S.quizScores = null;
+  S._quizResult = null;
+  ensureNextStep();                 // 生成第 1 题（首个维度起点题）
+}
+
+// ===== v41 自适应引擎：同维连答状态机 =====
+
+// 该维是否有任一难度级别存在题目（D4 修复）
+function dimHasAnyQuestion(byDim, k) {
+  return !!(byDim[k] && (byDim[k][0] || byDim[k][1] || byDim[k][2]));
+}
+
+function hasLevel(dim, lv) {
+  return !!(S._quizByDim && S._quizByDim[dim] && S._quizByDim[dim][lv]);
+}
+
+// 起点级别：优先 L1（中阶）；无 L1 则取该维最低有题级别（兜底：单证据定级）
+function pickStartLevel(dim) {
+  if (hasLevel(dim, 1)) return 1;
+  if (hasLevel(dim, 0)) return 0;
+  if (hasLevel(dim, 2)) return 2;
+  return -1;
+}
+
+// 追加一道题到计划末尾
+function pushPlanQuestion(dim, lv) {
+  const q = S._quizByDim[dim] && S._quizByDim[dim][lv];
+  if (!q) return false;
+  S._quizPlan.push({ d: dim, lv: lv, q: q });
+  return true;
+}
+
+// 定级决策表：证据链(≤2 条跨级) → 0-4（见 design/adaptive_engine.md §3.3）
+function gradeDimFromEvidence(ev) {
+  if (!ev || !ev.length) return 0;
+  const E = ev.map(x => ({ lv: x.lv, r: x.score >= 3 ? 'P' : x.score === 2 ? 'M' : 'F' }));
+  if (E.length >= 2) {
+    const a = E[0], b = E[1];              // a 起点(L1/L0)，b 相邻级(L2/L0)
+    if (a.r === 'P') return b.r === 'P' ? 4 : 3;   // 升测：L2 PASS→4，否则 3
+    return b.lv === 0 ? (b.r === 'P' ? 2 : b.r === 'M' ? 1 : 0) : 0;  // 降测 L0
+  }
+  const x = E[0];                          // 单证据（目标级无题 / 起点兜底级）
+  if (x.r === 'P') return x.lv === 2 ? 4 : x.lv === 1 ? 3 : 2;   // L0 PASS→2（缺题封顶）
+  return x.lv === 0 ? 0 : (x.r === 'M' ? 1 : 0);                 // 保守下限
+}
+
+function finalizeDim(dim) {
+  const grade = gradeDimFromEvidence(S._quizLog[dim] || []);
+  S.quizAnswers[dim] = grade;
+  S._quizDone[dim] = grade;
+}
+
+// 计划推进状态机（commitAnswer 后调用）：
+// 本维第 1 题已答 → PASS 升测 L2 / MID·FAIL 降测 L0（无目标级题则单证据定级）；
+// 第 2 题已答 → 定级收口；随后自动开下一未测维；全部定级 → _quizAllDone
+function ensureNextStep() {
+  if (!S._quizPlan) S._quizPlan = [];
+  const last = S._quizPlan.length ? S._quizPlan[S._quizPlan.length - 1] : null;
+  let dim = last ? last.d : null;
+
+  // 该维已定级（收口完成）→ 直接开新维
+  if (dim && (dim in S._quizDone)) dim = null;
+
+  // 本维第 1 题已答、尚未收口 → 决定是否出第 2 题
+  if (dim) {
+    const ev = S._quizLog[dim] || [];
+    if (ev.length === 1) {
+      const first = ev[0];
+      let nextLv = -1;
+      if (first.score >= 3 && first.lv < 2 && hasLevel(dim, 2)) nextLv = 2;        // PASS → 升测高阶
+      else if (first.score < 3 && first.lv > 0 && hasLevel(dim, 0)) nextLv = 0;    // MID/FAIL → 降测初阶
+      if (nextLv >= 0) { pushPlanQuestion(dim, nextLv); return; }
+      finalizeDim(dim);                                                             // 目标级无题 → 单证据定级
+    } else if (ev.length >= 2) {
+      finalizeDim(dim);                                                             // 两题证据齐 → 定级收口
+    }
+  }
+
+  // 开新维：取权重降序中第一个未定级维
+  for (const d of S._quizDims) {
+    if (d in S._quizDone) continue;
+    const lv = pickStartLevel(d);
+    if (lv >= 0 && pushPlanQuestion(d, lv)) return;
+    // 防御：该维无题（已被 filter 排除，理论不可达）
+  }
+
+  // 全部维度已定级
+  S._quizAllDone = true;
 }
 
 function getCurrentQuestion() {
-  if (!S._quizDims || S.quizIdx >= S._quizDims.length) return null;
-  const dimKey = S._quizDims[S.quizIdx];
-  if (!S._quizByDim) return null;
-  const level = S._quizCurrentLevel[dimKey] !== undefined ? S._quizCurrentLevel[dimKey] : 0;
-  return S._quizByDim[dimKey][level] || S._quizByDim[dimKey][0] || S._quizByDim[dimKey][1] || S._quizByDim[dimKey][2];
+  if (!S._quizPlan || S.quizIdx >= S._quizPlan.length) return null;
+  const t = S._quizPlan[S.quizIdx];
+  return t ? t.q : null;
 }
 
 // ===== 测评可信度增强 (v34): 防猜题 + 作答质量报告 =====
@@ -1478,51 +1569,72 @@ function showConfirm(opts) {
   return overlay;
 }
 
-// 记录题目开始展示时间（每次渲染当前题目时确保存在，已作答则不重置）
-function ensureQuizTiming(dimKey) {
+// 记录题目开始展示时间（v41：按 step 每题独立计时，已作答则不重置）
+function ensureQuizTiming(step) {
   S._quizStartAt = S._quizStartAt || {};
-  if (S._quizStartAt[dimKey] === undefined && !(S._quizSelected && S._quizSelected[dimKey] !== undefined)) {
-    S._quizStartAt[dimKey] = Date.now();
+  if (S._quizStartAt[step] === undefined && !(S._quizSelectedStep && S._quizSelectedStep[step] !== undefined)) {
+    S._quizStartAt[step] = Date.now();
   }
 }
 
-// 真正提交答案（防猜题确认通过后走这里）
-function commitAnswer(dimKey, answerIdx) {
-  S._quizSelected = S._quizSelected || {};
-  S._quizSelected[dimKey] = answerIdx;
-  // Also compute and store score so partial answers are preserved
-  const q = getCurrentQuestion();
-  if (q) {
-    const score = q.scores ? q.scores[answerIdx] : answerIdx;
-    S.quizAnswers[dimKey] = score;
+// 真正提交答案（防猜题确认通过后走这里）。
+// v41：写每题已选 + 追加该维证据链；证据收口后定级（quizAnswers[dim]=0-4），并推进计划生成下一题
+function commitAnswer(step, answerIdx) {
+  S._quizSelectedStep = S._quizSelectedStep || {};
+  S._quizSelectedStep[step] = answerIdx;
+  const t = S._quizPlan && S._quizPlan[step];
+  if (!t) { render(); return; }
+  // 改答本维第 1 题：作废已预生成、尚未作答的同维第 2 题（防重复出题）
+  if (S._quizPlan.length > step + 1) {
+    const tail = S._quizPlan[S._quizPlan.length - 1];
+    if (tail.d === t.d) {
+      const tailStep = S._quizPlan.length - 1;
+      S._quizPlan.pop();
+      if (S._quizSelectedStep) delete S._quizSelectedStep[tailStep];
+      if (S._quizStartAt) delete S._quizStartAt[tailStep];
+      if (S._quizTiming) delete S._quizTiming[tailStep];
+    }
   }
+  const q = t.q;
+  const score = (q.scores && q.scores[answerIdx] !== undefined) ? q.scores[answerIdx] : answerIdx;
+  const start = (S._quizStartAt && S._quizStartAt[step]) || Date.now();
+  const dur = Date.now() - start;
+  S._quizTiming = S._quizTiming || {};
+  S._quizTiming[step] = dur;
+  // 证据：同 step 旧证据先剔除再追加（支持重答覆盖，保证每维 ≤2 条且级别唯一）
+  S._quizLog = S._quizLog || {};
+  if (!S._quizLog[t.d]) S._quizLog[t.d] = [];
+  S._quizLog[t.d] = S._quizLog[t.d].filter(e => e.step !== step);
+  S._quizLog[t.d].push({ lv: t.lv, score: score, dur: dur, ansIdx: answerIdx, step: step });
+  // 防御：该维此前已定级（理论仅回退后可达）→ 撤销定级重走流程
+  if (t.d in S._quizDone) { delete S._quizDone[t.d]; delete S.quizAnswers[t.d]; S._quizAllDone = false; }
+  ensureNextStep();   // 出第 2 题 / 定级开新维 / 置 _quizAllDone
   render();
 }
 
 function answerCurrentQuestion(answerIdx) {
-  // Record the selected option index for the current dimension
-  if (!S._quizDims) return;
-  const dimKey = S._quizDims[S.quizIdx];
-  const isFirst = !(S._quizSelected && S._quizSelected[dimKey] !== undefined);
+  if (!S._quizPlan) return;
+  const step = S.quizIdx;
+  const t = S._quizPlan[step];
+  if (!t) return;
+  const isFirst = !(S._quizSelectedStep && S._quizSelectedStep[step] !== undefined);
   if (isFirst) {
-    // 防猜题：首次作答计时，快速作答需二次确认
-    const start = (S._quizStartAt && S._quizStartAt[dimKey]) || Date.now();
+    // 防猜题：本题首次作答计时，快速作答需二次确认
+    const start = (S._quizStartAt && S._quizStartAt[step]) || Date.now();
     const dur = Date.now() - start;
-    S._quizTiming = S._quizTiming || {};
-    S._quizTiming[dimKey] = dur;
     if (dur < FAST_ANSWER_MS) {
       showConfirm({
         title: '⏱️ 检测到快速作答',
-        msg: `本维度仅用 <b>${(dur / 1000).toFixed(1)} 秒</b>作答，可能未仔细审题。<br>请确认是否提交该答案？`,
+        msg: `本题仅用 <b>${(dur / 1000).toFixed(1)} 秒</b>作答，可能未仔细审题。<br>请确认是否提交该答案？`,
         okText: '确认提交',
         cancelText: '返回重新审题',
         danger: true,
-        onOk: () => commitAnswer(dimKey, answerIdx)
+        onOk: () => commitAnswer(step, answerIdx)
       });
       return;
     }
   }
-  commitAnswer(dimKey, answerIdx);
+  commitAnswer(step, answerIdx);
 }
 
 // 汇总作答质量：平均用时 / 快速作答数 / 可信度评级
@@ -1541,22 +1653,7 @@ function calcQuizQuality() {
   return { totalMs, avgMs, fastCount, fastRatio, fastestMs, level, n: vals.length };
 }
 
-// Adapt difficulty level for current dimension based on answer score.
-// Called by nextQuestion and finishQuiz when leaving a dimension.
-function adaptLevelForCurrentDim() {
-  if (!S._quizDims) return;
-  const dimKey = S._quizDims[S.quizIdx];
-  if (!dimKey) return;
-  const rawScore = S.quizAnswers[dimKey];
-  if (rawScore === undefined) return;
-  const normScore = rawScore / 4;
-  const currentLevel = S._quizCurrentLevel[dimKey] !== undefined ? S._quizCurrentLevel[dimKey] : 0;
-  if (normScore >= 0.75 && currentLevel < 2) {
-    S._quizCurrentLevel[dimKey] = currentLevel + 1;
-  } else if (normScore <= 0.25 && currentLevel > 0) {
-    S._quizCurrentLevel[dimKey] = currentLevel - 1;
-  }
-}
+// v41: 难度自适应已并入 ensureNextStep()（同维连答升/降级），此函数删除
 
 function finishAdaptiveQuiz() {
   const result = calculateAdaptiveScores();
@@ -6720,7 +6817,8 @@ const FINAL_QUIZZES = {
 const S = {
   view:'role', // role|quiz|results|dashboard|course|task|final|admin|map|schedule
   industry:null, role:null,
-  quizIdx:0, quizAnswers:[], quizScores:null,
+  quizIdx:0, quizAnswers:{}, quizScores:null,
+  _quizDone:{}, _quizLog:{}, _quizPlan:[], _quizSelectedStep:{}, _quizStartAt:{}, _quizTiming:{}, _quizAllDone:false,
   courseIdx:null, courseTaskIdx:0, courseProgress: JSON.parse(localStorage.getItem('ai_training_progress') || '{}'),
   finalAnswers:[], finalSubjAnswers:{}, finalScore:null, finalSubmitted:false, finalShowHint:{},
   taskShowHint:{}, taskShowAnswer:{},
@@ -6989,23 +7087,24 @@ function renderRoleSelection() {
   return html;
 }
 
-// ---- QUIZ ----
+// ---- QUIZ (v41: 同维连答自适应 UI) ----
 function renderQuiz() {
-  if (!S._quizDims || !S._quizByDim) {
+  if (!S._quizPlan || !S._quizPlan.length) {
     // fallback to legacy
     const role = ROLES[S.role];
     return headerHtml('AI能力测评', role ? role.icon + ' ' + role.name : '', true) +
            '<div class="card text-center"><p style="padding:40px;color:var(--text2)">正在初始化测评...</p></div>';
   }
-  const dimKey = S._quizDims[S.quizIdx];
-  if (!dimKey) {
+  const step = S.quizIdx;
+  const t = S._quizPlan[step];
+  if (!t) {
     finishAdaptiveQuiz();
     return '';
   }
-  ensureQuizTiming(dimKey); // v34: 记录题目展示起始时间（防猜题计时）
+  ensureQuizTiming(step); // v34: 记录本题展示起始时间（防猜题计时，每题独立）
+  const dimKey = t.d;
   const dimInfo = AI_DIMS[dimKey];
-  const level = S._quizCurrentLevel[dimKey] !== undefined ? S._quizCurrentLevel[dimKey] : 0;
-  const q = getCurrentQuestion();
+  const q = t.q;
   if (!q) {
     finishAdaptiveQuiz();
     return '';
@@ -7015,46 +7114,70 @@ function renderQuiz() {
   const scenarioHtml = q.scenario
     ? `<div style="font-size:13px;color:var(--accent);margin-bottom:12px;padding:10px 14px;background:var(--bg2);border-radius:8px;border-left:3px solid var(--accent);">${indCtx}${q.scenario.replace('场景：','')}</div>`
     : '';
-  const hasAnswered = S.quizAnswers[dimKey] !== undefined;
-  // On first visit always show 中阶 (level 1); on revisit show adapted level
-  const displayLevel = hasAnswered ? level : 1;
   const levelNames = ['初阶','中阶','高阶'];
-  const levelName = levelNames[displayLevel] || '中阶';
+  const levelName = levelNames[t.lv] || '中阶';
   const totalDims = S._quizDims.length;
-  const dimIdx = S.quizIdx; // 0-based
+  const dimPos = S._quizDims.indexOf(dimKey); // 0-based 维度序
+  // 本维内第几题：回看 plan 中同维第 1 题位置
+  let dimStart = step;
+  while (dimStart > 0 && S._quizPlan[dimStart-1].d === dimKey) dimStart--;
+  const qNoInDim = step - dimStart + 1;
+  const stepAnswered = !!(S._quizSelectedStep && S._quizSelectedStep[step] !== undefined);
 
-  // Progress dots: one dot per dimension, highlight current
+  // Progress dots: one dot per dimension — 未测灰 / 当前蓝 / 已定级绿
   let dots = '';
   for (let i=0; i<totalDims; i++) {
-    let cls = '';
-    if (i < dimIdx) cls = 'done';
-    else if (i === dimIdx) cls = 'current';
-    dots += `<div class="quiz-dot ${cls}"></div>`;
+    const d = S._quizDims[i];
+    let cls = S._quizDone[d] !== undefined ? 'done' : (d === dimKey ? 'current' : '');
+    dots += `<div class="quiz-dot ${cls}" title="${(AI_DIMS[d] && AI_DIMS[d].name) || d}"></div>`;
   }
 
-  let html = headerHtml(dimInfo.icon + ' ' + dimInfo.name + ' · ' + levelName, `能力维度 ${dimIdx+1}/${totalDims}`, true);
+  let html = headerHtml(dimInfo.icon + ' ' + dimInfo.name + ' · ' + levelName, `能力维度 ${dimPos+1}/${totalDims}`, true);
   html += `<div class="card slide-up">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
       <span class="tag tag-blue">${dimInfo.short}</span>
-      <span style="font-size:12px;color:var(--text2);">${levelName} · 难度 ${['低','中','高'][displayLevel]}${hasAnswered ? '<span style="color:var(--amber);margin-left:4px;">(根据你上次的回答已调整)</span>' : ''}</span>
+      <span style="font-size:12px;color:var(--text2);">${levelName} · 难度 ${['低','中','高'][t.lv] || '中'} · 本维第 ${qNoInDim}/2 题</span>
+      <span style="margin-left:auto;font-size:12px;font-weight:600;color:${Object.keys(S._quizDone).length === totalDims ? 'var(--green)' : 'var(--text2)'};">已定级 ${Object.keys(S._quizDone).length}/${totalDims} 维</span>
     </div>
     <div class="quiz-progress">${dots}</div>
     ${scenarioHtml}
     <div class="quiz-question">${q.q}</div>
     <div style="display:flex;flex-direction:column;">`;
-  const sel = S._quizSelected ? S._quizSelected[dimKey] : undefined;
+  const sel = stepAnswered ? S._quizSelectedStep[step] : undefined;
   q.opts.forEach((o, i) => {
     let cls = 'quiz-option';
     if (sel !== undefined && sel === i) cls += ' selected';
     html += `<button class="${cls}" data-action="answerQuiz" data-idx="${i}" onclick="if(typeof S!=='undefined'){S.answerQuiz(${i})}">${String.fromCharCode(65+i)}. ${o}</button>`;
   });
-  const hasSelected = sel !== undefined;
-  html += `</div>
-    <div class="flex-between mt-4">
-      <button class="btn btn-outline" data-action="prevQuestion" ${dimIdx===0?'disabled':''} onclick="if(typeof S!=='undefined'){S.prevQuestion()}">上一维度</button>
-      <span style="font-size:13px;color:${hasSelected?'var(--text2)':'var(--red)'};">${Object.keys(S.quizAnswers).length}/${totalDims} 已完成${hasSelected?'':'（请先选择答案）'}</span>
-      ${dimIdx >= totalDims-1?'<button class="btn btn-primary" data-action="finishQuiz"'+(hasSelected?'': ' disabled')+' onclick="if(typeof S!==\'undefined\'){S.finishQuiz()}">查看结果</button>':
-        '<button class="btn btn-primary" data-action="nextQuestion"'+(hasSelected?'': ' disabled')+' onclick="if(typeof S!==\'undefined\'){S.nextQuestion()}">下一维度 →</button>'}
+  html += `</div>`;
+
+  // 作答反馈条：本题表现三态 + 下一题难度预告（让考生感知自适应）
+  if (stepAnswered) {
+    const evLog = (S._quizLog && S._quizLog[dimKey]) || [];
+    const evNow = evLog.filter(e => e.step === step);
+    const sc = evNow.length ? evNow[0].score : 0;
+    const verdict = sc >= 3 ? {t:'掌握 ✓', c:'var(--green)'} : sc === 2 ? {t:'边缘 △', c:'var(--amber)'} : {t:'未掌握 ✗', c:'var(--red)'};
+    let nextHint = '';
+    if (step + 1 < S._quizPlan.length && S._quizPlan[step+1].d === dimKey) {
+      nextHint = S._quizPlan[step+1].lv > t.lv
+        ? '<span style="color:var(--green);">答得不错，下一题将升测高阶 ⬆</span>'
+        : '<span style="color:var(--amber);">本难度的关键要素尚未掌握，下一题将降测初阶 ⬇</span>';
+    } else if (S._quizAllDone) {
+      nextHint = '<span style="color:var(--green);">该维已定级，可查看结果</span>';
+    }
+    html += `<div style="font-size:13px;margin:12px 2px 0;color:var(--text2);display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+      <span>本题表现：<b style="color:${verdict.c};">${verdict.t}</b></span>${nextHint}</div>`;
+  }
+
+  const canBackToFirst = step > 0 && S._quizPlan[step-1].d === dimKey; // 本维第 2 题 → 可回退重答第 1 题
+  const isLastPlan = step >= S._quizPlan.length - 1;
+  const doneCount = Object.keys(S._quizDone).length;
+  html += `<div class="flex-between mt-4">
+      <button class="btn btn-outline" data-action="prevQuestion" ${canBackToFirst ? '' : 'disabled'} onclick="if(typeof S!=='undefined'){S.prevQuestion()}">↺ 重答本维第一题</button>
+      <span style="font-size:13px;color:${stepAnswered ? 'var(--text2)' : 'var(--red)'};">${doneCount}/${totalDims} 已完成${stepAnswered ? '' : '（请先选择答案）'}</span>
+      ${stepAnswered && isLastPlan && S._quizAllDone
+        ? '<button class="btn btn-primary" data-action="finishQuiz" onclick="if(typeof S!==\'undefined\'){S.finishQuiz()}">查看结果</button>'
+        : '<button class="btn btn-primary" data-action="nextQuestion"' + (stepAnswered ? '' : ' disabled') + ' onclick="if(typeof S!==\'undefined\'){S.nextQuestion()}">下一题 →</button>'}
     </div>
   </div>`;
   return html;
@@ -8383,28 +8506,42 @@ S.startQuiz = function() { startAdaptiveQuiz(); S.view = 'quiz'; render(); };
 S.retakeQuiz = function() { // v34: 重新测评（带确认，防误触清成绩）
   showConfirm({
     title: '🔄 重新测评',
-    msg: '重新测评将<b>清空当前测评成绩</b>，并重新开始 8 维度自适应测评。<br>确定继续吗？',
+    msg: '重新测评将<b>清空当前测评成绩</b>，并重新开始自适应测评（每维 1-2 题，按表现自动升降难度）。<br>确定继续吗？',
     okText: '重新测评',
     cancelText: '再想想',
     danger: true,
     onOk: () => {
       S.quizScores = null;
       S._quizResult = null;
-      S.quizAnswers = {};
-      S._quizSelected = {};
-      S._quizStartAt = {};
-      S._quizTiming = {};
-      S._quizCurrentLevel = {};
       S.view = 'quiz';
-      startAdaptiveQuiz();
+      startAdaptiveQuiz(); // v41: 内部完整重置引擎状态并生成第 1 题
       render();
     }
   });
 };
 S.answerQuiz = function(i) { answerCurrentQuestion(i); };
-S.prevQuestion = function() { if(S._quizDims && S.quizIdx>0) { S.quizIdx--; render(); } };
-S.nextQuestion = function() { adaptLevelForCurrentDim(); if(S._quizDims && S.quizIdx < S._quizDims.length-1) { S.quizIdx++; render(); } else { finishAdaptiveQuiz(); } };
-S.finishQuiz = function() { adaptLevelForCurrentDim(); finishAdaptiveQuiz(); };
+S.prevQuestion = function() { // v41: 仅允许回退到本维第 1 题（撤销第 2 题，含已定级撤销）
+  if (!S._quizPlan || S.quizIdx <= 0) return;
+  const cur = S._quizPlan[S.quizIdx];
+  const prev = S._quizPlan[S.quizIdx - 1];
+  if (!cur || !prev || cur.d !== prev.d) return;
+  const step = S.quizIdx;
+  S._quizPlan.pop();
+  if (S._quizLog && S._quizLog[cur.d]) S._quizLog[cur.d] = S._quizLog[cur.d].filter(e => e.step !== step);
+  if (S._quizSelectedStep) delete S._quizSelectedStep[step];
+  if (S._quizStartAt) delete S._quizStartAt[step];
+  if (S._quizTiming) delete S._quizTiming[step];
+  if (cur.d in S._quizDone) { delete S._quizDone[cur.d]; delete S.quizAnswers[cur.d]; }
+  S._quizAllDone = false;
+  S.quizIdx--;
+  render();
+};
+S.nextQuestion = function() { // v41: 推进到计划中的下一题；计划出尽（已全部定级）则出结果
+  if (!S._quizPlan) return;
+  if (S.quizIdx < S._quizPlan.length - 1) { S.quizIdx++; render(); }
+  else { finishAdaptiveQuiz(); }
+};
+S.finishQuiz = function() { finishAdaptiveQuiz(); };
 S.calcResults = function() {
   const questions = ASSESSMENTS[S.role];
   const scores = Array(ROLES[S.role].skills.length).fill(0);
@@ -8521,7 +8658,7 @@ S.saveAndFinish = function() {
   saveEmployees();
   alert('数据已保存！');
 };
-S.reset = function() { stopVoice(); S.industry=null; S.role=null; S.view='role'; S.quizIdx=0; S.quizAnswers=[]; S._quizSelected={}; S._quizDims=null; S._quizByDim=null; S._quizCurrentLevel={}; S._quizWeights=null; S._quizResult=null; S.quizScores=null; S.courseIdx=null; S.courseTaskIdx=0; S.courseProgress={}; S.finalAnswers=[]; S.finalSubjAnswers={}; S.finalScore=null; S.finalSubmitted=false; S.finalShowHint={}; S.currentEmployee=null; render(); };
+S.reset = function() { stopVoice(); S.industry=null; S.role=null; S.view='role'; S.quizIdx=0; S.quizAnswers={}; S._quizDims=null; S._quizByDim=null; S._quizWeights=null; S._quizResult=null; S.quizScores=null; S._quizDone={}; S._quizLog={}; S._quizPlan=[]; S._quizSelectedStep={}; S._quizStartAt={}; S._quizTiming={}; S._quizAllDone=false; S.courseIdx=null; S.courseTaskIdx=0; S.courseProgress={}; S.finalAnswers=[]; S.finalSubjAnswers={}; S.finalScore=null; S.finalSubmitted=false; S.finalShowHint={}; S.currentEmployee=null; render(); };
 S.goAdmin = function() { S.view='admin'; render(); };
 S.logout = function() {
   stopVoice();
