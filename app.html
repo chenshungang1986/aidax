@@ -4548,6 +4548,76 @@ const HR_QUIZ_V2 = {
   ]
 };
 
+// ===== AI 基础知识题库（v51 新增：岗位无关·通用认知卷 6主题×7题=42题）=====
+// 结构：每主题一数组、每行 1 题 {level(0-2), q, opts(5项·无字母前缀·UI渲染时统一加), scores:[4,0,0,0,0], best:0, explain}
+// 内容：boundary 能力边界 / principle 基础原理 / prompt 提示词基础 / agent Agent基础 / kb 知识库(RAG)基础 / compliance 安全合规
+// 长度规范（源头即无「选最长」线索）：A=正确项(中等长)；B=编号式超长 rival plan(0分·严格长于A与C/D/E)；C/D/E=含致命缺陷干扰项(0分·短于A且≥20字)
+const AI_BASE_QUIZ = {
+  boundary: [
+    {level:0,difficulty:"初阶",q:"关于生成式 AI（大模型）的能力边界，以下说法正确的是？",opts:["生成式 AI 擅长语言理解、文本创作、信息归纳等模式类任务，但对实时事实、精确计算和真实世界操作存在明显局限，需要配合工具与人工核验使用","随着模型不断升级，AI 将很快在所有任务上完全替代人类，写代码、做手术、开飞机、做投资决策都无需人再参与，人类只需提供电力与数据即可，当前使用中遇到的任何错误都只是版本还不够新，因此应把所有关键决策无保留地交给 AI，越早全面依赖越能抢占先机","AI 本质上就是一台超级计算机，任何问题只要问它都能给出绝对正确的答案，不存在出错的可能","大模型只能用来聊天解闷，写文案、做分析、处理数据这类实际工作它一概做不了","AI 的回答全部来自联网实时检索，所以它给出的新闻、股价与内部资料永远是最新且可信的"],scores:[4,0,0,0,0],best:0,explain:"大模型靠模式预测生成内容，擅长语言与模式类任务；事实性、精确性与实时性恰恰是短板。理解边界才不会误用。"},
+    {level:0,difficulty:"初阶",q:"你让 AI 帮你算一组财务数据并直接给出结论，最稳妥的做法是？",opts:["让 AI 分步展示计算过程与所用口径，再用 Excel 或代码对关键结果做交叉验算，确认无误后才采用","把全部数据交给 AI 后让它一次性算出结果并直接写进报告对外发布，理由是 AI 计算又快又准，人工复核既浪费时间又显得不信任工具，若真算错了那也是 AI 的错，与使用者无关","让 AI 直接口算给出一个大概数字，差个几万块无所谓，反正是内部参考","把 AI 当计算器用，直接问这笔账是多少，它说多少就填多少","先让 AI 算一遍，再凭自己的直觉判断结果像不像对的，感觉差不多就采用"],scores:[4,0,0,0,0],best:0,explain:"AI 不擅长精确多步计算，容易在中间环节出错。关键数据必须要求分步展示并交叉验算——AI 提效率，人来保准确。"},
+    {level:0,difficulty:"初阶",q:"以下哪类决策最不适合完全交给 AI 自动拍板、不做人工复核？",opts:["涉及重大利益的敏感决策，如录用与辞退员工、信贷审批、医疗诊断建议——这些场景 AI 只能辅助，最终责任必须由人来承担","凡是 AI 给出的方案都让 AI 自己执行到底，包括自动发送邮件、对外承诺客户、审批付款与发布公告，认为 AI 比人更冷静更不容易出错，只要告诉它目标和权限，它就会在无人监督的情况下把整条链路跑完，出了问题再追究也不迟","下周团队内部例会的议程排序，先后顺序对业务几乎没有影响","给部门周报起一个吸引眼球的标题，措辞风格不影响事实准确性","午餐点哪家外卖这种与工作结果无关的日常琐事"],scores:[4,0,0,0,0],best:0,explain:"决策影响越大、越涉及责任与合规，越需要人审。AI 是辅助工具，不是责任主体；高风险决策必须保留人的判断与问责。"},
+    {level:1,difficulty:"中阶",q:"同事给你一份 AI 生成的行业分析报告，里面引用了若干数据与出处。你要引用到正式方案里，首先应该？",opts:["先核对报告中的数据与引用来源是否真实存在、口径是否可靠，再把核实过的部分引用到方案中","让 AI 再生成一份引用更权威、数字更漂亮的报告，直接拿去汇报，理由是正式场合需要看起来专业的数据支撑，来源是否真实很少有人去查，就算被追问也可以解释为引自公开研究，先把方案通过再说","把报告原文整段复制进方案，相信 AI 不会编造来源","只看结论部分，把数据图表原样贴进 PPT 用于对外路演","觉得 AI 引用的出处太冷门，换成几家知名机构的名字贴上去"],scores:[4,0,0,0,0],best:0,explain:"AI 生成的数据与引用可能纯属编造（幻觉）。引用进正式材料前必须核实来源真实性——这是基本的信息素养。"},
+    {level:1,difficulty:"中阶",q:"以下任务中，最适合放心交给 AI 完成的是？",opts:["把长篇会议录音转写成文字稿并归纳要点——机械转写与摘要归纳是 AI 的强项，人工只需复核关键结论","让 AI 代表你在跨部门冲突中向对方部门负责人发一封措辞强硬的交涉邮件并抄送双方领导，认为 AI 最懂谈判话术，能替你争取最大利益，邮件发出后若引发矛盾那也是按你要求写的，与你无关","让 AI 替你在员工绩效面谈中向对方传达本次考核不达标的结论，省去当面沟通的尴尬","让 AI 替你决定今年要不要跟伴侣分手，理由是你俩吵架的聊天记录它都看过、最了解你们","把公司年度审计底稿交给 AI 全权填报并直接报给事务所，不再安排任何人工复核"],scores:[4,0,0,0,0],best:0,explain:"机械性、模式化的任务适合 AI；涉及信任、责任与人际温度的场合要由人来完成。选对场景才是会用 AI。"},
+    {level:2,difficulty:"高阶",q:"公司要制定《AI 使用边界规范》，以下哪条原则最能避免责任与合规风险？",opts:["按 AI 建议、人决策分层：AI 产出草稿与建议，凡对外发布、资金与人事等关键动作必须经有权人员审核确认并负责","给每位员工开放不限量的 AI 权限，鼓励把包括客户数据、源代码在内的资料全部喂给 AI 以获得最佳效果，认为内部数据不对外公开就不算泄露，出了问题由 AI 厂商承担责任，公司无需制定使用边界，只要在员工手册里写一句请合理使用 AI 即可","只要 AI 生成的结论就一定是客观中立的，因此对外文档无需再走人工审批流程","规范只管住实习生和外包员工，正式员工使用 AI 不受任何约束","把规范做成 80 页的法律文书挂在内网，要求全员自行阅读领会，不做培训也不设检查"],scores:[4,0,0,0,0],best:0,explain:"边界规范的核心是责任分层：AI 永远在建议层，关键动作由人审核拍板并负责。只有责任落到人，使用才会审慎。"},
+    {level:2,difficulty:"高阶",q:"关于 AI 会取代我的工作吗，以下认知最准确的是？",opts:["AI 会替代的是任务而非岗位：重复、模式化的任务被自动化，善用 AI 的人可以把精力转向判断、协同与创新等高价值工作","AI 已经具备与人类相同的理解与创造能力，只是暂时被限制在对话框里，一旦开放权限就能独立承担任何岗位的全部职责，与其学习使用它不如现在就转行，因为所有需要人的工作终将被机器取代，学习 AI 只会让你被取代得更快","只要公司没引入 AI，自己的工作就永远不会受任何影响，可以完全按老办法做事","AI 只能替代体力劳动和流水线工人，白领知识工作永远安全，无需关注","取代与否取决于 AI 的版本号，等它再更新两代自然会给出明确答案，现在不必准备"],scores:[4,0,0,0,0],best:0,explain:"历史规律是任务自动化而非岗位整体消失。与其焦虑被取代，不如主动掌握 AI，把精力转向 AI 不擅长的判断与协同。"}
+  ],
+  principle: [
+    {level:0,difficulty:"初阶",q:"大语言模型（如 ChatGPT、文心一言等）本质上是？",opts:["在海量文本上训练出来的统计模型，根据上文预测最合理的下一个字词来生成内容，并不具备人类意义上的理解与意识","一个能实时联网检索全世界所有数据库的超级搜索引擎，你问什么它就从互联网上把现成答案原样抓给你，所以它说的每一句话都必然有权威出处、绝对真实可靠，把它当成随问随答的百科全书的升级版即可","一台被灌入了人类全部知识的巨型硬盘，回答问题时直接从硬盘里把对应条目拷贝出来","具备自我意识和情感的程序，能像人一样思考、感受并形成自己的观点主张","由程序员逐条编写规则与标准答案的普通软件，遇到没写过的规则就只能报错"],scores:[4,0,0,0,0],best:0,explain:"大模型是概率性的文字接龙：它生成的是统计上最顺滑的文本，不是检索事实。理解这一点，就知道为什么需要校验它的输出。"},
+    {level:0,difficulty:"初阶",q:"上下文窗口是指？",opts:["模型单次对话中能参考的输入总量（含你的提问与历史内容），超出窗口的早期内容会被截断或遗忘","电脑屏幕上对话框的高度与宽度，窗口越大显示的字就越多，能同时看到更长的聊天记录——这是产品界面设置，与模型能参考多少上下文毫无关系","模型可以同时服务的用户数量，窗口越大同时在线的人越多","AI 能记住你所有历史对话的永久存储空间，永远不会被清空","网络带宽的大小，带宽越宽上下文窗口就越大"],scores:[4,0,0,0,0],best:0,explain:"上下文窗口决定 AI 记得住多少。长文档超出窗口就会被忽略，所以关键信息要前置精简，必要时分段处理。"},
+    {level:0,difficulty:"初阶",q:"AI 有时会一本正经地胡说八道（编造不存在的法规条文、案例），最主要原因是？",opts:["模型按概率生成通顺文本而非检索事实，遇到不确定的内容时会倾向于编造看似合理的答案来补全","电脑中了病毒，黑客正在远程操控 AI，(1)故意让模型说假话误导使用者 (2)诱导你按错误答案执行 (3)趁你分心时窃取文件——遇到 AI 答错应立即全盘杀毒并修改所有密码，而不是去核实答案本身","模型被训练数据中的恶意内容污染，专门挑错误答案回答你","网络信号不好，回答在传输过程中被截断和篡改才导致内容失真","AI 其实知道正确答案，但心情不好时故意答错来捉弄提问者"],scores:[4,0,0,0,0],best:0,explain:"幻觉源于生成而非检索的本质：模型追求文本流畅，不为事实负责。重要事实必须用可靠资料核对，别轻信 AI 的言之凿凿。"},
+    {level:1,difficulty:"中阶",q:"你发现 AI 的知识停留在两年前，不知道最近发布的新政策。这是因为？",opts:["模型知识来自训练时见过的数据、有截止时间；对话不会让它学到新知识，需要联网检索或外挂知识库补足","你的账号权限等级太低，(1)只要把会员升级到最高档 (2)再订阅厂商的实时知识扩展包 (3)AI 就能学会全世界所有新政策——知识的新旧完全由充值金额决定，等级越高模型越博学，与训练数据有没有截止时间毫无关系","AI 故意隐瞒新知识，要你用特定的解锁口令提问它才肯透露最新信息","说明这个 AI 已被厂商停止维护，应该立即卸载并换一个新的软件","因为模型只运行在境外服务器上，所以看不到国内的新政策"],scores:[4,0,0,0,0],best:0,explain:"模型的知识截止于训练数据时间点，且聊天不会更新知识。要最新信息就得联网或检索知识库，而不是反复追问同一个模型。"},
+    {level:1,difficulty:"中阶",q:"同一道题你换一种问法，AI 给出的答案略有差异。最主要的原因是？",opts:["生成过程带有随机采样，提示词的措辞与上下文也会影响输出，因此答案存在合理范围内的波动","说明 AI 每次都在联网搜索不同的网页，(1)先解析提问中的关键词 (2)到各大网站抓取说法不一的内容 (3)把搜索结果直接拼成回答——答案差异完全来自检索到的网页不同，与模型自身的生成机制无关，所以只要固定网络与缓存，同一问题就该逐字相同","说明 AI 在测试你的耐心，故意每次给出不同答案让你无所适从","说明 AI 的算法出了 bug，相同含义的问题应该每次输出完全相同的答案才算正常","因为每次提问时服务器的气温不同，影响了芯片的计算精度"],scores:[4,0,0,0,0],best:0,explain:"大模型生成带有随机性（采样温度），不是复读机。重要任务应固定优质提示词、多次尝试取稳定结果，而不是指望次次逐字一致。"},
+    {level:2,difficulty:"高阶",q:"想让 AI 在同样任务下输出更稳定、更少发散，最有效的做法是？",opts:["把任务要求写具体（角色、步骤、格式、约束），必要时降低随机性参数、固定示例，让模型在明确的框架内生成","故意把提示词写得很模糊，认为提示词越开放 AI 的发挥空间越大，输出自然会更好，同时关闭所有约束选项，让模型自由联想、每次给出不同的创新答案，再把多轮结果交给领导挑选，认为这才是充分发挥 AI 创造力的正确用法","每次提问前先让 AI 掷一次骰子，让它按骰子点数决定回答风格","把所有随机参数调到最大，让 AI 每次输出都完全不同再人工挑选最顺眼的","更换更贵的网络套餐，认为网速越快 AI 输出就越稳定"],scores:[4,0,0,0,0],best:0,explain:"稳定输出来自约束而非自由：清晰的指令、明确格式与低随机性共同压缩发散空间。提示词质量直接决定稳定性。"},
+    {level:2,difficulty:"高阶",q:"关于大模型的推理能力，以下说法最准确的是？",opts:["模型能完成大量基于模式的推理，但复杂、多步的逻辑链条仍会出错，关键推理需要拆解验证或借助代码等确定性工具","大模型已经具备完全严密的数学证明能力，任何复杂的逻辑推理题它都能像数学家一样一步步严格推导、绝无差错，因此可以把所有需要逻辑判断的工作交给它，甚至让它直接编写法律判决书与审计结论，无需任何人复核，出错概率为零","模型的推理能力与人类完全相同，也会疲惫、走神，需要像员工一样安排工间休息","模型完全不具备任何推理能力，只能机械复读训练数据里的原句","模型的推理靠的是脑内芯片超频运行，长时间推理会烧毁硬件"],scores:[4,0,0,0,0],best:0,explain:"大模型的推理本质是模式补全，长链条逻辑容易断裂。重要推理要拆小步、可验证，必要时交给确定性的程序去算。"}
+  ],
+  prompt: [
+    {level:0,difficulty:"初阶",q:"写好提示词最关键的第一步是？",opts:["把需求说清楚：明确告诉 AI 你要它做什么、基于什么信息、按什么格式输出","提示词写得越简短越好，最好只发一个关键词，让 AI 自己去猜你的真实意图，猜对了说明它聪明，猜错了就换一个词再试，反正 AI 又不收费，来回猜几十轮总能蒙对一次，把沟通成本转嫁给 AI 是使用提示词的最高境界","先夸 AI 几句让它心情好，它就会回答得更认真","把提示词写得越长越好，字数越多 AI 就越重视你的问题","用最晦涩的词汇包装需求，越让人看不懂显得越专业"],scores:[4,0,0,0,0],best:0,explain:"模糊的指令只能得到模糊的答案。清晰交代任务、背景与格式，是提示词的地基。"},
+    {level:0,difficulty:"初阶",q:"提示词里加一句你是一位有 10 年经验的人力资源专家，主要作用是？",opts:["设定角色，让 AI 调用对应领域的知识框架与表达风格来回答，使输出更专业、更有针对性","让 AI 相信自己真的拥有 10 年工龄，从而在回答时自动按真实经历编造具体案例与人事档案，方便你直接引用","告诉 AI 你的职位，让它知道提问者身份后给出更恭维的回答","给 AI 增加算力，角色越资深它调用的服务器就越多、回答越快","纯粹是客套话，AI 不会因为这句话有任何行为差异"],scores:[4,0,0,0,0],best:0,explain:"角色设定是给 AI 一个专业视角：让它按该领域的知识组织回答。注意是视角引导，不是让它编造经历。"},
+    {level:0,difficulty:"初阶",q:"你希望 AI 按固定结构输出（如表格、清单），最直接的做法是？",opts:["在提示词里明确写出格式要求，并给一个期望的结构示例，让 AI 照此组织输出","相信 AI 能读懂你的心思，只要说一句把结果给我它就会自动选择最完美的格式排版好，如果格式不对就怪 AI 不够智能，再原样重复提问几次直到它自己领悟","把要求写在邮件正文里发给 AI，等它回复后再手动誊抄成表格","不写任何格式要求，认为 AI 每次都会自动输出统一规范的格式结构","让 AI 自由发挥，认为它随机给出的格式每次都有新鲜感"],scores:[4,0,0,0,0],best:0,explain:"AI 默认输出是平铺文本。要表格给表格要求，要清单给清单结构——输出格式需要显式约定。"},
+    {level:1,difficulty:"中阶",q:"AI 第一次给出的答案你不满意，最有效的下一步是？",opts:["分析哪里不满意，补充约束或把任务拆小后重新提问（如结论太泛，请基于我给的 3 组数据逐条对比并给建议）","把同样的提示词原封不动地再发送二十次，坚信多试几次 AI 总会给出正确答案，若还不满意就认为是 AI 版本太旧，抱怨几句后放弃使用，把时间浪费在无效重复与情绪发泄上而不是去改进提问方式","直接放弃 AI，把需求丢回给最资深的同事加班完成","把不满意的地方用再写一遍三个字反复命令 AI，直到它猜中为止","换个更贵的新电脑重装软件，相信是设备不行才导致答案不满意"],scores:[4,0,0,0,0],best:0,explain:"好答案来自迭代提问：指出问题、补充信息、缩小范围。一次成稿是运气，迭代打磨才是常态。"},
+    {level:1,difficulty:"中阶",q:"你要 AI 从一份长合同里找出对己方不利的条款并逐条给修改建议，更好的提示词策略是？",opts:["先让 AI 通读全文并分段概括，再要求它按条款原文、风险点、修改建议的结构逐条输出，最后人工复核关键条款","直接命令 AI 把合同里所有坑都挑出来，不给任何输出结构让它自由发挥，认为 AI 学法律出身自然知道该说什么，挑漏了条款就再补一句还有呢，直到你觉得差不多为止，全程不做逐条核对，改完直接签署","让 AI 凭经验默写一份标准合同的风险清单，不看你这份具体合同","只让 AI 读合同标题，根据标题猜测内容并给建议","把合同翻译成英文再让 AI 看，认为英文处理更准确"],scores:[4,0,0,0,0],best:0,explain:"长文档任务要拆解：先理解全文，再按结构化清单逐条产出，才不容易遗漏，也便于人工逐条核对。"},
+    {level:2,difficulty:"高阶",q:"面对写一份年度营销方案这类复杂任务，更聪明的提示词用法是？",opts:["把任务拆成多步：先定目标与受众，再分渠道出策略，再生成执行计划与预算，每步单独提问、逐步确认","把写一份完美的年度营销方案作为唯一提示词发给 AI，要求一次输出 50 页可执行方案，认为 AI 能力足够强，一次性生成的内容必然比人拆解出来的更系统全面，若方案里前后矛盾或数据对不上，那是 AI 水平问题，再让它整体重写一遍即可","先让 AI 写方案再自己逐页重写，等于做两遍无用功","只让 AI 写方案标题和目录，正文内容自己凭感觉填充","让 AI 参考去年同期的方案原样改个日期就算完成"],scores:[4,0,0,0,0],best:0,explain:"复杂任务要化整为零：拆成有依赖关系的子任务逐步完成，质量远高于一次性求全。这也符合 Agent 的思路。"},
+    {level:2,difficulty:"高阶",q:"提示词调得再完美，也解决不了以下哪个问题？",opts:["模型不知道的内部机密信息或训练截止后的事实——这类信息必须靠知识库检索、联网或人工提供，提示词无法凭空变出模型没有的知识","模型回答的措辞不够书面化，希望它改用更正式的表达风格——例如把口语化的回复改写成公文式书面语、按公司行文规范统一称谓与结尾，这类风格调整正是提示词最擅长解决的典型问题，只需补充风格要求即可","AI 输出的报告结构混乱，希望它按指定章节重新组织内容","需要 AI 模仿公司文风撰写对外公告的初稿","希望 AI 把长篇回复压缩成 100 字以内的摘要"],scores:[4,0,0,0,0],best:0,explain:"提示词只能调动模型已有的知识，不能创造新知识。涉及私有资料与最新事实，要喂资料或用 RAG，而非死磕提示词。"}
+  ],
+  agent: [
+    {level:0,difficulty:"初阶",q:"通常所说的 AI Agent（智能体）是指？",opts:["能够理解目标、自主规划步骤并调用工具执行任务的 AI 系统，可在一定范围内独立完成多步工作","一种新型聊天机器人皮肤，只是把对话框换成了卡通形象，本质上仍然是你说一句它答一句的问答工具，没有任何自主执行能力","安装在电脑里的杀毒软件代理程序，专门负责清理系统垃圾","代替人类开会的虚拟人物形象，只能播放提前录好的视频","企业里的 AI 管理员账号，负责给其他同事分配软件使用权限"],scores:[4,0,0,0,0],best:0,explain:"Agent 的关键词是目标、规划、工具、执行：它能自己拆解步骤并动手干活，而不是只停留在对话。"},
+    {level:0,difficulty:"初阶",q:"Agent 与普通对话式 AI（聊天机器人）最核心的区别是？",opts:["Agent 能调用工具、执行动作并完成多步任务，普通对话 AI 主要在对话层面提供回答","普通 AI 用文字回答，Agent 用语音回答，而且音色更接近真人，可以模仿你老板的声音与口吻，接电话、开会发言都能以假乱真——两者的差别主要体现在发声方式与音色还原度上，与能否执行多步任务毫无关系","Agent 的体积更大、界面更炫酷，聊天 AI 则界面朴素","聊天 AI 要付费，Agent 全部免费，两者只是商业模式的差别","没有区别，只是厂商换了个营销名称来吸引用户"],scores:[4,0,0,0,0],best:0,explain:"能否调用工具并执行是分水岭：Agent 可以把查天气、订会议室、发通知串成一次自主完成的多步任务。"},
+    {level:0,difficulty:"初阶",q:"Agent 中的工具调用指的是？",opts:["AI 根据任务需要，自主决定调用搜索、计算器、API、数据库等外部能力来获取信息或执行操作","让 AI 学会点击办公软件菜单栏里的每一个按钮，像培训新员工一样先培训它熟悉界面，(1)教会它文件菜单下每个功能的用途 (2)带它逐个演练常用操作 (3)考核通过后再让它独立处理文档——工具调用就是让 AI 像人一样熟练操作软件界面","用户手动帮 AI 点击网页上的按钮，AI 在旁边语音指挥","给 AI 电脑插上机械臂，让它能像人一样物理操作键盘鼠标","把常用的提示词整理成一个工具箱文件夹，用时复制粘贴"],scores:[4,0,0,0,0],best:0,explain:"工具调用即模型输出结构化的调用指令（如调搜索 API、查数据库），由系统执行后把结果返回给模型继续推理。"},
+    {level:1,difficulty:"中阶",q:"给 Agent 分配自主发邮件给客户这类任务前，以下哪项做法是必要的？",opts:["先限定可联系对象、内容模板与审批机制，设置只读或需确认的权限边界，重要动作由人确认后执行","给 Agent 完全开放的最高权限，包括读取客户通讯录、直接发送、代为签署承诺，认为限制越多 Agent 效率越低，既然训练它就是为了省事，就应该一次性授权到底，若它误发了邮件或承诺了额外折扣，那也是系统设计者的责任，与使用者无关，后续再慢慢补权限漏洞即可","让 Agent 先模仿老板的语气练习发邮件，练熟之后再正式启用","把权限问题抛给 IT 部门讨论三个月，期间 Agent 闲置不用","相信 Agent 具备人类道德观，会自动判断哪些邮件该发、哪些承诺能许"],scores:[4,0,0,0,0],best:0,explain:"Agent 会忠实执行指令，但不会像人一样权衡人情与后果。授权要最小化、动作要可审计，高风险动作保留人工确认。"},
+    {level:1,difficulty:"中阶",q:"多个 Agent 协作完成复杂任务（如一个负责调研、一个负责写稿、一个负责质检），这种模式叫？",opts:["多 Agent 编排：把任务按角色拆给不同 Agent，通过设定好的流程互相传递结果、分工协作","让多个 Agent 同时回答同一个问题再投票表决，票数最多的答案即为最终结果，认为民主决策必然正确，无需设计任何分工与流程","把一个 Agent 复制成多个副本同时运行，用数量优势弥补单个能力的不足","让 Agent 之间互相聊天解闷，谁聊得好就派谁去干活","给每个员工都配一个 Agent 秘书，员工数量与 Agent 数量一一对应"],scores:[4,0,0,0,0],best:0,explain:"多 Agent 不是人多力量大，而是角色分工加流程衔接：像接力赛一样，每棒有明确职责与交接物。"},
+    {level:2,difficulty:"高阶",q:"搭建一个可靠的业务 Agent（如自动生成经营周报），以下哪项做法会带来最大风险？",opts:["让 Agent 在没有数据源授权与结果校验的情况下直接对外发布周报，出了问题再补救","明确的目标与流程定义：与业务方确认取数口径与周报模板，指定发送对象、发送时间与异常上报路径，把每周重复的执行动作固化成标准流程文档，作为 Agent 行为的唯一依据，确保任何一周的运行方式都可预期、可复现、可交接","稳定的数据与工具接入（BI 系统、数据库等）以及清晰的权限边界","结果校验与兜底机制：异常提醒、人工抽检、失败重试","运行日志与审计：记录每次执行的动作与依据，全程可追溯"],scores:[4,0,0,0,0],best:0,explain:"可靠的 Agent 等于目标流程加数据工具加权限护栏加校验兜底加审计日志。缺失校验与审计的 Agent 是定时炸弹。"},
+    {level:2,difficulty:"高阶",q:"以下任务中，最适合交给 Agent 自主完成的是？",opts:["每天定时从各系统抓取数据、按模板生成报表并发送给固定收件人——流程固定、规则清晰、结果可校验","代表公司参加一场价值数千万的战略谈判并当场签约，认为 Agent 掌握了全部谈判资料与话术，比人类谈判专家更冷静、不会被情绪左右，让它在关键条款上临场发挥、自主让步并直接盖章，事后若谈亏了还能用 AI 决策向董事会交代，完美规避个人责任","处理员工之间的情感纠纷与团队氛围建设，替代 HR 进行一对一深度疏导","预测下周彩票开奖号码并自动下注，实现公司收入翻番","替你决定公司年度战略方向，因为 Agent 读过的商业书籍比 CEO 多"],scores:[4,0,0,0,0],best:0,explain:"Agent 适合流程固定、规则清晰、结果可校验的任务；高不确定性、高风险与强人际场景必须由人主导。选错场景，自动化就是放大风险。"}
+  ],
+  kb: [
+    {level:0,difficulty:"初阶",q:"通俗地说，RAG（检索增强生成）让 AI 回答问题时？",opts:["先从外部知识库检索与问题相关的资料，再基于检索到的资料组织答案，减少凭空编造","先把问题翻译成多国语言检索全球网页，再挑最长的那个答案返回给你，认为答案越长越权威，与你的企业内部资料完全无关","把整个知识库的文档一次性全部塞进模型的记忆里永久保存","让 AI 每天夜里自动把知识库内容朗读一遍以增强记忆","把 AI 的回答与搜索引擎结果逐字比对，完全一致才输出"],scores:[4,0,0,0,0],best:0,explain:"RAG 是先检索、后作答：把相关资料临时放进上下文当参考，让 AI 有据可依，是抑制幻觉的主流方法。"},
+    {level:0,difficulty:"初阶",q:"为什么企业内部问答（如制度查询、产品文档答疑）通常需要给 AI 外挂知识库？",opts:["大模型训练时没见过你的内部资料，且知识有截止时间——只有把制度文档检索进来，它才能基于真实内容回答","因为不挂知识库的 AI 是免费版，挂了知识库才是付费专业版，(1)免费版只能回答通用常识 (2)付费版解锁企业专属内容 (3)两者在问答质量上没有本质差别——知识库只是厂商用来区分付费档次的营销功能，与数据是否私有毫无关系","因为内部资料存在电脑本地，AI 无法联网访问，挂个知识库其实是给它开了一条通往内网的网线","为了让 AI 显得更专业，知识库只是装饰，实际回答仍靠模型自身知识","因为企业文档太多，需要知识库帮忙压缩磁盘空间"],scores:[4,0,0,0,0],best:0,explain:"通用模型不掌握你的私有知识。知识库是喂资料的管道，让 AI 从凭记忆猜变成查资料答。"},
+    {level:0,difficulty:"初阶",q:"判断一个知识库问答系统答得可不可信，最直接的依据是？",opts:["答案是否明确引用并忠实于检索到的资料内容，而不是脱离资料自由发挥","答案的字数是否足够多、结构是否完整，写得越长越详细说明系统越认真，还配有分点论述与总结陈词的回答一定经过了充分思考，可信度自然更高，反之简短回答都是系统在偷懒敷衍","答案的语气是否自信，斩钉截铁、毫不含糊的回答一定是对的","答案是否以最快的速度弹出，秒回的系统比思考良久的更可靠","答案中是否包含感叹号与表情符号，情感充沛代表内容真实"],scores:[4,0,0,0,0],best:0,explain:"RAG 系统的答案应有出处。能追到资料原文的答案才可验证——查无实据的流畅回答要警惕。"},
+    {level:1,difficulty:"中阶",q:"知识库里的长文档（如 200 页操作手册）通常要先切成片段再检索，主要原因是？",opts:["模型上下文窗口有限，且整篇检索会淹没关键信息——切成适度片段才能精准命中并放得进上下文","把文档切碎后每个文件的体积变小，(1)占用更少的服务器硬盘 (2)传输更快更省流量 (3)还可以把不常用的旧文档单独归档——切片的首要目的是节约存储成本，与能否精准检索到内容没有关系","分片可以绕过版权限制，让系统合法地使用整本手册的内容","切片是为了让 AI 每次只读一小段，防止它读太多内容而疲劳出错","纯粹是行业惯例，不切片的问答系统在技术上完全无法工作"],scores:[4,0,0,0,0],best:0,explain:"分块是 RAG 的基本功：块太大塞不进上下文且语义混杂，块太小又丢失上下文。分块质量直接决定检索命中率。"},
+    {level:1,difficulty:"中阶",q:"知识库里明明有某条制度，但 AI 却答不上来或答错了。以下哪个原因最常见？",opts:["检索环节没找到或没排对这条资料——检索质量决定 RAG 的上限，资料没被正确召回，模型再强也答不对","模型训练数据里恰好没有收录这条内部制度，说明当前接入的这个 AI 太笨、知识面太窄，应该立刻换一个参数更大、更聪明的大模型重新接入，新模型的训练语料更全，自然就认识你们公司内部的每一条制度","知识库服务器当天网络拥堵，答案在传输中被截断丢失","制度文档使用了加密格式，AI 无法解读加密内容","AI 认为这条制度不重要，故意跳过不答以节省计算资源"],scores:[4,0,0,0,0],best:0,explain:"库里有不等于答得出。RAG 的瓶颈常在检索召回：分段、向量化与排序策略不佳，相关资料就检不到。先查检索，再怪模型。"},
+    {level:2,difficulty:"高阶",q:"知识库检索里常说的向量化、向量检索，通俗理解是？",opts:["把文字转换成代表语义的数字向量，按意思相近而非字面相同来匹配——问报销流程也能找到写费用申请的资料","把文档全部转换成图像格式保存，(1)检索时用图像识别技术把问题也转成图像 (2)再对库里的图片逐张做像素级比对 (3)找到最相似的那一张返回——这就是向量检索的原理，本质是图片相似度匹配","给每篇文档标注关键词标签，检索时严格按关键词逐个字符匹配","把知识库压缩成一个超大向量文件，整个库只保留一个数字","把文档按拼音排序存储，检索时按读音相似度查找"],scores:[4,0,0,0,0],best:0,explain:"向量检索匹配的是语义，能理解同义表达，比关键词搜索更聪明，但也可能因语义相近而误召回——需要排序与阈值调优。"},
+    {level:2,difficulty:"高阶",q:"要让企业知识库问答的答案更可靠、更可追溯，以下哪项做法最关键？",opts:["回答必须标注引用的资料出处，并对检索与答案质量做持续抽检评估、不断优化","把知识库的文档数量堆得越多越好，认为资料越全 AI 的答案就越准，完全不必关注检索质量与引用标注，只要库足够大，模型自然会从海量资料中挑出正确的那一段","让 AI 省略引用出处，答案更简洁流畅，避免员工被出处打断思路","只保留一份主文档并让 AI 背诵，其它版本全部删除以防混淆","让回答完全脱离知识库自由发挥，认为模型自身能力足以覆盖内部知识"],scores:[4,0,0,0,0],best:0,explain:"可追溯等于有引用、可抽查。知识库不是越大越好，检索质量加引用标注加持续评估才是可靠性的关键。"}
+  ],
+  compliance: [
+    {level:0,difficulty:"初阶",q:"能否把包含客户手机号、身份证号的文件直接上传给公开的 AI 工具做分析？",opts:["不能——个人信息与商业秘密外发给未经授权的第三方 AI 服务存在泄露与合规风险，应先脱敏或使用获准的企业内部 AI","可以放心上传，因为主流 AI 厂商都承诺严格保密且不会把数据用于训练，即使条款里写着数据可能被用于改进服务，也相信厂商会自觉遵守口头承诺，若真发生泄露那也是厂商的责任，企业无需评估与管控员工把什么数据传给外部 AI","可以上传，只要把文件重命名成测试数据就没人知道里面是什么","可以上传，因为手机号是公开信息，不属于个人敏感数据","可以上传，只要不在文件里写机密两个字就不算泄密"],scores:[4,0,0,0,0],best:0,explain:"外发数据前先分级：个人敏感信息与商业秘密必须脱敏或走企业白名单内的 AI。文件名与口头约定都不构成合规。"},
+    {level:0,difficulty:"初阶",q:"用 AI 生成的对外公告或宣传文案，发布前应该？",opts:["经过人工与法务合规审核——AI 可能生成夸大、虚假或违规表述，发布者须对内容的真实与合法负责","直接发布，因为 AI 生成的文案用词规范、逻辑通顺，比人写的更严谨，若出现虚假宣传或违规用语，那是 AI 的问题，公司可以对外声明本公告由 AI 自动生成、内容概不负责，消费者与监管部门理应理解并追究 AI 厂商的责任","只发给领导看一眼标题，正文无需细看即可发布","让 AI 自己检查一遍有没有违规，AI 说没问题就可以发","发布后若被投诉再悄悄删掉，删掉就等于没发过"],scores:[4,0,0,0,0],best:0,explain:"内容责任在人不在工具。AI 写稿要快，但对外内容的审核与担责必须走人工合规流程——AI 生成的不是免责声明。"},
+    {level:0,difficulty:"初阶",q:"员工用 AI 写代码并提交到公司产品里，以下哪种认知是正确的？",opts:["AI 生成的代码可能存在漏洞或侵权风险，提交前要经过代码审查、测试与许可证检查","AI 写代码绝不会出错，比程序员手写的更安全，可以直接跳过测试与代码评审流程，若线上出了事故就归咎于 AI 工具、让厂商赔偿，团队无需建立任何针对 AI 代码的审查规范","只要代码能编译通过，就说明没有问题，可以直接上线","AI 写的代码版权归 AI 厂商所有，员工只是搬运工，无需对质量负责","AI 代码不能用于任何生产环境，只能用来写写个人小工具"],scores:[4,0,0,0,0],best:0,explain:"AI 提速不改变工程底线：审查、测试、许可证合规一个不能少。工具会变，代码质量责任不变。"},
+    {level:1,difficulty:"中阶",q:"公司想让大家用 AI 提效，又怕数据泄露。比较稳妥的落地方式是？",opts:["制定数据分级：机密与敏感数据禁入外部 AI，一般数据先脱敏；优先采购或开通企业版（数据不用于训练）并做工具白名单管理","直接禁止全体员工使用任何 AI 工具，认为一刀切最安全，研发、市场、财务的效率损失可以靠加班弥补，等三五年后监管清晰了再重新评估，期间竞争对手用 AI 跑出的效率差距就当作没看见","鼓励大家只用免费公开版 AI，把使用成本降到零，数据风险靠员工自觉","让各部门自己看着办，公司层面不制定任何统一规范","只允许管理层使用 AI，普通员工继续手工，数据风险自然可控"],scores:[4,0,0,0,0],best:0,explain:"防泄露靠分级加白名单加企业版，而不是禁用。堵死工具是下策，管住数据才是关键。"},
+    {level:1,difficulty:"中阶",q:"AI 帮你生成了一段行业分析，其中大段内容与某付费报告雷同。以下做法正确的是？",opts:["不直接使用——核实原创性与版权，改写提炼观点并补充自有数据与判断，注明信息来源","稍作同义词替换后直接发布，认为只要改动超过三成的文字就不算抄袭，AI 生成的内容版权归属本身模糊，用了也追不到你头上，被原作者发现就推说是 AI 的灵感参考，法律风险交给法务部门去头疼","既然是 AI 生成的，版权就归 AI，任何人都可以免费使用","把付费报告买下来就自动获得 AI 改写后再发布的权利","只要在公司内部使用不外发，就完全不存在任何版权问题"],scores:[4,0,0,0,0],best:0,explain:"AI 会洗稿式重组训练语料。对外使用前要确认内容原创性，规避版权与学术不端风险——工具变了，知识产权规则没变。"},
+    {level:2,difficulty:"高阶",q:"一份合格的企业《AI 使用管理办法》至少应包含？",opts:["数据分级与外发规则、工具白名单与审批、内容审核与人工复核要求、违规责任与培训机制","一份鼓励全员多用 AI、少用人的倡议书，强调效率优先、容错免责，让员工放心大胆地把各类资料喂给任意 AI 工具，若发生泄密或违规发布，公司承诺不追究个人责任，因为效率是第一位的，出了问题再亡羊补牢即可","只规定 AI 工具采购预算上限，不涉及数据与内容管理","仅要求员工在 AI 生成内容的末尾标注本文由 AI 辅助生成，其余不做约束","只针对外部供应商的 AI 系统，内部员工使用完全不管"],scores:[4,0,0,0,0],best:0,explain:"管理办法的核心是管住数据、工具、内容、责任四件事。只谈效率不谈边界，等于没有管理。"},
+    {level:2,difficulty:"高阶",q:"在金融、医疗等强监管行业用 AI 生成面向客户的内容（如投资建议、诊疗建议），合规要点是？",opts:["AI 只能做辅助草拟，最终内容须由具备执业资格的人员审核确认并署名担责，符合行业监管要求","让 AI 直接以专家口吻生成建议并自动推送给客户，认为 AI 的知识量远超单个从业者，给出的建议更全面客观，监管要求的执业人员审核只是形式主义可以省去，客户若因建议受损就声称系统已尽到提示义务，把 AI 输出包装成仅供参考即可规避责任","只要内容不出现具体公司名和药名，就不属于监管范围","在 AI 建议末尾加一行以上内容由 AI 生成、风险自负即算合规","让 AI 参考竞品的公开话术生成内容，认为跟同行保持一致就不会违规"],scores:[4,0,0,0,0],best:0,explain:"强监管行业的底线是持证人员对内容负责。AI 提供效率，资质与责任必须留在人的一侧，格式化的免责声明不能替代审核。"}
+  ]
+};
+
+const AI_BASE_THEMES = {
+  boundary:   { name: '能力与边界',   icon: '🧭', desc: 'AI 能做什么、不能做什么，何时该用、何时必须人来做' },
+  principle:  { name: '基础原理',     icon: '🧠', desc: '大模型如何工作：训练、上下文、幻觉、随机性' },
+  prompt:     { name: '提示词基础',   icon: '💬', desc: '把需求讲清楚：指令、角色、格式、拆解与迭代' },
+  agent:      { name: 'Agent 基础',   icon: '🤖', desc: '能规划与调用工具执行多步任务的智能体' },
+  kb:         { name: '知识库基础',   icon: '📚', desc: 'RAG 检索增强：让 AI 基于企业资料回答问题' },
+  compliance: { name: '安全与合规',   icon: '🛡️', desc: '数据红线、内容审核、版权与责任归属' }
+};
+
 const FIN_QUIZ_V2 = {
   prompt: [
     {level:0,difficulty:"初阶",scenario:"场景：CFO让你分析本季度毛利率下滑原因，你手上有收入、成本、费用三类明细数据（各 2000 行 Excel）。",q:"如何设计 Prompt 让 AI 高效完成归因分析？",opts:["A. 分步法：(1)上传三类数据→说明字段含义→让AI按产品线/渠道/月份做毛利率拆解 (2)要求AI定位毛利率下滑最大的3个产品线和月份 (3)让AI结合成本明细识别是原料涨价/售价下调/结构变化导致 (4)输出归因结论+建议", "B. 不补充任何字段与口径说明，把收入、成本、费用三张Excel原样丢给AI，让它自己摸索数据含义并直接给出毛利下滑原因", "C. 自己先用Excel透视表把各产品线、渠道的毛利差异算成结果表，再把结果表交给AI，只让它把数字整理成一份书面归因说明", "D. 按四步让AI一体化完成：(1)把收入、成本、费用三张Excel连同「分析毛利率下滑原因」的目标一起上传 (2)让AI自行理解字段含义、统计口径与数据质量，必要时自行清洗加工 (3)要求AI按产品线、渠道、月份拆解毛利并直接定位下滑区间 (4)让AI把根因判断与改进建议写进报告一次输出成稿，全程不做分步干预与中间人工核对", "E. 不上传任何数据，直接问AI「毛利率下滑通常由哪些原因导致」，把它的通用清单拿回来逐条对照公司情况自行比对判断"],scores:[4, 0, 1, 2, 0],best:0,explain:"财务归因分析=数据拆解→差异定位→根因识别→结论输出。关键是让AI按维度拆解而非一次性要结论。"},
@@ -7088,8 +7158,199 @@ function renderRoleSelection() {
   return html;
 }
 
-// ---- QUIZ (v41: 同维连答自适应 UI) ----
+// ===== v51: AI 基础素养卷（独立于 8 维岗位自适应；先答基础卷 → 再进岗位卷；不计入综合分）=====
+// 题库 AI_BASE_QUIZ = 6 主题 × 7 题；卷面分层抽 10 题 = 每主题至少 1 题 + 随机补抽 4 题
+// 状态字段：S._basePhase（intro|active|done）、S._basePlan/_baseIdx/_baseAnswers/_baseFeedback/_baseResult
+
+function buildBaseQuiz() {
+  const themes = Object.keys(AI_BASE_QUIZ || {});
+  const plan = [];
+  const used = {};
+  // ① 每主题锚抽 1 题（保证六主题全覆盖）
+  themes.forEach(th => {
+    const arr = AI_BASE_QUIZ[th];
+    if (!arr || !arr.length) return;
+    const idx = Math.floor(Math.random() * arr.length);
+    plan.push({ theme: th, q: arr[idx] });
+    used[th + ':' + idx] = true;
+  });
+  // ② 剩余 36 题洗牌，补抽 4 题
+  const pool = [];
+  themes.forEach(th => {
+    (AI_BASE_QUIZ[th] || []).forEach((q, i) => { if (!used[th + ':' + i]) pool.push({ theme: th, q: q }); });
+  });
+  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = pool[i]; pool[i] = pool[j]; pool[j] = t; }
+  pool.slice(0, 4).forEach(p => plan.push(p));
+  // ③ 整卷洗牌打散主题次序
+  for (let i = plan.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = plan[i]; plan[i] = plan[j]; plan[j] = t; }
+  // ④ 每题选项 Fisher-Yates 洗牌（正确项不固定于 A，与自适应卷同约定）
+  plan.forEach(p => {
+    const q = p.q;
+    if (!q || !q.opts || !q.opts.length) return;
+    const n = q.opts.length;
+    const ix = q.opts.map((_, i) => i);
+    for (let i = n - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = ix[i]; ix[i] = ix[j]; ix[j] = t; }
+    q.opts = ix.map(i => q.opts[i]);
+    q.scores = ix.map(i => q.scores[i]);
+    if (q.best !== undefined) q.best = ix.indexOf(q.best);
+  });
+  S._basePlan = plan;
+  S._baseIdx = 0;
+  S._baseAnswers = [];
+  S._baseFeedback = null;
+}
+
+function finishBaseQuiz() {
+  const answers = S._baseAnswers || [];
+  const plan = S._basePlan || [];
+  const perTheme = {};
+  let correct = 0;
+  answers.forEach((a, i) => {
+    const th = a.theme || (plan[i] && plan[i].theme) || 'boundary';
+    if (!perTheme[th]) perTheme[th] = { ok: 0, n: 0 };
+    perTheme[th].n++;
+    if (a.ok) { perTheme[th].ok++; correct++; }
+  });
+  S._baseResult = {
+    correct: correct,
+    total: answers.length,
+    pct: answers.length ? Math.round(correct / answers.length * 100) : 0,
+    perTheme: perTheme,
+    at: Date.now()
+  };
+  S._basePhase = 'done';
+}
+
+function renderBaseIntro() {
+  let totalQ = 0;
+  Object.keys(AI_BASE_QUIZ || {}).forEach(th => { totalQ += (AI_BASE_QUIZ[th] ? AI_BASE_QUIZ[th].length : 0); });
+  const themeChips = Object.entries(AI_BASE_THEMES || {}).map(([, t]) =>
+    `<div style="flex:1 1 30%;min-width:150px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;">
+      <div style="font-weight:600;font-size:13px;">${t.icon} ${t.name}</div>
+      <div style="font-size:11px;color:var(--text2);margin-top:3px;line-height:1.5;">${t.desc}</div>
+    </div>`).join('');
+  let html = headerHtml('AI 基础素养测评', '进入岗位测评前，先做 10 题基础认知自检（约 5 分钟）', true);
+  html += `<div class="card slide-up">
+    <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;">
+      <div style="font-size:36px;line-height:1.2;">🧭</div>
+      <div style="flex:1;min-width:240px;">
+        <p style="font-weight:600;font-size:15px;margin-bottom:6px;">这是一次「AI 通识体检」，与岗位专业测评相互独立</p>
+        <p style="font-size:13px;color:var(--text2);line-height:1.8;">覆盖 <b>能力与边界 · 基础原理 · 提示词 · Agent · 知识库 · 安全合规</b> 六大主题（共 ${totalQ} 道题库，每卷随机抽 10 题）。<br><b style="color:var(--accent);">结果单独展示，不计入 8 维岗位综合分与课程推荐</b>——帮你先补 AI 认知地基，岗位测评聚焦专业能力。</p>
+      </div>
+    </div>
+    <p style="font-weight:600;font-size:13px;margin:16px 0 8px;">六大主题覆盖</p>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;">${themeChips}</div>
+    <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="flex:1;min-width:200px;" data-action="baseStart" onclick="if(typeof S!=='undefined'){S.baseStart()}">开始基础测评（10 题）</button>
+      <button class="btn btn-outline" style="flex:1;min-width:200px;" data-action="baseSkip" onclick="if(typeof S!=='undefined'){S.baseSkip()}">跳过，直接岗位测评 →</button>
+    </div>
+    <p style="font-size:11px;color:var(--text3);margin-top:12px;">答完 10 题后展示基础素养结果，可「重新作答」或一键进入岗位自适应测评；岗位测评仍按 8 维 × 行业权重进行。</p>
+  </div>`;
+  return html;
+}
+
+function renderBaseQuestion() {
+  const plan = S._basePlan || [];
+  const idx = S._baseIdx || 0;
+  const p = plan[idx];
+  if (!p) { finishBaseQuiz(); return renderBaseSummary(); }
+  const theme = (AI_BASE_THEMES && AI_BASE_THEMES[p.theme]) || { name: p.theme, icon: '📘' };
+  const q = p.q;
+  const total = plan.length;
+  const answeredCount = (S._baseAnswers || []).filter(a => !!a).length;
+  const fb = S._baseFeedback;
+  const levelNames = ['初阶', '中阶', '高阶'];
+
+  let dots = '';
+  for (let i = 0; i < total; i++) {
+    const done = !!(S._baseAnswers && S._baseAnswers[i]);
+    const cur = i === idx;
+    const bg = done ? '#30b158' : cur ? '#0071e3' : 'rgba(0,113,227,.18)';
+    dots += `<div style="width:14px;height:14px;border-radius:50%;background:${bg};border:2px solid ${cur ? 'var(--accent)' : 'transparent'};transition:all .2s;"></div>`;
+  }
+
+  let html = headerHtml(theme.icon + ' ' + theme.name + ' · AI 基础素养', '基础卷（不计入岗位综合分）· ' + `第 ${idx + 1}/${total} 题`, true);
+  html += `<div class="card slide-up">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+      <span class="tag tag-blue">${theme.name}</span>
+      <span style="font-size:12px;color:var(--text2);">${levelNames[q.level] || '通用'} · 难度 ${['低', '中', '高'][q.level] || '中'}</span>
+      <span style="margin-left:auto;font-size:12px;color:var(--text2);">已答 ${answeredCount}/${total}</span>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">${dots}</div>
+    <div class="quiz-question">${q.q}</div>
+    <div style="display:flex;flex-direction:column;">`;
+  q.opts.forEach((o, i) => {
+    let style = '';
+    if (fb) {
+      if (i === fb.correct) style = 'border-color:#30b158!important;background:rgba(48,177,88,.10)!important;color:var(--text1);';
+      else if (i === fb.chosen) style = 'border-color:#ff3b30!important;background:rgba(255,59,48,.07)!important;';
+      else style = 'opacity:.55;';
+    }
+    const mark = fb ? (i === fb.correct ? '　✅ 正确答案' : i === fb.chosen ? '　✗ 你的选择' : '') : '';
+    html += `<button class="quiz-option" data-action="answerQuiz" data-idx="${i}" ${fb ? 'disabled style="' + style + 'cursor:default;"' : 'style="' + style + '"'} onclick="if(typeof S!=='undefined'){S.answerQuiz(${i})}">${String.fromCharCode(65 + i)}. ${o}${mark}</button>`;
+  });
+  html += `</div>`;
+  if (fb) {
+    const verdict = fb.ok ? '答对了 ✓' : '答错了 ✗';
+    const vc = fb.ok ? '#30b158' : '#ff9500';
+    const bg = fb.ok ? 'rgba(48,177,88,.08)' : 'rgba(255,149,0,.09)';
+    html += `<div style="margin-top:14px;padding:12px 14px;border-radius:10px;background:${bg};border-left:3px solid ${vc};font-size:13px;line-height:1.8;animation:slideUp .25s ease;">
+      <div style="font-weight:600;color:${vc};margin-bottom:4px;">${verdict}${fb.ok ? '　理解正确' : '　正确答案已高亮'}</div>
+      <div style="color:var(--text2);">💡 ${q.explain || ''}</div>
+    </div>`;
+  }
+  const isLast = idx >= total - 1;
+  html += `<div class="flex-between mt-4">
+      <button class="btn btn-outline" data-action="goBack" onclick="if(typeof S!=='undefined'){S.goBack()}">← 退出</button>`;
+  if (fb) {
+    html += isLast
+      ? `<button class="btn btn-primary" data-action="baseFinish" onclick="if(typeof S!=='undefined'){S.baseFinish()}">查看基础素养结果 →</button>`
+      : `<button class="btn btn-primary" data-action="baseNext" onclick="if(typeof S!=='undefined'){S.baseNext()}">下一题 →</button>`;
+  } else {
+    html += `<span style="font-size:13px;color:var(--text2);">请选择答案后继续</span>`;
+  }
+  html += `</div></div>`;
+  return html;
+}
+
+function renderBaseSummary() {
+  const r = S._baseResult || { correct: 0, total: 10, pct: 0, perTheme: {} };
+  const pct = Math.max(0, Math.min(100, r.pct));
+  const ringColor = pct >= 80 ? '#30b158' : pct >= 60 ? '#ff9500' : '#ff3b30';
+  const ringOffset = Math.round(326 - 326 * pct / 100);
+  const themeRows = Object.keys(AI_BASE_THEMES || {}).map(th => {
+    const t = AI_BASE_THEMES[th];
+    const s = r.perTheme && r.perTheme[th];
+    const ok = s ? s.ok : 0;
+    const tn = s ? s.n : 0;
+    const col = !tn ? 'var(--text3)' : ok === tn ? '#30b158' : ok >= Math.ceil(tn / 2) ? '#ff9500' : '#ff3b30';
+    return `<div class="emp-row"><div class="emp-avatar">${t.icon}</div>
+      <div class="emp-info"><div class="emp-name">${t.name}</div><div class="emp-meta">${t.desc}</div></div>
+      <div class="emp-score" style="color:${col};">${ok}/${tn}</div></div>`;
+  }).join('');
+  let html = headerHtml('基础素养测评完成', '独立结果 · 不计入岗位 8 维综合分', true);
+  html += `<div class="card slide-up text-center">
+    <div style="text-align:center;margin:6px auto 2px;"><svg viewBox="0 0 120 120" width="132" height="132"><circle class="gauge-bg" cx="60" cy="60" r="52"/><circle class="gauge-fill" cx="60" cy="60" r="52" stroke-dasharray="326" stroke-dashoffset="${ringOffset}" stroke="${ringColor}"/></svg>
+      <div class="gauge-text">${pct}%</div></div>
+    <div class="gauge-label">AI 基础素养得分（${r.correct}/${r.total} 题）</div>
+    <div class="alert ${pct >= 80 ? 'alert-success' : pct >= 60 ? 'alert-warning' : 'alert-info'}" style="margin-top:12px;">
+      ${pct >= 80 ? '🎉 基础扎实！可以自信进入岗位专业测评' : pct >= 60 ? '📖 基础尚可——后续课程中留意薄弱主题的补强' : '🌱 基础偏弱——建议优先安排 AI 通识类课程打底'}
+    </div>
+    <div style="text-align:left;margin-top:14px;">${themeRows}</div>
+    <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;">
+      <button class="btn btn-outline" style="flex:1;min-width:160px;" data-action="baseRetake" onclick="if(typeof S!=='undefined'){S.baseRetake()}">↺ 重新作答基础卷</button>
+      <button class="btn btn-primary" style="flex:1;min-width:200px;" data-action="baseGoAdaptive" onclick="if(typeof S!=='undefined'){S.baseGoAdaptive()}">进入岗位自适应测评 →</button>
+    </div>
+    <p style="font-size:11px;color:var(--text3);margin-top:12px;">基础素养结果将随测评报告单独展示，不影响 8 维得分、雷达图与课程推荐算法。</p>
+  </div>`;
+  return html;
+}
+
+// ---- QUIZ (v41: 同维连答自适应 UI; v51: 前置 AI 基础素养卷) ----
 function renderQuiz() {
+  if (S._basePhase === 'intro') return renderBaseIntro();
+  if (S._basePhase === 'active') return renderBaseQuestion();
+  if (S._basePhase === 'done' && (!S._quizPlan || !S._quizPlan.length)) return renderBaseSummary();
   if (!S._quizPlan || !S._quizPlan.length) {
     // fallback to legacy
     const role = ROLES[S.role];
@@ -7321,6 +7582,29 @@ function exportReport() {
     <tr><td><span class="badge ${lvl.c}">${lvl.icon} ${lvl.t}</span></td><td>${avgSec} 秒/题</td><td>${fastSec} 秒</td><td>${q.fastCount || 0} / ${q.n || '—'} 题</td></tr></table>`;
   }
 
+  // v51: AI 基础素养独立小节（不计入岗位综合分）
+  const baseR = S._baseResult || null;
+  let baseReportHtml = '';
+  const baseTitle = `AI 基础素养 <span style="font-size:11px;color:#86868b;font-weight:400;">（独立评估 · 不计入岗位综合分）</span>`;
+  if (baseR) {
+    const bRows = Object.keys(AI_BASE_THEMES || {}).map(th => {
+      const t = AI_BASE_THEMES[th];
+      const s = baseR.perTheme && baseR.perTheme[th];
+      const ok = s ? s.ok : 0;
+      const tn = s ? s.n : 0;
+      return `<tr><td>${t.icon} ${escHtml(t.name)}</td><td class="num">${ok}/${tn}</td><td class="num">${tn ? Math.round(ok / tn * 100) : 0}%</td></tr>`;
+    }).join('');
+    baseReportHtml = `<h2>${baseTitle}</h2>
+    <table>
+      <tr><th>主题</th><th class="num">答对/抽中</th><th class="num">掌握度</th></tr>
+      ${bRows}
+      <tr style="font-weight:600;background:#f5f7fa;"><td>合计</td><td class="num">${baseR.correct}/${baseR.total}</td><td class="num">${baseR.pct}%</td></tr>
+    </table>`;
+  } else {
+    baseReportHtml = `<h2>${baseTitle}</h2>
+    <p style="font-size:12px;color:#86868b;">本次未作答 AI 基础素养卷（可重新测评时在入口作答）。</p>`;
+  }
+
   const now = new Date();
   const dateStr = now.toLocaleDateString('zh-CN') + ' ' + now.toLocaleTimeString('zh-CN', {hour:'2-digit', minute:'2-digit'});
   const fileName = `AIDAX测评报告_${industry ? industry.name : ''}_${role ? role.name : ''}_${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}.html`;
@@ -7375,6 +7659,8 @@ function exportReport() {
     <div><div class="num">${overall}%</div><div class="lbl">AI综合能力指数</div></div>
     <div class="desc">${overall >= 80 ? '🎯 你的AI能力较强，课程将聚焦高阶应用和体系化建设' : overall >= 60 ? '📈 你的AI能力有较好基础，课程将帮助你将能力转化为生产力' : '🚀 你处于AI应用起步阶段，课程将从基础开始帮助你建立AI思维'}</div>
   </div>
+
+  ${baseReportHtml}
 
   ${qualityHtml}
 
@@ -7440,6 +7726,7 @@ function shareReport() {
     `综合指数：${result.overall}%`,
     `💪 最强：${top.map(t => AI_DIMS[t.k].name + ' ' + t.pct + '%').join('、')}`,
     `⚠️ 短板：${weak.map(w => AI_DIMS[w.k].name + ' ' + w.pct + '%').join('、')}`,
+    baseResultSummaryText() ? baseResultSummaryText() + '（独立 · 不计入综合分）' : 'AI基础素养：本次未作答',
     '—— 来自 AI达学(AIDAX) 8维自适应测评'
   ].join('\n');
   if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -7448,6 +7735,52 @@ function shareReport() {
   } else {
     fallbackCopyText(text);
   }
+}
+
+// ===== v51: AI 基础素养独立板块（结果页 / 导出报告 / 分享摘要；不计入 8 维综合分）=====
+function renderBaseResultCard() {
+  const r = S._baseResult;
+  if (!r) return '';
+  const pct = Math.max(0, Math.min(100, r.pct || 0));
+  const ringColor = pct >= 80 ? '#30b158' : pct >= 60 ? '#ff9500' : '#ff3b30';
+  const ringOffset = Math.round(326 - 326 * pct / 100);
+  let themeBars = '';
+  Object.keys(AI_BASE_THEMES || {}).forEach(th => {
+    const t = AI_BASE_THEMES[th];
+    const s = r.perTheme && r.perTheme[th];
+    const ok = s ? s.ok : 0;
+    const tn = s ? s.n : 0;
+    const tp = tn ? Math.round(ok / tn * 100) : 0;
+    const barCls = tp >= 70 ? 'strong' : tp >= 40 ? 'ok' : 'weak';
+    themeBars += `<div class="gap-item">
+      <span class="gap-name" style="min-width:118px;">${t.icon} ${t.name}</span>
+      <div class="gap-bar"><div class="gap-bar-fill ${barCls}" style="width:${tp}%"></div></div>
+      <span class="gap-score">${ok}/${tn}</span></div>`;
+  });
+  return `<div class="card slide-up" style="margin-top:14px;border:1px dashed var(--line);background:linear-gradient(180deg,transparent,rgba(48,177,88,.04));">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;">
+      <span style="font-weight:600;font-size:15px;">🧭 AI 基础素养</span>
+      <span class="tag tag-blue">独立评估</span>
+      <span class="tag tag-green">不计入综合分</span>
+      <span style="margin-left:auto;font-size:12px;color:var(--text2);">答对 ${r.correct}/${r.total} 题</span>
+    </div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:12px;">能力与边界 · 基础原理 · 提示词 · Agent · 知识库 · 安全合规 六主题通识体检；独立于岗位 8 维得分，不影响雷达图与课程推荐。</p>
+    <div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap;">
+      <div style="text-align:center;flex:0 0 116px;">
+        <div class="gauge" style="margin:0 auto 4px;"><svg viewBox="0 0 120 120" width="112" height="112"><circle class="gauge-bg" cx="60" cy="60" r="52"/><circle class="gauge-fill" cx="60" cy="60" r="52" stroke-dasharray="326" stroke-dashoffset="${ringOffset}" stroke="${ringColor}"/></svg>
+          <div class="gauge-text">${pct}%</div></div>
+        <div style="font-size:11px;color:var(--text2);">基础素养得分</div>
+      </div>
+      <div style="flex:1;min-width:220px;">${themeBars}</div>
+    </div>
+  </div>`;
+}
+
+function baseResultSummaryText() {
+  const r = S._baseResult;
+  if (!r) return null;
+  const tag = r.pct >= 80 ? '🎉' : r.pct >= 60 ? '📖' : '🌱';
+  return 'AI基础素养：' + r.correct + '/' + r.total + ' 题（' + r.pct + '% ' + tag + '）';
 }
 
 function renderResults() {
@@ -7501,6 +7834,8 @@ function renderResults() {
     </div>
 
     ${renderQuizQualityCard(result)}<!-- v34: 作答质量卡片 -->
+
+    ${S._baseResult ? renderBaseResultCard() : (S._baseSkipped ? '<div class="alert alert-info" style="margin-top:14px;">ℹ️ 本次跳过了 AI 基础素养卷。重新测评时可在入口选择作答（约 5 分钟，独立结果、不计入综合分）。</div>' : '')}<!-- v51: 基础素养独立板块 -->
 
     <div style="display:flex;gap:8px;margin-top:12px;"><!-- v35: 报告导出 -->
       <button class="btn btn-primary" style="flex:1;" data-action="exportReport">📄 导出测评报告</button>
@@ -8503,7 +8838,39 @@ function renderAdmin() {
 // ==================== ACTIONS ====================
 S.selectIndustry = function(id) { S.industry = id; render(); };
 S.selectRole = function(id) { S.role = id; render(); };
-S.startQuiz = function() { startAdaptiveQuiz(); S.view = 'quiz'; render(); };
+S.startQuiz = function() { // v51: 首次测评先答基础卷（10 题），再进岗位自适应卷
+  if (!S._baseResult) {
+    S._basePhase = 'intro';
+    S._quizPlan = []; // 清空旧计划，防止基础卷阶段误入自适应渲染
+    S.view = 'quiz';
+    render();
+    return;
+  }
+  startAdaptiveQuiz(); S.view = 'quiz'; render();
+};
+S.baseStart = function() { S._baseSkipped = false; buildBaseQuiz(); S._basePhase = 'active'; S.view = 'quiz'; render(); };
+S.baseSkip = function() { S._basePhase = 'done'; S._baseResult = null; S._baseSkipped = true; S._quizPlan = []; startAdaptiveQuiz(); S.view = 'quiz'; render(); };
+S.answerBase = function(i) {
+  const plan = S._basePlan || [];
+  const idx = S._baseIdx || 0;
+  const p = plan[idx];
+  if (!p || !p.q) return;
+  if (S._baseAnswers && S._baseAnswers[idx]) return; // 已作答即锁定（防重复提交）
+  const q = p.q;
+  const ok = !!(q.scores && q.scores[i] === 4);
+  if (!S._baseAnswers) S._baseAnswers = [];
+  S._baseAnswers[idx] = { theme: p.theme, chosen: i, ok: ok };
+  S._baseFeedback = { chosen: i, correct: q.best, ok: ok, explain: q.explain };
+  render();
+};
+S.baseNext = function() {
+  const plan = S._basePlan || [];
+  if ((S._baseIdx || 0) < plan.length - 1) { S._baseIdx++; S._baseFeedback = null; render(); }
+  else { S.baseFinish(); }
+};
+S.baseFinish = function() { finishBaseQuiz(); render(); };
+S.baseRetake = function() { S._baseSkipped = false; buildBaseQuiz(); S._basePhase = 'active'; S.view = 'quiz'; render(); };
+S.baseGoAdaptive = function() { startAdaptiveQuiz(); S.view = 'quiz'; render(); };
 S.retakeQuiz = function() { // v34: 重新测评（带确认，防误触清成绩）
   showConfirm({
     title: '🔄 重新测评',
@@ -8520,7 +8887,10 @@ S.retakeQuiz = function() { // v34: 重新测评（带确认，防误触清成�
     }
   });
 };
-S.answerQuiz = function(i) { answerCurrentQuestion(i); };
+S.answerQuiz = function(i) {
+  if (S._basePhase === 'active') { S.answerBase(i); return; }
+  answerCurrentQuestion(i);
+};
 S.prevQuestion = function() { // v41: 仅允许回退到本维第 1 题（撤销第 2 题，含已定级撤销）
   if (!S._quizPlan || S.quizIdx <= 0) return;
   const cur = S._quizPlan[S.quizIdx];
@@ -8645,6 +9015,8 @@ S.saveAndFinish = function() {
     industry: S.industry,
     date: new Date().toLocaleDateString('zh-CN'),
     quizScores: S.quizScores,
+    _baseResult: S._baseResult || null,
+    _baseSkipped: S._baseSkipped || false,
     courseProgress: S.courseProgress,
     finalScore: S.finalScore,
     doneCourses: Object.values(S.courseProgress).filter(p=>p.done).length
@@ -8659,7 +9031,7 @@ S.saveAndFinish = function() {
   saveEmployees();
   alert('数据已保存！');
 };
-S.reset = function() { stopVoice(); S.industry=null; S.role=null; S.view='role'; S.quizIdx=0; S.quizAnswers={}; S._quizDims=null; S._quizByDim=null; S._quizWeights=null; S._quizResult=null; S.quizScores=null; S._quizDone={}; S._quizLog={}; S._quizPlan=[]; S._quizSelectedStep={}; S._quizStartAt={}; S._quizTiming={}; S._quizAllDone=false; S.courseIdx=null; S.courseTaskIdx=0; S.courseProgress={}; S.finalAnswers=[]; S.finalSubjAnswers={}; S.finalScore=null; S.finalSubmitted=false; S.finalShowHint={}; S.currentEmployee=null; render(); };
+S.reset = function() { stopVoice(); S.industry=null; S.role=null; S.view='role'; S.quizIdx=0; S._basePhase=null; S._baseResult=null; S._basePlan=null; S._baseIdx=0; S._baseAnswers=[]; S._baseFeedback=null; S._baseSkipped=false; S.quizAnswers={}; S._quizDims=null; S._quizByDim=null; S._quizWeights=null; S._quizResult=null; S.quizScores=null; S._quizDone={}; S._quizLog={}; S._quizPlan=[]; S._quizSelectedStep={}; S._quizStartAt={}; S._quizTiming={}; S._quizAllDone=false; S.courseIdx=null; S.courseTaskIdx=0; S.courseProgress={}; S.finalAnswers=[]; S.finalSubjAnswers={}; S.finalScore=null; S.finalSubmitted=false; S.finalShowHint={}; S.currentEmployee=null; render(); };
 S.goAdmin = function() { S.view='admin'; render(); };
 S.logout = function() {
   stopVoice();
@@ -8675,6 +9047,9 @@ S.loadEmployee = function(idx) {
   S.courseProgress = e.courseProgress;
   S.finalScore = e.finalScore;
   S.finalSubmitted = e.finalScore != null;
+  S._baseResult = e._baseResult || null;
+  S._baseSkipped = e._baseSkipped || false;
+  S._basePhase = null;
 };
 S.goBack = function() {
   stopVoice();
@@ -8917,6 +9292,12 @@ function bindEvents() {
             case 'selectRole': S.selectRole(id); break;
             case 'startQuiz': S.startQuiz(); break;
             case 'answerQuiz': S.answerQuiz(idx); break;
+            case 'baseStart': S.baseStart(); break;
+            case 'baseSkip': S.baseSkip(); break;
+            case 'baseNext': S.baseNext(); break;
+            case 'baseFinish': S.baseFinish(); break;
+            case 'baseRetake': S.baseRetake(); break;
+            case 'baseGoAdaptive': S.baseGoAdaptive(); break;
             case 'retakeQuiz': S.retakeQuiz(); break;
             case 'exportReport': exportReport(); break;
             case 'shareReport': shareReport(); break;
