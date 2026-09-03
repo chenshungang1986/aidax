@@ -6884,6 +6884,39 @@ const FINAL_QUIZZES = {
   ]
 };
 
+// ==================== OPTION PREFIX SANITIZER (#186 v52) ====================
+// 老库（v43-v49 反选最长 / V2 电报体）opts 内嵌 "A. " 前缀；UI 洗牌后再拼字母标签
+// → 出现 "D. A. …" 双前缀 / "AB" 错乱。修复：引导期一次性深度清洗题库数据；
+// 渲染时 cleanOpt 兜底（覆盖课中题等动态数据源），保证任何展示路径不再出现内嵌前缀。
+function cleanOpt(o) {
+  return (typeof o === 'string') ? o.replace(/^[A-Ea-e][.．、]\s*/, '') : o;
+}
+(function sanitizeQuizOptPrefixes() {
+  function cleanList(arr) {
+    if (!arr) return;
+    for (var i = 0; i < arr.length; i++) {
+      var q = arr[i];
+      if (q && Array.isArray(q.opts)) {
+        for (var j = 0; j < q.opts.length; j++) {
+          if (typeof q.opts[j] === 'string') q.opts[j] = cleanOpt(q.opts[j]);
+        }
+      }
+    }
+  }
+  var banks = [MFG_PM_QUIZ, FIN_PM_QUIZ, AUTO_PM_QUIZ, CPG_PM_QUIZ, INTERNET_PM_QUIZ, MEGA_PM_QUIZ,
+    DEV_QUIZ_V2, OPS_QUIZ_V2, SALES_QUIZ_V2, HR_QUIZ_V2, FIN_QUIZ_V2, PO_QUIZ_V2, LEGAL_QUIZ_V2, AI_BASE_QUIZ];
+  for (var b = 0; b < banks.length; b++) {
+    var B = banks[b];
+    if (!B) continue;
+    var keys = Object.keys(B);
+    for (var k = 0; k < keys.length; k++) cleanList(B[keys[k]]);
+  }
+  if (typeof FINAL_QUIZZES !== 'undefined') {
+    var fk = Object.keys(FINAL_QUIZZES);
+    for (var f = 0; f < fk.length; f++) cleanList(FINAL_QUIZZES[fk[f]]);
+  }
+})();
+
 // ==================== APP STATE ====================
 const S = {
   view:'role', // role|quiz|results|dashboard|course|task|final|admin|map|schedule
@@ -7287,7 +7320,7 @@ function renderBaseQuestion() {
       else style = 'opacity:.55;';
     }
     const mark = fb ? (i === fb.correct ? '　✅ 正确答案' : i === fb.chosen ? '　✗ 你的选择' : '') : '';
-    html += `<button class="quiz-option" data-action="answerQuiz" data-idx="${i}" ${fb ? 'disabled style="' + style + 'cursor:default;"' : 'style="' + style + '"'} onclick="if(typeof S!=='undefined'){S.answerQuiz(${i})}">${String.fromCharCode(65 + i)}. ${o}${mark}</button>`;
+    html += `<button class="quiz-option" data-action="answerQuiz" data-idx="${i}" ${fb ? 'disabled style="' + style + 'cursor:default;"' : 'style="' + style + '"'} onclick="if(typeof S!=='undefined'){S.answerQuiz(${i})}">${String.fromCharCode(65 + i)}. ${cleanOpt(o)}${mark}</button>`;
   });
   html += `</div>`;
   if (fb) {
@@ -7409,7 +7442,7 @@ function renderQuiz() {
   q.opts.forEach((o, i) => {
     let cls = 'quiz-option';
     if (sel !== undefined && sel === i) cls += ' selected';
-    html += `<button class="${cls}" data-action="answerQuiz" data-idx="${i}" onclick="if(typeof S!=='undefined'){S.answerQuiz(${i})}">${String.fromCharCode(65+i)}. ${o}</button>`;
+    html += `<button class="${cls}" data-action="answerQuiz" data-idx="${i}" onclick="if(typeof S!=='undefined'){S.answerQuiz(${i})}">${String.fromCharCode(65+i)}. ${cleanOpt(o)}</button>`;
   });
   html += `</div>`;
 
@@ -8722,7 +8755,7 @@ function renderFinalQuiz() {
         q.opts.forEach((o, j) => {
           const sel = S.finalAnswers[i];
           html += `<label class="quiz-option" style="margin-bottom:4px;${sel===j?'border-color:var(--blue);background:var(--blue-bg);':''}">
-            <input type="radio" name="q${i}" value="${j}" ${sel===j?'checked':''} onchange="S.answerFinal(${i},${j})" style="margin-right:8px;">${String.fromCharCode(65+j)}. ${o}</label>`;
+            <input type="radio" name="q${i}" value="${j}" ${sel===j?'checked':''} onchange="S.answerFinal(${i},${j})" style="margin-right:8px;">${String.fromCharCode(65+j)}. ${cleanOpt(o)}</label>`;
         });
       } else {
         // Subjective question
@@ -8769,7 +8802,7 @@ function renderFinalResults() {
       const correct = userAns === q.ans;
       html += `<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;">
         <span style="color:${correct?'var(--green)':'var(--red)'};font-weight:600;">${correct?'✓':'✗'}</span> ${i+1}. ${q.q}
-        <span style="display:block;margin-top:4px;color:var(--text2);">正确答案：${String.fromCharCode(65+q.ans)}. ${q.opts[q.ans]} — ${q.explain||''}</span></div>`;
+        <span style="display:block;margin-top:4px;color:var(--text2);">正确答案：${String.fromCharCode(65+q.ans)}. ${cleanOpt(q.opts[q.ans])} — ${q.explain||''}</span></div>`;
     } else {
       const hasAnswer = S.finalSubjAnswers[i] && S.finalSubjAnswers[i].trim();
       html += `<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;">
