@@ -6790,6 +6790,107 @@ const AI_BASE_THEMES = {
   compliance: { name: '安全与合规',   icon: '🛡️', desc: '数据红线、内容审核、版权与责任归属' }
 };
 
+// ==================== #193 能力自评题库（员工 AI 工具使用自报；不计入综合分）====================
+// 覆盖：用过哪些主流 AI 工具 / 使用频率 / 使用场景 / 遇到的问题 / 自评能力短板 / 想学什么 / 自评阶段
+// 纯选择题；部分选项标记 other:true（「其他（请填写）」），选中后弹出可自填的输入框
+const SELF_ASSESS_QUIZ = [
+  {
+    q: '你平时用过以下哪些 AI 工具？（可多选）',
+    multi: true,
+    opts: [
+      {t:'ChatGPT / Claude / Gemini 等海外大模型'},
+      {t:'文心一言 / 通义千问 / 智谱清言 等国内大模型'},
+      {t:'DeepSeek'},
+      {t:'豆包 / 元宝 / Kimi 等国产 AI 助手'},
+      {t:'GitHub Copilot / Microsoft 365 Copilot 等办公或编程助手'},
+      {t:'即梦 / 可灵 / Midjourney 等图像或视频生成工具'},
+      {t:'其他（请填写）', other:true}
+    ]
+  },
+  {
+    q: '你使用 AI 工具的频率大概是？',
+    multi: false,
+    opts: [
+      {t:'几乎每天多次，已嵌入日常工作流'},
+      {t:'每天至少用一次'},
+      {t:'每周几次'},
+      {t:'偶尔试试，还没形成习惯'},
+      {t:'几乎没用过'},
+      {t:'其他（请填写）', other:true}
+    ]
+  },
+  {
+    q: '你主要把 AI 用在这些场景？（可多选）',
+    multi: true,
+    opts: [
+      {t:'写文案 / 报告 / 邮件 / 周报'},
+      {t:'代码编写、调试或技术文档'},
+      {t:'数据分析、报表或图表制作'},
+      {t:'翻译、润色、改写'},
+      {t:'头脑风暴、创意灵感'},
+      {t:'资料检索、总结、提炼要点'},
+      {t:'PPT / 文档 / 方案排版制作'},
+      {t:'其他（请填写）', other:true}
+    ]
+  },
+  {
+    q: '用 AI 时你遇到过哪些问题？（可多选）',
+    multi: true,
+    opts: [
+      {t:'不知道怎么写好提示词，结果时好时坏'},
+      {t:'担心数据安全，不敢把内部资料喂给 AI'},
+      {t:'结果不准确 / 出现幻觉，不敢直接用'},
+      {t:'不擅长把 AI 接进自己的工作流'},
+      {t:'缺少好用的企业级 AI 工具'},
+      {t:'不知道 AI 能用在哪些具体工作'},
+      {t:'其他（请填写）', other:true}
+    ]
+  },
+  {
+    q: '你觉得自己在以下哪些方面能力短板最明显？（可多选）',
+    multi: true,
+    opts: [
+      {t:'提示词表达（说不清楚需求）'},
+      {t:'结果判断与甄别（防幻觉 / 核验）'},
+      {t:'数据分析与 AI 工具实战'},
+      {t:'内容创作（文案 / 设计 / 视频）'},
+      {t:'AI 辅助编程 / 开发'},
+      {t:'工作流自动化（Agent / RPA）'},
+      {t:'知识库 / RAG 搭建'},
+      {t:'安全合规与数据保护'},
+      {t:'其他（请填写）', other:true}
+    ]
+  },
+  {
+    q: '你最希望学习哪些 AI 知识？（可多选）',
+    multi: true,
+    opts: [
+      {t:'AI 通识与底层原理'},
+      {t:'高效提示词方法'},
+      {t:'数据分析与 AI 工具'},
+      {t:'内容创作（文案 / 设计 / 视频）'},
+      {t:'AI 辅助编程'},
+      {t:'工作流自动化（Agent / RPA）'},
+      {t:'知识库 / RAG 搭建实战'},
+      {t:'安全合规与数据保护'},
+      {t:'行业落地案例'},
+      {t:'其他（请填写）', other:true}
+    ]
+  },
+  {
+    q: '你觉得自己目前的 AI 应用处于哪个阶段？',
+    multi: false,
+    opts: [
+      {t:'完全没用过，想从零开始'},
+      {t:'试用过但不熟练'},
+      {t:'能完成简单任务（写写文案、查查资料）'},
+      {t:'能嵌入日常工作流，稳定提效'},
+      {t:'能设计 AI 解决方案 / 带团队落地'},
+      {t:'其他（请填写）', other:true}
+    ]
+  }
+];
+
 const FIN_QUIZ_V2 = {
   prompt: [
     {level:0,difficulty:"初阶",scenario:"场景：CFO让你分析本季度毛利率下滑原因，你手上有收入、成本、费用三类明细数据（各 2000 行 Excel）。",q:"如何设计 Prompt 让 AI 高效完成归因分析？",opts:["A. 分步法：(1)上传三类数据→说明字段含义→让AI按产品线/渠道/月份做毛利率拆解 (2)要求AI定位毛利率下滑最大的3个产品线和月份 (3)让AI结合成本明细识别是原料涨价/售价下调/结构变化导致 (4)输出归因结论+建议", "B. 不补充任何字段与口径说明，把收入、成本、费用三张Excel原样丢给AI，让它自己摸索数据含义并直接给出毛利下滑原因", "C. 自己先用Excel透视表把各产品线、渠道的毛利差异算成结果表，再把结果表交给AI，只让它把数字整理成一份书面归因说明", "D. 按四步让AI一体化完成：(1)把收入、成本、费用三张Excel连同「分析毛利率下滑原因」的目标一起上传 (2)让AI自行理解字段含义、统计口径与数据质量，必要时自行清洗加工 (3)要求AI按产品线、渠道、月份拆解毛利并直接定位下滑区间 (4)让AI把根因判断与改进建议写进报告一次输出成稿，全程不做分步干预与中间人工核对", "E. 不上传任何数据，直接问AI「毛利率下滑通常由哪些原因导致」，把它的通用清单拿回来逐条对照公司情况自行比对判断"],scores:[4, 0, 1, 2, 0],best:0,explain:"财务归因分析=数据拆解→差异定位→根因识别→结论输出。关键是让AI按维度拆解而非一次性要结论。"},
@@ -9554,8 +9655,168 @@ function renderBaseSummary() {
   return html;
 }
 
+// ==================== #193 能力自评（员工 AI 工具使用自报；不计入综合分）====================
+// 流程：intro → active（逐题）→ done（画像）；纯自报、不评分，选项含「其他（请填写）」可自填
+// 状态：S._selfPhase / S._selfPlan / S._selfIdx / S._selfAnswers / S._selfSel / S._selfOtherText / S._selfResult / S._selfSkipped
+
+function selfSelOf(idx) {
+  if (!S._selfSel) S._selfSel = {};
+  if (!S._selfSel[idx]) {
+    const prev = S._selfAnswers && S._selfAnswers[idx];
+    S._selfSel[idx] = prev ? prev.chosen.slice() : [];
+  }
+  return S._selfSel[idx];
+}
+
+function buildSelfQuiz() {
+  S._selfPlan = SELF_ASSESS_QUIZ.map((_, i) => i);
+  S._selfIdx = 0;
+  S._selfAnswers = [];
+  S._selfSel = {};
+  S._selfOtherText = {};
+  S._selfPhase = 'active';
+}
+
+function finishSelfQuiz() {
+  S._selfResult = { at: Date.now(), n: (S._selfPlan || []).length };
+  S._selfPhase = 'done';
+}
+
+function renderSelfIntro() {
+  const n = SELF_ASSESS_QUIZ.length;
+  let html = headerHtml('能力自评', '正式测评前，先花 2 分钟说说你自己的 AI 工具使用现状', true);
+  html += `<div class="card slide-up">
+    <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;">
+      <div style="font-size:36px;line-height:1.2;">🪞</div>
+      <div style="flex:1;min-width:240px;">
+        <p style="font-weight:600;font-size:15px;margin-bottom:6px;">这是一次「自我画像」，与岗位专业测评相互独立</p>
+        <p style="font-size:13px;color:var(--text2);line-height:1.8;">我们会了解你<b>用过哪些 AI 工具、在哪些场景用、遇到过什么问题、觉得自己短板在哪、最想学什么</b>（共 ${n} 题）。<br><b style="color:var(--accent);">结果单独展示，不计入 8 维岗位综合分与课程推荐算法</b>——但会帮助你和管理者更清楚你的起点与诉求。</p>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--text2);margin-top:14px;line-height:1.9;">
+      🛠️ 用过哪些主流 AI 工具　·　📊 使用频率与场景　·　⚠️ 遇到的问题　·　📉 自评能力短板　·　📚 最想学习的内容
+    </p>
+    <p style="font-size:12px;color:var(--text2);margin-top:8px;line-height:1.8;">所有题目均为选择题，部分题目可勾选「其他」并自行填写；标注「可多选」的题目可选项不止一个。</p>
+    <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;">
+      <button class="btn btn-primary" style="flex:1;min-width:200px;" onclick="if(typeof S!=='undefined'){S.selfStart()}">开始能力自评（${n} 题）</button>
+      <button class="btn btn-outline" style="flex:1;min-width:200px;" onclick="if(typeof S!=='undefined'){S.selfSkip()}">跳过，直接岗位测评 →</button>
+    </div>
+    <p style="font-size:11px;color:var(--text3);margin-top:12px;">答完展示你的能力自评画像，可「重新自评」或一键进入岗位自适应测评。</p>
+  </div>`;
+  return html;
+}
+
+function renderSelfQuestion() {
+  const plan = S._selfPlan || [];
+  const idx = S._selfIdx || 0;
+  const q = SELF_ASSESS_QUIZ[plan[idx]];
+  if (!q) { finishSelfQuiz(); return renderSelfSummary(); }
+  const total = plan.length;
+  const sel = selfSelOf(idx);
+  const isLast = idx >= total - 1;
+
+  let dots = '';
+  for (let i = 0; i < total; i++) {
+    const done = !!(S._selfAnswers && S._selfAnswers[i]);
+    const cur = i === idx;
+    const bg = done ? '#30b158' : cur ? '#0071e3' : 'rgba(0,113,227,.18)';
+    dots += `<div style="width:14px;height:14px;border-radius:50%;background:${bg};border:2px solid ${cur ? 'var(--accent)' : 'transparent'};transition:all .2s;"></div>`;
+  }
+
+  let html = headerHtml('🪞 能力自评 · ' + (q.multi ? '可多选' : '单选'), '第 ' + (idx + 1) + '/' + total + ' 题 · 不计入综合分', true);
+  html += `<div class="card slide-up">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+      <span class="tag tag-blue">${q.multi ? '多选题' : '单选题'}</span>
+      <span style="margin-left:auto;font-size:12px;color:var(--text2);">已答 ${ (S._selfAnswers||[]).filter(a=>!!a).length }/${total}</span>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">${dots}</div>
+    <div class="quiz-question">${q.q}</div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px;">`;
+
+  q.opts.forEach((o, i) => {
+    const selected = sel.includes(i);
+    const isOther = !!o.other;
+    const style = selected ? 'border-color:var(--accent)!important;background:rgba(0,113,227,.08)!important;color:var(--text1);' : '';
+    html += `<button class="quiz-option" ${selected?'style="'+style+'"':''} onclick="if(typeof S!=='undefined'){S.selfToggle(${idx},${i})}">${String.fromCharCode(65+i)}. ${o.t}</button>`;
+    if (isOther && selected) {
+      const val = (S._selfOtherText && S._selfOtherText[idx]) || '';
+      html += `<input class="self-other-input" data-qidx="${idx}" value="${escHtml(val)}" placeholder="请填写你的具体内容…" oninput="if(typeof S!=='undefined'){S.selfOtherInput(${idx}, this.value)}" style="margin:-4px 0 4px 0;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px;outline:none;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--line)'">`;
+    }
+  });
+
+  html += `</div>
+    <div class="flex-between mt-4">
+      <button class="btn btn-outline" onclick="if(typeof S!=='undefined'){S.goBack()}">← 退出</button>
+      <button class="btn btn-primary" onclick="if(typeof S!=='undefined'){S.selfNext()}">${isLast ? '查看自评画像 →' : '下一题 →'}</button>
+    </div>
+  </div>`;
+  return html;
+}
+
+function renderSelfSummary() {
+  const ans = S._selfAnswers || [];
+  let html = headerHtml('能力自评完成', '你的 AI 工具使用画像 · 不计入综合分', true);
+  html += `<div class="card slide-up">
+    <p style="font-weight:600;font-size:15px;margin-bottom:6px;">🪞 你的能力自画像</p>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:14px;">以下来自你的自报，将随测评报告单独展示，帮助定位你的起点与学习诉求。</p>`;
+
+  SELF_ASSESS_QUIZ.forEach((q, qk) => {
+    const a = ans[qk];
+    const labels = a ? a.labels : [];
+    if (!labels.length) return;
+    const chips = labels.map(l => `<span style="display:inline-block;background:var(--bg2);border:1px solid var(--line);border-radius:20px;padding:4px 10px;font-size:12px;margin:3px 4px 3px 0;color:var(--text1);">${escHtml(l)}</span>`).join('');
+    html += `<div style="margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:600;color:var(--text1);margin-bottom:6px;">${escHtml(q.q)}</div>
+      <div>${chips}</div>
+    </div>`;
+  });
+
+  html += `<div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;">
+      <button class="btn btn-outline" style="flex:1;min-width:160px;" onclick="if(typeof S!=='undefined'){S.selfRetake()}">↺ 重新自评</button>
+      <button class="btn btn-primary" style="flex:1;min-width:200px;" onclick="if(typeof S!=='undefined'){S.selfGoAdaptive()}">进入岗位自适应测评 →</button>
+    </div>
+    <p style="font-size:11px;color:var(--text3);margin-top:12px;">能力自评结果独立展示，不影响 8 维得分、雷达图与课程推荐算法。</p>
+  </div>`;
+  return html;
+}
+
+function renderSelfResultCard() {
+  const ans = S._selfAnswers || [];
+  const answered = ans.filter(Boolean);
+  if (!answered.length) return '';
+  let chipsHtml = '';
+  SELF_ASSESS_QUIZ.forEach((q, qk) => {
+    const a = ans[qk];
+    if (!a || !a.labels || !a.labels.length) return;
+    const chips = a.labels.map(l => `<span style="display:inline-block;background:var(--bg2);border:1px solid var(--line);border-radius:20px;padding:3px 10px;font-size:12px;margin:3px 4px 3px 0;color:var(--text1);">${escHtml(l)}</span>`).join('');
+    chipsHtml += `<div style="margin-bottom:8px;"><div style="font-size:12px;color:var(--text2);margin-bottom:3px;">${escHtml(q.q)}</div>${chips}</div>`;
+  });
+  return `<div class="card slide-up" style="margin-top:14px;border:1px dashed var(--line);background:linear-gradient(180deg,transparent,rgba(0,113,227,.04));">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;">
+      <span style="font-weight:600;font-size:15px;">🪞 能力自评</span>
+      <span class="tag tag-blue">员工自报</span>
+      <span class="tag tag-green">不计入综合分</span>
+    </div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:10px;">你用过的 AI 工具 / 场景 / 遇到的问题 / 自评短板 / 想学的内容，帮助定位起点与诉求。</p>
+    ${chipsHtml}
+  </div>`;
+}
+
+function selfShareText() {
+  const a = S._selfAnswers || [];
+  const answered = a.filter(Boolean);
+  if (!answered.length) return '';
+  const tools = (a[0] && a[0].labels) || [];
+  const want = (a[5] && a[5].labels) || [];
+  return '能力自评：常用工具 ' + (tools.length ? tools.join('/') : '无') + '；最想学 ' + (want.length ? want.join('/') : '—');
+}
+
 // ---- QUIZ (v41: 同维连答自适应 UI; v51: 前置 AI 基础素养卷) ----
 function renderQuiz() {
+  // #193 能力自评：在「基础素养卷」与「岗位自适应卷」之间插入自报阶段
+  if (S._selfPhase === 'intro') return renderSelfIntro();
+  if (S._selfPhase === 'active') return renderSelfQuestion();
+  if (S._selfPhase === 'done' && (!S._quizPlan || !S._quizPlan.length)) return renderSelfSummary();
   if (S._basePhase === 'intro') return renderBaseIntro();
   if (S._basePhase === 'active') return renderBaseQuestion();
   if (S._basePhase === 'done' && (!S._quizPlan || !S._quizPlan.length)) return renderBaseSummary();
@@ -9813,6 +10074,27 @@ function exportReport() {
     <p style="font-size:12px;color:#86868b;">本次未作答 AI 基础素养卷（可重新测评时在入口作答）。</p>`;
   }
 
+  // #193: 能力自评独立小节（员工自报，不计入岗位综合分）
+  const selfA = S._selfAnswers || [];
+  let selfReportHtml = '';
+  const selfTitle = `能力自评 <span style="font-size:11px;color:#86868b;font-weight:400;">（员工自报 · 不计入岗位综合分）</span>`;
+  const answeredSelf = selfA.filter(Boolean);
+  if (answeredSelf.length) {
+    const sRows = SELF_ASSESS_QUIZ.map((q, qk) => {
+      const a = selfA[qk];
+      if (!a || !a.labels || !a.labels.length) return '';
+      return `<tr><td>${escHtml(q.q)}</td><td>${a.labels.map(l => escHtml(l)).join('、 ')}</td></tr>`;
+    }).filter(Boolean).join('');
+    selfReportHtml = `<h2>${selfTitle}</h2>
+    <table>
+      <tr><th>自评项</th><th>作答</th></tr>
+      ${sRows}
+    </table>`;
+  } else {
+    selfReportHtml = `<h2>${selfTitle}</h2>
+    <p style="font-size:12px;color:#86868b;">本次未作答能力自评（可重新测评时在入口作答）。</p>`;
+  }
+
   const now = new Date();
   const dateStr = now.toLocaleDateString('zh-CN') + ' ' + now.toLocaleTimeString('zh-CN', {hour:'2-digit', minute:'2-digit'});
   const fileName = `AIDAX测评报告_${industry ? industry.name : ''}_${role ? role.name : ''}_${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}.html`;
@@ -9869,6 +10151,8 @@ function exportReport() {
   </div>
 
   ${baseReportHtml}
+
+  ${selfReportHtml}
 
   ${qualityHtml}
 
@@ -9935,6 +10219,7 @@ function shareReport() {
     `💪 最强：${top.map(t => AI_DIMS[t.k].name + ' ' + t.pct + '%').join('、')}`,
     `⚠️ 短板：${weak.map(w => AI_DIMS[w.k].name + ' ' + w.pct + '%').join('、')}`,
     baseResultSummaryText() ? baseResultSummaryText() + '（独立 · 不计入综合分）' : 'AI基础素养：本次未作答',
+    selfShareText() ? selfShareText() + '（独立 · 不计入综合分）' : '能力自评：本次未作答',
     '—— 来自 AI达学(AIDAX) 8维自适应测评'
   ].join('\n');
   if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -10044,6 +10329,8 @@ function renderResults() {
     ${renderQuizQualityCard(result)}<!-- v34: 作答质量卡片 -->
 
     ${S._baseResult ? renderBaseResultCard() : (S._baseSkipped ? '<div class="alert alert-info" style="margin-top:14px;">ℹ️ 本次跳过了 AI 基础素养卷。重新测评时可在入口选择作答（约 5 分钟，独立结果、不计入综合分）。</div>' : '')}<!-- v51: 基础素养独立板块 -->
+
+    ${(S._selfResult || (S._selfAnswers && S._selfAnswers.filter(Boolean).length)) ? renderSelfResultCard() : (S._selfSkipped ? '<div class="alert alert-info" style="margin-top:14px;">ℹ️ 本次跳过了能力自评。重新测评时可在入口选择作答（约 2 分钟，独立结果、不计入综合分）。</div>' : '')}<!-- #193: 能力自评独立板块 -->
 
     <div style="display:flex;gap:8px;margin-top:12px;"><!-- v35: 报告导出 -->
       <button class="btn btn-primary" style="flex:1;" data-action="exportReport">📄 导出测评报告</button>
@@ -11444,10 +11731,17 @@ function renderAdmin() {
 // ==================== ACTIONS ====================
 S.selectIndustry = function(id) { S.industry = id; render(); };
 S.selectRole = function(id) { S.role = id; render(); };
-S.startQuiz = function() { // v51: 首次测评先答基础卷（10 题），再进岗位自适应卷
-  if (!S._baseResult) {
+S.startQuiz = function() { // v51: 首次测评先答基础卷（10 题），再进能力自评，最后岗位自适应卷
+  if (!S._baseResult && !S._baseSkipped) {
     S._basePhase = 'intro';
     S._quizPlan = []; // 清空旧计划，防止基础卷阶段误入自适应渲染
+    S.view = 'quiz';
+    render();
+    return;
+  }
+  // #193 能力自评：基础卷完成后，未做且未跳过则先自报
+  if (!S._selfResult && !S._selfSkipped) {
+    S._selfPhase = 'intro';
     S.view = 'quiz';
     render();
     return;
@@ -11476,7 +11770,55 @@ S.baseNext = function() {
 };
 S.baseFinish = function() { finishBaseQuiz(); render(); };
 S.baseRetake = function() { S._baseSkipped = false; buildBaseQuiz(); S._basePhase = 'active'; S.view = 'quiz'; render(); };
-S.baseGoAdaptive = function() { startAdaptiveQuiz(); S.view = 'quiz'; render(); };
+S.baseGoAdaptive = function() {
+  // #193 基础卷完成后，未做且未跳过能力自评则先自报，再进岗位自适应
+  if (!S._selfResult && !S._selfSkipped) { S._selfPhase = 'intro'; S.view = 'quiz'; render(); return; }
+  startAdaptiveQuiz(); S.view = 'quiz'; render();
+};
+// #193 能力自评动作
+S.selfStart = function() { S._selfSkipped = false; buildSelfQuiz(); S.view = 'quiz'; render(); };
+S.selfSkip = function() {
+  S._selfPhase = 'done'; S._selfResult = null; S._selfSkipped = true; S._selfPlan = [];
+  startAdaptiveQuiz(); S.view = 'quiz'; render();
+};
+S.selfToggle = function(idx, optIdx) {
+  const sel = selfSelOf(idx);
+  const q = SELF_ASSESS_QUIZ[S._selfPlan[idx]];
+  if (q.multi) {
+    const p = sel.indexOf(optIdx);
+    if (p >= 0) sel.splice(p, 1); else sel.push(optIdx);
+  } else {
+    S._selfSel[idx] = [optIdx];
+  }
+  render();
+};
+S.selfOtherInput = function(idx, val) {
+  if (!S._selfOtherText) S._selfOtherText = {};
+  S._selfOtherText[idx] = val; // 仅暂存，不触发重渲染（避免输入框失焦）
+};
+S.selfNext = function() {
+  const idx = S._selfIdx || 0;
+  const plan = S._selfPlan || [];
+  const q = SELF_ASSESS_QUIZ[plan[idx]];
+  if (!q) { finishSelfQuiz(); return; }
+  const sel = (S._selfSel && S._selfSel[idx]) ? S._selfSel[idx].slice() : [];
+  if (!sel.length) { alert(q.multi ? '请至少选择一项（可多选）' : '请选择一个选项'); return; }
+  const labels = sel.map(i => {
+    const o = q.opts[i];
+    if (o.other) {
+      const txt = (S._selfOtherText && S._selfOtherText[idx]) ? S._selfOtherText[idx].trim() : '';
+      return '其他：' + (txt || '（未填写）');
+    }
+    return o.t;
+  });
+  if (!S._selfAnswers) S._selfAnswers = [];
+  S._selfAnswers[idx] = { q: q.q, multi: q.multi, chosen: sel.slice(), labels: labels };
+  if (S._selfSel) delete S._selfSel[idx];
+  if (idx < plan.length - 1) { S._selfIdx++; render(); }
+  else { finishSelfQuiz(); render(); }
+};
+S.selfRetake = function() { S._selfSkipped = false; buildSelfQuiz(); S.view = 'quiz'; render(); };
+S.selfGoAdaptive = function() { startAdaptiveQuiz(); S.view = 'quiz'; render(); };
 S.retakeQuiz = function() { // v34: 重新测评（带确认，防误触清成绩）
   showConfirm({
     title: '🔄 重新测评',
@@ -11623,6 +11965,9 @@ S.saveAndFinish = function() {
     quizScores: S.quizScores,
     _baseResult: S._baseResult || null,
     _baseSkipped: S._baseSkipped || false,
+    _selfResult: S._selfResult || null,
+    _selfSkipped: S._selfSkipped || false,
+    _selfAnswers: S._selfAnswers || null,
     courseProgress: S.courseProgress,
     questProg: S.questProg,
     finalScore: S.finalScore,
@@ -11638,7 +11983,7 @@ S.saveAndFinish = function() {
   saveEmployees();
   alert('数据已保存！');
 };
-S.reset = function() { stopVoice(); S.industry=null; S.role=null; S.view='role'; S.quizIdx=0; S._basePhase=null; S._baseResult=null; S._basePlan=null; S._baseIdx=0; S._baseAnswers=[]; S._baseFeedback=null; S._baseSkipped=false; S.quizAnswers={}; S._quizDims=null; S._quizByDim=null; S._quizWeights=null; S._quizResult=null; S.quizScores=null; S._quizDone={}; S._quizLog={}; S._quizPlan=[]; S._quizSelectedStep={}; S._quizStartAt={}; S._quizTiming={}; S._quizAllDone=false; S.courseIdx=null; S.courseTaskIdx=0; S.courseProgress={}; S.questProg={}; S.quest=null; S.combo=0; S.finalAnswers=[]; S.finalSubjAnswers={}; S.finalScore=null; S.finalSubmitted=false; S.finalShowHint={}; S.currentEmployee=null; render(); };
+S.reset = function() { stopVoice(); S.industry=null; S.role=null; S.view='role'; S.quizIdx=0; S._basePhase=null; S._baseResult=null; S._basePlan=null; S._baseIdx=0; S._baseAnswers=[]; S._baseFeedback=null; S._baseSkipped=false; S._selfPhase=null; S._selfResult=null; S._selfPlan=null; S._selfIdx=0; S._selfAnswers=[]; S._selfSel={}; S._selfOtherText={}; S._selfSkipped=false; S.quizAnswers={}; S._quizDims=null; S._quizByDim=null; S._quizWeights=null; S._quizResult=null; S.quizScores=null; S._quizDone={}; S._quizLog={}; S._quizPlan=[]; S._quizSelectedStep={}; S._quizStartAt={}; S._quizTiming={}; S._quizAllDone=false; S.courseIdx=null; S.courseTaskIdx=0; S.courseProgress={}; S.questProg={}; S.quest=null; S.combo=0; S.finalAnswers=[]; S.finalSubjAnswers={}; S.finalScore=null; S.finalSubmitted=false; S.finalShowHint={}; S.currentEmployee=null; render(); };
 S.goAdmin = function() { S.view='admin'; render(); };
 S.logout = function() {
   stopVoice();
@@ -11658,7 +12003,10 @@ S.loadEmployee = function(idx) {
   S.finalSubmitted = e.finalScore != null;
   S._baseResult = e._baseResult || null;
   S._baseSkipped = e._baseSkipped || false;
-  S._basePhase = null;
+  S._selfResult = e._selfResult || null;
+  S._selfSkipped = e._selfSkipped || false;
+  S._selfAnswers = e._selfAnswers || null;
+  S._selfPhase = null;
 };
 S.goBack = function() {
   stopVoice();
