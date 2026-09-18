@@ -12050,6 +12050,7 @@ S.goBack = function() {
 // ==================== PPT & VOICE SYSTEM ====================
 let _voiceSynth = window.speechSynthesis;
 let _voiceUtterance = null;
+let _audioEl = null; // 方案B：预生成 mp3 播放元素
 let _pptInterval = null;
 let _subtitleTimer = null;
 
@@ -12096,6 +12097,7 @@ function initPPT() {
 function stopVoice() {
   if (_voiceUtterance) { _voiceUtterance.onend = null; }
   _voiceSynth.cancel();
+  if (_audioEl) { try { _audioEl.pause(); _audioEl.onended = null; _audioEl.onerror = null; } catch(e){} }
   if (_pptInterval) clearInterval(_pptInterval);
   S.voicePlaying = false;
   S.voicePaused = false;
@@ -12103,12 +12105,14 @@ function stopVoice() {
 
 S.toggleVoice = function() {
   if (S.voicePlaying && !S.voicePaused) { // pause
+    if (_audioEl && !_audioEl.paused) { try { _audioEl.pause(); } catch(e){} }
     _voiceSynth.pause();
     S.voicePaused = true;
     updateVoiceButton();
     return;
   }
   if (S.voicePaused) { // resume
+    if (_audioEl) { try { _audioEl.play().catch(function(){}); } catch(e){} }
     _voiceSynth.resume();
     S.voicePaused = false;
     updateVoiceButton();
@@ -12141,41 +12145,71 @@ S.setVoiceSpeed = function(rate) {
   S.voiceRate = parseFloat(rate);
 };
 
+function ensureAudioEl() {
+  if (!_audioEl) { try { _audioEl = new Audio(); _audioEl.preload = 'auto'; } catch(e){ _audioEl = null; } }
+  return _audioEl;
+}
+
 function playCurrentSlide() {
   S.voicePlaying = true;
   S.voicePaused = false;
   updateVoiceButton();
   var c = getRoleCourses()?.[S.courseIdx];
   if (!c) return;
-  const slides = getPPTSlides(c.id, '', '');
+  const slides = getPPTSlides(c.id, c.title, c.desc);
   if (!slides[S.pptCurrentSlide]) return;
   const rawNotes = slides[S.pptCurrentSlide].notes || '';
-  // P2.4: Split long text into sentences for better TTS pacing
+  if (!rawNotes.trim()) return;
+
+  // 方案B：优先播放预生成音频（自然人声，火山/Edge mp3 或 Apple 离线 m4a）；均无则回退浏览器内置 TTS
+  const audioBase = 'audio/' + c.id + '/' + S.pptCurrentSlide;
+  const a = ensureAudioEl();
+  if (a) {
+    a.playbackRate = (S.voiceRate || 1);
+    a.onended = function() { onSlideAudioEnded(); };
+    const exts = ['mp3', 'm4a'];
+    let ei = 0;
+    function tryNext() {
+      if (ei >= exts.length) { a.onerror = null; a.onended = null; playSlideTTS(rawNotes); return; }
+      a.onerror = function() { a.onerror = null; ei++; tryNext(); };
+      a.src = audioBase + '.' + exts[ei];
+      const pr = a.play();
+      if (pr && pr.catch) pr.catch(function() { ei++; tryNext(); });
+    }
+    tryNext();
+    updateSubtitle(rawNotes); // 静态字幕（无逐句高亮）
+    return;
+  }
+  // 无 Audio 支持，直接 TTS
+  playSlideTTS(rawNotes);
+}
+
+function onSlideAudioEnded() {
+  if (_subtitleTimer) clearInterval(_subtitleTimer);
+  S._voiceSlideProgress = S._voiceSlideProgress || {};
+  S._voiceSlideProgress[S.pptCurrentSlide] = true;
+  const allSlides = document.querySelectorAll('.ppt-slide');
+  if (S.pptCurrentSlide < allSlides.length - 1) {
+    S.pptCurrentSlide++;
+    updatePPTUI();
+    playCurrentSlide();
+  } else {
+    S.voicePlaying = false;
+    updateVoiceButton();
+    updateSubtitle('课程语音播放完成，可进入关卡练习。');
+  }
+}
+
+// 浏览器内置 TTS 回退（原 playCurrentSlide 逻辑）
+function playSlideTTS(rawNotes) {
   const sentences = splitChineseSentences(rawNotes);
   const notes = sentences.join('。');
   S._currentSentences = sentences;
   S._currentSentenceIdx = 0;
-  
   _voiceUtterance = new SpeechSynthesisUtterance(notes);
   _voiceUtterance.lang = 'zh-CN';
   _voiceUtterance.rate = S.voiceRate;
-  _voiceUtterance.onend = function() {
-    if (_subtitleTimer) clearInterval(_subtitleTimer);
-    // P2.4: Save voice progress
-    S._voiceSlideProgress = S._voiceSlideProgress || {};
-    S._voiceSlideProgress[S.pptCurrentSlide] = true;
-    // Auto advance to next slide
-    const allSlides = document.querySelectorAll('.ppt-slide');
-    if (S.pptCurrentSlide < allSlides.length - 1) {
-      S.pptCurrentSlide++;
-      updatePPTUI();
-      playCurrentSlide();
-    } else {
-      S.voicePlaying = false;
-      updateVoiceButton();
-      updateSubtitle('课程语音播放完成，可进入关卡练习。');
-    }
-  };
+  _voiceUtterance.onend = function() { onSlideAudioEnded(); };
   updateSubtitle(notes, S._currentSentences);
   _voiceSynth.speak(_voiceUtterance);
 }
