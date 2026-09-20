@@ -204,7 +204,50 @@ img{max-width:100%;display:block}
 .role-card-wrap h4{font-size:1rem;font-weight:700;color:var(--c-text);margin-bottom:4px}
 .role-card-wrap p{font-size:.78rem;color:var(--c-text3)}
 
-/* ===== CTA ===== */
+/* ===== Capability Model (8-dim) ===== */
+.model{background:#fff}
+.model-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.model-card{background:#fff;border-radius:20px;padding:26px 18px;text-align:center;border:1px solid var(--c-border);transition:all .3s;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.model-card:hover{border-color:var(--c-primary);transform:translateY(-3px);box-shadow:var(--shadow-hover)}
+.model-card .m-ico{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:1.4rem;color:#fff}
+.model-card h4{font-size:1rem;font-weight:700;color:var(--c-text);margin-bottom:6px}
+.model-card p{font-size:.78rem;color:var(--c-text3);line-height:1.6}
+
+/* ===== Upgrade Highlights (6 optimizations) ===== */
+.upgrade{background:#f8fafc}
+.up-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.up-card{background:#fff;border-radius:20px;padding:30px 26px;border:1px solid var(--c-border);transition:all .3s;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.up-card:hover{border-color:var(--c-border-hover);transform:translateY(-2px);box-shadow:var(--shadow-hover)}
+.up-num{position:absolute;top:14px;right:18px;font-size:2.4rem;font-weight:900;color:rgba(99,102,241,.07);letter-spacing:-1px}
+.up-ico{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:1.4rem;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff}
+.up-card h3{font-size:1.05rem;font-weight:700;margin-bottom:10px;color:var(--c-text)}
+.up-card p{font-size:.88rem;color:var(--c-text2);line-height:1.7}
+
+/* ===== Enterprise Band ===== */
+.ent{background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 60%,#312e81 100%);color:#e2e8f0;position:relative;overflow:hidden}
+.ent::before{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.06) 1px,transparent 1px);background-size:36px 36px}
+.ent .container{position:relative;z-index:1}
+.ent-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:56px;align-items:center}
+.ent h2{font-size:2.3rem;font-weight:800;color:#fff;margin-bottom:18px;letter-spacing:-.5px;line-height:1.25}
+.ent p{color:rgba(226,232,240,.75);font-size:1.02rem;line-height:1.9;margin-bottom:22px}
+.ent-feats{list-style:none}
+.ent-feats li{padding:11px 0;font-size:.95rem;color:#e2e8f0;display:flex;align-items:center;gap:12px}
+.ent-feats li::before{content:'';flex-shrink:0;width:24px;height:24px;border-radius:50%;background:#6366f1 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E") center no-repeat;background-size:14px}
+.ent-visual{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:28px;backdrop-filter:blur(8px)}
+.ent-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.ent-row:last-child{border-bottom:none}
+.ent-row .e-lbl{width:96px;font-size:.82rem;color:#a5b4fc;flex-shrink:0}
+.ent-row .e-track{flex:1;height:8px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden}
+.ent-row .e-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#818cf8,#22d3ee)}
+.ent-row .e-val{width:52px;font-size:.82rem;font-weight:700;color:#fff;text-align:right}
+.ent-cta{display:flex;gap:14px;margin-top:8px;flex-wrap:wrap}
+.ent-cta .btn-outline{color:rgba(255,255,255,.85);border-color:rgba(255,255,255,.25)}
+.ent-cta .btn-outline:hover{border-color:#fff;color:#fff;background:rgba(255,255,255,.08)}
+
+@media(max-width:768px){
+  .model-grid,.up-grid{grid-template-columns:1fr 1fr}
+  .ent-grid{grid-template-columns:1fr;padding:28px}
+}
 .cta{background:linear-gradient(135deg,#6366f1,#8b5cf6);text-align:center;padding:80px 0;position:relative;overflow:hidden}
 .cta::before{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.1) 1px,transparent 1px);background-size:40px 40px}
 .cta .container{position:relative;z-index:1}
@@ -343,9 +386,11 @@ img{max-width:100%;display:block}
     <ul class="nav-links" data-page-node-id="4G4UFL2GZO2Eu5POArdeUu">
       <li data-page-node-id="3e03UjiEJE6dCZVW0cOJIE"><a href="#pain" data-page-node-id="4YkMSrplmS0Of6qg2u7nP3">痛点</a></li>
       <li data-page-node-id="p1QhGG73pDuZhYzOdYSIS8"><a href="#solution" data-page-node-id="d48ghinHuJCDgwYVt6yoiv">方案</a></li>
-      <li data-page-node-id="1STrt7I8Q9A7eekJGCO0KM"><a href="#features" data-page-node-id="MOMQ5pAWiGV0Ms5WYPLGM3">能力</a></li>
-      <li data-page-node-id="ESNpe3nYxZFHaIlArSLhBb"><a href="#industries" data-page-node-id="Sc9J6DP6NYrtFpLBtaYlH2">行业</a></li>
-      <li data-page-node-id="V5qQVMKfjfQgBKLJPbwgRX"><a href="#roles" data-page-node-id="6QbletVJu7XjHTyAC3O9kn">岗位</a></li>
+      <li data-page-node-id="1STrt7I8Q9A7eekJGCO0KM"><a href="#model" data-page-node-id="MOMQ5pAWiGV0Ms5WYPLGM3">能力模型</a></li>
+      <li data-page-node-id="ESNpe3nYxZFHaIlArSLhBb"><a href="#upgrade" data-page-node-id="Sc9J6DP6NYrtFpLBtaYlH2">六大升级</a></li>
+      <li data-page-node-id="V5qQVMKfjfQgBKLJPbwgRX"><a href="#industries" data-page-node-id="6QbletVJu7XjHTyAC3O9kn">行业</a></li>
+      <li data-page-node-id="rOlENAv2"><a href="#roles" data-page-node-id="6QbletVJu7XjHTyAC3O9kn2">岗位</a></li>
+      <li data-page-node-id="ENTnav"><a href="#enterprise" data-page-node-id="ENTnavA">企业版</a></li>
     </ul>
     <div class="nav-cta" data-page-node-id="NRd3Zlm2Fv8vrAx5GcCwE6"><button class="btn btn-primary" onclick="openLogin()" data-page-node-id="ErDZijjBEhcwacdd5XW9FX">立即体验</button></div>
   </div>
@@ -358,7 +403,7 @@ img{max-width:100%;display:block}
     <div data-page-node-id="6BW17idnYnySznCNOgRjzc">
       <div class="hero-badge" data-page-node-id="IWFgpHuq2m9CvdBJbGnu7L"><span class="dot" data-page-node-id="KUSpOXkRFrWVtbIZ0DAK5d"></span>企业AI学习一站式服务 · 已服务100+企业</div>
       <h1 data-page-node-id="vRpU5eUtI62Xpi46PQFber">让每位员工<br data-page-node-id="eHL3kxj0N1v2o1PzwjNQ8s">都成为<span class="gradient" data-page-node-id="2n9rwznwXNmOD6H7DldtYU">AI高手</span></h1>
-      <p class="hero-desc" data-page-node-id="nzEtJj3jBdLAaHiSvhAkRE">AI达学AIDAX为企业提供从能力诊断、个性化课程、场景化陪练到成果验证的完整AI技能培训闭环，全面覆盖7大行业、8大岗位。</p>
+      <p class="hero-desc" data-page-node-id="nzEtJj3jBdLAaHiSvhAkRE">AI达学AIDAX为企业提供「AI基础素养 + 岗位自适应双测评 → 自评融入学习地图 → 全课程可学（必修/选修）→ WorkBuddy 场景实操 → 视频字幕高亮陪练 → 作业提示与得分点」的完整AI技能培训闭环，全面覆盖7大行业、8大岗位。</p>
       <div class="hero-btns" data-page-node-id="Xxu7u9H0qqnFMmHBOEXuzy">
         <button class="btn btn-primary" onclick="openLogin()" data-page-node-id="7OZ2ZAeKVzYIvOTurrWPym">免费开始测评 →</button>
         <button class="btn btn-outline" onclick="openLogin()" data-page-node-id="f4WE32D69AOkI27d1EQOYF">查看行业方案</button>
@@ -603,6 +648,73 @@ img{max-width:100%;display:block}
   </div>
 </section>
 
+<!-- ===== CAPABILITY MODEL (8-dim) ===== -->
+<section class="model section" id="model" data-page-node-id="MOD1">
+  <div class="container" data-page-node-id="MOD2">
+    <div class="section-tag" data-page-node-id="MOD3">AI Capability Model</div>
+    <h2 class="section-title" data-page-node-id="MOD4">科学量化的<span class="hl" data-page-node-id="MOD5">八大AI能力维度</span></h2>
+    <p class="section-sub" data-page-node-id="MOD6">基于企业实际岗位场景定义的能力模型，前测定位短板、学习补全、后测验证，全程数据驱动</p>
+    <div class="model-grid" data-page-node-id="MOD7">
+      <div class="model-card" data-page-node-id="M1"><div class="m-ico" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">💬</div><h4 data-page-node-id="M1a">提示词工程</h4><p data-page-node-id="M1b">结构化表达，让AI精准理解需求</p></div>
+      <div class="model-card" data-page-node-id="M2"><div class="m-ico" style="background:linear-gradient(135deg,#06b6d4,#3b82f6)">🛠️</div><h4 data-page-node-id="M2a">工具实战</h4><p data-page-node-id="M2b">主流AI工具深度使用与工作流集成</p></div>
+      <div class="model-card" data-page-node-id="M3"><div class="m-ico" style="background:linear-gradient(135deg,#10b981,#059669)">📊</div><h4 data-page-node-id="M3a">数据分析</h4><p data-page-node-id="M3b">用AI做清洗、归因与可视化洞察</p></div>
+      <div class="model-card" data-page-node-id="M4"><div class="m-ico" style="background:linear-gradient(135deg,#f59e0b,#f97316)">✍️</div><h4 data-page-node-id="M4a">内容创作</h4><p data-page-node-id="M4b">文案、设计、视频脚本一站生成</p></div>
+      <div class="model-card" data-page-node-id="M5"><div class="m-ico" style="background:linear-gradient(135deg,#8b5cf6,#a855f7)">💻</div><h4 data-page-node-id="M5a">辅助开发</h4><p data-page-node-id="M5b">代码生成、审查、调试自动化</p></div>
+      <div class="model-card" data-page-node-id="M6"><div class="m-ico" style="background:linear-gradient(135deg,#ec4899,#db2777)">🔄</div><h4 data-page-node-id="M6a">协同工作流</h4><p data-page-node-id="M6b">人机协作与人跨部门规范</p></div>
+      <div class="model-card" data-page-node-id="M7"><div class="m-ico" style="background:linear-gradient(135deg,#ef4444,#dc2626)">🛡️</div><h4 data-page-node-id="M7a">安全合规</h4><p data-page-node-id="M7b">数据隐私保护与AI治理规范</p></div>
+      <div class="model-card" data-page-node-id="M8"><div class="m-ico" style="background:linear-gradient(135deg,#14b8a6,#0d9488)">🎯</div><h4 data-page-node-id="M8a">战略应用</h4><p data-page-node-id="M8b">用AI驱动业务决策与增长</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== UPGRADE HIGHLIGHTS (6 optimizations) ===== -->
+<section class="upgrade section" id="upgrade" data-page-node-id="UP1">
+  <div class="container" data-page-node-id="UP2">
+    <div class="section-tag" data-page-node-id="UP3">What's New</div>
+    <h2 class="section-title" data-page-node-id="UP4">产品体验<span class="hl" data-page-node-id="UP5">六大升级</span></h2>
+    <p class="section-sub" data-page-node-id="UP6">围绕"测得更准、学得更顺、用得起来"持续打磨学习闭环</p>
+    <div class="up-grid" data-page-node-id="UP7">
+      <div class="up-card" data-page-node-id="U1"><div class="up-num">01</div><div class="up-ico">🧮</div><h3 data-page-node-id="U1a">双测评计入综合分</h3><p data-page-node-id="U1b">AI基础素养卷（30%）+ 岗位8维自适应测评（70%）共同构成综合分，两部分均不可跳过，结果更可信。</p></div>
+      <div class="up-card" data-page-node-id="U2"><div class="up-num">02</div><div class="up-ico">🪞</div><h3 data-page-node-id="U2a">自评融入学习地图</h3><p data-page-node-id="U2b">第三部分能力自评自动结合进学习地图与课程推荐优先级，相关课程以 🪞 标记，学得更对症。</p></div>
+      <div class="up-card" data-page-node-id="U3"><div class="up-num">03</div><div class="up-ico">📚</div><h3 data-page-node-id="U3a">全部可学 · 必修/选修</h3><p data-page-node-id="U3b">进入学习后所有内容均可学习，仅标注必修（测评建议）与选修（其余内容），不再硬锁，路径更自由。</p></div>
+      <div class="up-card" data-page-node-id="U4"><div class="up-num">04</div><div class="up-ico">⭐</div><h3 data-page-node-id="U4a">WorkBuddy 主力平台</h3><p data-page-node-id="U4b">除研发岗外，各岗位课程均以 WorkBuddy 作为首选AI工具与实操入口，课前课中课后统一落地。</p></div>
+      <div class="up-card" data-page-node-id="U5"><div class="up-num">05</div><div class="up-ico">🎬</div><h3 data-page-node-id="U5a">视频字幕 + 讲到哪高亮</h3><p data-page-node-id="U5b">课程视频图文并茂，解说带逐句字幕，讲到哪一段文字/图示即高亮，学员边看边跟练。</p></div>
+      <div class="up-card" data-page-node-id="U6"><div class="up-num">06</div><div class="up-ico">📝</div><h3 data-page-node-id="U6a">作业提示要点 + 得分点</h3><p data-page-node-id="U6b">每课作业给出输出提示要点与明确得分点（完整性/具体性/结构/相关性），交付有标准、可自评。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ENTERPRISE BAND ===== -->
+<section class="ent section" id="enterprise" data-page-node-id="ENT1">
+  <div class="container" data-page-node-id="ENT2">
+    <div class="ent-grid" data-page-node-id="ENT3">
+      <div data-page-node-id="ENT4">
+        <h2 data-page-node-id="ENT5">企业版：让培训效果看得见、管得住</h2>
+        <p data-page-node-id="ENT6">从单点学习走向组织级管理——管理员看板、行业/公司维度测评分析、学员实时反馈汇聚成产品迭代需求，一套系统打通"学、练、管、改"。</p>
+        <ul class="ent-feats" data-page-node-id="ENT7">
+          <li data-page-node-id="EF1">管理员 / 企业管理员双角色，查看访问与考试进度</li>
+          <li data-page-node-id="EF2">按行业、按公司汇总员工测评水平与能力短板</li>
+          <li data-page-node-id="EF3">操作中小气泡实时提交 bug（文字/图/音/视频）</li>
+          <li data-page-node-id="EF4">反馈由AI聚合成产品功能优化迭代需求</li>
+          <li data-page-node-id="EF5">按行业+测评+学习生成培训与陪跑方案</li>
+        </ul>
+        <div class="ent-cta" data-page-node-id="ENT8">
+          <button class="btn btn-primary" onclick="openLogin()" data-page-node-id="EC1">申请企业试用 →</button>
+          <button class="btn btn-outline" onclick="toggleCsPanel()" data-page-node-id="EC2">联系顾问</button>
+        </div>
+      </div>
+      <div class="ent-visual" data-page-node-id="ENT9">
+        <div class="sv-header" data-page-node-id="ENT10"><div class="sv-dot g"></div><span style="font-size:.82rem;color:#a5b4fc">企业培训数据看板（示意）</span></div>
+        <div class="ent-row" data-page-node-id="ER1"><span class="e-lbl">测评完成率</span><div class="e-track"><div class="e-fill" style="width:88%"></div></div><span class="e-val">88%</span></div>
+        <div class="ent-row" data-page-node-id="ER2"><span class="e-lbl">平均综合分</span><div class="e-track"><div class="e-fill" style="width:74%"></div></div><span class="e-val">74</span></div>
+        <div class="ent-row" data-page-node-id="ER3"><span class="e-lbl">必修完成率</span><div class="e-track"><div class="e-fill" style="width:81%"></div></div><span class="e-val">81%</span></div>
+        <div class="ent-row" data-page-node-id="ER4"><span class="e-lbl">反馈处理率</span><div class="e-track"><div class="e-fill" style="width:67%"></div></div><span class="e-val">67%</span></div>
+        <div class="ent-row" data-page-node-id="ER5"><span class="e-lbl">能力提升率</span><div class="e-track"><div class="e-fill" style="width:92%"></div></div><span class="e-val">92%</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ===== CTA ===== -->
 <section class="cta" data-page-node-id="1fQu4t1hT3rHNIg72qz0I7">
   <div class="container" data-page-node-id="dGE2GaG0bK0mo4Hfz7TyLy">
@@ -630,7 +742,7 @@ img{max-width:100%;display:block}
         </svg>
         <p style="margin-top:12px;font-size:.85rem" data-page-node-id="vSAP4phcAfEKBowWd7HVwH">AI达学AIDAX为企业提供从能力诊断、个性化课程、场景化陪练到成果验证的完整AI技能培训闭环。</p>
       </div>
-      <div data-page-node-id="Z5n9AWDaNGsFWCaGP8vB0j"><h3 data-page-node-id="uxWi9dqgJblI3MzjGeoyGH">产品</h3><a href="#" data-page-node-id="zTGv2RbQLfyi1RCKtlXaGl">AI能力测评</a><a href="#" data-page-node-id="gHFCp7hCim8k8C7PpActua">个性化课程</a><a href="#" data-page-node-id="B8biAjPGYCRCmAVaamVini">关卡陪练</a><a href="#" data-page-node-id="SB0vYShkvFXl9HJxeYAkey">管理后台</a></div>
+      <div data-page-node-id="Z5n9AWDaNGsFWCaGP8vB0j"><h3 data-page-node-id="uxWi9dqgJblI3MzjGeoyGH">产品</h3><a href="#model" data-page-node-id="zTGv2RbQLfyi1RCKtlXaGl">AI能力模型</a><a href="#upgrade" data-page-node-id="gHFCp7hCim8k8C7PpActua">六大升级</a><a href="#" data-page-node-id="B8biAjPGYCRCmAVaamVini">关卡陪练</a><a href="#enterprise" data-page-node-id="SB0vYShkvFXl9HJxeYAkey">企业版 / 管理后台</a></div>
       <div data-page-node-id="QPew437z1kwkC4dZ4yeWhG"><h3 data-page-node-id="qJ3GqARpHk96FVoBTv0B7Q">资源</h3><a href="#" data-page-node-id="4YWrke2CRSP06Ub9fbSYWf">行业案例</a><a href="#" data-page-node-id="qq7Z6K55e0HF59UUKmJFLf">课程目录</a><a href="#" data-page-node-id="HwJAaC32FfubetCkKv6clU">帮助中心</a><a href="#" data-page-node-id="ONUIdD5Xe1cHoNKQEtxAgX">API文档</a></div>
       <div data-page-node-id="vCSQupZEpGbKxlEASBDDHA"><h3 data-page-node-id="s6FYNrhaJc9atIx30y4sss">联系</h3><a href="#" data-page-node-id="X5Aay3tOqZ9uodvqD6KSAI">预约演示</a><a href="#" data-page-node-id="y46ayhiSaeTjzma1r7smPv">企业合作</a><a href="#" data-page-node-id="CjbJtGt6qAH9ofmc6sN0Ah">人才招聘</a></div>
     </div>
@@ -701,9 +813,9 @@ function closeLogin(){document.getElementById('loginOverlay').classList.remove('
 function switchLoginTab(t){var a=document.querySelectorAll('.login-tab'),f=document.getElementById('managerForm'),e=document.getElementById('employeeForm');a.forEach(function(x){x.classList.remove('active')});if(t==='manager'){event.target.classList.add('active');f.style.display='block';e.style.display='none'}else{event.target.classList.add('active');f.style.display='none';e.style.display='block'}}
 // (role selection removed — now handled on app.html)
 
-function handleManagerLogin(){var u=document.getElementById('mgrUser').value.trim(),p=document.getElementById('mgrPwd').value.trim();if(!u||!p){document.getElementById('loginError').classList.add('show');return}if(u==='admin'&&p==='ai_training_admin'){localStorage.setItem('ai_training_session',JSON.stringify({loggedIn:true,user:'管理员',role:'admin',timestamp:Date.now()}));window.location.replace('app.html?v=61')}else{document.getElementById('loginError').classList.add('show')}}
-function handleEmployeeLogin(){var n=document.getElementById('empName').value.trim();if(!n){document.getElementById('empError').style.display='block';return}localStorage.setItem('ai_training_session',JSON.stringify({loggedIn:true,user:n,role:'employee',timestamp:Date.now()}));window.location.replace('app.html?v=61')}
-function guestLogin(){localStorage.setItem('ai_training_session',JSON.stringify({loggedIn:true,user:'游客',role:'guest',timestamp:Date.now()}));window.location.replace('app.html?v=61')}
+function handleManagerLogin(){var u=document.getElementById('mgrUser').value.trim(),p=document.getElementById('mgrPwd').value.trim();if(!u||!p){document.getElementById('loginError').classList.add('show');return}if(u==='admin'&&p==='ai_training_admin'){localStorage.setItem('ai_training_session',JSON.stringify({loggedIn:true,user:'管理员',role:'admin',timestamp:Date.now()}));window.location.replace('app.html?v=62')}else{document.getElementById('loginError').classList.add('show')}}
+function handleEmployeeLogin(){var n=document.getElementById('empName').value.trim();if(!n){document.getElementById('empError').style.display='block';return}localStorage.setItem('ai_training_session',JSON.stringify({loggedIn:true,user:n,role:'employee',timestamp:Date.now()}));window.location.replace('app.html?v=62')}
+function guestLogin(){localStorage.setItem('ai_training_session',JSON.stringify({loggedIn:true,user:'游客',role:'guest',timestamp:Date.now()}));window.location.replace('app.html?v=62')}
 
 // Customer service toggle
 function toggleCsPanel(){document.getElementById('csPanel').classList.toggle('show')}
