@@ -296,6 +296,15 @@
   .ppt-slide-dark .ppt-p, .ppt-slide-dark .ppt-list li { color:rgba(255,255,255,0.7); }
   .ppt-slide-dark .ppt-h2 { color:#fff; }
   .ppt-slide-dark .ppt-list li::before { background:#fff; }
+  /* v56: 图文并茂 + 字幕逐句高亮 */
+  .ppt-fig { width:100%; max-height:130px; margin:0 auto 14px; display:block; border-radius:12px; }
+  .ppt-slide-cover .ppt-fig, .ppt-slide-summary .ppt-fig { max-height:150px; }
+  .narr-block { transition:background .35s ease, box-shadow .35s ease, transform .35s ease; border-radius:10px; padding:3px 7px; }
+  .narr-block.narr-active { background:var(--blue-bg); box-shadow:0 0 0 2px var(--blue); transform:translateX(3px); }
+  .ppt-slide-dark .narr-block.narr-active { background:rgba(129,140,248,0.20); box-shadow:0 0 0 2px #818cf8; }
+  .ppt-list li.narr-block.narr-active { padding-left:24px; }
+  .ppt-card-mini { transition:box-shadow .35s ease, background .35s ease; }
+  .subtitle-bar .narr-cur { color:#ffd866; font-weight:700; }
 
   /* ===== Subtitle bar ===== */
   .subtitle-bar { background:rgba(0,0,0,0.8); color:#fff; text-align:center; padding:12px 20px; font-size:14px; line-height:1.6; min-height:48px; display:flex; align-items:center; justify-content:center; transition:all .3s; }
@@ -8938,34 +8947,76 @@ const IND_OVERRIDES = {
 };
 
 // ==================== PPT SLIDE GENERATOR ====================
+function pptFig(type) {
+  const figs = {
+    cover:`<svg class="ppt-fig" viewBox="0 0 420 130" xmlns="http://www.w3.org/2000/svg"><rect width="420" height="130" rx="16" fill="#0f3460"/><circle cx="70" cy="65" r="34" fill="#4361ee"/><text x="70" y="75" font-size="28" fill="#fff" text-anchor="middle" font-family="sans-serif" font-weight="700">AI</text><rect x="130" y="44" width="250" height="14" rx="7" fill="#748ffc"/><rect x="130" y="72" width="180" height="10" rx="5" fill="#5a78d8"/><circle cx="384" cy="28" r="6" fill="#ffd866"/></svg>`,
+    objectives:`<svg class="ppt-fig" viewBox="0 0 420 120" xmlns="http://www.w3.org/2000/svg"><rect width="420" height="120" rx="14" fill="#eef2ff"/><rect x="30" y="28" width="20" height="20" rx="5" fill="#4361ee"/><path d="M34 38 l4 4 l8 -9" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/><rect x="62" y="32" width="200" height="12" rx="6" fill="#c7d2fe"/><rect x="30" y="68" width="20" height="20" rx="5" fill="#4361ee"/><path d="M34 78 l4 4 l8 -9" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/><rect x="62" y="72" width="150" height="12" rx="6" fill="#c7d2fe"/></svg>`,
+    concept:`<svg class="ppt-fig" viewBox="0 0 420 120" xmlns="http://www.w3.org/2000/svg"><rect width="420" height="120" rx="14" fill="#f8f9ff"/><circle cx="210" cy="54" r="34" fill="#ffd866"/><path d="M196 80 q14 18 28 0" stroke="#caa400" stroke-width="3" fill="none"/><rect x="200" y="82" width="20" height="14" rx="3" fill="#9aa0b5"/><path d="M182 30 l-20 -14 M238 30 l20 -14" stroke="#748ffc" stroke-width="3"/></svg>`,
+    steps:`<svg class="ppt-fig" viewBox="0 0 420 120" xmlns="http://www.w3.org/2000/svg"><rect width="420" height="120" rx="14" fill="#16213e"/><rect x="22" y="46" width="66" height="28" rx="8" fill="#4361ee"/><path d="M90 60 h20" stroke="#fff" stroke-width="3"/><rect x="112" y="46" width="66" height="28" rx="8" fill="#5a78d8"/><path d="M180 60 h20" stroke="#fff" stroke-width="3"/><rect x="202" y="46" width="66" height="28" rx="8" fill="#748ffc"/><path d="M270 60 h20" stroke="#fff" stroke-width="3"/><rect x="292" y="46" width="66" height="28" rx="8" fill="#a5b4fc"/></svg>`,
+    scenario:`<svg class="ppt-fig" viewBox="0 0 420 120" xmlns="http://www.w3.org/2000/svg"><rect width="420" height="120" rx="14" fill="#eef2ff"/><rect x="24" y="26" width="172" height="34" rx="14" fill="#c7d2fe"/><rect x="224" y="64" width="172" height="34" rx="14" fill="#4361ee"/><path d="M62 60 l-14 16 l26 0 z" fill="#c7d2fe"/><path d="M378 64 l14 16 l-26 0 z" fill="#4361ee"/><circle cx="372" cy="38" r="11" fill="#a5b4fc"/></svg>`,
+    output:`<svg class="ppt-fig" viewBox="0 0 420 120" xmlns="http://www.w3.org/2000/svg"><rect width="420" height="120" rx="14" fill="#f8f9ff"/><rect x="150" y="18" width="120" height="86" rx="8" fill="#fff" stroke="#4361ee" stroke-width="2"/><rect x="166" y="34" width="88" height="8" rx="4" fill="#4361ee"/><rect x="166" y="50" width="88" height="6" rx="3" fill="#c7d2fe"/><rect x="166" y="64" width="64" height="6" rx="3" fill="#c7d2fe"/><rect x="166" y="78" width="80" height="6" rx="3" fill="#c7d2fe"/></svg>`,
+    pitfall:`<svg class="ppt-fig" viewBox="0 0 420 120" xmlns="http://www.w3.org/2000/svg"><rect width="420" height="120" rx="14" fill="#fff7ed"/><path d="M210 24 l54 94 h-108 z" fill="#f59e0b"/><rect x="204" y="48" width="12" height="40" rx="4" fill="#fff"/><circle cx="210" cy="98" r="6" fill="#fff"/></svg>`,
+    summary:`<svg class="ppt-fig" viewBox="0 0 420 120" xmlns="http://www.w3.org/2000/svg"><rect width="420" height="120" rx="14" fill="#0f3460"/><path d="M180 36 h60 v22 a30 30 0 0 1 -60 0 z" fill="#ffd866"/><rect x="204" y="58" width="12" height="20" fill="#ffd866"/><rect x="184" y="78" width="52" height="12" rx="4" fill="#ffd866"/><path d="M180 40 q-22 0 -22 18" stroke="#ffd866" stroke-width="4" fill="none"/><path d="M240 40 q22 0 22 18" stroke="#ffd866" stroke-width="4" fill="none"/></svg>`
+  };
+  return figs[type] || '';
+}
+const CHAP_LABEL = {cover:'封面', content:'学习目标', accent:'核心概念', dark:'实操方法', scenario:'场景演示', output:'产出展示', pitfall:'难点误区', summary:'小结'};
+
+function alignSegs(notes, blocks) {
+  if (!notes) return [];
+  const sents = splitChineseSentences(notes);
+  if (!blocks || !blocks.length) return sents.map(t => ({text:t, bid:-1}));
+  return sents.map((t, i) => ({text:t, bid: blocks[Math.min(i, blocks.length-1)].bid}));
+}
+
 function getPPTSlides(courseId, courseTitle, courseDesc) {
   const c = getAdaptedContent(courseId);
   if (!c) return [];
   const al = c._adaptLevel || {level:'intermediate', score:60};
-  const notes = (t) => t; // TTS reads the text directly
   const slides = [];
-  // Slide 1: Cover with adaptation badge
+  const finalize = (type, title, blocks, notes, chapter, figType) => {
+    blocks.forEach((b, i) => { if (b.bid === undefined) b.bid = i; });
+    const FIG_MAP = {content:'objectives', accent:'concept', dark:'steps', cover:'cover', scenario:'scenario', pitfall:'pitfall', summary:'summary'};
+    return {type, title, blocks, notes, segs:alignSegs(notes, blocks), chapter: chapter || type, fig: pptFig(figType || FIG_MAP[type] || type)};
+  };
+  // Slide 1: Cover
   const badgeTxt = al.level === 'beginner' ? ' 🎯 初级适配·重点学习'
     : al.level === 'advanced' ? ' 🚀 高级适配·快速进阶' : '';
   const coverDesc = courseDesc + (c._beginnerHint ? ' | ' + c._beginnerHint : '');
-  slides.push({type:'cover', blocks:[{el:'h1',txt:courseTitle + badgeTxt},{el:'p',txt:coverDesc}], notes:notes(courseTitle+'。'+courseDesc)});
+  slides.push(finalize('cover', null, [{el:'h1',txt:courseTitle + badgeTxt},{el:'p',txt:coverDesc}], courseTitle+'。'+courseDesc, 'cover'));
   // Slide 2: Learning Objectives
-  if (c.objectives) {
-    slides.push({type:'content', title:{icon:'🎯',txt:'学习目标'}, blocks:c.objectives.map(o=>({el:'li',txt:o})), notes:notes('本课程的学习目标如下：'+c.objectives.join('。'))});
+  if (c.objectives && c.objectives.length) {
+    slides.push(finalize('content', {icon:'🎯',txt:'学习目标'}, c.objectives.map(o=>({el:'li',txt:o})), '本课程的学习目标如下：'+c.objectives.join('。'), 'content'));
   }
   // Slide 3: Core Concept
   if (c.concepts && c.concepts.length) {
     const blocks = c.concepts.map(co=>({el:'h3p',title:co.t,txt:co.c.substring(0,200)+(co.c.length>200?'...':'')}));
-    slides.push({type:'accent', title:{icon:'💡',txt:'核心概念'}, blocks, notes:notes('核心概念讲解：'+c.concepts.map(co=>co.t+'。'+co.c.substring(0,300)).join('。'))});
+    slides.push(finalize('accent', {icon:'💡',txt:'核心概念'}, blocks, '核心概念讲解：'+c.concepts.map(co=>co.t+'。'+co.c.substring(0,300)).join('。'), 'accent'));
   }
-  // Slide 4: Steps summary
-  if (c.steps) {
+  // Slide 4: Steps
+  if (c.steps && c.steps.length) {
     const blocks = c.steps.map((s,i)=>({el:'card',num:i+1,title:s.t,txt:s.d.substring(0,80)+'...'}));
-    slides.push({type:'dark', title:{icon:'🛠',txt:'实操方法论'}, blocks, notes:notes('实操步骤：'+c.steps.map(s=>s.t+'。'+s.d.substring(0,200)).join('。'))});
+    slides.push(finalize('dark', {icon:'🛠',txt:'实操方法论'}, blocks, '实操步骤：'+c.steps.map(s=>s.t+'。'+s.d.substring(0,200)).join('。'), 'dark'));
   }
-  // Slide 5: Summary & Next
+  // Slide 5 (new): 业务场景举例 + AI 实操演示 + 产出物展示
+  if (c.cases && c.cases.length) {
+    const cs = c.cases[0];
+    const blocks = [
+      {el:'card', num:1, title:'📍 业务场景举例', txt:cs.s},
+      {el:'card', num:2, title:'🤖 AI 实操演示（WorkBuddy）', txt:'打开 WorkBuddy，把场景需求直接交给 AI 对话，按步骤让它产出方案初稿，再人工校对关键结论与数据。'},
+      {el:'card', num:3, title:'📦 产出物展示', txt:cs.sol}
+    ];
+    slides.push(finalize('scenario', {icon:'🎬',txt:'场景演示与产出物'}, blocks, '我们来看一个真实业务场景。'+cs.s+'。在 WorkBuddy 中，我们把这个需求直接交给 AI，让它逐步产出方案初稿。'+cs.sol+'。这就是这门课能帮你稳定交付的产出物。', 'scenario'));
+  }
+  // Slide 6 (new): 操作难点与误区
+  if (c.tips && c.tips.length) {
+    const top = c.tips.slice(0, 4);
+    const blocks = top.map((t,i)=>({el:'card', num:i+1, title:'⚠️ 操作难点 / 误区 '+(i+1), txt:t}));
+    slides.push(finalize('pitfall', {icon:'🚧',txt:'操作难点与误区'}, blocks, '最后提醒几个常见误区。'+top.join('。')+'。避开这些坑，你的产出质量会明显提升。', 'pitfall'));
+  }
+  // Slide 7: Summary
   const tipsSummary = c.tips ? c.tips.slice(0,3).join('；') : '';
-  slides.push({type:'summary', blocks:[{el:'h2',txt:'本章小结'},{el:'p',txt:tipsSummary || '请进入关卡练习检验学习成果'}], notes:notes('课程小结。'+tipsSummary+'现在请进入关卡练习，检验你的学习成果。')});
+  slides.push(finalize('summary', null, [{el:'h2',txt:'本章小结'},{el:'p',txt:tipsSummary || '请进入关卡练习检验学习成果'}], '课程小结。'+tipsSummary+'现在请进入关卡练习，检验你的学习成果。', 'summary'));
   return slides;
 }
 
@@ -11028,9 +11079,10 @@ function renderCourseDetail() {
   if (c.type === 'video' && content) {
     const slides = getPPTSlides(c.id, c.title, c.desc);
 
-    // P2.2: Chapter markers
-    const chapterNames = ['封面', '学习目标', '核心概念', '实操方法', '小结'];
-    const chapterSlides = [0, 1, 2, 3, 4]; // slide indices for each chapter
+    // P2.2: Chapter markers (dynamic from slides)
+    const chapterNames = slides.map((s, i) => (CHAP_LABEL[s.chapter] || CHAP_LABEL[s.type] || ('章节 ' + (i + 1))));
+    const chapterSlides = slides.map((s, i) => i);
+    S._chapterSlides = chapterSlides;
     html += `<div class="chapter-strip" id="chapterStrip">`;
     chapterNames.forEach((name, ci) => {
       html += `<span class="chapter-dot${S.pptCurrentSlide===chapterSlides[ci]?' active':''}" onclick="S.pptCurrentSlide=${chapterSlides[ci]};stopVoice();updatePPTUI();" title="跳转到：${name}">${name}</span>`;
@@ -11108,31 +11160,36 @@ function renderCourseDetail() {
 function escapeHtml(str) { return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 function renderPPTSlide(slide, idx, total) {
-  const clsMap = {cover:'ppt-slide-cover', content:'ppt-slide-content', accent:'ppt-slide-accent', dark:'ppt-slide-dark', summary:'ppt-slide-summary'};
+  const clsMap = {cover:'ppt-slide-cover', content:'ppt-slide-content', accent:'ppt-slide-accent', dark:'ppt-slide-dark', summary:'ppt-slide-summary', scenario:'ppt-slide-accent', pitfall:'ppt-slide-content'};
   const cls = clsMap[slide.type] || 'ppt-slide-content';
   let inner = '';
-  // Title bar
+  if (slide.fig) inner += slide.fig;
   if (slide.title) {
     inner += `<div class="ppt-h2"><span class="ppt-icon" style="background:var(--blue-bg);">${slide.title.icon||''}</span>${slide.title.txt}</div>`;
   }
-  // Blocks
-  slide.blocks.forEach(b => {
+  const bs = slide.blocks || [];
+  const lis = bs.filter(b=>b.el==='li');
+  const cards = bs.filter(b=>b.el==='card');
+  const others = bs.filter(b=>b.el!=='li' && b.el!=='card');
+  others.forEach(b => {
     switch(b.el) {
-      case 'h1': inner += `<div class="ppt-badge ppt-badge-blue">视频课程</div><div class="ppt-h1">${b.txt}</div>`; break;
-      case 'h2': inner += `<div class="ppt-h1" style="font-size:22px;">${b.txt}</div>`; break;
-      case 'p': inner += `<div class="ppt-p" style="color:rgba(255,255,255,0.7);max-width:500px;margin:0 auto;">${b.txt}</div>`; break;
-      case 'li': inner += `<li>${b.txt}</li>`; break;
-      case 'h3p': inner += `<div style="margin-bottom:12px;"><div class="ppt-h3">${b.title}</div><div class="ppt-p">${b.txt}</div></div>`; break;
-      case 'card': inner += `<div class="ppt-card-mini"><div class="ppt-card-num">${String(b.num).padStart(2,'0')}</div><div class="ppt-card-t">${b.title}</div><div class="ppt-card-d">${b.txt}</div></div>`; break;
+      case 'h1': inner += `<div class="narr-block" data-block="${b.bid}"><div class="ppt-badge ppt-badge-blue">视频课程</div><div class="ppt-h1">${b.txt}</div></div>`; break;
+      case 'h2': inner += `<div class="narr-block" data-block="${b.bid}" style="font-size:22px;font-weight:800;">${b.txt}</div>`; break;
+      case 'p': inner += `<div class="narr-block" data-block="${b.bid}" style="color:rgba(255,255,255,0.78);max-width:520px;margin:0 auto;line-height:1.8;font-size:14px;">${b.txt}</div>`; break;
+      case 'h3p': inner += `<div class="narr-block" data-block="${b.bid}" style="margin-bottom:12px;"><div class="ppt-h3">${b.title}</div><div class="ppt-p">${b.txt}</div></div>`; break;
     }
   });
-  // Wrap li's in ul
-  if (slide.blocks.some(b=>b.el==='li')) {
-    inner = inner.replace(/((?:<li>.*?<\/li>)+)/g, '<ul class="ppt-list">$1</ul>');
+  if (lis.length) {
+    inner += '<ul class="ppt-list">';
+    lis.forEach(b => { inner += `<li class="narr-block" data-block="${b.bid}">${b.txt}</li>`; });
+    inner += '</ul>';
   }
-  // Wrap cards in grid
-  if (slide.blocks.some(b=>b.el==='card')) {
-    inner = inner.replace(/((?:<div class="ppt-card-mini">.*?<\/div>)+)/g, '<div class="ppt-grid2">$1</div>');
+  if (cards.length) {
+    inner += '<div class="ppt-grid2">';
+    cards.forEach(b => {
+      inner += `<div class="narr-block" data-block="${b.bid}"><div class="ppt-card-mini"><div class="ppt-card-num">${String(b.num).padStart(2,'0')}</div><div class="ppt-card-t">${b.title}</div><div class="ppt-card-d">${b.txt}</div></div></div>`;
+    });
+    inner += '</div>';
   }
   return `<div class="ppt-slide ${cls}${idx===0?' active':''}" data-slide="${idx}">${inner}</div>`;
 }
@@ -12255,6 +12312,45 @@ let _voiceUtterance = null;
 let _audioEl = null; // 方案B：预生成 mp3 播放元素
 let _pptInterval = null;
 let _subtitleTimer = null;
+let _narrTimer = null;
+
+function clearNarr() {
+  if (_narrTimer) { clearInterval(_narrTimer); _narrTimer = null; }
+  S._narrSegIdx = -1;
+  var acts = document.querySelectorAll('.narr-active');
+  acts.forEach(function(el){ el.classList.remove('narr-active'); });
+}
+
+// 字幕 + 高亮联动：根据音频/语音播放进度，定位当前解说句并高亮对应 block
+function startNarrSync(segs, getElapsed, getDur) {
+  if (_narrTimer) { clearInterval(_narrTimer); _narrTimer = null; }
+  S._curSegs = segs;
+  S._narrSegIdx = -1;
+  var lens = segs.map(function(s){ return Math.max(1, s.text.length); });
+  var total = lens.reduce(function(a,b){ return a+b; }, 0) || 1;
+  var bounds = []; var acc = 0;
+  segs.forEach(function(s, i){ bounds.push([acc/total, (acc+lens[i])/total]); acc += lens[i]; });
+  function tick() {
+    var dur = getDur(); if (!dur || !isFinite(dur)) return;
+    var frac = Math.min(1, Math.max(0, getElapsed()/dur));
+    var idx = segs.length - 1;
+    for (var i=0; i<bounds.length; i++){ if (frac >= bounds[i][0] && frac < bounds[i][1]) { idx = i; break; } }
+    if (idx !== S._narrSegIdx) { S._narrSegIdx = idx; updateNarr(idx); }
+  }
+  tick();
+  _narrTimer = setInterval(tick, 120);
+}
+
+function updateNarr(idx) {
+  var segs = S._curSegs; if (!segs || !segs[idx]) return;
+  var seg = segs[idx];
+  var bar = document.getElementById('subtitleBar');
+  if (bar) bar.textContent = seg.text;
+  var acts = document.querySelectorAll('.narr-active');
+  acts.forEach(function(el){ el.classList.remove('narr-active'); });
+  var blk = document.querySelector('[data-slide="'+S.pptCurrentSlide+'"] [data-block="'+seg.bid+'"]');
+  if (blk) blk.classList.add('narr-active');
+}
 
 // P2.4: Smart Chinese sentence splitting
 function splitChineseSentences(text) {
@@ -12299,8 +12395,10 @@ function initPPT() {
 function stopVoice() {
   if (_voiceUtterance) { _voiceUtterance.onend = null; }
   _voiceSynth.cancel();
-  if (_audioEl) { try { _audioEl.pause(); _audioEl.onended = null; _audioEl.onerror = null; } catch(e){} }
+  if (_audioEl) { try { _audioEl.pause(); _audioEl.onended = null; _audioEl.onerror = null; _audioEl.onloadedmetadata = null; } catch(e){} }
   if (_pptInterval) clearInterval(_pptInterval);
+  if (_subtitleTimer) clearInterval(_subtitleTimer);
+  clearNarr();
   S.voicePlaying = false;
   S.voicePaused = false;
 }
@@ -12359,35 +12457,45 @@ function playCurrentSlide() {
   var c = getRoleCourses()?.[S.courseIdx];
   if (!c) return;
   const slides = getPPTSlides(c.id, c.title, c.desc);
-  if (!slides[S.pptCurrentSlide]) return;
-  const rawNotes = slides[S.pptCurrentSlide].notes || '';
-  if (!rawNotes.trim()) return;
+  const slide = slides[S.pptCurrentSlide];
+  if (!slide) return;
+  const segs = slide.segs && slide.segs.length ? slide.segs : null;
+  const rawNotes = slide.notes || '';
+  if (!rawNotes.trim()) { onSlideAudioEnded(); return; }
+  S._curSegs = segs;
+  clearNarr();
+  updateSubtitle(rawNotes);
 
-  // 方案B：优先播放预生成音频（自然人声，火山/Edge mp3 或 Apple 离线 m4a）；均无则回退浏览器内置 TTS
+  // 方案B：优先播放预生成音频（自然人声 mp3/m4a）；无则回退浏览器 TTS
   const audioBase = 'audio/' + c.id + '/' + S.pptCurrentSlide;
   const a = ensureAudioEl();
   if (a) {
     a.playbackRate = (S.voiceRate || 1);
     a.onended = function() { onSlideAudioEnded(); };
+    if (segs) {
+      a.onloadedmetadata = function() { startNarrSync(segs, function(){ return a.currentTime; }, function(){ return a.duration; }); };
+    }
     const exts = ['mp3', 'm4a'];
     let ei = 0;
     function tryNext() {
-      if (ei >= exts.length) { a.onerror = null; a.onended = null; playSlideTTS(rawNotes); return; }
+      if (ei >= exts.length) { a.onerror = null; a.onended = null; a.onloadedmetadata = null; playSlideTTS(rawNotes, segs); return; }
       a.onerror = function() { a.onerror = null; ei++; tryNext(); };
+      a.onloadedmetadata = segs ? function() { startNarrSync(segs, function(){ return a.currentTime; }, function(){ return a.duration; }); } : null;
       a.src = audioBase + '.' + exts[ei];
       const pr = a.play();
       if (pr && pr.catch) pr.catch(function() { ei++; tryNext(); });
     }
     tryNext();
-    updateSubtitle(rawNotes); // 静态字幕（无逐句高亮）
+    if (!segs) updateSubtitle(rawNotes); // 静态字幕
     return;
   }
   // 无 Audio 支持，直接 TTS
-  playSlideTTS(rawNotes);
+  playSlideTTS(rawNotes, segs);
 }
 
 function onSlideAudioEnded() {
   if (_subtitleTimer) clearInterval(_subtitleTimer);
+  clearNarr();
   S._voiceSlideProgress = S._voiceSlideProgress || {};
   S._voiceSlideProgress[S.pptCurrentSlide] = true;
   const allSlides = document.querySelectorAll('.ppt-slide');
@@ -12402,23 +12510,34 @@ function onSlideAudioEnded() {
   }
 }
 
-// 浏览器内置 TTS 回退（原 playCurrentSlide 逻辑）
-function playSlideTTS(rawNotes) {
+// 浏览器内置 TTS 回退（原 playCurrentSlide 逻辑），支持字幕逐句高亮
+function playSlideTTS(rawNotes, segs) {
   const sentences = splitChineseSentences(rawNotes);
   const notes = sentences.join('。');
   S._currentSentences = sentences;
   S._currentSentenceIdx = 0;
   _voiceUtterance = new SpeechSynthesisUtterance(notes);
   _voiceUtterance.lang = 'zh-CN';
-  _voiceUtterance.rate = S.voiceRate;
-  _voiceUtterance.onend = function() { onSlideAudioEnded(); };
-  updateSubtitle(notes, S._currentSentences);
+  _voiceUtterance.rate = S.voiceRate || 1;
+  _voiceUtterance.onend = function() { clearNarr(); onSlideAudioEnded(); };
+  if (!segs || !segs.length) {
+    updateSubtitle(notes, sentences);
+    _voiceSynth.speak(_voiceUtterance);
+    return;
+  }
+  // 用虚拟时钟驱动高亮（按字数估算总时长，随语速缩放）
+  S._ttsStart = Date.now();
+  const total = segs.reduce(function(a, s){ return a + Math.max(1, s.text.length); }, 0);
+  const dur = total / 4.5 / (S.voiceRate || 1);
+  startNarrSync(segs, function(){ return (Date.now() - S._ttsStart) / 1000; }, function(){ return dur; });
+  updateSubtitle(notes, sentences);
   _voiceSynth.speak(_voiceUtterance);
 }
 
 function updatePPTUI() {
   var slides = document.querySelectorAll('.ppt-slide');
   slides.forEach(function(s, i) { s.classList.toggle('active', i === S.pptCurrentSlide); });
+  clearNarr();
   var counter = document.getElementById('slideCounter');
   if (counter) counter.textContent = (S.pptCurrentSlide+1) + '/' + slides.length;
   var prog = document.getElementById('voiceProgress');
@@ -12444,8 +12563,7 @@ function updateChapterMarkers() {
   var strip = document.getElementById('chapterStrip');
   if (!strip) return;
   var dots = strip.querySelectorAll('.chapter-dot');
-  // Map slide to chapter index
-  var chapterSlides = [0, 1, 2, 3, 4];
+  var chapterSlides = S._chapterSlides || [0,1,2,3,4];
   dots.forEach(function(d, i) {
     d.classList.remove('active', 'current');
     if (S.pptCurrentSlide === chapterSlides[i]) d.classList.add('active');
