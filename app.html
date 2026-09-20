@@ -11507,6 +11507,7 @@ function buildQuestLevels(c) {
     levels.push({ icon:'🧩', name:'方法关', sub:'先学后练 · 实操步骤',
       learn: steps.length ? steps.map(s=>({t:s.t, d:s.d})) : [{t:'实操方法', d:c.desc}],
       qs:[{type:'order', stem:'将实操步骤按正确顺序排列（按顺序点击下方卡片）', items, dispOrder:disp,
+        ans: items.map((_,i)=>i).join(','),
         explain:`正确顺序：${items.map((x,i)=>(i+1)+'. '+x).join('；')}`}]
     });
   }
@@ -11758,8 +11759,8 @@ S.questOrderCheck = function() {
   const q = S.quest; if (!q || q.checked) return;
   const curQ = q.qs[q.qi];
   const seq = q.order.join(',');
-  const correct = seq === curQ.items.map((_,i)=>i).join(',');
-  q.checked = true; q.sel = correct ? curQ.items.length-1 : -1;
+  const correct = seq === curQ.ans;
+  q.checked = true; q.sel = seq;
   if (correct) { _questAwardXp(); }
   render();
   if (!correct) {
