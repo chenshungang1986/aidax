@@ -446,6 +446,54 @@
   .map-connector.done-conn { background:var(--green); }
   .map-skill-tag { display:inline-block; font-size:10px; padding:1px 6px; border-radius:4px; background:var(--amber-bg); color:var(--amber); margin-top:3px; }
 
+  /* ===== v55: 解除课程硬锁（软提示）+ 自评结合地图 + 演示/作业/WorkBuddy ===== */
+  .map-node.suggested { border-color:var(--amber); background:var(--amber-bg); }
+  .map-node.suggested .map-node-icon { background:var(--amber); color:#fff; }
+  .map-node.self-related { box-shadow:0 0 0 2px rgba(0,113,227,.28); }
+  .map-node-badge.suggested-badge { background:var(--amber-bg); color:var(--amber); }
+  .map-node-badge.self-badge { background:rgba(0,113,227,.12); color:var(--blue); }
+  .course-card.suggested { border-left:3px solid var(--amber); }
+  .composite-breakdown { font-size:11px; color:var(--text2); margin-top:6px; }
+  .self-map-card { border:1px dashed var(--accent); background:linear-gradient(180deg,transparent,rgba(0,113,227,.05)); border-radius:var(--radius); padding:14px 16px; margin-bottom:14px; }
+  .self-map-card h3 { font-size:14px; font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+  .self-map-card .self-chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+  .self-map-card .self-chip, .self-chip { display:inline-block; background:rgba(0,113,227,.1); color:var(--blue); border-radius:20px; padding:3px 10px; font-size:12px; font-weight:600; }
+  .self-map-card .self-note { font-size:12px; color:var(--text2); line-height:1.7; }
+  .wb-tool-banner { background:linear-gradient(135deg,rgba(0,113,227,.1),rgba(66,165,245,.12)); border:1px solid rgba(0,113,227,.25); border-radius:12px; padding:10px 14px; font-size:13px; color:var(--text); line-height:1.7; margin-bottom:12px; }
+  .wb-tool-banner b { color:var(--blue); }
+  .demo-window { border:1px solid var(--border); border-radius:14px; overflow:hidden; background:#fff; box-shadow:0 4px 16px rgba(0,0,0,.06); }
+  .demo-bar { display:flex; align-items:center; gap:6px; padding:10px 12px; background:var(--bg); border-bottom:1px solid var(--border); }
+  .demo-dot { width:10px; height:10px; border-radius:50%; }
+  .demo-dot.r { background:#ff5f57; } .demo-dot.y { background:#febc2e; } .demo-dot.g { background:#28c840; }
+  .demo-title { margin-left:8px; font-size:12px; color:var(--text2); font-weight:600; }
+  .demo-body { padding:14px; background:linear-gradient(180deg,#fafcff,#fff); }
+  .demo-row { display:flex; margin-bottom:10px; }
+  .demo-row.user { justify-content:flex-end; animation:demoInLeft .4s ease both; }
+  .demo-row.ai { justify-content:flex-start; animation:demoInRight .5s ease 1.3s both; }
+  .demo-bubble { max-width:82%; padding:10px 13px; border-radius:14px; font-size:13px; line-height:1.7; word-break:break-word; }
+  .demo-bubble.user { background:var(--blue); color:#fff; border-bottom-right-radius:4px; }
+  .demo-bubble.ai { background:var(--bg); color:var(--text); border:1px solid var(--border); border-bottom-left-radius:4px; }
+  .demo-typing { display:flex; gap:4px; padding:6px 4px; animation:demoTyping 2s ease forwards; margin-bottom:8px; }
+  .demo-typing span { width:7px; height:7px; border-radius:50%; background:var(--text3); animation:dotBounce 1.2s infinite; }
+  .demo-typing span:nth-child(2) { animation-delay:.2s; }
+  .demo-typing span:nth-child(3) { animation-delay:.4s; }
+  .demo-note { font-size:12px; color:var(--text2); line-height:1.7; margin-top:10px; background:var(--blue-bg); border-radius:8px; padding:10px 12px; }
+  @keyframes demoInLeft { from { opacity:0; transform:translateX(-16px); } to { opacity:1; transform:translateX(0); } }
+  @keyframes demoInRight { from { opacity:0; transform:translateX(16px); } to { opacity:1; transform:translateX(0); } }
+  @keyframes demoTyping { 0% { opacity:1; } 70% { opacity:1; } 100% { opacity:0; } }
+  @keyframes dotBounce { 0%,80%,100% { transform:translateY(0); opacity:.4; } 40% { transform:translateY(-5px); opacity:1; } }
+  .assign-box { border:1px solid var(--border); border-radius:14px; overflow:hidden; background:#fff; }
+  .assign-task { background:linear-gradient(135deg,#0071e3,#42a5f5); color:#fff; padding:14px 16px; font-size:14px; line-height:1.8; font-weight:600; }
+  .assign-task .assign-label { display:inline-block; font-size:11px; font-weight:800; background:rgba(255,255,255,.25); border-radius:6px; padding:2px 8px; margin-bottom:8px; letter-spacing:1px; }
+  .assign-points { padding:14px 16px; }
+  .assign-points h4 { font-size:13px; font-weight:700; margin:12px 0 8px; color:var(--text); }
+  .assign-points h4:first-child { margin-top:0; }
+  .point-item { display:flex; gap:10px; align-items:flex-start; padding:8px 10px; background:var(--bg); border-radius:10px; margin-bottom:6px; }
+  .point-num { flex-shrink:0; width:22px; height:22px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:#fff; }
+  .point-item.hint .point-num { background:var(--blue); }
+  .point-item.score .point-num { background:var(--green); }
+  .point-item .point-t { font-size:13px; color:var(--text); line-height:1.6; }
+
   /* ===== Schedule Plan ===== */
   .schedule-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
   .schedule-week { margin-bottom:16px; }
@@ -1738,6 +1786,7 @@ function finishAdaptiveQuiz() {
   result.quality = calcQuizQuality(); // v34: 作答质量报告
   S.quizScores = result.dimScores;
   S._quizResult = result;
+  S._composite = computeComposite(); // v55: 综合分（基础素养30% + 岗位70%）
   // 三段式：②业务场景完成后，若 ③能力自评尚未做/未跳过，则进入自评；否则直接出结果
   if (!S._selfResult && !S._selfSkipped) {
     S._quizPlan = []; // 清空，避免分发器误渲染自适应
@@ -1768,6 +1817,16 @@ function calculateAdaptiveScores() {
   }
   const overall = totalWeight > 0 ? Math.round(weightedTotal / totalWeight * 100) : 0;
   return { dimScores, overall, weights, dims };
+}
+
+// v55: 综合分 = AI基础素养(30%) × 0.3 + 岗位8维自适应(70%) × 0.7；第一部分为必答项
+function computeComposite() {
+  const basePct = (S._baseResult && typeof S._baseResult.pct === 'number') ? S._baseResult.pct : 0;
+  const adaptive = (S._quizResult && typeof S._quizResult.overall === 'number') ? S._quizResult.overall : 0;
+  const baseW = 0.3, advW = 0.7;
+  // 若基础卷缺失（理论上已强制必答），权重全部归岗位能力
+  const overall = S._baseResult ? Math.round(basePct * baseW + adaptive * advW) : adaptive;
+  return { base: basePct, adaptive: adaptive, overall: overall, baseW: baseW, advW: advW };
 }
 
 // ===== 行业×角色专属题库 (8维度×3级=24题/套) =====
@@ -7396,14 +7455,58 @@ function getCoursePriority(course) {
     if (unmet.length > 0) prereqBoost = 1.0 + unmet.length * 0.3;
   }
 
-  // Combine: base priority × industry urgency × prereq factor
-  return Math.round(basePriority * indBoost * prereqBoost * 100) / 100;
+  // v55: 自评加权重（想学 / 短板对应的维度优先推荐）
+  let selfBoost = 1.0;
+  const sd = selfDimKeys();
+  if (sd.size) {
+    const dk = courseDimKey(course);
+    if (dk && sd.has(dk)) selfBoost = 1.3;
+  }
+  // Combine: base priority × industry urgency × prereq factor × self factor
+  return Math.round(basePriority * indBoost * prereqBoost * selfBoost * 100) / 100;
 }
 
 // Check if all prerequisites for a course are met
 function prereqsMet(course) {
   if (!course.requires || !course.requires.length) return true;
   return course.requires.every(rid => S.courseProgress[rid]?.done);
+}
+
+// v55: 能力自评 → 学习地图结合。将自评「想学 / 短板」映射到 8 维，feed 进课程优先级与地图标记
+const SELF_DIM_MAP = {
+  '提示词': 'prompt', '提示': 'prompt',
+  '数据': 'data', '分析': 'data',
+  '内容创作': 'content', '文案': 'content', '设计': 'content', '视频': 'content',
+  '编程': 'dev', '开发': 'dev',
+  '工作流': 'workflow', 'Agent': 'workflow', 'RPA': 'workflow',
+  '知识库': 'strategy', 'RAG': 'strategy', '结果判断': 'strategy',
+  '安全合规': 'security', '安全': 'security', '合规': 'security'
+};
+function selfSelectedLabels() {
+  const a = S._selfAnswers || [];
+  let labels = [];
+  [4, 5].forEach(i => { const x = a[i]; if (x && x.labels) labels = labels.concat(x.labels); }); // Q5 短板 + Q6 想学
+  return labels;
+}
+function selfDimKeys() {
+  const labels = selfSelectedLabels();
+  const keys = new Set();
+  labels.forEach(l => {
+    Object.keys(SELF_DIM_MAP).forEach(k => { if (l && l.indexOf(k) >= 0) keys.add(SELF_DIM_MAP[k]); });
+  });
+  return keys;
+}
+function courseDimKey(course) {
+  const role = ROLES[S.role];
+  if (!role) return null;
+  const skillIdx = getPrimarySkillIdx(course);
+  return (role.dimKeys && role.dimKeys[skillIdx]) || null;
+}
+function isSelfRelated(course) {
+  const sd = selfDimKeys();
+  if (!sd.size) return false;
+  const dk = courseDimKey(course);
+  return !!(dk && sd.has(dk));
 }
 
 // ==================== COURSE CONTENT GENERATOR ====================
@@ -9547,21 +9650,20 @@ function renderBaseIntro() {
       <div style="font-weight:600;font-size:13px;">${t.icon} ${t.name}</div>
       <div style="font-size:11px;color:var(--text2);margin-top:3px;line-height:1.5;">${t.desc}</div>
     </div>`).join('');
-  let html = headerHtml('第一部分 · AI 基础素养测评', '先做 10 题基础认知自检（约 5 分钟）· 不计入岗位综合分', true);
+  let html = headerHtml('第一部分 · AI 基础素养测评', '先做 10 题基础认知自检（约 5 分钟）· 计入综合分（30%）', true);
   html += `<div class="card slide-up">
     <div style="display:inline-block;background:linear-gradient(90deg,#0071e3,#42a5f5);color:#fff;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;margin-bottom:12px;">第一部分 · AI 基础素养（约 5 分钟）</div>
     <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;">
       <div style="font-size:36px;line-height:1.2;">🧭</div>
       <div style="flex:1;min-width:240px;">
         <p style="font-weight:600;font-size:15px;margin-bottom:6px;">这是一次「AI 通识体检」，与岗位专业测评相互独立</p>
-        <p style="font-size:13px;color:var(--text2);line-height:1.8;">覆盖 <b>能力与边界 · 基础原理 · 提示词 · Agent · 知识库 · 安全合规</b> 六大主题（共 ${totalQ} 道题库，每卷随机抽 10 题）。<br><b style="color:var(--accent);">结果单独展示，不计入 8 维岗位综合分与课程推荐</b>——帮你先补 AI 认知地基，岗位测评聚焦专业能力。</p>
+        <p style="font-size:13px;color:var(--text2);line-height:1.8;">覆盖 <b>能力与边界 · 基础原理 · 提示词 · Agent · 知识库 · 安全合规</b> 六大主题（共 ${totalQ} 道题库，每卷随机抽 10 题）。<br><b style="color:var(--accent);">结果已按 30% 计入综合分</b>，与岗位 8 维得分合并为「AI 综合能力指数」——帮你先补 AI 认知地基，再聚焦专业能力测评。</p>
       </div>
     </div>
     <p style="font-weight:600;font-size:13px;margin:16px 0 8px;">六大主题覆盖</p>
     <div style="display:flex;flex-wrap:wrap;gap:8px;">${themeChips}</div>
     <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;">
-      <button class="btn btn-primary" style="flex:1;min-width:200px;" data-action="baseStart" onclick="if(typeof S!=='undefined'){S.baseStart()}">开始基础测评（10 题）</button>
-      <button class="btn btn-outline" style="flex:1;min-width:200px;" data-action="baseSkip" onclick="if(typeof S!=='undefined'){S.baseSkip()}">跳过，直接岗位测评 →</button>
+      <button class="btn btn-primary" style="flex:1;min-width:200px;" data-action="baseStart" onclick="if(typeof S!=='undefined'){S.baseStart()}">开始基础测评（10 题 · 计入综合分）</button>
     </div>
     <p style="font-size:11px;color:var(--text3);margin-top:12px;">答完 10 题后展示基础素养结果，可「重新作答」或一键进入岗位自适应测评；岗位测评仍按 8 维 × 行业权重进行。</p>
   </div>`;
@@ -9588,7 +9690,7 @@ function renderBaseQuestion() {
     dots += `<div style="width:14px;height:14px;border-radius:50%;background:${bg};border:2px solid ${cur ? 'var(--accent)' : 'transparent'};transition:all .2s;"></div>`;
   }
 
-  let html = headerHtml(theme.icon + ' ' + theme.name + ' · AI 基础素养', '基础卷（不计入岗位综合分）· ' + `第 ${idx + 1}/${total} 题`, true);
+  let html = headerHtml(theme.icon + ' ' + theme.name + ' · AI 基础素养', '基础卷（计入综合分 · 30%）· ' + `第 ${idx + 1}/${total} 题`, true);
   html += `<div class="card slide-up">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
       <span class="tag tag-blue">${theme.name}</span>
@@ -9647,7 +9749,7 @@ function renderBaseSummary() {
       <div class="emp-info"><div class="emp-name">${t.name}</div><div class="emp-meta">${t.desc}</div></div>
       <div class="emp-score" style="color:${col};">${ok}/${tn}</div></div>`;
   }).join('');
-  let html = headerHtml('第一部分 · 基础素养测评完成', '独立结果 · 不计入岗位 8 维综合分', true);
+  let html = headerHtml('第一部分 · 基础素养测评完成', '计入综合分（30%）· 与岗位能力合并', true);
   html += `<div class="card slide-up text-center">
     <div style="text-align:center;margin:6px auto 2px;"><svg viewBox="0 0 120 120" width="132" height="132"><circle class="gauge-bg" cx="60" cy="60" r="52"/><circle class="gauge-fill" cx="60" cy="60" r="52" stroke-dasharray="326" stroke-dashoffset="${ringOffset}" stroke="${ringColor}"/></svg>
       <div class="gauge-text">${pct}%</div></div>
@@ -9660,7 +9762,7 @@ function renderBaseSummary() {
       <button class="btn btn-outline" style="flex:1;min-width:160px;" data-action="baseRetake" onclick="if(typeof S!=='undefined'){S.baseRetake()}">↺ 重新作答基础卷</button>
       <button class="btn btn-primary" style="flex:1;min-width:200px;" data-action="baseGoAdaptive" onclick="if(typeof S!=='undefined'){S.baseGoAdaptive()}">进入岗位自适应测评 →</button>
     </div>
-    <p style="font-size:11px;color:var(--text3);margin-top:12px;">基础素养结果将随测评报告单独展示，不影响 8 维得分、雷达图与课程推荐算法。</p>
+    <p style="font-size:11px;color:var(--text3);margin-top:12px;">基础素养得分已按 30% 计入综合分，与岗位 8 维得分共同决定课程推荐与学习地图。</p>
   </div>`;
   return html;
 }
@@ -9808,7 +9910,7 @@ function renderSelfResultCard() {
       <span class="tag tag-blue">员工自报</span>
       <span class="tag tag-green">不计入综合分</span>
     </div>
-    <p style="font-size:12px;color:var(--text2);margin-bottom:10px;">你用过的 AI 工具 / 场景 / 遇到的问题 / 自评短板 / 想学的内容，帮助定位起点与诉求。</p>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:10px;">你用过的 AI 工具 / 场景 / 自评短板 / 想学的内容，已结合进学习地图与课程推荐优先级（学习地图中以 🪞 标记相关课程）。</p>
     ${chipsHtml}
   </div>`;
 }
@@ -10071,7 +10173,7 @@ function exportReport() {
   // v51: AI 基础素养独立小节（不计入岗位综合分）
   const baseR = S._baseResult || null;
   let baseReportHtml = '';
-  const baseTitle = `AI 基础素养 <span style="font-size:11px;color:#86868b;font-weight:400;">（独立评估 · 不计入岗位综合分）</span>`;
+  const baseTitle = `AI 基础素养 <span style="font-size:11px;color:#86868b;font-weight:400;">（计入综合分 · 权重 30%）</span>`;
   if (baseR) {
     const bRows = Object.keys(AI_BASE_THEMES || {}).map(th => {
       const t = AI_BASE_THEMES[th];
@@ -10088,7 +10190,7 @@ function exportReport() {
     </table>`;
   } else {
     baseReportHtml = `<h2>${baseTitle}</h2>
-    <p style="font-size:12px;color:#86868b;">本次未作答 AI 基础素养卷（可重新测评时在入口作答）。</p>`;
+    <p style="font-size:12px;color:#86868b;">本次未作答 AI 基础素养卷（可重新测评时在入口补答，权重 30%）。</p>`;
   }
 
   // #193: 能力自评独立小节（员工自报，不计入岗位综合分）
@@ -10235,7 +10337,7 @@ function shareReport() {
     `综合指数：${result.overall}%`,
     `💪 最强：${top.map(t => AI_DIMS[t.k].name + ' ' + t.pct + '%').join('、')}`,
     `⚠️ 短板：${weak.map(w => AI_DIMS[w.k].name + ' ' + w.pct + '%').join('、')}`,
-    baseResultSummaryText() ? baseResultSummaryText() + '（独立 · 不计入综合分）' : 'AI基础素养：本次未作答',
+    baseResultSummaryText() ? baseResultSummaryText() + '（占综合分 30%）' : 'AI基础素养：本次未作答',
     selfShareText() ? selfShareText() + '（独立 · 不计入综合分）' : '能力自评：本次未作答',
     '—— 来自 AI达学(AIDAX) 8维自适应测评'
   ].join('\n');
@@ -10271,15 +10373,15 @@ function renderBaseResultCard() {
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;">
       <span style="font-weight:600;font-size:15px;">🧭 AI 基础素养</span>
       <span class="tag tag-blue">独立评估</span>
-      <span class="tag tag-green">不计入综合分</span>
+      <span class="tag tag-blue">计入综合分</span>
       <span style="margin-left:auto;font-size:12px;color:var(--text2);">答对 ${r.correct}/${r.total} 题</span>
     </div>
-    <p style="font-size:12px;color:var(--text2);margin-bottom:12px;">能力与边界 · 基础原理 · 提示词 · Agent · 知识库 · 安全合规 六主题通识体检；独立于岗位 8 维得分，不影响雷达图与课程推荐。</p>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:12px;">能力与边界 · 基础原理 · 提示词 · Agent · 知识库 · 安全合规 六主题通识体检；<b style="color:var(--blue);">已按 30% 权重计入综合分</b>，与岗位 8 维得分共同决定课程推荐与学习地图。</p>
     <div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap;">
       <div style="text-align:center;flex:0 0 116px;">
         <div class="gauge" style="margin:0 auto 4px;"><svg viewBox="0 0 120 120" width="112" height="112"><circle class="gauge-bg" cx="60" cy="60" r="52"/><circle class="gauge-fill" cx="60" cy="60" r="52" stroke-dasharray="326" stroke-dashoffset="${ringOffset}" stroke="${ringColor}"/></svg>
           <div class="gauge-text">${pct}%</div></div>
-        <div style="font-size:11px;color:var(--text2);">基础素养得分</div>
+        <div style="font-size:11px;color:var(--text2);">基础素养得分（占综合分 30%）</div>
       </div>
       <div style="flex:1;min-width:220px;">${themeBars}</div>
     </div>
@@ -10330,6 +10432,9 @@ function renderResults() {
     });
   }
 
+  const comp = computeComposite(); // v55: 综合分（基础素养30% + 岗位能力70%）
+  overall = comp.overall;
+
   let html = headerHtml('测评结果分析', role.icon + ' ' + role.name, true);
 
   // Overall gauge
@@ -10338,6 +10443,7 @@ function renderResults() {
       <div class="gauge"><svg viewBox="0 0 120 120" width="120" height="120"><circle class="gauge-bg" cx="60" cy="60" r="52"/><circle class="gauge-fill" cx="60" cy="60" r="52" stroke-dasharray="326" stroke-dashoffset="${326 - 326*overall/100}" stroke="${overall>=80?'var(--green)':overall>=60?'var(--amber)':'var(--red)'}"/></svg>
         <div class="gauge-text">${overall}%</div></div>
       <div class="gauge-label">AI综合能力指数</div>
+      <div class="composite-breakdown">综合分 = 基础素养 ${comp.base}% ×30% ＋ 岗位能力 ${comp.adaptive}% ×70%</div>
     </div>
     <div class="alert ${overall>=80?'alert-success':overall>=60?'alert-warning':'alert-info'}">
       ${overall>=80 ? '🎯 你的AI能力较强，课程将聚焦高阶应用和体系化建设' : overall>=60 ? '📈 你的AI能力有较好基础，课程将帮助你将能力转化为生产力' : '🚀 你处于AI应用起步阶段，课程将从基础开始帮助你建立AI思维'}
@@ -10345,7 +10451,7 @@ function renderResults() {
 
     ${renderQuizQualityCard(result)}<!-- v34: 作答质量卡片 -->
 
-    ${S._baseResult ? renderBaseResultCard() : (S._baseSkipped ? '<div class="alert alert-info" style="margin-top:14px;">ℹ️ 本次跳过了 AI 基础素养卷。重新测评时可在入口选择作答（约 5 分钟，独立结果、不计入综合分）。</div>' : '')}<!-- v51: 基础素养独立板块 -->
+    ${S._baseResult ? renderBaseResultCard() : (S._baseSkipped ? '<div class="alert alert-info" style="margin-top:14px;">ℹ️ 第一部分（AI 基础素养）为必答项，当前综合分已按岗位能力计算（基础卷权重 30% 待补）。</div>' : '')}<!-- v51: 基础素养独立板块 -->
 
     ${(S._selfResult || (S._selfAnswers && S._selfAnswers.filter(Boolean).length)) ? renderSelfResultCard() : (S._selfSkipped ? '<div class="alert alert-info" style="margin-top:14px;">ℹ️ 本次跳过了能力自评。重新测评时可在入口选择作答（约 2 分钟，独立结果、不计入综合分）。</div>' : '')}<!-- #193: 能力自评独立板块 -->
 
@@ -10416,12 +10522,12 @@ function renderResults() {
     }
     const urgency = pct < 40 ? '🔴 急需提升' : pct < 70 ? '🟡 建议学习' : '🟢 进阶提升';
     const multiTag = normalizeSkills(c.skills).length > 1 ? ' 🏷️多维' : '';
-    const resLocked = !S.courseProgress[c.id]?.done && !prereqsMet(c);
-    html += `<div class="course-card${S.courseProgress[c.id]?.done?' completed':''}${resLocked?' locked':''}" ${resLocked?'':'data-action="openCourse" data-idx="'+c.origIdx+'"'} style="animation:slideUp ${0.3 + i*0.05}s ease both;${resLocked?'':'cursor:pointer;'}">
-      <div class="course-num">${resLocked?'🔒':i+1}</div>
+    const prereqUnmet = c.requires && c.requires.length && c.requires.some(rid => !S.courseProgress[rid]?.done);
+    html += `<div class="course-card${S.courseProgress[c.id]?.done?' completed':''}" data-action="openCourse" data-idx="${c.origIdx}" style="animation:slideUp ${0.3 + i*0.05}s ease both;cursor:pointer;">
+      <div class="course-num">${i+1}</div>
       <div style="flex:1;min-width:0;">
         <div class="course-title">${c.title}${multiTag}</div>
-        <div class="course-meta">${c.dur} · ${urgency}${resLocked?' · 需完成前置课程':''}</div>
+        <div class="course-meta">${c.dur} · ${urgency}${prereqUnmet?' · 建议先学前置':''}</div>
         <span class="map-skill-tag">${skillName}</span>
       </div>
       ${courseTierBadge(c)}
@@ -10575,6 +10681,10 @@ function renderLearningMap() {
     </div>
   </div>`;
 
+  // v55: 能力自评画像卡（结合学习地图）
+  const selfMapCard = renderSelfMapCard();
+  if (selfMapCard) html += selfMapCard;
+
   // Stage grouping: Phase 1 (基础夯实, 前1/3), Phase 2 (能力提升, 中1/3), Phase 3 (综合应用, 后1/3)
   const stageCount = Math.ceil(total/3);
   const stages = [
@@ -10591,14 +10701,16 @@ function renderLearningMap() {
     stage.courses.forEach((c, nodeIdx) => {
       const globalIdx = stageIdx * stageCount + nodeIdx;
       const isDone = S.courseProgress[c.id]?.done;
-      const isLocked = !isDone && !prereqsMet(c);
-      const isCurrent = !isDone && !isLocked && globalIdx === currentIdx;
+      const prereqUnmet = c.requires && c.requires.length && c.requires.some(rid => !S.courseProgress[rid]?.done);
+      const isCurrent = !isDone && globalIdx === currentIdx;
+      const selfRel = isSelfRelated(c);
       const skillIdx = getPrimarySkillIdx(c);
       const skillName = role.skills[skillIdx] || '';
       const skillPct = S.quizScores ? Math.round((S.quizScores[skillIdx]||0)/4*100) : 0;
       const urgency = skillPct < 40 ? '🔴 急需' : skillPct < 70 ? '🟡 建议' : '🟢 进阶';
 
       let nodeCls = 'map-node';
+      if (selfRel) nodeCls += ' self-related';
       let iconContent = c.type==='video'?'🎬':'📖';
       let badgeText = '', badgeCls = '';
 
@@ -10608,14 +10720,15 @@ function renderLearningMap() {
       } else if (isCurrent) {
         nodeCls += ' current';
         badgeText = '进行中'; badgeCls = 'current-badge';
-      } else if (isLocked) {
-        nodeCls += ' locked';
-        badgeText = '待解锁'; badgeCls = 'locked-badge';
+      } else if (prereqUnmet) {
+        nodeCls += ' suggested';
+        badgeText = '建议先学前置'; badgeCls = 'suggested-badge';
       } else {
         badgeText = '待学习'; badgeCls = 'pending-badge';
       }
 
-      const clickHandler = !isLocked ? `data-action="openCourse" data-idx="${c.origIdx}" style="cursor:pointer"` : '';
+      // v55: 解除硬锁——所有课程均可点击学习，前置仅作软提示
+      const clickHandler = `data-action="openCourse" data-idx="${c.origIdx}" style="cursor:pointer"`;
 
       html += `<div class="${nodeCls}" ${clickHandler}>
         <div class="map-node-icon">${iconContent}</div>
@@ -10623,7 +10736,7 @@ function renderLearningMap() {
           <div class="map-node-title">${c.title}</div>
           <div class="map-node-meta">${c.dur} · ${c.type==='video'?'视频课程':'图文课程'}</div>
           <span class="map-skill-tag">${skillName} ${urgency}</span>
-          <div style="margin-top:4px;">${courseTierBadge(c)}</div>
+          <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">${courseTierBadge(c)}${selfRel?'<span class="map-node-badge self-badge">🪞自评相关</span>':''}</div>
         </div>
         <span class="map-node-badge ${badgeCls}">${badgeText}</span>
       </div>`;
@@ -10731,12 +10844,12 @@ function renderSchedule() {
       const dur = parseInt(c.dur) || 30;
       const tagCls = c.type==='video' ? 'tag-blue' : 'tag-purple';
 
-      const schedLocked = !prereqsMet(c);
-      html += `<div class="schedule-item ${priorityCls}${schedLocked?' locked':''}" ${schedLocked?'':'data-action="openCourse" data-idx="'+c.origIdx+'" style="cursor:pointer;"'}>
+      const prereqUnmet = c.requires && c.requires.length && c.requires.some(rid => !S.courseProgress[rid]?.done);
+      html += `<div class="schedule-item ${priorityCls}" data-action="openCourse" data-idx="${c.origIdx}" style="cursor:pointer;">
         <div class="schedule-day">${day}</div>
         <div class="schedule-course">
-          <div class="schedule-course-name">${schedLocked?'🔒 ':''}${c.title}</div>
-          <div class="schedule-course-dur">${c.dur} + 约10分钟关卡练习 · <span class="tag ${tagCls}" style="font-size:10px;padding:1px 6px;">${c.type==='video'?'视频':'图文'}</span>${schedLocked?' · <span style="color:var(--text3);font-size:11px;">需完成前置课程</span>':''}</div>
+          <div class="schedule-course-name">${c.title}</div>
+          <div class="schedule-course-dur">${c.dur} + 约10分钟关卡练习 · <span class="tag ${tagCls}" style="font-size:10px;padding:1px 6px;">${c.type==='video'?'视频':'图文'}</span>${prereqUnmet?' · <span style="color:var(--amber);font-size:11px;">建议先学前置</span>':''}</div>
         </div>
       </div>`;
     });
@@ -10820,11 +10933,10 @@ function renderDashboard() {
   ordered.forEach((c, i) => {
     const prog = S.courseProgress[c.id];
     const isDone = prog?.done;
-    const canStart = prereqsMet(c) || isDone;
-    const locked = !isDone && !canStart;
-    const cls = isDone ? 'completed' : locked ? 'locked' : '';
+    const prereqUnmet = c.requires && c.requires.length && c.requires.some(rid => !S.courseProgress[rid]?.done);
+    const cls = isDone ? 'completed' : prereqUnmet ? 'suggested' : '';
     const tagCls = c.type==='video' ? 'tag-blue' : 'tag-purple';
-    const statusLabel = isDone ? '已完成' : locked ? '🔒 需前置' : '待学习';
+    const statusLabel = isDone ? '已完成' : prereqUnmet ? '建议先学前置' : '待学习';
 
     // P2.3: Quiz stats for adaptive feedback
     const quizStats = getTotalQuizStats(c.id);
@@ -10835,7 +10947,7 @@ function renderDashboard() {
     if (quizWarning) quizBadge = `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;background:#fef2f2;color:var(--red);font-size:11px;font-weight:600;margin-left:6px;">⚠️ 需复习 (${quizStats.rate}%)</span>`;
     else if (quizOk) quizBadge = `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;background:var(--green-bg);color:var(--green);font-size:11px;font-weight:600;margin-left:6px;">✓ 已掌握 (${quizStats.rate}%)</span>`;
 
-    html += `<div class="course-card ${cls}" ${locked?'':'data-action="openCourse" data-idx="'+c.origIdx+'"'}>
+    html += `<div class="course-card ${cls}" data-action="openCourse" data-idx="${c.origIdx}" style="cursor:pointer;">
       <div class="course-num">${i+1}</div>
       <div style="flex:1;min-width:0;"><div class="course-title">${c.title}${quizBadge}</div><div class="course-meta">${c.dur}${c.requires?.length?' · 前置：'+c.requires.map(r=>getRoleCourses().find(rc=>rc.id===r)?.title||r).join('+ '):''}</div></div>
       ${courseTierBadge(c)}
@@ -10968,11 +11080,11 @@ function renderCourseDetail() {
     }
 
     // Full content below PPT (only show if transcript is hidden)
-    html += `<div class="mt-4" id="courseFullContent">${buildContentHTML(content)}</div>`;
+    html += `<div class="mt-4" id="courseFullContent">${buildContentHTML(content, c)}</div>`;
   } else if (c.type === 'video') {
     html += `<div class="video-placeholder"><div class="play-btn">▶</div><p style="font-weight:600;font-size:16px;">${c.title}</p><p style="font-size:13px;opacity:0.8;">课程PPT视频演示</p></div>`;
   } else {
-    if (content) { html += buildContentHTML(content); }
+    if (content) { html += buildContentHTML(content, c); }
     else { html += `<div style="background:var(--bg);border-radius:var(--radius);padding:20px;"><p style="font-size:13px;color:var(--text2);text-align:center;">课程内容加载中…</p></div>`; }
   }
 
@@ -11025,7 +11137,7 @@ function renderPPTSlide(slide, idx, total) {
   return `<div class="ppt-slide ${cls}${idx===0?' active':''}" data-slide="${idx}">${inner}</div>`;
 }
 
-function buildContentHTML(content) {
+function buildContentHTML(content, c) {
   if (!content) return '';
   let h = '';
 
@@ -11060,6 +11172,10 @@ function buildContentHTML(content) {
     h += `</div>`;
   }
 
+  // Demo (req5: 动画演示，供学员模仿)
+  const demoHtml = buildDemoHTML(content);
+  if (demoHtml) h += demoHtml;
+
   // Cases
   if (content.cases && content.cases.length) {
     h += `<div class="content-section"><h3>场景案例</h3>`;
@@ -11070,9 +11186,19 @@ function buildContentHTML(content) {
     h += `</div>`;
   }
 
-  // Tools
+  // Tools (req4: 非研发岗以 WorkBuddy 为主力 AI 平台)
   if (content.tools && content.tools.length) {
-    h += `<div class="content-section"><h3>推荐工具</h3><div class="tools-grid">`;
+    h += `<div class="content-section"><h3>推荐工具</h3>`;
+    const isDev = S.role === 'dev';
+    if (!isDev) {
+      h += `<div class="wb-tool-banner">🛠️ 本课程以 <b>WorkBuddy</b> 作为主力 AI 平台：课前 / 课中 / 课后实操均优先在 WorkBuddy 中完成，其余工具作为补充能力。</div>`;
+    }
+    h += `<div class="tools-grid">`;
+    if (!isDev) {
+      h += `<div class="tool-card" style="border:2px solid var(--blue);background:var(--blue-bg);">
+        <div class="tool-name">⭐ WorkBuddy <span style="font-size:11px;background:var(--blue);color:#fff;border-radius:6px;padding:1px 6px;margin-left:4px;">主力平台</span></div>
+        <div class="tool-desc">一站式 AI 工作平台：对话 / 文档 / 数据分析 / 自动化，课程实操的统一入口</div></div>`;
+    }
     content.tools.forEach(t => {
       h += `<div class="tool-card"><div class="tool-name">${t.n}</div><div class="tool-desc">${t.d}</div></div>`;
     });
@@ -11088,12 +11214,95 @@ function buildContentHTML(content) {
     h += `</div>`;
   }
 
+  // Assignment (req6: 作业 + 输出提示要点 + 得分点)
+  const assignHtml = buildAssignmentHTML(c, content);
+  if (assignHtml) h += assignHtml;
+
   // Summary
   if (content.summary) {
     h += `<div class="summary-box"><h4>本章小结</h4><p>${content.summary}</p></div>`;
   }
 
   return h;
+}
+
+// ===== v55: 演示动画 + 作业（提示要点/得分点）辅助构建 =====
+function _truncStr(s, n) { if (!s) return ''; s = String(s).replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n) + '…' : s; }
+function _stripPromptPrefix(s) { if (!s) return ''; return String(s).replace(/^\/\/\s*/, '').replace(/^["'"'"'「『]/, '').trim(); }
+
+// 演示：从「实操步骤/核心概念」派生 AI 对话窗口（动画由 CSS 驱动，每次打开重播）
+function buildDemoHTML(content) {
+  if (!content) return '';
+  const steps = (content.steps || []).map(s => ({ t: _stripStep(s.t), d: s.d }));
+  const concepts = content.concepts || [];
+  const ex = [];
+  steps.slice(0, 3).forEach(s => {
+    ex.push({ u: '我想完成「' + _truncStr(s.t, 20) + '」，给我可直接用的提示词和步骤。' });
+    ex.push({ a: _truncStr(_stripPromptPrefix(s.d), 120) });
+  });
+  if (!ex.length && concepts.length) {
+    ex.push({ u: '一句话讲清「' + concepts[0].t + '」的核心？' });
+    ex.push({ a: _truncStr(concepts[0].c, 120) });
+  }
+  if (!ex.length) return '';
+  let rows = '', d = 0;
+  ex.forEach((o, i) => {
+    if (o.u !== undefined) {
+      rows += `<div class="demo-row user" style="animation-delay:${d}s"><div class="demo-bubble user">${escHtml(o.u)}</div></div>`;
+    } else {
+      const last = (i === ex.length - 1);
+      rows += `<div class="demo-row ai" style="animation-delay:${d.toFixed(1)}s"><div class="demo-bubble ai">${escHtml(o.a)}${last ? '<span class="demo-cursor">▋</span>' : ''}</div></div>`;
+    }
+    d += 1.4;
+  });
+  return `<div class="content-section"><h3>🎬 演示 · 模仿练习</h3>
+    <div class="demo-window">
+      <div class="demo-bar"><span class="demo-dot r"></span><span class="demo-dot y"></span><span class="demo-dot g"></span><span class="demo-title">AI 助手实时演示</span></div>
+      <div class="demo-body">${rows}</div>
+    </div>
+    <div class="demo-note">👀 观察提示词结构与 AI 回复风格，进入下方「作业」动手模仿。每次打开课程演示自动重播。</div>
+  </div>`;
+}
+
+// 作业：实战任务 + 输出提示要点 + 得分点（对齐 4 维评分）
+function buildAssignmentHTML(c, content) {
+  if (!c || !c.tasks || !c.tasks.length) return '';
+  const tips = (content && content.tips) ? content.tips : [];
+  const taskList = c.tasks.map((t, i) => `${i + 1}. ${escHtml(t.t)} —— ${escHtml(_truncStr(t.h, 60))}`).join('<br>');
+  let hintPoints = tips.slice(0, 3).map(t => t);
+  if (hintPoints.length < 3) hintPoints.push('先明确任务背景、目标与验收标准，再给 AI 下指令');
+  if (hintPoints.length < 3) hintPoints.push('用「角色 + 任务 + 输出格式 + 约束」结构写提示词，减少返工');
+  hintPoints = hintPoints.slice(0, 4);
+  const scorePoints = [
+    { n: '完整性', d: '覆盖任务全部要素，过程与成果描述充分（占比 25%）' },
+    { n: '具体性', d: '含具体工具 / 数据 / 实例，避免空泛表述（占比 30%）' },
+    { n: '结构性', d: '条理清晰，分步骤 / 分模块呈现（占比 15%）' },
+    { n: '相关性', d: '紧扣任务要求，与岗位场景高度相关（占比 30%）' }
+  ];
+  return `<div class="content-section"><h3>📝 作业 · 输出要点与得分点</h3>
+    <div class="assign-box">
+      <div class="assign-task"><span class="assign-label">实战任务</span><br>${taskList}</div>
+      <div class="assign-points">
+        <h4>💡 输出提示要点</h4>
+        ${hintPoints.map((p, i) => `<div class="point-item hint"><div class="point-num">${i + 1}</div><div class="point-t">${escHtml(p)}</div></div>`).join('')}
+        <h4>✅ 得分点（评分维度）</h4>
+        ${scorePoints.map((p, i) => `<div class="point-item score"><div class="point-num">${i + 1}</div><div class="point-t"><b>${p.n}</b>：${p.d}</div></div>`).join('')}
+      </div>
+    </div>
+    <div class="demo-note">📌 提交入口在课程底部「任务提交模式」，系统按上述 4 个维度自动评分并给出改进建议。</div>
+  </div>`;
+}
+
+// 学习地图中的能力自评画像卡（结合自评数据驱动推荐）
+function renderSelfMapCard() {
+  const labels = selfSelectedLabels();
+  if (!labels.length) return '';
+  const chips = labels.map(l => `<span class="self-chip">${escHtml(l)}</span>`).join('');
+  return `<div class="self-map-card">
+    <h3>🪞 你的能力自评画像</h3>
+    <div class="self-chips">${chips}</div>
+    <div class="self-note">学习地图中与以上自评高度相关的课程已用 <b>🪞 自评相关</b> 标记，并在课程排序中优先推荐（排序已结合你的自评维度）。</div>
+  </div>`;
 }
 
 // ---- TASK MODAL ----
@@ -11771,7 +11980,7 @@ S.startQuiz = function() { // 三段式：①AI基础素养 → ②AI业务场�
   S.view = 'results'; render();
 };
 S.baseStart = function() { S._baseSkipped = false; buildBaseQuiz(); S._basePhase = 'active'; S.view = 'quiz'; render(); };
-S.baseSkip = function() { S._basePhase = 'done'; S._baseResult = null; S._baseSkipped = true; S._quizPlan = []; startAdaptiveQuiz(); S.view = 'quiz'; render(); };
+S.baseSkip = function() { if (typeof alert !== 'undefined') alert('第一部分（AI 基础素养）为必答项，计入综合分（30%），不可跳过，请先完成 10 题。'); };
 S.answerBase = function(i) {
   const plan = S._basePlan || [];
   const idx = S._baseIdx || 0;
@@ -11897,14 +12106,6 @@ S.calcResults = function() {
 S.openCourse = function(idx) {
   const courses = getRoleCourses();
   const c = courses[idx];
-  if (!prereqsMet(c)) {
-    const reqNames = (c.requires||[]).map(rid => {
-      const rc = courses.find(x => x.id === rid);
-      return rc ? rc.title : rid;
-    }).join('、');
-    alert('🔒 请先完成前置课程：' + reqNames + '\n\n完成前置课程后即可解锁本课程。');
-    return;
-  }
   S.courseIdx = idx; S.courseTaskIdx = 0; S.pptCurrentSlide = 0; S.voicePlaying = false; S.view = 'course'; render();
 };
 S.goDashboard = function() { stopVoice(); S.view = 'dashboard'; S.courseIdx = null; S.courseTaskIdx = 0; render(); };
