@@ -617,6 +617,101 @@
 .q-complete .q-stars-big{font-size:44px;letter-spacing:6px;margin:12px 0;}
 .q-complete h2{font-size:22px;font-weight:800;margin-bottom:6px;}
 .q-complete .q-xp-line{font-size:15px;font-weight:700;color:#e6a700;margin-bottom:16px;}
+
+/* ===== #2/#3/#4 Admin Foundation ===== */
+.admin-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 16px;background:var(--bg);padding:6px;border-radius:12px;border:1px solid var(--border);}
+.admin-tab{flex:1;min-width:84px;padding:9px 8px;border:none;background:transparent;border-radius:8px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .18s;}
+.admin-tab:hover{background:var(--card-hover);color:var(--text);}
+.admin-tab.active{background:#fff;color:var(--blue);box-shadow:var(--shadow);}
+.section-title{font-weight:700;font-size:14px;margin:4px 0 12px;display:flex;align-items:center;gap:8px;}
+.section-title .st-ico{font-size:16px;}
+.analysis-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.analysis-row:last-child{border-bottom:none;}
+.analysis-name{width:130px;flex-shrink:0;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px;}
+.analysis-bar{flex:1;height:10px;background:var(--border);border-radius:6px;overflow:hidden;}
+.analysis-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--blue),var(--purple));transition:width .7s ease;}
+.analysis-val{width:120px;flex-shrink:0;text-align:right;font-size:12px;color:var(--text2);}
+.analysis-val b{color:var(--text);font-size:13px;}
+.dim-bars{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px 18px;margin-top:6px;}
+.dim-bar{display:flex;align-items:center;gap:10px;}
+.dim-bar .db-name{width:96px;font-size:12px;color:var(--text2);flex-shrink:0;}
+.dim-bar .db-track{flex:1;height:8px;background:var(--border);border-radius:5px;overflow:hidden;}
+.dim-bar .db-fill{height:100%;border-radius:5px;}
+.dim-bar .db-val{width:38px;text-align:right;font-size:12px;font-weight:600;}
+.kv{display:flex;gap:8px;font-size:13px;padding:6px 0;border-bottom:1px dashed var(--border);}
+.kv:last-child{border-bottom:none;}
+.kv .k{width:96px;color:var(--text3);flex-shrink:0;}
+.kv .v{flex:1;color:var(--text);}
+.log-line{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12.5px;}
+.log-line:last-child{border-bottom:none;}
+.log-line .ll-dot{width:7px;height:7px;border-radius:50%;background:var(--blue);flex-shrink:0;}
+.log-line .ll-time{color:var(--text3);font-size:11px;width:64px;flex-shrink:0;}
+.log-line .ll-user{font-weight:600;width:84px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.log-line .ll-meta{color:var(--text2);flex:1;}
+
+/* Feedback bubble */
+.fb-fab{position:fixed;left:28px;bottom:28px;z-index:1600;display:flex;align-items:center;gap:8px;padding:12px 18px;border-radius:50px;background:linear-gradient(135deg,#0ea5e9,#6366f1);color:#fff;border:none;cursor:pointer;box-shadow:0 6px 22px rgba(14,165,233,.32);font-size:13px;font-weight:600;transition:all .2s;}
+.fb-fab:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(14,165,233,.42);}
+.fb-fab svg{width:20px;height:20px;}
+.fb-modal{position:fixed;inset:0;z-index:2000;background:rgba(15,23,42,.5);display:none;align-items:center;justify-content:center;padding:16px;}
+.fb-modal.show{display:flex;}
+.fb-modal-inner{background:#fff;border-radius:18px;width:100%;max-width:480px;max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);animation:modalSlideIn .25s ease;}
+.fb-head{display:flex;align-items:center;gap:10px;padding:18px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:#fff;}
+.fb-head h3{font-size:16px;font-weight:700;}
+.fb-head .fb-close{margin-left:auto;background:none;border:none;font-size:22px;color:var(--text3);cursor:pointer;line-height:1;}
+.fb-body{padding:18px 20px;}
+.fb-type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+.fb-type{padding:10px 4px;border:1.5px solid var(--border);border-radius:10px;background:transparent;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;text-align:center;transition:all .15s;}
+.fb-type .ft-ico{font-size:18px;display:block;margin-bottom:3px;}
+.fb-type.active{border-color:var(--blue);background:var(--blue-bg);color:var(--blue);}
+.fb-textarea{width:100%;min-height:96px;border:1.5px solid var(--border);border-radius:10px;padding:12px;font-size:14px;font-family:inherit;resize:vertical;color:var(--text);}
+.fb-textarea:focus{outline:none;border-color:var(--blue);}
+.fb-media-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+.fb-media-btn{flex:1;min-width:120px;padding:10px;border:1.5px dashed var(--border);border-radius:10px;background:var(--bg);font-size:12.5px;color:var(--text2);cursor:pointer;text-align:center;transition:all .15s;}
+.fb-media-btn:hover{border-color:var(--blue);color:var(--blue);}
+.fb-media-btn.recording{background:var(--red-bg);color:var(--red);border-color:var(--red);}
+.fb-preview{margin-top:12px;display:none;}
+.fb-preview.show{display:block;}
+.fb-preview img,.fb-preview video{max-width:100%;max-height:200px;border-radius:10px;border:1px solid var(--border);}
+.fb-preview .fb-audio{width:100%;}
+.sev-row{display:flex;gap:8px;margin-top:14px;align-items:center;}
+.sev-row .sev-lbl{font-size:13px;color:var(--text2);}
+.chip{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid var(--border);background:#fff;color:var(--text2);cursor:pointer;transition:all .15s;}
+.chip.active{border-color:var(--blue);background:var(--blue-bg);color:var(--blue);}
+.fb-foot{display:flex;gap:10px;padding:16px 20px;border-top:1px solid var(--border);position:sticky;bottom:0;background:#fff;}
+
+/* Feedback list (admin) */
+.fb-list{display:flex;flex-direction:column;gap:10px;}
+.fb-item{border:1px solid var(--border);border-radius:12px;padding:14px;background:var(--card);transition:all .15s;}
+.fb-item.sel{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-bg);}
+.fb-item .fi-top{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+.fb-item .fi-text{font-size:13.5px;color:var(--text);white-space:pre-wrap;line-height:1.6;}
+.fb-item .fi-meta{font-size:11.5px;color:var(--text3);margin-top:8px;display:flex;gap:12px;flex-wrap:wrap;}
+.fb-item .fi-thumb{margin-top:8px;max-width:120px;max-height:90px;border-radius:8px;border:1px solid var(--border);}
+.status-pill{padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;}
+.status-new{background:var(--red-bg);color:var(--red);}
+.status-triaged{background:var(--amber-bg);color:var(--amber);}
+.status-done{background:var(--green-bg);color:var(--green);}
+.req-card{border:1px solid var(--border);border-left:4px solid var(--purple);border-radius:12px;padding:14px;background:var(--card);margin-bottom:10px;}
+.req-card h4{font-size:14px;font-weight:700;margin-bottom:6px;}
+.req-card .rc-desc{font-size:12.5px;color:var(--text2);white-space:pre-wrap;line-height:1.6;}
+.req-card .rc-meta{font-size:11.5px;color:var(--text3);margin-top:8px;}
+
+/* Sales plan */
+.plan-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+.plan-form .pf-full{grid-column:1/-1;}
+.plan-form label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px;font-weight:600;}
+.plan-form select,.plan-form input{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:13.5px;font-family:inherit;color:var(--text);background:#fff;}
+.plan-box{background:#0f172a;color:#e2e8f0;border-radius:12px;padding:18px 20px;font-size:13px;line-height:1.75;white-space:pre-wrap;font-family:"SF Mono",Menlo,Consolas,monospace;max-height:560px;overflow:auto;}
+.plan-box h3{color:#a5b4fc;font-size:15px;margin:14px 0 6px;}
+.plan-box .pb-h{color:#fff;font-weight:700;font-size:16px;margin-bottom:8px;}
+.plan-box ul{margin:4px 0 4px 18px;}
+.plan-box li{margin:2px 0;}
+.plan-box .pb-tip{color:#94a3b8;font-style:italic;}
+.toast{position:fixed;left:50%;bottom:40px;transform:translateX(-50%) translateY(20px);background:var(--text);color:#fff;padding:11px 20px;border-radius:50px;font-size:13px;font-weight:600;z-index:3000;opacity:0;transition:all .3s;pointer-events:none;box-shadow:0 6px 20px rgba(0,0,0,.2);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+@keyframes modalSlideIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:560px){.plan-form{grid-template-columns:1fr;}.fb-type-grid{grid-template-columns:repeat(2,1fr);}}
 </style>
 </head>
 <body data-page-node-id="Prs4Mp8xI4LQUblNgECgE9">
@@ -9542,6 +9637,7 @@ function render() {
     case 'map': app.innerHTML = renderLearningMap(); break;
     case 'schedule': app.innerHTML = renderSchedule(); break;
   }
+  recordAccess(S.view);
   bindEvents();
 }
 
@@ -9558,7 +9654,7 @@ function headerHtml(title, sub, showBack) {
         ${indText ? '<span class="tag tag-blue">'+indText+'</span>' : ''}
         ${roleText ? '<span class="tag tag-purple">'+roleText+'</span>' : ''}
         <span style="font-size:12px;color:var(--text3);">👤 ${userName}</span>
-        ${S.view!=='admin'&&session.role==='admin'?'<button class="btn btn-sm btn-outline" data-action="goAdmin">管理员</button>':''}
+        ${S.view!=='admin'&&(session.role==='admin'||session.role==='ent')?'<button class="btn btn-sm btn-outline" data-action="goAdmin">管理员</button>':''}
         ${S.view!=='role' ? '<button class="btn btn-sm btn-outline" data-action="reset">切换场景/岗位</button>' : ''}
         <button class="btn btn-sm btn-outline" data-action="logout" style="color:#ef4444;border-color:#ef4444;">退出</button>
       </div>
@@ -11965,7 +12061,515 @@ function renderFinalResults() {
 }
 
 // ---- ADMIN ----
+// ==================== #2/#3/#4 后端地基：本地优先 + 可切换云端 ====================
+// 设计约定：所有新模块（访问日志 / 用户反馈 / 产品需求 / 销售陪跑方案）统一走 DB 抽象层。
+// 当前 adapter = localStorage（离线可用、零依赖）；未来接入 Supabase / 云数据库时，
+// 只需实现同签名 API（all / get / put / del / clear，可返回 Promise）并替换实现，
+// 上层业务与 UI 代码零改动。
+const DB = {
+  mode: 'local',
+  _key: function(c){ return 'aidax_' + c; },
+  all: function(c){
+    try { return JSON.parse(localStorage.getItem(this._key(c)) || '[]'); } catch(e){ return []; }
+  },
+  get: function(c, id){
+    var l = this.all(c);
+    for (var i = 0; i < l.length; i++) if (l[i].id === id) return l[i];
+    return null;
+  },
+  put: function(c, item){
+    var list = this.all(c), i = -1;
+    for (var k = 0; k < list.length; k++) { if (list[k].id === item.id) { i = k; break; } }
+    if (i >= 0) list[i] = item; else list.push(item);
+    try { localStorage.setItem(this._key(c), JSON.stringify(list)); }
+    catch(e){
+      // 配额不足：优先丢弃体积最大的媒体字段，保住文字信息
+      if (item.media) {
+        delete item.media; item._mediaDropped = true;
+        try { localStorage.setItem(this._key(c), JSON.stringify(list)); showToast('存储空间不足：媒体已丢弃，文字已保存'); return item; } catch(e2){}
+      }
+      showToast('存储空间不足，本次未保存');
+    }
+    return item;
+  },
+  del: function(c, id){
+    var list = this.all(c).filter(function(x){ return x.id !== id; });
+    try { localStorage.setItem(this._key(c), JSON.stringify(list)); } catch(e){}
+    return list;
+  },
+  clear: function(c){ try { localStorage.removeItem(this._key(c)); } catch(e){} }
+};
+
+function uid(p){ return (p||'') + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+function showToast(msg){
+  var t = document.getElementById('toastBox');
+  if (!t) { t = document.createElement('div'); t.id = 'toastBox'; t.className = 'toast'; document.body.appendChild(t); }
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t); t._t = setTimeout(function(){ t.classList.remove('show'); }, 2400);
+}
+
+function fmtTs(ts){
+  var d = new Date(ts);
+  function p(n){ return n < 10 ? '0' + n : '' + n; }
+  return p(d.getMonth()+1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+}
+
+var VIEW_LABEL = {role:'场景/岗位选择', quiz:'测评', results:'能力结果', dashboard:'学习仪表盘',
+  course:'课程学习', task:'任务提交', questmap:'闯关地图', quest:'闯关练习', final:'终极测验',
+  admin:'管理后台', map:'学习地图', schedule:'学习计划'};
+var FB_TYPE = {text:{n:'文字',i:'✍️'}, image:{n:'截图',i:'🖼️'}, audio:{n:'语音',i:'🎙️'}, video:{n:'录屏',i:'🎬'}};
+var FB_STATUS = {new:'待处理', triaged:'处理中', done:'已解决'};
+var FB_SEV = {high:'高', mid:'中', low:'低'};
+
+// ---- 访问日志（#2 看板「访问情况」数据源）----
+var _accessThrottle = {};
+function recordAccess(view){
+  if (!view) return;
+  try {
+    var session = JSON.parse(localStorage.getItem('ai_training_session') || '{}');
+    var user = session.user || '游客';
+    var key = user + '|' + view;
+    var now = Date.now();
+    if (_accessThrottle[key] && now - _accessThrottle[key] < 10*60*1000) return; // 同一人同页面 10 分钟内只记一次
+    _accessThrottle[key] = now;
+    DB.put('access_log', { id: uid('a_'), ts: now, user: user, role: S.role || '', industry: S.industry || '', view: view });
+  } catch(e){}
+}
+
+// ---- 测评聚合（#3 行业 / 企业维度分析）----
+// quizScores 兼容两种形态：v41 自适应为 {dimKey:0-4} 对象；旧版为按技能索引的数组
+function dimScoresOf(e){
+  var q = e.quizScores, out = {};
+  if (!q) return out;
+  if (Object.prototype.toString.call(q) === '[object Array]') {
+    var r = ROLES[e.role];
+    q.forEach(function(s, i){
+      var dk = (r && r.dimKeys) ? r.dimKeys[i] : null;
+      if (!dk) return;
+      if (out[dk] == null) out[dk] = s; else out[dk] = Math.max(out[dk], s);
+    });
+  } else {
+    Object.keys(q).forEach(function(dk){ if (AI_DIMS[dk]) out[dk] = q[dk]; });
+  }
+  return out;
+}
+
+function aggregateBy(keyFn, list){
+  var src = list || S.employees, map = {};
+  src.forEach(function(e){
+    var k = keyFn(e) || '未填写';
+    if (!map[k]) map[k] = {key:k, n:0, completed:0, scores:[], dimSum:{}, dimN:{}, roles:{}, courses:0};
+    var g = map[k];
+    g.n++;
+    g.roles[e.role] = (g.roles[e.role] || 0) + 1;
+    g.courses += (e.doneCourses || 0);
+    if (e.finalScore != null) { g.completed++; g.scores.push(e.finalScore); }
+    var ds = dimScoresOf(e);
+    Object.keys(ds).forEach(function(dk){
+      g.dimSum[dk] = (g.dimSum[dk] || 0) + ds[dk];
+      g.dimN[dk] = (g.dimN[dk] || 0) + 1;
+    });
+  });
+  var arr = Object.keys(map).map(function(k){ return map[k]; });
+  arr.forEach(function(g){
+    g.avg = g.scores.length ? Math.round(g.scores.reduce(function(a,b){ return a+b; }, 0) / g.scores.length) : null;
+    g.rate = g.n ? Math.round(g.completed / g.n * 100) : 0;
+    g.dimAvg = {};
+    Object.keys(g.dimSum).forEach(function(dk){ g.dimAvg[dk] = g.dimSum[dk] / g.dimN[dk]; });
+    g.weak = Object.keys(g.dimAvg).sort(function(a,b){ return g.dimAvg[a] - g.dimAvg[b]; }).slice(0, 3);
+  });
+  return arr.sort(function(a,b){ return b.n - a.n; });
+}
+
+function scoreColor(pct){ return pct >= 70 ? 'var(--green)' : pct >= 45 ? 'var(--amber)' : 'var(--red)'; }
+
+function dimBarsHtml(dimAvg){
+  var html = '<div class="dim-bars">';
+  Object.keys(AI_DIMS).forEach(function(dk){
+    var v = dimAvg ? dimAvg[dk] : null;
+    var pct = (v == null) ? 0 : Math.round(v / 4 * 100);
+    var color = scoreColor(pct);
+    html += '<div class="dim-bar"><span class="db-name">' + AI_DIMS[dk].icon + ' ' + AI_DIMS[dk].short + '</span>'
+          + '<span class="db-track"><span class="db-fill" style="width:' + pct + '%;background:' + color + '"></span></span>'
+          + '<span class="db-val" style="color:' + (v == null ? 'var(--text3)' : color) + '">' + (v == null ? '—' : pct) + '</span></div>';
+  });
+  return html + '</div>';
+}
+
+// ---- #4 销售：培训陪跑方案生成 ----
+function buildSalesPlan(o){
+  var ind = INDUSTRIES[o.industry] || {name:o.industry, desc:''};
+  var role = ROLES[o.role] || {name:o.role, skills:[]};
+  var groups = aggregateBy(function(e){ return e.industry; });
+  var g = null;
+  groups.forEach(function(x){ if (x.key === o.industry) g = x; });
+  var clist = COURSES[o.role + '_' + o.industry] || COURSES[o.role] || [];
+  var weak = (g && g.weak && g.weak.length) ? g.weak : [];
+  var weakNames = weak.map(function(d){ return AI_DIMS[d].name; });
+  if (!weakNames.length) { // 无实测数据时用岗位能力基线兜底
+    var w = BASE_ROLE_WEIGHTS[o.role] || {};
+    weakNames = Object.keys(w).sort(function(a,b){ return w[a] - w[b]; }).slice(0, 2).map(function(k){ return AI_DIMS[k].name; });
+  }
+  function dimOf(cid){
+    var base = cid.indexOf('_') >= 0 ? cid.split('_').pop() : cid;
+    return COURSE_SKILL_MAP[base] || COURSE_SKILL_MAP[cid] || 'general';
+  }
+  var sorted = clist.slice().sort(function(a,b){
+    var wa = weak.indexOf(dimOf(a.id)), wb = weak.indexOf(dimOf(b.id));
+    return (wa < 0 ? 99 : wa) - (wb < 0 ? 99 : wb);
+  });
+  var pick = sorted.slice(0, Math.min(5, sorted.length));
+  var wks = Math.max(2, o.weeks || 4);
+  var midEnd = Math.max(2, Math.round(wks / 2));
+  var t = [];
+  t.push('# ' + ind.name + ' × ' + role.name + ' 岗位 · AI 能力训战陪跑方案');
+  t.push('> 规模 ' + o.size + ' 人 ｜ 周期 ' + wks + ' 周 ｜ 生成于 ' + fmtTs(Date.now()));
+  t.push('');
+  t.push('## 一、现状诊断' + (g ? '（基于本地 ' + g.n + ' 条实测数据）' : '（暂无实测数据，按岗位基线推断）'));
+  if (g) {
+    t.push('- 已参训 ' + g.n + ' 人，测评完成率 ' + g.rate + '%，平均成绩 ' + (g.avg == null ? '—' : g.avg) + ' 分');
+    t.push('- 能力短板（全员均值最低）：' + weakNames.join('、'));
+    t.push('- 累计完成课程 ' + g.courses + ' 门');
+  } else {
+    t.push('- 该行业暂无学员测评数据，建议先组织 ' + o.size + ' 人完成「AI 基础素养 + 岗位自适应」双测评');
+    t.push('- 按岗位能力基线，重点攻坚方向预判为：' + weakNames.join('、'));
+  }
+  t.push('');
+  t.push('## 二、培养目标与验收标准');
+  t.push('- 全员完成双测评，形成个人 8 维能力画像与短板清单');
+  t.push('- 短板维度平均等级提升 ≥ 1 级（0-4 级标尺）');
+  t.push('- 每人产出 ≥ 1 个可复用的岗位 AI 工作流（提示词 / 智能体 / 自动化）');
+  t.push('- 终极测验通过率 ≥ 80%，平均分 ≥ 75');
+  t.push('');
+  t.push('## 三、' + wks + ' 周陪跑路径');
+  t.push('- 第 1 周｜测评定级：全员完成 AI 基础素养卷 + 岗位自适应测评，输出团队能力热力图');
+  t.push('- 第 2-' + midEnd + ' 周｜必修攻坚：按短板维度推送必修课，闯关模式通关（概念→步骤→案例→WorkBuddy 实操）');
+  t.push('- 第 ' + (midEnd + 1) + '-' + Math.max(midEnd + 1, wks - 1) + ' 周｜场景陪练：以' + ind.name + '真实业务场景做 WorkBuddy 实操，助教点评与迭代');
+  t.push('- 第 ' + wks + ' 周｜成果验收：终极测验 + 产出物答辩，沉淀企业提示词库与案例集');
+  t.push('');
+  t.push('## 四、推荐课程清单（按短板维度排序）');
+  pick.forEach(function(c, i){
+    var d = AI_DIMS[dimOf(c.id)];
+    t.push('- ' + (i + 1) + '. ' + (c.title || c.id) + '（主维度：' + (d ? d.name : '综合') + '）');
+  });
+  t.push('');
+  t.push('## 五、服务节奏与交付物');
+  t.push('- 周会：每周 1 次 60 分钟线上复盘（数据看板 + 答疑）');
+  t.push('- 陪跑：企业微信群内随时提问，24h 内响应');
+  t.push('- 交付：个人能力报告 / 团队能力热力图 / 企业提示词库 / 优秀案例集 / 结营证书');
+  t.push('');
+  t.push('## 六、数据看板（管理员可持续追踪）');
+  t.push('- 访问与活跃：管理后台「总览」查看今日 / 累计访问与活跃学员');
+  t.push('- 考试进度：按行业 / 按企业查看完成率与平均分');
+  t.push('- 反馈闭环：学员提交的问题自动汇总为产品迭代需求');
+  return t.join('\n');
+}
+
+function planToHtml(txt){
+  var out = [], inUl = false;
+  txt.split('\n').forEach(function(line){
+    var s = escapeHtml(line);
+    function closeUl(){ if (inUl) { out.push('</ul>'); inUl = false; } }
+    if (s.indexOf('# ') === 0) { closeUl(); out.push('<div class="pb-h">' + s.slice(2) + '</div>'); }
+    else if (s.indexOf('## ') === 0) { closeUl(); out.push('<h3>' + s.slice(3) + '</h3>'); }
+    else if (s.indexOf('&gt; ') === 0) { closeUl(); out.push('<div class="pb-tip">' + s.slice(5) + '</div>'); }
+    else if (s.indexOf('- ') === 0) { if (!inUl) { out.push('<ul>'); inUl = true; } out.push('<li>' + s.slice(2) + '</li>'); }
+    else if (s.trim() === '') { closeUl(); out.push('<div style="height:6px"></div>'); }
+    else { closeUl(); out.push('<div>' + s + '</div>'); }
+  });
+  if (inUl) out.push('</ul>');
+  return out.join('');
+}
+
+// ---- #2 反馈气泡：提交与汇总 ----
+var _fbRec = null, _fbStream = null, _fbChunks = [];
+
+function fbModalHtml(){
+  var type = S._fbType || 'text';
+  var sev = S._fbSev || 'mid';
+  var media = S._fbMedia || {};
+  var html = '<div class="fb-head"><span style="font-size:20px">🐞</span><h3>提交问题反馈</h3>'
+           + '<button class="fb-close" onclick="S.fbClose()">×</button></div><div class="fb-body">';
+  html += '<div class="fb-type-grid">';
+  Object.keys(FB_TYPE).forEach(function(k){
+    html += '<button class="fb-type ' + (type === k ? 'active' : '') + '" onclick="S.fbSetType(\'' + k + '\')">'
+          + '<span class="ft-ico">' + FB_TYPE[k].i + '</span>' + FB_TYPE[k].n + '</button>';
+  });
+  html += '</div>';
+  html += '<textarea id="fbText" class="fb-textarea" placeholder="遇到什么问题？请描述操作步骤、预期与实际结果…">' + escapeHtml(S._fbText || '') + '</textarea>';
+  html += '<div class="fb-media-row">';
+  html += '<button class="fb-media-btn" onclick="document.getElementById(\'fbImg\').click()">🖼️ 上传截图</button>';
+  html += '<button class="fb-media-btn' + (_fbRec && _fbRec.state === 'recording' ? ' recording' : '') + '" onclick="S.fbToggleRec()">' + (_fbRec && _fbRec.state === 'recording' ? '⏹ 停止录音' : '🎙️ 录制语音') + '</button>';
+  html += '<button class="fb-media-btn" onclick="document.getElementById(\'fbVid\').click()">🎬 上传录屏</button>';
+  html += '</div>';
+  html += '<input type="file" id="fbImg" accept="image/*" style="display:none" onchange="S.fbPickMedia(event,\'image\')">';
+  html += '<input type="file" id="fbAud" accept="audio/*" style="display:none" onchange="S.fbPickMedia(event,\'audio\')">';
+  html += '<input type="file" id="fbVid" accept="video/*" style="display:none" onchange="S.fbPickMedia(event,\'video\')">';
+  var hasMedia = media.image || media.audio || media.video;
+  html += '<div class="fb-preview' + (hasMedia ? ' show' : '') + '">';
+  if (media.image) html += '<img src="' + media.image + '" alt="截图">';
+  if (media.audio) html += '<audio class="fb-audio" src="' + media.audio + '" controls style="margin-top:8px"></audio>';
+  if (media.video) html += '<video src="' + media.video + '" controls style="margin-top:8px"></video>';
+  if (hasMedia) html += '<div style="margin-top:8px"><button class="chip" onclick="S.fbClearMedia()">移除附件</button></div>';
+  html += '</div>';
+  html += '<div class="sev-row"><span class="sev-lbl">严重程度</span>';
+  Object.keys(FB_SEV).forEach(function(k){
+    html += '<button class="chip ' + (sev === k ? 'active' : '') + '" onclick="S.fbSev(\'' + k + '\')">' + FB_SEV[k] + '</button>';
+  });
+  html += '</div>';
+  html += '<p style="font-size:11.5px;color:var(--text3);margin-top:12px">当前页面：' + (VIEW_LABEL[S.view] || S.view || '—') + '（自动附带，便于定位）</p>';
+  html += '</div><div class="fb-foot">'
+        + '<button class="btn btn-outline" style="flex:1" onclick="S.fbClose()">取消</button>'
+        + '<button class="btn btn-primary" style="flex:1" onclick="S.fbSubmit()">提交反馈</button></div>';
+  return html;
+}
+
+function fbRenderInner(){
+  var m = document.getElementById('fbModalInner');
+  if (m) m.innerHTML = fbModalHtml();
+}
+
+S.fbOpen = function(){
+  if (!S._fbType) S._fbType = 'text';
+  if (!S._fbSev) S._fbSev = 'mid';
+  if (!S._fbMedia) S._fbMedia = {};
+  fbRenderInner();
+  document.getElementById('fbModal').classList.add('show');
+};
+S.fbClose = function(){
+  document.getElementById('fbModal').classList.remove('show');
+  if (_fbRec && _fbRec.state !== 'inactive') { try { _fbRec.stop(); } catch(e){} }
+};
+S.fbSetType = function(t){
+  var ta = document.getElementById('fbText'); if (ta) S._fbText = ta.value;
+  S._fbType = t; fbRenderInner();
+};
+S.fbSev = function(v){
+  var ta = document.getElementById('fbText'); if (ta) S._fbText = ta.value;
+  S._fbSev = v; fbRenderInner();
+};
+S.fbClearMedia = function(){ S._fbMedia = {}; fbRenderInner(); };
+
+function fbReadImage(file, cb){
+  var fr = new FileReader();
+  fr.onload = function(){
+    var img = new Image();
+    img.onload = function(){
+      try {
+        var max = 900, w = img.width, h = img.height;
+        if (w > max) { h = Math.round(h * max / w); w = max; }
+        var cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+        cv.getContext('2d').drawImage(img, 0, 0, w, h);
+        cb(cv.toDataURL('image/jpeg', 0.75));
+      } catch(e){ cb(fr.result); }
+    };
+    img.onerror = function(){ cb(fr.result); };
+    img.src = fr.result;
+  };
+  fr.readAsDataURL(file);
+}
+
+S.fbPickMedia = function(ev, kind){
+  var f = ev.target.files && ev.target.files[0];
+  if (!f) return;
+  if (!S._fbMedia) S._fbMedia = {};
+  function done(dataUrl){
+    S._fbMedia[kind] = dataUrl;
+    S._fbType = kind;
+    fbRenderInner();
+    showToast('已附加' + (FB_TYPE[kind] ? FB_TYPE[kind].n : '文件'));
+  }
+  if (kind === 'image') { fbReadImage(f, done); }
+  else {
+    var fr = new FileReader();
+    fr.onload = function(){ done(fr.result); };
+    fr.readAsDataURL(f);
+  }
+  ev.target.value = '';
+};
+
+S.fbToggleRec = function(){
+  if (_fbRec && _fbRec.state === 'recording') { try { _fbRec.stop(); } catch(e){} return; }
+  if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) {
+    showToast('当前环境不支持录音，请改用上传文件');
+    document.getElementById('fbAud').click();
+    return;
+  }
+  navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+    _fbStream = stream; _fbChunks = [];
+    try { _fbRec = new MediaRecorder(stream); } catch(e){ showToast('浏览器不支持录音'); return; }
+    _fbRec.ondataavailable = function(e){ if (e.data && e.data.size) _fbChunks.push(e.data); };
+    _fbRec.onstop = function(){
+      if (_fbStream) { _fbStream.getTracks().forEach(function(t){ t.stop(); }); _fbStream = null; }
+      if (!_fbChunks.length) { fbRenderInner(); return; }
+      var blob = new Blob(_fbChunks, {type:'audio/webm'});
+      var fr = new FileReader();
+      fr.onload = function(){
+        if (!S._fbMedia) S._fbMedia = {};
+        S._fbMedia.audio = fr.result; S._fbType = 'audio';
+        fbRenderInner(); showToast('录音已附加');
+      };
+      fr.readAsDataURL(blob);
+    };
+    _fbRec.start(); fbRenderInner(); showToast('开始录音…');
+  }).catch(function(){ showToast('麦克风不可用，请改用上传文件'); document.getElementById('fbAud').click(); });
+};
+
+S.fbSubmit = function(){
+  var ta = document.getElementById('fbText');
+  var text = ta ? ta.value.trim() : (S._fbText || '');
+  var media = S._fbMedia || {};
+  if (!text && !media.image && !media.audio && !media.video) { showToast('请填写描述或附加截图/语音/录屏'); return; }
+  var session = JSON.parse(localStorage.getItem('ai_training_session') || '{}');
+  DB.put('feedback', {
+    id: uid('f_'), ts: Date.now(),
+    user: session.user || '游客', role: session.role || '',
+    type: S._fbType || 'text', sev: S._fbSev || 'mid',
+    text: text, media: media,
+    page: VIEW_LABEL[S.view] || S.view || '', industry: S.industry || '',
+    status: 'new'
+  });
+  S._fbText = ''; S._fbMedia = {}; S._fbType = 'text'; S._fbSev = 'mid';
+  S.fbClose();
+  showToast('反馈已提交，感谢！');
+  if (S.view === 'admin') render();
+};
+
+// ---- 反馈管理（管理员）----
+S.fbToggleSel = function(id){
+  if (!S._fbSel) S._fbSel = {};
+  S._fbSel[id] = !S._fbSel[id];
+  if (S.view === 'admin') render(); // 仅在后台视图重渲染，避免侵入学员侧渲染状态
+};
+S.fbAggregate = function(){
+  var sel = S._fbSel || {};
+  var ids = Object.keys(sel).filter(function(k){ return sel[k]; });
+  if (!ids.length) { showToast('请先勾选要汇总的反馈'); return; }
+  var items = DB.all('feedback').filter(function(f){ return ids.indexOf(f.id) >= 0; });
+  if (!items.length) { showToast('未找到对应反馈'); return; }
+  var byType = {}, bySev = {high:0, mid:0, low:0}, byPage = {};
+  items.forEach(function(f){
+    byType[f.type] = (byType[f.type] || 0) + 1;
+    bySev[f.sev] = (bySev[f.sev] || 0) + 1;
+    byPage[f.page || '未标注'] = (byPage[f.page || '未标注'] || 0) + 1;
+  });
+  var topPage = Object.keys(byPage).sort(function(a,b){ return byPage[b] - byPage[a]; })[0] || '全局';
+  var typeStr = Object.keys(byType).map(function(t){ return FB_TYPE[t] ? FB_TYPE[t].n : t; }).join(' / ');
+  var desc = '来源：' + items.length + ' 条用户反馈（' + typeStr + '），其中高优先级 ' + bySev.high + ' 条。\n'
+           + '集中页面：' + topPage + '\n\n反馈原文摘要：\n';
+  items.forEach(function(f, i){
+    desc += (i + 1) + '. [' + (FB_TYPE[f.type] ? FB_TYPE[f.type].n : f.type) + '｜'
+          + (FB_SEV[f.sev] || '中') + '] ' + (f.text || '（无文字描述，见附件）') + '\n';
+  });
+  desc += '\n建议处理方向：\n'
+        + '- 复现 ' + topPage + ' 页面的触发路径，定位根因\n'
+        + '- 评估影响面（涉及角色 / 行业 / 设备终端）\n'
+        + '- 输出修复方案与回归用例，排入下一迭代';
+  DB.put('requirements', {
+    id: uid('r_'), ts: Date.now(),
+    title: '【' + topPage + '】' + items.length + ' 条用户反馈待优化',
+    desc: desc, src: ids, status: 'todo'
+  });
+  items.forEach(function(f){ f.status = 'triaged'; DB.put('feedback', f); });
+  S._fbSel = {};
+  showToast('已汇总为 1 条产品迭代需求');
+  if (S.view === 'admin') render();
+};
+S.fbStatus = function(id, st){
+  var f = DB.get('feedback', id);
+  if (f) { f.status = st; DB.put('feedback', f); if (S.view === 'admin') render(); }
+};
+S.fbDelete = function(id){ DB.del('feedback', id); if (S.view === 'admin') render(); };
+S.reqStatus = function(id, st){
+  var r = DB.get('requirements', id);
+  if (r) { r.status = st; DB.put('requirements', r); if (S.view === 'admin') render(); }
+};
+
+// ---- 销售陪跑方案动作 ----
+S.genSalesPlan = function(){
+  var ind = document.getElementById('spInd').value;
+  var role = document.getElementById('spRole').value;
+  var size = parseInt(document.getElementById('spSize').value) || 20;
+  var weeks = parseInt(document.getElementById('spWeeks').value) || 4;
+  S._spForm = {industry:ind, role:role, size:size, weeks:weeks};
+  S._spPlan = buildSalesPlan({industry:ind, role:role, size:size, weeks:weeks});
+  DB.put('sales_plans', {id:uid('p_'), ts:Date.now(), industry:ind, role:role, size:size, weeks:weeks, plan:S._spPlan});
+  showToast('方案已生成');
+  if (S.view === 'admin') render();
+};
+S.copyPlan = function(){
+  if (!S._spPlan) return;
+  var ta = document.createElement('textarea');
+  ta.value = S._spPlan; document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); showToast('已复制到剪贴板'); } catch(e){ showToast('复制失败，请手动选择'); }
+  document.body.removeChild(ta);
+};
+S.downloadPlan = function(){
+  if (!S._spPlan) return;
+  var blob = new Blob([S._spPlan], {type:'text/plain;charset=utf-8'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'AI陪跑方案_' + fmtTs(Date.now()).replace(/[-: ]/g,'') + '.txt';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+};
+
+// ---- 演示数据（便于本地验证分析看板）----
+S.seedDemoData = function(){
+  var inds = Object.keys(INDUSTRIES), roles = Object.keys(ROLES);
+  var companies = ['海尔智家','某头部家电制造集团','某城商行','某新能源车企','某快消集团'];
+  var surnames = ['张','李','王','刘','陈','杨','赵','黄','周','吴'];
+  for (var i = 0; i < 40; i++) {
+    var dimScores = {};
+    Object.keys(AI_DIMS).forEach(function(dk){ dimScores[dk] = Math.floor(Math.random() * 5); });
+    var vals = Object.keys(dimScores).map(function(k){ return dimScores[k]; });
+    var overall = Math.round(vals.reduce(function(a,b){ return a+b; }, 0) / vals.length / 4 * 100);
+    S.employees.push({
+      name: surnames[i % surnames.length] + '学员' + (i + 1),
+      role: roles[i % roles.length], industry: inds[i % inds.length],
+      company: companies[i % companies.length],
+      date: fmtTs(Date.now() - Math.floor(Math.random() * 30) * 86400000),
+      quizScores: dimScores, courseProgress: {}, questProg: {},
+      finalScore: overall, doneCourses: Math.floor(Math.random() * 4)
+    });
+  }
+  for (var j = 0; j < 60; j++) {
+    DB.put('access_log', {
+      id: uid('a_'), ts: Date.now() - Math.floor(Math.random() * 14) * 86400000,
+      user: surnames[j % surnames.length] + '学员' + ((j % 40) + 1),
+      role: roles[j % roles.length], industry: inds[j % inds.length],
+      view: ['role','quiz','results','dashboard','course','final'][j % 6]
+    });
+  }
+  saveEmployees();
+  showToast('已生成 40 条演示学员数据 + 60 条访问日志');
+  if (S.view === 'admin') render();
+};
+
+// ==================== 管理后台（#2 看板 / #3 分析 / #4 方案）====================
+S.adminSetTab = function(t){ S.adminTab = t; render(); };
+
 function renderAdmin() {
+  S.adminTab = S.adminTab || 'overview';
+  var session = JSON.parse(localStorage.getItem('ai_training_session') || '{}');
+  var isAdmin = session.role === 'admin';
+  var tabs = [['overview','总览'],['industry','行业分析'],['company','企业分析'],['feedback','反馈汇总'],['sales','销售方案']];
+  var html = headerHtml('管理员看板', isAdmin ? '平台管理员视角 · 团队AI学习全景' : '企业管理员视角 · 团队AI学习进度', true);
+  html += '<div class="admin-tabs">';
+  tabs.forEach(function(t){
+    html += '<button class="admin-tab' + (S.adminTab === t[0] ? ' active' : '') + '" data-action="adminSetTab" data-tab="' + t[0] + '">' + t[1] + '</button>';
+  });
+  html += '</div>';
+  if (S.adminTab === 'industry') html += renderAdminIndustry();
+  else if (S.adminTab === 'company') html += renderAdminCompany();
+  else if (S.adminTab === 'feedback') html += renderAdminFeedback();
+  else if (S.adminTab === 'sales') html += renderAdminSales();
+  else html += renderAdminOverview(isAdmin);
+  return html;
+}
+
+function renderAdminOverview(isAdmin) {
   const all = S.employees;
   const total = all.length;
   const completed = all.filter(e => e.finalScore != null).length;
@@ -11973,42 +12577,243 @@ function renderAdmin() {
   const roleBreakdown = {};
   all.forEach(e => { roleBreakdown[e.role] = (roleBreakdown[e.role]||0)+1; });
 
-  let html = headerHtml('管理员看板', '团队AI学习进度总览', true);
+  // 访问情况（#2）
+  var logs = DB.all('access_log');
+  var todayStart = new Date(); todayStart.setHours(0,0,0,0);
+  var todayLogs = logs.filter(function(l){ return l.ts >= todayStart.getTime(); });
+  var uniq = {}; logs.forEach(function(l){ uniq[l.user] = 1; });
+  var uniqCount = Object.keys(uniq).length;
+  var recent = logs.slice().sort(function(a,b){ return b.ts - a.ts; }).slice(0, 8);
+
+  let html = '';
   html += `<div class="card slide-up">
+    <div class="section-title"><span class="st-ico">📊</span>学习与考试进度</div>
     <div class="stat-grid">
       <div class="stat-card"><div class="stat-value" style="color:var(--blue);">${total}</div><div class="stat-label">参训人数</div></div>
       <div class="stat-card"><div class="stat-value" style="color:var(--green);">${completed}</div><div class="stat-label">已完成测评</div></div>
       <div class="stat-card"><div class="stat-value">${avgScore}</div><div class="stat-label">平均成绩</div></div>
-      <div class="stat-card"><div class="stat-value">${Math.round(completed/total*100)||0}%</div><div class="stat-label">完成率</div></div>
+      <div class="stat-card"><div class="stat-value">${total?Math.round(completed/total*100):0}%</div><div class="stat-label">完成率</div></div>
     </div>
-    <div class="progress-bar mt-2"><div class="progress-fill ${completed/total>=0.8?'high':completed/total>=0.4?'mid':'low'}" style="width:${Math.round(completed/total*100)}%"></div></div>
+    <div class="progress-bar mt-2"><div class="progress-fill ${total&&completed/total>=0.8?'high':total&&completed/total>=0.4?'mid':'low'}" style="width:${total?Math.round(completed/total*100):0}%"></div></div>
   </div>`;
 
-  html += `<div class="card mt-3 slide-up"><p style="font-weight:600;font-size:14px;margin-bottom:12px;">岗位分布</p>`;
-  for (const [rid, cnt] of Object.entries(roleBreakdown)) {
-    const r = ROLES[rid];
-    html += `<div class="emp-row"><div class="emp-avatar">${r?r.icon:'?'}</div>
-      <div class="emp-info"><div class="emp-name">${r?r.name:rid}</div><div class="emp-meta">${cnt}人</div></div>
-      <div class="emp-score">${Math.round(cnt/total*100)}%</div></div>`;
+  html += `<div class="card mt-3 slide-up">
+    <div class="section-title"><span class="st-ico">👣</span>访问情况</div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-value" style="color:var(--blue);">${logs.length}</div><div class="stat-label">累计访问</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:var(--green);">${todayLogs.length}</div><div class="stat-label">今日访问</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:var(--purple);">${uniqCount}</div><div class="stat-label">活跃学员</div></div>
+      <div class="stat-card"><div class="stat-value">${DB.all('feedback').length}</div><div class="stat-label">反馈条数</div></div>
+    </div>
+    <div style="margin-top:14px">`;
+  if (!recent.length) {
+    html += `<p style="color:var(--text3);font-size:13px;text-align:center;padding:14px">暂无访问记录，浏览各页面后将自动记录</p>`;
+  } else {
+    recent.forEach(function(l){
+      html += `<div class="log-line"><span class="ll-dot"></span>`
+            + `<span class="ll-time">${fmtTs(l.ts)}</span>`
+            + `<span class="ll-user">${escapeHtml(l.user)}</span>`
+            + `<span class="ll-meta">${VIEW_LABEL[l.view]||l.view}${l.industry&&INDUSTRIES[l.industry]?' · '+INDUSTRIES[l.industry].name:''}</span></div>`;
+    });
   }
-  html += `</div>`;
+  html += `</div></div>`;
 
-  html += `<div class="card mt-3 slide-up"><p style="font-weight:600;font-size:14px;margin-bottom:12px;">员工详细记录</p>`;
+  if (total > 0) {
+    html += `<div class="card mt-3 slide-up"><div class="section-title"><span class="st-ico">🏢</span>行业分布</div>`;
+    var groups = aggregateBy(function(e){ return e.industry; });
+    groups.forEach(function(g){
+      var ind = INDUSTRIES[g.key];
+      html += `<div class="analysis-row"><div class="analysis-name">${ind?ind.name:g.key}</div>`
+            + `<div class="analysis-bar"><div class="analysis-fill" style="width:${Math.round(g.n/total*100)}%"></div></div>`
+            + `<div class="analysis-val"><b>${g.n}</b> 人 · ${Math.round(g.n/total*100)}%</div></div>`;
+    });
+    html += `</div>`;
+
+    html += `<div class="card mt-3 slide-up"><div class="section-title"><span class="st-ico">👥</span>岗位分布</div>`;
+    for (const [rid, cnt] of Object.entries(roleBreakdown)) {
+      const r = ROLES[rid];
+      html += `<div class="analysis-row"><div class="analysis-name">${r?r.name:rid}</div>`
+            + `<div class="analysis-bar"><div class="analysis-fill" style="width:${Math.round(cnt/total*100)}%"></div></div>`
+            + `<div class="analysis-val"><b>${cnt}</b> 人 · ${Math.round(cnt/total*100)}%</div></div>`;
+    }
+    html += `</div>`;
+  }
+
+  html += `<div class="card mt-3 slide-up"><div class="section-title"><span class="st-ico">🧾</span>员工详细记录</div>`;
   if (all.length === 0) {
-    html += `<p style="color:var(--text2);text-align:center;padding:20px;">暂无员工数据</p>`;
+    html += `<p style="color:var(--text2);text-align:center;padding:20px">暂无员工数据${isAdmin?'，可点击下方生成演示数据':''}</p>`;
   } else {
     all.forEach((e, i) => {
       const r = ROLES[e.role];
       const scoreCls = e.finalScore>=80?'var(--green)':e.finalScore>=60?'var(--amber)':'var(--red)';
       html += `<div class="emp-row">
         <div class="emp-avatar">${e.name[0]}</div>
-        <div class="emp-info"><div class="emp-name">${e.name}</div><div class="emp-meta">${r?r.icon+' '+r.name:''} · ${e.date} · ${e.doneCourses||0}/${COURSES[e.role]?.length||0}课</div></div>
+        <div class="emp-info"><div class="emp-name">${e.name}</div><div class="emp-meta">${r?r.icon+' '+r.name:''} · ${e.company?e.company+' · ':''}${e.date} · ${e.doneCourses||0}/${COURSES[e.role]?.length||0}课</div></div>
         <div class="emp-score" style="color:${scoreCls}">${e.finalScore!=null?e.finalScore+'分':'学习中'}</div>
         <button class="btn btn-sm btn-outline" data-action="loadAndGoDashboard" data-idx="${i}">查看</button>
       </div>`;
     });
   }
   html += `</div>`;
+
+  if (isAdmin) {
+    html += `<div class="card mt-3 slide-up"><div class="section-title"><span class="st-ico">🧪</span>本地演示数据</div>
+      <p style="font-size:12.5px;color:var(--text2);margin-bottom:12px">当前为「本地优先」存储（localStorage）。生成演示数据可立即验证行业/企业分析与访问看板；接入云端后这些数据将自动改为读写云数据库。</p>
+      <button class="btn btn-outline btn-sm" data-action="seedDemoData">生成 40 条演示数据</button></div>`;
+  }
+  return html;
+}
+
+function renderAdminIndustry() {
+  var groups = aggregateBy(function(e){ return e.industry; });
+  var html = `<div class="card slide-up"><div class="section-title"><span class="st-ico">🏭</span>按行业汇总用户水平</div>`;
+  if (!groups.length) {
+    html += `<p style="color:var(--text3);text-align:center;padding:24px">暂无学员数据</p></div>`;
+    return html;
+  }
+  groups.forEach(function(g){
+    var ind = INDUSTRIES[g.key];
+    html += `<div style="padding:14px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+        <span style="font-size:14px;font-weight:700">${ind?ind.name:g.key}</span>
+        <span class="tag tag-blue">${g.n} 人</span>
+        <span class="tag ${g.rate>=80?'tag-green':g.rate>=40?'tag-amber':'tag-red'}">完成率 ${g.rate}%</span>
+        <span class="tag tag-purple">平均 ${g.avg==null?'—':g.avg} 分</span>
+      </div>
+      ${dimBarsHtml(g.dimAvg)}
+      <div style="margin-top:8px;font-size:12px;color:var(--text2)">能力短板：<b>${g.weak.map(function(d){return AI_DIMS[d].name;}).join('、')||'—'}</b></div>
+    </div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+function renderAdminCompany() {
+  var groups = aggregateBy(function(e){ return e.company; });
+  var html = `<div class="card slide-up"><div class="section-title"><span class="st-ico">🏢</span>按企业汇总员工总体测评</div>`;
+  if (!groups.length) {
+    html += `<p style="color:var(--text3);text-align:center;padding:24px">暂无企业数据（员工保存学习记录时会登记所属企业）</p></div>`;
+    return html;
+  }
+  groups.forEach(function(g){
+    var roleStr = Object.keys(g.roles).map(function(r){ return (ROLES[r]?ROLES[r].name:r)+'×'+g.roles[r]; }).join('、');
+    html += `<div style="padding:14px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+        <span style="font-size:14px;font-weight:700">${escapeHtml(g.key)}</span>
+        <span class="tag tag-blue">${g.n} 人</span>
+        <span class="tag ${(g.avg||0)>=75?'tag-green':(g.avg||0)>=60?'tag-amber':'tag-red'}">平均 ${g.avg==null?'—':g.avg} 分</span>
+        <span class="tag tag-purple">完成率 ${g.rate}%</span>
+      </div>
+      <div class="kv"><span class="k">岗位构成</span><span class="v">${roleStr||'—'}</span></div>
+      <div class="kv"><span class="k">累计完课</span><span class="v">${g.courses} 门</span></div>
+      <div class="kv"><span class="k">能力短板</span><span class="v">${g.weak.map(function(d){return AI_DIMS[d].name;}).join('、')||'—'}</span></div>
+      ${dimBarsHtml(g.dimAvg)}
+    </div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+function renderAdminFeedback() {
+  var list = DB.all('feedback').slice().sort(function(a,b){ return b.ts - a.ts; });
+  var reqs = DB.all('requirements').slice().sort(function(a,b){ return b.ts - a.ts; });
+  var sel = S._fbSel || {};
+  var selCount = Object.keys(sel).filter(function(k){ return sel[k]; }).length;
+  var newCount = list.filter(function(f){ return f.status === 'new'; }).length;
+
+  var html = `<div class="card slide-up">
+    <div class="section-title"><span class="st-ico">🐞</span>用户反馈（${list.length} 条，待处理 ${newCount} 条）</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+      <span class="tag tag-blue">已选 ${selCount} 条</span>
+      <button class="btn btn-sm btn-primary" data-action="fbAggregate">汇总为产品需求</button>
+    </div>`;
+  if (!list.length) {
+    html += `<p style="color:var(--text3);text-align:center;padding:24px">暂无反馈。学员可点击左下角「反馈」气泡提交文字/截图/语音/录屏。</p>`;
+  } else {
+    html += `<div class="fb-list">`;
+    list.forEach(function(f){
+      var m = f.media || {};
+      html += `<div class="fb-item${sel[f.id]?' sel':''}" data-action="fbToggleSel" data-id="${f.id}">
+        <div class="fi-top">
+          <span class="tag tag-blue">${FB_TYPE[f.type]?FB_TYPE[f.type].i+' '+FB_TYPE[f.type].n:f.type}</span>
+          <span class="tag ${f.sev==='high'?'tag-red':f.sev==='low'?'tag-green':'tag-amber'}">${FB_SEV[f.sev]||'中'}优先级</span>
+          <span class="status-pill status-${f.status||'new'}">${FB_STATUS[f.status||'new']}</span>
+          <span style="margin-left:auto;font-size:11.5px;color:var(--text3)">${fmtTs(f.ts)} · ${escapeHtml(f.user||'')}</span>
+        </div>
+        <div class="fi-text">${escapeHtml(f.text || '（无文字描述）')}</div>`;
+      if (m.image) html += `<img class="fi-thumb" src="${m.image}" alt="截图">`;
+      if (m.audio) html += `<audio class="fi-thumb" src="${m.audio}" controls style="width:100%;max-width:220px"></audio>`;
+      if (m.video) html += `<video class="fi-thumb" src="${m.video}" controls></video>`;
+      if (f._mediaDropped) html += `<div style="font-size:11px;color:var(--amber);margin-top:6px">（附件因存储空间不足未保留）</div>`;
+      html += `<div class="fi-meta"><span>页面：${escapeHtml(f.page||'—')}</span>${f.industry&&INDUSTRIES[f.industry]?'<span>行业：'+INDUSTRIES[f.industry].name+'</span>':''}</div>
+        <div class="fi-meta">
+          <button class="chip" data-action="fbStatus" data-id="${f.id}" data-st="triaged">标记处理中</button>
+          <button class="chip" data-action="fbStatus" data-id="${f.id}" data-st="done">标记已解决</button>
+          <button class="chip" data-action="fbDelete" data-id="${f.id}" style="color:var(--red)">删除</button>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+  html += `</div>`;
+
+  html += `<div class="card mt-3 slide-up"><div class="section-title"><span class="st-ico">📌</span>产品迭代需求（${reqs.length} 条）</div>`;
+  if (!reqs.length) {
+    html += `<p style="color:var(--text3);text-align:center;padding:18px">勾选上方反馈后点击「汇总为产品需求」即可生成</p></div>`;
+    return html;
+  }
+  var REQ_ST = {todo:'待排期', doing:'开发中', done:'已上线'};
+  reqs.forEach(function(r){
+    html += `<div class="req-card">
+      <h4>${escapeHtml(r.title)}</h4>
+      <div class="rc-desc">${escapeHtml(r.desc)}</div>
+      <div class="rc-meta">${fmtTs(r.ts)} · 关联 ${(r.src||[]).length} 条反馈 · 状态：${REQ_ST[r.status||'todo']}</div>
+      <div class="fi-meta">
+        <button class="chip" data-action="reqStatus" data-id="${r.id}" data-st="doing">开发中</button>
+        <button class="chip" data-action="reqStatus" data-id="${r.id}" data-st="done">已上线</button>
+      </div>
+    </div>`;
+  });
+  html += `</div>`;
+  return html;
+}
+
+function renderAdminSales() {
+  var f = S._spForm || {industry: S.industry || 'mfg', role: S.role || 'pm', size: 20, weeks: 4};
+  var plans = DB.all('sales_plans').slice().sort(function(a,b){ return b.ts - a.ts; }).slice(0, 5);
+  var html = `<div class="card slide-up">
+    <div class="section-title"><span class="st-ico">🧭</span>生成培训陪跑方案</div>
+    <p style="font-size:12.5px;color:var(--text2);margin-bottom:14px">按行业 / 岗位 / 测评与学习数据，自动生成可交付给客户的训战陪跑方案（含现状诊断、目标验收、分阶段路径、推荐课程、服务节奏）。</p>
+    <div class="plan-form">
+      <div><label>行业</label><select id="spInd">`;
+  Object.keys(INDUSTRIES).forEach(function(k){
+    html += `<option value="${k}"${f.industry===k?' selected':''}>${INDUSTRIES[k].name}</option>`;
+  });
+  html += `</select></div>
+      <div><label>岗位</label><select id="spRole">`;
+  Object.keys(ROLES).forEach(function(k){
+    html += `<option value="${k}"${f.role===k?' selected':''}>${ROLES[k].name}</option>`;
+  });
+  html += `</select></div>
+      <div><label>参训人数</label><input id="spSize" type="number" min="1" value="${f.size}"></div>
+      <div><label>周期（周）</label><input id="spWeeks" type="number" min="2" max="52" value="${f.weeks}"></div>
+      <div class="pf-full"><button class="btn btn-primary" data-action="genSalesPlan" style="width:100%">生成方案</button></div>
+    </div>`;
+  if (S._spPlan) {
+    html += `<div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 10px">
+      <button class="btn btn-sm btn-outline" data-action="copyPlan">复制</button>
+      <button class="btn btn-sm btn-outline" data-action="downloadPlan">下载 .txt</button>
+    </div><div class="plan-box">${planToHtml(S._spPlan)}</div>`;
+  }
+  html += `</div>`;
+
+  if (plans.length) {
+    html += `<div class="card mt-3 slide-up"><div class="section-title"><span class="st-ico">🗂️</span>历史方案</div>`;
+    plans.forEach(function(p){
+      html += `<div class="kv"><span class="k">${fmtTs(p.ts)}</span><span class="v">${INDUSTRIES[p.industry]?INDUSTRIES[p.industry].name:p.industry} × ${ROLES[p.role]?ROLES[p.role].name:p.role} · ${p.size} 人 / ${p.weeks} 周</span></div>`;
+    });
+    html += `</div>`;
+  }
   return html;
 }
 
@@ -12239,9 +13044,13 @@ S.submitFinal = function() {
 S.saveAndFinish = function() {
   const name = prompt('请输入你的姓名（用于管理看板）：', S.currentEmployee?.name || '');
   if (!name) return;
+  // #3 企业维度分析：登记所属企业（可留空）
+  let company = prompt('请输入所属企业/公司名称（用于企业维度汇总分析，可留空）：', S.currentEmployee?.company || '');
+  if (company === null) company = '';
   const emp = {
     name, role: S.role,
     industry: S.industry,
+    company: company.trim() || '未填写',
     date: new Date().toLocaleDateString('zh-CN'),
     quizScores: S.quizScores,
     _baseResult: S._baseResult || null,
@@ -12662,6 +13471,16 @@ function bindEvents() {
             case 'saveAndFinish': S.saveAndFinish(); break;
             case 'reset': S.reset(); break;
             case 'goAdmin': S.goAdmin(); break;
+            case 'adminSetTab': S.adminSetTab(el.getAttribute('data-tab')); break;
+            case 'seedDemoData': S.seedDemoData(); break;
+            case 'fbToggleSel': S.fbToggleSel(id); break;
+            case 'fbAggregate': S.fbAggregate(); break;
+            case 'fbStatus': S.fbStatus(id, el.getAttribute('data-st')); break;
+            case 'fbDelete': S.fbDelete(id); break;
+            case 'reqStatus': S.reqStatus(id, el.getAttribute('data-st')); break;
+            case 'genSalesPlan': S.genSalesPlan(); break;
+            case 'copyPlan': S.copyPlan(); break;
+            case 'downloadPlan': S.downloadPlan(); break;
             case 'goBack': S.goBack(); break;
             case 'logout': S.logout(); break;
             case 'toggleTaskHint': S.toggleTaskHint(el.getAttribute('data-cid'), parseInt(el.getAttribute('data-ti'))); break;
@@ -12699,6 +13518,15 @@ try {
   if (app) app.innerHTML = '<div class="card" style="margin:40px;padding:30px;text-align:center"><h3 style="color:var(--red)">页面渲染失败</h3><p style="color:var(--text2);margin:12px 0">' + e.message + '</p><button class="btn btn-primary" onclick="location.reload()" style="margin-top:12px">刷新重试</button></div>';
 }
 </script>
+
+<!-- ===== FEEDBACK BUBBLE (#2 实时提交 bug：文字/截图/语音/录屏) ===== -->
+<button class="fb-fab" onclick="S.fbOpen()" title="提交问题反馈">
+  <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+  反馈
+</button>
+<div class="fb-modal" id="fbModal" onclick="if(event.target===this)S.fbClose()">
+  <div class="fb-modal-inner" id="fbModalInner"></div>
+</div>
 
 <!-- ===== CUSTOMER SERVICE ===== -->
 <div class="cs-widget" style="position:fixed;bottom:28px;right:28px;z-index:1500" data-page-node-id="G9KUFT1UheldIRvCFJCnHu">
