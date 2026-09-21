@@ -9448,6 +9448,28 @@ function renderFinalResults() {
 // 优先级：localStorage('aidax_cloud') > window.AIDAX_CONFIG（代码内注入）。管理员可在后台「云端数据同步」面板填写并保存。
 window.AIDAX_CONFIG = window.AIDAX_CONFIG || { supabaseUrl: 'https://nyqiwjwzbpnepamldqto.supabase.co', supabaseAnonKey: 'sb_publishable_rnBBDPdiDI5vnc9IEaTP6g_1ZyxJjHI' };
 
+// ---- 云端同步 outbox：依赖/网络未就绪时缓存待同步操作，连接恢复后自动补推 ----
+function outboxPush(c, op, item){
+  try {
+    var q = JSON.parse(localStorage.getItem('aidax_outbox') || '[]');
+    q.push({ c: c, op: op, item: item });
+    localStorage.setItem('aidax_outbox', JSON.stringify(q));
+  } catch(e){}
+}
+function outboxFlush(){
+  var cl = sbClient(); if (!cl) return;
+  var q = [];
+  try { q = JSON.parse(localStorage.getItem('aidax_outbox') || '[]'); } catch(e){}
+  if (!q.length) return;
+  localStorage.removeItem('aidax_outbox'); // 先清，避免重复补推
+  q.forEach(function(job){
+    try {
+      if (job.op === 'upsert') cl.from(job.c).upsert({ id: job.item.id, doc: job.item }, { onConflict: 'id' });
+      else if (job.op === 'delete') cl.from(job.c).delete().eq('id', job.item.id);
+    } catch(e){}
+  });
+}
+
 const DB = {
   mode: 'local',
   _key: function(c){ return 'aidax_' + c; },
@@ -9484,11 +9506,15 @@ const DB = {
   clear: function(c){ try { localStorage.removeItem(this._key(c)); } catch(e){} }, // clear 仅清本地，避免误删云端全表
   // ---- 云端同步（本地优先 + 异步镜像，失败静默降级本地）----
   _sync: function(c, op, item){
-    var cl = sbClient(); if (!cl) return;
-    try {
-      if (op === 'upsert') cl.from(c).upsert({ id: item.id, doc: item }, { onConflict: 'id' });
-      else if (op === 'delete') cl.from(c).delete().eq('id', item.id);
-    } catch(e){}
+    var cl = sbClient(); // 若本次调用才完成依赖初始化，会顺带补推既有 outbox
+    if (cl) {
+      try {
+        if (op === 'upsert') cl.from(c).upsert({ id: item.id, doc: item }, { onConflict: 'id' });
+        else if (op === 'delete') cl.from(c).delete().eq('id', item.id);
+        return;
+      } catch(e){}
+    }
+    outboxPush(c, op, item); // 依赖未就绪或调用失败：入队，连接恢复后自动补推，避免游客提交静默丢失
   },
   hydrate: function(cb){
     var cl = sbClient(); if (!cl) { cb && cb(); return; }
@@ -9520,7 +9546,7 @@ function sbClient(){
   if (_sbClient !== null) return _sbClient;
   var cfg = cloudConfig();
   if (cfg && typeof window.supabase !== 'undefined') {
-    try { _sbClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey); DB.mode = 'cloud'; }
+    try { _sbClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey); DB.mode = 'cloud'; outboxFlush(); }
     catch(e){ _sbClient = null; }
   } else { _sbClient = null; }
   return _sbClient;
@@ -9929,6 +9955,12 @@ S.fbStatus = function(id, st){
   var f = DB.get('feedback', id);
   if (f) { f.status = st; DB.put('feedback', f); if (S.view === 'admin') render(); }
 };
+S.fbRefresh = function(){
+  var cl = sbClient();
+  if (!cl) { showToast('云端未连接，无法拉取'); return; }
+  showToast('正在从云端拉取最新反馈…');
+  DB.hydrate(function(){ render(); showToast('已刷新'); });
+};
 S.fbDelete = function(id){ DB.del('feedback', id); if (S.view === 'admin') render(); };
 S.reqStatus = function(id, st){
   var r = DB.get('requirements', id);
@@ -10188,6 +10220,7 @@ function renderAdminFeedback() {
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
       <span class="tag tag-blue">已选 ${selCount} 条</span>
       <button class="btn btn-sm btn-primary" data-action="fbAggregate">汇总为产品需求</button>
+      <button class="btn btn-sm btn-outline" data-action="fbRefresh">🔄 刷新云端</button>
     </div>`;
   if (!list.length) {
     html += `<p style="color:var(--text3);text-align:center;padding:24px">暂无反馈。学员可点击左下角「反馈」气泡提交文字/截图/语音/录屏。</p>`;
@@ -10538,7 +10571,11 @@ S.saveAndFinish = function() {
   alert('数据已保存！');
 };
 S.reset = function() { stopVoice(); S.industry=null; S.role=null; S.view='role'; S.quizIdx=0; S._basePhase=null; S._baseResult=null; S._basePlan=null; S._baseIdx=0; S._baseAnswers=[]; S._baseFeedback=null; S._baseSkipped=false; S._selfPhase=null; S._selfResult=null; S._selfPlan=null; S._selfIdx=0; S._selfAnswers=[]; S._selfSel={}; S._selfOtherText={}; S._selfSkipped=false; S.quizAnswers={}; S._quizDims=null; S._quizByDim=null; S._quizWeights=null; S._quizResult=null; S.quizScores=null; S._quizDone={}; S._quizLog={}; S._quizPlan=[]; S._quizSelectedStep={}; S._quizStartAt={}; S._quizTiming={}; S._quizAllDone=false; S.courseIdx=null; S.courseTaskIdx=0; S.courseProgress={}; S.questProg={}; S.quest=null; S.combo=0; S.finalAnswers=[]; S.finalSubjAnswers={}; S.finalScore=null; S.finalSubmitted=false; S.finalShowHint={}; S.currentEmployee=null; render(); };
-S.goAdmin = function() { S.view='admin'; render(); };
+S.goAdmin = function() {
+  S.view='admin';
+  if (sbClient()) { DB.hydrate(function(){ render(); }); } // 进入后台即从云端拉取最新反馈/需求，确保看到游客（含其他设备）提交的
+  else { render(); }
+};
 S.cloudConnect = function() {
   var url = (document.getElementById('cloudUrl')||{}).value || '';
   var key = (document.getElementById('cloudKey')||{}).value || '';
@@ -10956,6 +10993,7 @@ function bindEvents() {
             case 'fbAggregate': S.fbAggregate(); break;
             case 'fbStatus': S.fbStatus(id, el.getAttribute('data-st')); break;
             case 'fbDelete': S.fbDelete(id); break;
+            case 'fbRefresh': S.fbRefresh(); break;
             case 'reqStatus': S.reqStatus(id, el.getAttribute('data-st')); break;
             case 'genSalesPlan': S.genSalesPlan(); break;
             case 'copyPlan': S.copyPlan(); break;
@@ -10988,6 +11026,13 @@ function bindEvents() {
   S.view = 'role';
   window.S = S;  // expose S for inline onclick handlers
   bootCloud();
+  // 跨标签页实时同步：其他标签写入反馈/需求后，本标签若在后台则立即刷新
+  window.addEventListener('storage', function(e){
+    if (!e || !e.key) return;
+    if (e.key === DB._key('feedback') || e.key === DB._key('requirements') || e.key === 'aidax_outbox') {
+      if (S.view === 'admin') render();
+    }
+  });
 })();
 
 try {
