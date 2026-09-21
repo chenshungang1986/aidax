@@ -9446,7 +9446,7 @@ function renderFinalResults() {
 // 上层业务与 UI 代码零改动。
 // ---- 云端后端配置（Supabase）：留空/未连则自动降级为纯本地，上层零改动 ----
 // 优先级：localStorage('aidax_cloud') > window.AIDAX_CONFIG（代码内注入）。管理员可在后台「云端数据同步」面板填写并保存。
-window.AIDAX_CONFIG = window.AIDAX_CONFIG || { supabaseUrl: '', supabaseAnonKey: '' };
+window.AIDAX_CONFIG = window.AIDAX_CONFIG || { supabaseUrl: 'https://nyqiwjwzbpnepamldqto.supabase.co', supabaseAnonKey: 'sb_publishable_rnBBDPdiDI5vnc9IEaTP6g_1ZyxJjHI' };
 
 const DB = {
   mode: 'local',
