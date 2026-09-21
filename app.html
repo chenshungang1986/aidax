@@ -713,6 +713,7 @@
 @keyframes modalSlideIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:560px){.plan-form{grid-template-columns:1fr;}.fb-type-grid{grid-template-columns:repeat(2,1fr);}}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body data-page-node-id="Prs4Mp8xI4LQUblNgECgE9">
 <div class="app" id="app" data-page-node-id="iVtQgw6qKgLzQxdvwF5oCC"><div class="card text-center" style="padding:60px 20px" data-page-node-id="d5xSIRIQrO2LUB7EdYduS8"><p style="color:var(--text2);font-size:14px" data-page-node-id="xgoCTH1RiURl1B80TiSVoJ">正在加载 AI达学...</p></div></div>
@@ -6842,6 +6843,9 @@ const S = {
 function saveEmployees() {
   localStorage.setItem('ai_training_employees', JSON.stringify(S.employees));
 }
+// 旧数据兼容：为缺失 id 的存量员工补 id（仅本地，便于云端 upsert 主键对齐）
+S.employees.forEach(function(e){ if (e && !e.id) e.id = uid('e_'); });
+saveEmployees();
 
 function saveProgress() {
   localStorage.setItem('ai_training_progress', JSON.stringify(S.courseProgress));
@@ -9440,6 +9444,10 @@ function renderFinalResults() {
 // 当前 adapter = localStorage（离线可用、零依赖）；未来接入 Supabase / 云数据库时，
 // 只需实现同签名 API（all / get / put / del / clear，可返回 Promise）并替换实现，
 // 上层业务与 UI 代码零改动。
+// ---- 云端后端配置（Supabase）：留空/未连则自动降级为纯本地，上层零改动 ----
+// 优先级：localStorage('aidax_cloud') > window.AIDAX_CONFIG（代码内注入）。管理员可在后台「云端数据同步」面板填写并保存。
+window.AIDAX_CONFIG = window.AIDAX_CONFIG || { supabaseUrl: '', supabaseAnonKey: '' };
+
 const DB = {
   mode: 'local',
   _key: function(c){ return 'aidax_' + c; },
@@ -9464,15 +9472,82 @@ const DB = {
       }
       showToast('存储空间不足，本次未保存');
     }
+    this._sync(c, 'upsert', item);
     return item;
   },
   del: function(c, id){
     var list = this.all(c).filter(function(x){ return x.id !== id; });
     try { localStorage.setItem(this._key(c), JSON.stringify(list)); } catch(e){}
+    this._sync(c, 'delete', { id: id });
     return list;
   },
-  clear: function(c){ try { localStorage.removeItem(this._key(c)); } catch(e){} }
+  clear: function(c){ try { localStorage.removeItem(this._key(c)); } catch(e){} }, // clear 仅清本地，避免误删云端全表
+  // ---- 云端同步（本地优先 + 异步镜像，失败静默降级本地）----
+  _sync: function(c, op, item){
+    var cl = sbClient(); if (!cl) return;
+    try {
+      if (op === 'upsert') cl.from(c).upsert({ id: item.id, doc: item }, { onConflict: 'id' });
+      else if (op === 'delete') cl.from(c).delete().eq('id', item.id);
+    } catch(e){}
+  },
+  hydrate: function(cb){
+    var cl = sbClient(); if (!cl) { cb && cb(); return; }
+    var cols = ['access_log','feedback','requirements','sales_plans'];
+    var done = 0;
+    cols.forEach(function(c){
+      cl.from(c).select('*').then(function(res){
+        if (res.data) {
+          var map = {}, local = DB.all(c);
+          local.forEach(function(x){ if (x && x.id) map[x.id] = x; });
+          res.data.forEach(function(x){ if (x && x.id) map[x.id] = x.doc; });
+          localStorage.setItem(DB._key(c), JSON.stringify(Object.keys(map).map(function(k){ return map[k]; })));
+        }
+      }).catch(function(){}).finally(function(){ done++; if (done === cols.length) cb && cb(); });
+    });
+  }
 };
+
+// 读取云端配置（localStorage 优先，便于后台免改码配置）
+function cloudConfig(){
+  try { var s = JSON.parse(localStorage.getItem('aidax_cloud') || 'null'); if (s && s.supabaseUrl && s.supabaseAnonKey) return s; } catch(e){}
+  var cfg = (typeof window !== 'undefined' && window.AIDAX_CONFIG) || {};
+  if (cfg.supabaseUrl && cfg.supabaseAnonKey) return cfg;
+  return null;
+}
+// 懒加载 Supabase 客户端（配置缺失/网络不可达时返回 null → 纯本地）
+var _sbClient = null;
+function sbClient(){
+  if (_sbClient !== null) return _sbClient;
+  var cfg = cloudConfig();
+  if (cfg && typeof window.supabase !== 'undefined') {
+    try { _sbClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey); DB.mode = 'cloud'; }
+    catch(e){ _sbClient = null; }
+  } else { _sbClient = null; }
+  return _sbClient;
+}
+
+// 员工档案云端镜像（S.employees 本地优先 + 异步同步；id 为 upsert 主键）
+function cloudPushEmployee(emp){
+  var cl = sbClient(); if (!cl || !emp || !emp.id) return;
+  cl.from('employees').upsert({ id: emp.id, doc: emp }, { onConflict: 'id' }).then(function(){}).catch(function(){});
+}
+function cloudHydrateEmployees(cb){
+  var cl = sbClient(); if (!cl) { cb && cb(); return; }
+  cl.from('employees').select('*').then(function(res){
+    if (res.data && res.data.length) {
+      var map = {};
+      S.employees.forEach(function(e){ if (e && e.id) map[e.id] = e; });
+      res.data.forEach(function(x){ if (x && x.id) map[x.id] = x.doc; });
+      S.employees = Object.keys(map).map(function(k){ return map[k]; });
+      localStorage.setItem('ai_training_employees', JSON.stringify(S.employees));
+    }
+  }).catch(function(){}).finally(function(){ cb && cb(); });
+}
+// 应用启动：未配置云端则静默跳过；配置了则从云端拉取跨设备数据（仅本地读，渲染即时）
+function bootCloud(){
+  if (!sbClient()) return;
+  DB.hydrate(function(){ cloudHydrateEmployees(function(){ if (S.view === 'admin') render(); }); });
+}
 
 function uid(p){ return (p||'') + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 
@@ -9960,6 +10035,19 @@ function renderAdminOverview(isAdmin) {
   var recent = logs.slice().sort(function(a,b){ return b.ts - a.ts; }).slice(0, 8);
 
   let html = '';
+  // 云端同步面板（管理员可见）
+  var cc = cloudConfig() || {};
+  html += `<div class="card mt-3 slide-up">
+    <div class="section-title"><span class="st-ico">☁️</span>云端数据同步</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:10px">当前模式：<b style="color:${DB.mode==='cloud'?'var(--green)':'var(--text3)'}">${DB.mode==='cloud'?'已连接云端 ☁️':'本地存储（未连接）'}</b></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <input id="cloudUrl" placeholder="Supabase 项目 URL" value="${cc.supabaseUrl||''}" style="flex:1;min-width:150px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px">
+      <input id="cloudKey" placeholder="anon public key" value="${cc.supabaseAnonKey||''}" style="flex:1;min-width:150px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px">
+      <button class="btn btn-primary" data-action="cloudConnect">保存并连接</button>
+      <button class="btn" data-action="cloudSync">从云端同步</button>
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-top:8px">在 Supabase 建库并运行 supabase_schema.sql 后，填入项目 URL 与 anon key，即可跨设备汇总员工档案、反馈与访问数据。</div>
+  </div>`;
   html += `<div class="card slide-up">
     <div class="section-title"><span class="st-ico">📊</span>学习与考试进度</div>
     <div class="stat-grid">
@@ -10422,6 +10510,7 @@ S.saveAndFinish = function() {
   let company = prompt('请输入所属企业/公司名称（用于企业维度汇总分析，可留空）：', S.currentEmployee?.company || '');
   if (company === null) company = '';
   const emp = {
+    id: (S.currentEmployee && S.currentEmployee.id) || uid('e_'),
     name, role: S.role,
     industry: S.industry,
     company: company.trim() || '未填写',
@@ -10445,10 +10534,24 @@ S.saveAndFinish = function() {
   }
   S.currentEmployee = emp;
   saveEmployees();
+  cloudPushEmployee(emp);
   alert('数据已保存！');
 };
 S.reset = function() { stopVoice(); S.industry=null; S.role=null; S.view='role'; S.quizIdx=0; S._basePhase=null; S._baseResult=null; S._basePlan=null; S._baseIdx=0; S._baseAnswers=[]; S._baseFeedback=null; S._baseSkipped=false; S._selfPhase=null; S._selfResult=null; S._selfPlan=null; S._selfIdx=0; S._selfAnswers=[]; S._selfSel={}; S._selfOtherText={}; S._selfSkipped=false; S.quizAnswers={}; S._quizDims=null; S._quizByDim=null; S._quizWeights=null; S._quizResult=null; S.quizScores=null; S._quizDone={}; S._quizLog={}; S._quizPlan=[]; S._quizSelectedStep={}; S._quizStartAt={}; S._quizTiming={}; S._quizAllDone=false; S.courseIdx=null; S.courseTaskIdx=0; S.courseProgress={}; S.questProg={}; S.quest=null; S.combo=0; S.finalAnswers=[]; S.finalSubjAnswers={}; S.finalScore=null; S.finalSubmitted=false; S.finalShowHint={}; S.currentEmployee=null; render(); };
 S.goAdmin = function() { S.view='admin'; render(); };
+S.cloudConnect = function() {
+  var url = (document.getElementById('cloudUrl')||{}).value || '';
+  var key = (document.getElementById('cloudKey')||{}).value || '';
+  if (!url || !key) { alert('请填写 Supabase 项目 URL 与 anon key'); return; }
+  localStorage.setItem('aidax_cloud', JSON.stringify({ supabaseUrl: url, supabaseAnonKey: key }));
+  showToast('已保存，正在连接云端…');
+  setTimeout(function(){ location.reload(); }, 600);
+};
+S.cloudSync = function() {
+  if (!sbClient()) { showToast('尚未连接云端，请先填写并保存'); return; }
+  showToast('正在从云端同步…');
+  DB.hydrate(function(){ cloudHydrateEmployees(function(){ showToast('已从云端同步'); if (S.view === 'admin') render(); }); });
+};
 S.logout = function() {
   stopVoice();
   localStorage.removeItem('ai_training_session');
@@ -10845,6 +10948,8 @@ function bindEvents() {
             case 'saveAndFinish': S.saveAndFinish(); break;
             case 'reset': S.reset(); break;
             case 'goAdmin': S.goAdmin(); break;
+            case 'cloudConnect': S.cloudConnect(); break;
+            case 'cloudSync': S.cloudSync(); break;
             case 'adminSetTab': S.adminSetTab(el.getAttribute('data-tab')); break;
             case 'seedDemoData': S.seedDemoData(); break;
             case 'fbToggleSel': S.fbToggleSel(id); break;
@@ -10882,6 +10987,7 @@ function bindEvents() {
   }
   S.view = 'role';
   window.S = S;  // expose S for inline onclick handlers
+  bootCloud();
 })();
 
 try {
