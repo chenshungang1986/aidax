@@ -759,34 +759,23 @@ window.onerror = function(msg, url, line, col, err) {
   return true;
 };
 
-// ==================== SESSION CHECK ====================
+// ==================== SESSION HYGIENE ====================
+// ⚠️ 此处绝不跳转：登录路由由页面底部 init IIFE（S.view）统一负责。
+// 历史 bug（v68~v70）：这里的 location.replace('index.html') 会把未登录用户
+// 从 app.html 直接踢回首页，导致 app.html 自带登录页永远无法显示
+// （症状：首页点「登录」→ 进入 app.html 的瞬间又被弹回首页）。
 (function() {
-  // Skip check if we're already on landing page (prevent redirect loops)
-  if (window.location.pathname.indexOf('landing') !== -1) return;
-
-  var session = localStorage.getItem('ai_training_session');
-  if (!session) {
-    window.location.replace('index.html');
-    return;
-  }
   try {
-    var data = JSON.parse(session);
-    if (!data.loggedIn) {
-      localStorage.removeItem('ai_training_session');
-      window.location.replace('index.html');
-      return;
-    }
-    // Session valid — auto-logout after 12 hours
-    if (Date.now() - data.timestamp > 12 * 3600 * 1000) {
+    var s = localStorage.getItem('ai_training_session');
+    if (!s) return;
+    var d = JSON.parse(s);
+    // 仅做 12 小时过期清理（清存储，不跳转）
+    if (d && d.timestamp && (Date.now() - d.timestamp > 12 * 3600 * 1000)) {
       localStorage.removeItem('ai_training_session');
       localStorage.removeItem('ai_training_emp_role');
-      window.location.replace('index.html');
-      return;
     }
   } catch(e) {
     localStorage.removeItem('ai_training_session');
-    window.location.replace('index.html');
-    return;
   }
 })();
 
