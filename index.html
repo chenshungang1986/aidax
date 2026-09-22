@@ -758,22 +758,8 @@ img{max-width:100%;display:block}
     <button class="login-close" onclick="closeLogin()" data-page-node-id="Fg3RIj0BKIYuKmQI9IEtVo">✕</button>
     <h2 data-page-node-id="hET5ffMJBjxQkJUmICRBmq">AI达学 · AIDAX</h2>
     <p class="login-sub" data-page-node-id="0AhbIUKebw9EHAESG7PIQJ">企业AI学习一站式服务</p>
-    <div class="login-tabs" data-page-node-id="iISlJBAFbL5x3jhaGcAEIy">
-      <button class="login-tab active" onclick="switchLoginTab('manager')" data-page-node-id="ruEKa7vnkXUiSpHkRxOBGy">管理员登录</button>
-      <button class="login-tab" onclick="switchLoginTab('employee')" data-page-node-id="d18QspQmMYQ7Kl7gAsKnMW">员工登录</button>
-    </div>
-    <div id="managerForm" data-page-node-id="69pNqrzPOxSjboFyefXIHw">
-      <div class="login-field" data-page-node-id="qN5W6RmED9SsMZnIyclgM2"><label data-page-node-id="kzMTRW4CGj50zAmj7NFAPY">用户名</label><input type="text" id="mgrUser" placeholder="请输入管理员用户名" autocomplete="username" data-page-node-id="2qImR0Ne1jtAKtCvi6mhc8"></div>
-      <div class="login-field" data-page-node-id="8FgKmZVXvWPHmnifgZvquL"><label data-page-node-id="UyB1J5ve3DPzr2NweQUwEx">密码</label><input type="password" id="mgrPwd" placeholder="请输入密码" autocomplete="current-password" data-page-node-id="BYgcpSqSS7GuB1jIYo97eG"></div>
-      <div class="login-error" id="loginError" data-page-node-id="sw4jhUKrOwFZGvgeB1kfEB">用户名或密码错误，请重试</div>
-      <button type="button" class="login-submit" onclick="handleManagerLogin()" data-page-node-id="5lmvDsECMSK0qoUxqehffO">登录</button>
-    </div>
-    <div id="employeeForm" style="display:none" data-page-node-id="MhcnoCkW9AZcqZDLqo5ZOU">
-      <div class="login-field" data-page-node-id="UaQDNji73b9pmzGrooIOfK"><label data-page-node-id="szX6s792qupSarglKH4qoZ">姓名</label><input type="text" id="empName" placeholder="请输入您的姓名" autocomplete="name" data-page-node-id="Ub9mUR9YInrDBq2sY08q6G"></div>
-      <div class="login-error" id="empError" data-page-node-id="w7grPUvs3t8tKyDGsjhw0G">请填写姓名</div>
-      <button type="button" class="login-submit" onclick="handleEmployeeLogin()" style="margin-top:16px" data-page-node-id="Q4cNHdMW3iiL8ViE6l95iN">进入体验</button>
-    </div>
-    <div class="login-guest" data-page-node-id="DA5nhldZGQIj6TYVLpVzy2"><a onclick="guestLogin()" data-page-node-id="1kOFoi9T0tD4AEsCKxJg2X">游客体验入口 →</a></div>
+    <p style="font-size:.85rem;color:var(--c-text2);line-height:1.7;margin:4px 0 18px;text-align:center">进入后将统一完成身份登录（需填写公司名称与手机号验证码），<br>管理员与企业专属账号也可在此登录。</p>
+    <button type="button" class="login-submit" onclick="goApp()" data-page-node-id="enterApp">进入 AI达学 学习平台 →</button>
   </div>
 </div>
 
@@ -808,14 +794,10 @@ img{max-width:100%;display:block}
 
 <script>
 // Login functions
-function openLogin(){document.getElementById('loginOverlay').classList.add('show');document.getElementById('loginError').classList.remove('show');document.getElementById('empError').style.display='none'}
+function openLogin(){document.getElementById('loginOverlay').classList.add('show')}
 function closeLogin(){document.getElementById('loginOverlay').classList.remove('show')}
-function switchLoginTab(t){var a=document.querySelectorAll('.login-tab'),f=document.getElementById('managerForm'),e=document.getElementById('employeeForm');a.forEach(function(x){x.classList.remove('active')});if(t==='manager'){event.target.classList.add('active');f.style.display='block';e.style.display='none'}else{event.target.classList.add('active');f.style.display='none';e.style.display='block'}}
-// (role selection removed — now handled on app.html)
-
-function handleManagerLogin(){var u=document.getElementById('mgrUser').value.trim(),p=document.getElementById('mgrPwd').value.trim();if(!u||!p){document.getElementById('loginError').classList.add('show');return}if(u==='admin'&&p==='ai_training_admin'){localStorage.setItem('ai_training_session',JSON.stringify({loggedIn:true,user:'管理员',role:'admin',timestamp:Date.now()}));window.location.replace('app.html?v=67')}else{document.getElementById('loginError').classList.add('show')}}
-function handleEmployeeLogin(){var n=document.getElementById('empName').value.trim();if(!n){document.getElementById('empError').style.display='block';return}localStorage.setItem('ai_training_session',JSON.stringify({loggedIn:true,user:n,role:'employee',timestamp:Date.now()}));window.location.replace('app.html?v=67')}
-function guestLogin(){localStorage.setItem('ai_training_session',JSON.stringify({loggedIn:true,user:'游客',role:'guest',timestamp:Date.now()}));window.location.replace('app.html?v=67')}
+// 登录统一在 app.html 完成（含公司名称 / 手机号验证码校验）
+function goApp(){window.location.replace('app.html?v=68')}
 
 // Customer service toggle
 function toggleCsPanel(){document.getElementById('csPanel').classList.toggle('show')}
