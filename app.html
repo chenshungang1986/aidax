@@ -6837,7 +6837,10 @@ const S = {
   transcriptOpen: false,
   employees: JSON.parse(localStorage.getItem('ai_training_employees') || '[]'),
   currentEmployee: null,
-  pptCurrentSlide:0, voicePlaying:false, voicePaused:false, voiceRate:1.0
+  pptCurrentSlide:0, voicePlaying:false, voicePaused:false, voiceRate:1.0,
+  companies: JSON.parse(localStorage.getItem('aidax_companies') || '[]'),
+  adminLogFilter: { date:'', month:'' },
+  _sms: null, _loginTab: 'personal', _lastCompanyCreds: null
 };
 
 function saveEmployees() {
@@ -6998,6 +7001,206 @@ function showQuizOnSlide(courseId, quizIdx) {
   bindQuizEvents();
 }
 
+// ==================== 登录体系 + 管理面板 + 访问日志 + 企业管理（v68）====================
+// ---- 平台管理员密码（哈希存储，避免明文；默认 aidax2026）----
+function adminPwdHash(p){ var h=0; p=''+p; for (var i=0;i<p.length;i++){ h=(h*31 + p.charCodeAt(i))>>>0; } return 'h' + h.toString(16); }
+function getAdminPwdHash(){ var local = localStorage.getItem('aidax_admin_pwd'); return local || adminPwdHash('aidax2026'); }
+function setAdminPwd(p){ localStorage.setItem('aidax_admin_pwd', adminPwdHash(p)); }
+
+// ---- 企业账号（管理员生成专属登录ID+密码）----
+function companyByLoginId(loginId){ return (S.companies||[]).find(function(c){ return c.loginId === loginId; }); }
+function genCompanyCreds(){
+  var loginId = 'CO-' + Math.random().toString(36).slice(2,6).toUpperCase();
+  var pwd = Math.random().toString(36).slice(2,8);
+  return { loginId: loginId, pwd: pwd };
+}
+
+// ---- 登录逻辑 ----
+S.loginTab = function(t){ S._loginTab = t; render(); };
+S.sendCode = function(){
+  var phoneId = (S._loginTab==='ent') ? 'entPhone' : 'loginPhone';
+  var phone = (document.getElementById(phoneId)||{}).value || '';
+  if (!/^1[3-9]\d{9}$/.test(phone)) { alert('请输入有效的 11 位手机号'); return; }
+  var code = String(Math.floor(100000 + Math.random()*900000));
+  S._sms = { phone: phone, code: code, exp: Date.now() + 5*60*1000 };
+  showToast('演示验证码：' + code + '（生产环境将通过短信发送）');
+};
+S.verifyCode = function(phone, code){
+  if (!S._sms || S._sms.phone !== phone) return false;
+  if (Date.now() > S._sms.exp) return false;
+  return S._sms.code === String(code);
+};
+S.doLoginPersonal = function(){
+  var name = (document.getElementById('loginName')||{}).value || '';
+  var company = (document.getElementById('loginCompany')||{}).value || '';
+  var phone = (document.getElementById('loginPhone')||{}).value || '';
+  var code = (document.getElementById('loginCode')||{}).value || '';
+  if (!name.trim()) { alert('请填写姓名'); return; }
+  if (!company.trim()) { alert('请填写公司名称'); return; }
+  if (!/^1[3-9]\d{9}$/.test(phone)) { alert('请输入有效的 11 位手机号'); return; }
+  if (!S.verifyCode(phone, code)) { alert('验证码错误或已过期，请重新获取'); return; }
+  var session = { user: name.trim(), name: name.trim(), role:'learner', company: company.trim(), phone: phone, loginType:'learner', verified:true };
+  localStorage.setItem('ai_training_session', JSON.stringify(session));
+  recordAccess('login');
+  S.view = 'role'; render();
+};
+S.doLoginEnt = function(){
+  var loginId = (document.getElementById('entLoginId')||{}).value || '';
+  var pwd = (document.getElementById('entPwd')||{}).value || '';
+  var name = (document.getElementById('entName')||{}).value || '';
+  var phone = (document.getElementById('entPhone')||{}).value || '';
+  var code = (document.getElementById('entCode')||{}).value || '';
+  var co = companyByLoginId(loginId.trim());
+  if (!co || !co.active) { alert('企业登录ID不存在或已停用'); return; }
+  if (co.pwdHash !== adminPwdHash(pwd)) { alert('企业密码错误'); return; }
+  if (!name.trim()) { alert('请填写姓名'); return; }
+  if (!/^1[3-9]\d{9}$/.test(phone)) { alert('请输入有效的 11 位手机号'); return; }
+  if (!S.verifyCode(phone, code)) { alert('验证码错误或已过期，请重新获取'); return; }
+  var session = { user: name.trim(), name: name.trim(), role:'ent', company: co.name, companyId: co.id, phone: phone, loginType:'ent', verified:true };
+  localStorage.setItem('ai_training_session', JSON.stringify(session));
+  recordAccess('login');
+  S.view = 'role'; render();
+};
+S.doLoginAdmin = function(){
+  var pwd = (document.getElementById('adminPwd')||{}).value || '';
+  if (adminPwdHash(pwd) !== getAdminPwdHash()) { alert('管理员密码错误'); return; }
+  var session = { user:'管理员', role:'admin', loginType:'admin' };
+  localStorage.setItem('ai_training_session', JSON.stringify(session));
+  if (sbClient()) { DB.hydrate(function(){ S.companies = DB.all('companies'); S.view='admin'; render(); }); }
+  else { S.view='admin'; render(); }
+};
+
+// ---- 企业管理（管理员生成企业专属登录ID+密码）----
+S.genCompany = function(){
+  var name = (document.getElementById('newCompanyName')||{}).value || '';
+  var c = genCompanyCreds();
+  var rec = { id: uid('c_'), loginId: c.loginId, pwdHash: adminPwdHash(c.pwd), name: name.trim() || ('企业'+c.loginId), active: true, createdAt: Date.now() };
+  DB.put('companies', rec); S.companies = DB.all('companies');
+  S._lastCompanyCreds = { loginId: rec.loginId, pwd: c.pwd, name: rec.name };
+  showToast('已生成企业账号：' + rec.loginId + ' / 密码 ' + c.pwd);
+  render();
+};
+S.regenCompanyPwd = function(id){
+  var co = (S.companies||[]).find(function(c){ return c.id===id; }); if (!co) return;
+  var c = genCompanyCreds();
+  co.pwdHash = adminPwdHash(c.pwd); DB.put('companies', co); S.companies = DB.all('companies');
+  S._lastCompanyCreds = { loginId: co.loginId, pwd: c.pwd, name: co.name };
+  showToast('已重置密码：' + co.loginId + ' / ' + c.pwd); render();
+};
+S.toggleCompany = function(id){
+  var co = (S.companies||[]).find(function(c){ return c.id===id; }); if (!co) return;
+  co.active = !co.active; DB.put('companies', co); S.companies = DB.all('companies'); render();
+};
+S.delCompany = function(id){
+  if (!confirm('确认删除该企业账号？')) return;
+  DB.del('companies', id); S.companies = DB.all('companies'); render();
+};
+S.adminSetPwd = function(){
+  var p = (document.getElementById('newAdminPwd')||{}).value || '';
+  if (p.length < 6) { alert('密码至少 6 位'); return; }
+  setAdminPwd(p); showToast('管理员密码已更新'); render();
+};
+S.logFilterApply = function(){
+  S.adminLogFilter.date = (document.getElementById('logDate')||{}).value || '';
+  S.adminLogFilter.month = (document.getElementById('logMonth')||{}).value || '';
+  render();
+};
+S.logFilterClear = function(){ S.adminLogFilter = { date:'', month:'' }; render(); };
+
+// ---- 渲染：登录首屏 ----
+function renderLogin(){
+  var tab = S._loginTab || 'personal';
+  function tabBtn(id, label){ return '<button class="admin-tab'+(tab===id?' active':'')+'" data-action="loginTab" data-tab="'+id+'">'+label+'</button>'; }
+  var html = '<div style="max-width:460px;margin:30px auto;padding:0 16px;">'
+    + '<div class="text-center mb-4"><h1 style="font-size:22px;font-weight:700;">AI达学 · AIDAX</h1>'
+    + '<p style="color:var(--text2);font-size:13px;">请先登录后开始 AI 技能测评</p></div>'
+    + '<div class="card"><div class="admin-tabs" style="margin-bottom:16px">'
+    + tabBtn('personal','学员/游客/员工') + tabBtn('ent','企业专属登录') + tabBtn('admin','管理员') + '</div>';
+  var fi = 'padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;width:100%;box-sizing:border-box';
+  var fl = 'display:block;font-size:13px;color:var(--text2);margin-bottom:6px';
+  if (tab === 'personal') {
+    html += '<div style="margin-bottom:12px"><label style="'+fl+'">姓名 *</label><input id="loginName" style="'+fi+'" placeholder="请输入姓名"></div>'
+      + '<div style="margin-bottom:12px"><label style="'+fl+'">公司名称 *</label><input id="loginCompany" style="'+fi+'" placeholder="请输入所属公司名称"></div>'
+      + '<div style="margin-bottom:12px"><label style="'+fl+'">手机号 *</label><input id="loginPhone" style="'+fi+'" placeholder="11 位手机号" maxlength="11"></div>'
+      + '<div style="margin-bottom:12px"><label style="'+fl+'">验证码 *</label><div style="display:flex;gap:8px"><input id="loginCode" style="'+fi+';flex:1" placeholder="6 位验证码" maxlength="6"><button class="btn btn-outline btn-sm" data-action="sendCode">发送验证码</button></div></div>'
+      + '<button class="btn btn-primary" style="width:100%;margin-top:8px" data-action="doLoginPersonal">登录并开始测评</button>';
+  } else if (tab === 'ent') {
+    html += '<div style="margin-bottom:12px"><label style="'+fl+'">企业登录ID *</label><input id="entLoginId" style="'+fi+'" placeholder="管理员分配的企业登录ID"></div>'
+      + '<div style="margin-bottom:12px"><label style="'+fl+'">企业密码 *</label><input id="entPwd" type="password" style="'+fi+'" placeholder="企业专属密码"></div>'
+      + '<div style="font-size:12px;color:var(--text3);margin:-4px 0 10px">登录成功后公司名称自动带入，仍需填写本人信息</div>'
+      + '<div style="margin-bottom:12px"><label style="'+fl+'">姓名 *</label><input id="entName" style="'+fi+'" placeholder="请输入姓名"></div>'
+      + '<div style="margin-bottom:12px"><label style="'+fl+'">手机号 *</label><input id="entPhone" style="'+fi+'" placeholder="11 位手机号" maxlength="11"></div>'
+      + '<div style="margin-bottom:12px"><label style="'+fl+'">验证码 *</label><div style="display:flex;gap:8px"><input id="entCode" style="'+fi+';flex:1" placeholder="6 位验证码" maxlength="6"><button class="btn btn-outline btn-sm" data-action="sendCode">发送验证码</button></div></div>'
+      + '<button class="btn btn-primary" style="width:100%;margin-top:8px" data-action="doLoginEnt">企业登录</button>';
+  } else {
+    html += '<div style="margin-bottom:12px"><label style="'+fl+'">管理员密码 *</label><input id="adminPwd" type="password" style="'+fi+'" placeholder="请输入管理员密码"></div>'
+      + '<button class="btn btn-primary" style="width:100%;margin-top:8px" data-action="doLoginAdmin">进入管理面板</button>'
+      + '<p style="font-size:12px;color:var(--text3);margin-top:10px">默认密码 aidax2026，首次进入可在「企业管理」中修改。</p>';
+  }
+  html += '</div></div>';
+  return html;
+}
+
+// ---- 渲染：访问日志（#2 按日期/月筛选，列出全部）----
+function renderAdminLogs(){
+  function pad(n){ return n<10?'0'+n:''+n; }
+  var session = JSON.parse(localStorage.getItem('ai_training_session') || '{}');
+  var logs = DB.all('access_log').slice().sort(function(a,b){ return b.ts - a.ts; });
+  if (session.role === 'ent' && session.company) logs = logs.filter(function(l){ return l.company === session.company; });
+  var f = S.adminLogFilter || {};
+  if (f.date) logs = logs.filter(function(l){ var d=new Date(l.ts); return (d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())) === f.date; });
+  if (f.month) logs = logs.filter(function(l){ var d=new Date(l.ts); return (d.getFullYear()+'-'+pad(d.getMonth()+1)) === f.month; });
+  var html = '<div class="card slide-up"><div class="section-title"><span class="st-ico">📋</span>访问 / 登录日志'+(session.role==='ent'?'（仅本企业）':'')+'</div>';
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">'
+    + '<input id="logDate" type="date" value="'+(f.date||'')+'" style="padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px">'
+    + '<input id="logMonth" type="month" value="'+(f.month||'')+'" style="padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px">'
+    + '<button class="btn btn-sm btn-primary" data-action="logFilterApply">筛选</button>'
+    + '<button class="btn btn-sm btn-outline" data-action="logFilterClear">清空</button>'
+    + '<span style="font-size:12px;color:var(--text3)">共 '+logs.length+' 条</span></div>';
+  if (!logs.length) { html += '<p style="color:var(--text3);text-align:center;padding:24px">无匹配记录</p>'; }
+  else {
+    html += '<div style="overflow-x:auto"><table class="log-table"><thead><tr><th>时间</th><th>姓名</th><th>公司</th><th>手机号</th><th>类型</th><th>验证</th><th>页面</th></tr></thead><tbody>';
+    logs.forEach(function(l){
+      var phone = l.phone ? (l.phone.slice(0,3)+'****'+l.phone.slice(7)) : '—';
+      var type = l.loginType==='ent'?'企业':(l.loginType==='admin'?'管理员':'学员');
+      html += '<tr><td>'+fmtTs(l.ts)+'</td><td>'+escapeHtml(l.name||l.user||'—')+'</td><td>'+escapeHtml(l.company||'—')+'</td><td>'+phone+'</td><td>'+type+'</td><td>'+(l.verified?'✅':'—')+'</td><td>'+(VIEW_LABEL[l.view]||l.view)+'</td></tr>';
+    });
+    html += '</tbody></table></div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+// ---- 渲染：企业管理（管理员生成企业专属登录ID+密码）----
+function renderAdminCompanies(){
+  var list = S.companies || [];
+  var html = '<div class="card slide-up"><div class="section-title"><span class="st-ico">🏢</span>企业管理（生成企业专属登录ID + 密码）</div>';
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px">'
+    + '<input id="newCompanyName" placeholder="企业名称（如：某某科技）" style="flex:1;min-width:160px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px">'
+    + '<button class="btn btn-primary btn-sm" data-action="genCompany">+ 生成企业账号</button></div>';
+  if (S._lastCompanyCreds) {
+    html += '<div class="cred-box">最新生成凭证　企业：<b>'+escapeHtml(S._lastCompanyCreds.name)+'</b>　登录ID：<code>'+S._lastCompanyCreds.loginId+'</code>　密码：<code>'+S._lastCompanyCreds.pwd+'</code>'
+      + '　<span style="color:var(--text3)">（请复制发给该企业对接人）</span></div>';
+  }
+  if (!list.length) { html += '<p style="color:var(--text3);text-align:center;padding:20px">暂无企业账号，点击上方生成</p>'; }
+  else {
+    html += '<div style="overflow-x:auto"><table class="log-table"><thead><tr><th>企业名称</th><th>登录ID</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead><tbody>';
+    list.forEach(function(c){
+      html += '<tr><td>'+escapeHtml(c.name)+'</td><td><code>'+c.loginId+'</code></td><td>'+(c.active?'<span style="color:var(--green)">启用</span>':'<span style="color:var(--red)">停用</span>')+'</td><td>'+fmtTs(c.createdAt)+'</td>'
+        + '<td style="white-space:nowrap"><button class="btn btn-sm btn-outline" data-action="regenCompanyPwd" data-id="'+c.id+'">重置密码</button> '
+        + '<button class="btn btn-sm btn-outline" data-action="toggleCompany" data-id="'+c.id+'">'+(c.active?'停用':'启用')+'</button> '
+        + '<button class="btn btn-sm btn-outline" data-action="delCompany" data-id="'+c.id+'" style="color:var(--red)">删除</button></td></tr>';
+    });
+    html += '</tbody></table></div>';
+  }
+  html += '<div style="margin-top:18px;border-top:1px solid var(--border);padding-top:14px"><div class="section-title"><span class="st-ico">🔑</span>修改管理员密码</div>'
+    + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">'
+    + '<input id="newAdminPwd" type="password" placeholder="新密码（至少6位）" style="flex:1;min-width:160px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px">'
+    + '<button class="btn btn-primary btn-sm" data-action="adminSetPwd">更新密码</button></div></div>';
+  html += '</div>';
+  return html;
+}
+
 // ==================== RENDER ====================
 function render() {
   const app = document.getElementById('app');
@@ -7011,11 +7214,12 @@ function render() {
     case 'questmap': app.innerHTML = renderQuestMap(); break;
     case 'quest': app.innerHTML = renderQuestView(); break;
     case 'final': app.innerHTML = renderFinalQuiz(); break;
+    case 'login': app.innerHTML = renderLogin(); break;
     case 'admin': app.innerHTML = renderAdmin(); break;
     case 'map': app.innerHTML = renderLearningMap(); break;
     case 'schedule': app.innerHTML = renderSchedule(); break;
   }
-  recordAccess(S.view);
+  if (S.view !== 'login') recordAccess(S.view);
   bindEvents();
 }
 
@@ -7032,7 +7236,7 @@ function headerHtml(title, sub, showBack) {
         ${indText ? '<span class="tag tag-blue">'+indText+'</span>' : ''}
         ${roleText ? '<span class="tag tag-purple">'+roleText+'</span>' : ''}
         <span style="font-size:12px;color:var(--text3);">👤 ${userName}</span>
-        ${S.view!=='admin'&&(session.role==='admin'||session.role==='ent')?'<button class="btn btn-sm btn-outline" data-action="goAdmin">管理员</button>':''}
+        ${S.view!=='admin'&&(session.role==='admin'||session.role==='ent')?'<button class="btn btn-sm btn-outline" data-action="goAdmin">管理面板</button>':''}
         ${S.view!=='role' ? '<button class="btn btn-sm btn-outline" data-action="reset">切换场景/岗位</button>' : ''}
         <button class="btn btn-sm btn-outline" data-action="logout" style="color:#ef4444;border-color:#ef4444;">退出</button>
       </div>
@@ -9518,7 +9722,7 @@ const DB = {
   },
   hydrate: function(cb){
     var cl = sbClient(); if (!cl) { cb && cb(); return; }
-    var cols = ['access_log','feedback','requirements','sales_plans'];
+    var cols = ['access_log','feedback','requirements','sales_plans','companies'];
     var done = 0;
     cols.forEach(function(c){
       cl.from(c).select('*').then(function(res){
@@ -9572,7 +9776,7 @@ function cloudHydrateEmployees(cb){
 // 应用启动：未配置云端则静默跳过；配置了则从云端拉取跨设备数据（仅本地读，渲染即时）
 function bootCloud(){
   if (!sbClient()) return;
-  DB.hydrate(function(){ cloudHydrateEmployees(function(){ if (S.view === 'admin') render(); }); });
+  DB.hydrate(function(){ cloudHydrateEmployees(function(){ S.companies = DB.all('companies'); if (S.view === 'admin') render(); }); });
 }
 
 function uid(p){ return (p||'') + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
@@ -9604,11 +9808,13 @@ function recordAccess(view){
   try {
     var session = JSON.parse(localStorage.getItem('ai_training_session') || '{}');
     var user = session.user || '游客';
-    var key = user + '|' + view;
     var now = Date.now();
-    if (_accessThrottle[key] && now - _accessThrottle[key] < 10*60*1000) return; // 同一人同页面 10 分钟内只记一次
-    _accessThrottle[key] = now;
-    DB.put('access_log', { id: uid('a_'), ts: now, user: user, role: S.role || '', industry: S.industry || '', view: view });
+    if (view !== 'login') {
+      var key = user + '|' + view;
+      if (_accessThrottle[key] && now - _accessThrottle[key] < 10*60*1000) return; // 同一人同页面 10 分钟内只记一次
+      _accessThrottle[key] = now;
+    }
+    DB.put('access_log', { id: uid('a_'), ts: now, user: user, name: session.name||'', company: session.company||'', phone: session.phone||'', role: S.role || '', industry: S.industry || '', view: view, loginType: session.loginType||'', verified: !!session.verified });
   } catch(e){}
 }
 
@@ -10035,7 +10241,8 @@ function renderAdmin() {
   S.adminTab = S.adminTab || 'overview';
   var session = JSON.parse(localStorage.getItem('ai_training_session') || '{}');
   var isAdmin = session.role === 'admin';
-  var tabs = [['overview','总览'],['industry','行业分析'],['company','企业分析'],['feedback','反馈汇总'],['sales','销售方案']];
+  var tabs = [['overview','总览'],['industry','行业分析'],['company','企业分析'],['feedback','反馈汇总'],['logs','访问日志'],['sales','销售方案']];
+  if (isAdmin) tabs.push(['companies','企业管理']);
   var html = headerHtml('管理员看板', isAdmin ? '平台管理员视角 · 团队AI学习全景' : '企业管理员视角 · 团队AI学习进度', true);
   html += '<div class="admin-tabs">';
   tabs.forEach(function(t){
@@ -10045,6 +10252,8 @@ function renderAdmin() {
   if (S.adminTab === 'industry') html += renderAdminIndustry();
   else if (S.adminTab === 'company') html += renderAdminCompany();
   else if (S.adminTab === 'feedback') html += renderAdminFeedback();
+  else if (S.adminTab === 'logs') html += renderAdminLogs();
+  else if (S.adminTab === 'companies') html += renderAdminCompanies();
   else if (S.adminTab === 'sales') html += renderAdminSales();
   else html += renderAdminOverview(isAdmin);
   return html;
@@ -10985,6 +11194,18 @@ function bindEvents() {
             case 'saveAndFinish': S.saveAndFinish(); break;
             case 'reset': S.reset(); break;
             case 'goAdmin': S.goAdmin(); break;
+            case 'loginTab': S.loginTab(el.getAttribute('data-tab')); break;
+            case 'sendCode': S.sendCode(); break;
+            case 'doLoginPersonal': S.doLoginPersonal(); break;
+            case 'doLoginEnt': S.doLoginEnt(); break;
+            case 'doLoginAdmin': S.doLoginAdmin(); break;
+            case 'genCompany': S.genCompany(); break;
+            case 'regenCompanyPwd': S.regenCompanyPwd(el.getAttribute('data-id')); break;
+            case 'toggleCompany': S.toggleCompany(el.getAttribute('data-id')); break;
+            case 'delCompany': S.delCompany(el.getAttribute('data-id')); break;
+            case 'adminSetPwd': S.adminSetPwd(); break;
+            case 'logFilterApply': S.logFilterApply(); break;
+            case 'logFilterClear': S.logFilterClear(); break;
             case 'cloudConnect': S.cloudConnect(); break;
             case 'cloudSync': S.cloudSync(); break;
             case 'adminSetTab': S.adminSetTab(el.getAttribute('data-tab')); break;
@@ -11012,6 +11233,14 @@ function bindEvents() {
     });
   }
 }
+// 注入登录/日志/企业表格所需样式
+(function(){
+  try {
+    var st = document.createElement('style');
+    st.textContent = '.log-table{width:100%;border-collapse:collapse;font-size:13px}.log-table th,.log-table td{border-bottom:1px solid var(--border);padding:8px 10px;text-align:left;white-space:nowrap}.log-table th{color:var(--text3);font-weight:600;background:rgba(0,0,0,0.02)}.cred-box{background:#eef2ff;border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:13px}.cred-box code{background:#fff;padding:2px 6px;border-radius:4px;font-family:monospace}';
+    document.head.appendChild(st);
+  } catch(e){}
+})();
 // Init: start at role/industry selection page
 (function() {
   var session = JSON.parse(localStorage.getItem('ai_training_session') || '{}');
@@ -11023,7 +11252,11 @@ function bindEvents() {
       localStorage.removeItem('ai_training_emp_role');
     }
   }
-  S.view = 'role';
+  var _sessRole = session && session.role;
+  // 仅认可 v68 三类合法角色；老版本会话(guest/employee)或缺少公司/手机信息 → 强制重新登录（满足公司名称+手机号校验要求）
+  var _validRole = (_sessRole === 'admin' || _sessRole === 'ent' || _sessRole === 'learner');
+  var _needsReLogin = !_validRole || ((_sessRole === 'learner' || _sessRole === 'ent') && (!session.company || !session.phone));
+  S.view = _needsReLogin ? 'login' : (_sessRole === 'admin' ? 'admin' : 'role');
   window.S = S;  // expose S for inline onclick handlers
   bootCloud();
   // 跨标签页实时同步：其他标签写入反馈/需求后，本标签若在后台则立即刷新
