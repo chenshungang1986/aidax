@@ -6868,6 +6868,7 @@ const S = {
   currentEmployee: null,
   pptCurrentSlide:0, voicePlaying:false, voicePaused:false, voiceRate:1.0,
   companies: JSON.parse(localStorage.getItem('aidax_companies') || '[]'),
+  users: JSON.parse(localStorage.getItem('aidax_users') || '[]'),
   adminLogFilter: { date:'', month:'' },
   _sms: null, _loginTab: 'personal', _lastCompanyCreds: null
 };
@@ -7230,6 +7231,101 @@ function renderAdminCompanies(){
   return html;
 }
 
+// ==================== 登录体系 v70：无弹窗 + 三模式（账号登录 / 游客 / 注册）====================
+S.loginMode = function(t){ S._loginMode = t; render(); };
+S.sendCode = function(){
+  var phone = (document.getElementById('guestPhone')||{}).value || '';
+  if (!/^1[3-9]\d{9}$/.test(phone)) { alert('请输入有效的 11 位手机号'); return; }
+  var code = String(Math.floor(100000 + Math.random()*900000));
+  S._sms = { phone: phone, code: code, exp: Date.now() + 5*60*1000 };
+  showToast('演示验证码：' + code + '（生产环境将通过短信发送）');
+};
+S.doLoginAccount = function(){
+  var id = (document.getElementById('accId')||{}).value || '';
+  var pwd = (document.getElementById('accPwd')||{}).value || '';
+  if (!id.trim() || !pwd) { alert('请输入账号ID和密码'); return; }
+  // 管理员（ID=admin + 管理员密码）
+  if (id.trim() === 'admin' && adminPwdHash(pwd) === getAdminPwdHash()) {
+    localStorage.setItem('ai_training_session', JSON.stringify({ user:'管理员', role:'admin', loginType:'admin' }));
+    if (sbClient()) { DB.hydrate(function(){ S.companies = DB.all('companies'); S.users = DB.all('users'); S.view='admin'; render(); }); }
+    else { S.view='admin'; render(); }
+    return;
+  }
+  // 企业专属账号（管理员生成的 CO-XXXX）
+  var co = companyByLoginId(id.trim());
+  if (co && co.active && co.pwdHash === adminPwdHash(pwd)) {
+    var se = { user: co.name, name: co.name, role:'ent', company: co.name, companyId: co.id, loginType:'ent', verified:true };
+    localStorage.setItem('ai_training_session', JSON.stringify(se));
+    recordAccess('login'); S.view='admin'; render(); return;
+  }
+  // 注册用户
+  var u = (S.users||[]).find(function(x){ return x.id === id.trim(); });
+  if (u && u.pwdHash === adminPwdHash(pwd)) {
+    var su = { user: u.company || id.trim(), name: u.company || id.trim(), role:'learner', company: u.company || '', phone:'', loginType:'user', verified:true };
+    localStorage.setItem('ai_training_session', JSON.stringify(su));
+    recordAccess('login'); S.view='role'; render(); return;
+  }
+  alert('账号或密码错误');
+};
+S.doLoginGuest = function(){
+  var company = (document.getElementById('guestCompany')||{}).value || '';
+  var phone = (document.getElementById('guestPhone')||{}).value || '';
+  var code = (document.getElementById('guestCode')||{}).value || '';
+  if (!company.trim()) { alert('请填写公司名称'); return; }
+  if (!/^1[3-9]\d{9}$/.test(phone)) { alert('请输入有效的 11 位手机号'); return; }
+  if (!S.verifyCode(phone, code)) { alert('验证码错误或已过期，请重新获取'); return; }
+  var s = { user: company.trim(), name: company.trim(), role:'learner', company: company.trim(), phone: phone, loginType:'guest', verified:true };
+  localStorage.setItem('ai_training_session', JSON.stringify(s));
+  recordAccess('login'); S.view='role'; render();
+};
+S.doRegister = function(){
+  var company = (document.getElementById('regCompany')||{}).value || '';
+  var id = (document.getElementById('regId')||{}).value || '';
+  var pwd = (document.getElementById('regPwd')||{}).value || '';
+  var pwd2 = (document.getElementById('regPwd2')||{}).value || '';
+  if (!company.trim()) { alert('请填写公司名称'); return; }
+  if (!/^[A-Za-z0-9_]{3,20}$/.test(id.trim())) { alert('账号ID为3-20位字母、数字或下划线'); return; }
+  if (pwd.length < 6) { alert('密码至少 6 位'); return; }
+  if (pwd !== pwd2) { alert('两次输入的密码不一致'); return; }
+  if (id.trim() === 'admin') { alert('该账号ID不可用'); return; }
+  if ((S.users||[]).some(function(x){ return x.id === id.trim(); })) { alert('该账号ID已被注册'); return; }
+  if ((S.companies||[]).some(function(c){ return c.loginId === id.trim(); })) { alert('该账号ID已被占用'); return; }
+  var rec = { id: id.trim(), company: company.trim(), pwdHash: adminPwdHash(pwd), role:'learner', createdAt: Date.now() };
+  DB.put('users', rec); S.users = DB.all('users');
+  var s = { user: company.trim(), name: company.trim(), role:'learner', company: company.trim(), phone:'', loginType:'user', verified:true };
+  localStorage.setItem('ai_training_session', JSON.stringify(s));
+  recordAccess('login'); showToast('注册成功，已自动登录'); S.view='role'; render();
+};
+function renderLoginV2(){
+  var mode = S._loginMode || 'account';
+  var tab = function(k,label){ return '<button class="login-tab'+(mode===k?' active':'')+'" data-action="loginMode" data-mode="'+k+'">'+label+'</button>'; };
+  var html = '';
+  html += '<style>.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#eef2ff,#f8fafc);padding:24px}.login-card{width:100%;max-width:380px;background:#fff;border-radius:16px;box-shadow:0 10px 40px rgba(30,64,175,.12);padding:32px 28px}.login-brand{font-size:22px;font-weight:800;color:#1e40af;text-align:center}.login-sub{font-size:13px;color:#64748b;text-align:center;margin:6px 0 18px}.login-tabs{display:flex;gap:6px;background:#f1f5f9;padding:4px;border-radius:10px;margin-bottom:18px}.login-tab{flex:1;border:none;background:transparent;padding:9px 0;border-radius:8px;font-size:13px;color:#475569;cursor:pointer}.login-tab.active{background:#1e40af;color:#fff;font-weight:600}.login-field{margin-bottom:14px}.login-field label{display:block;font-size:12px;color:#475569;margin-bottom:6px}.login-field input{width:100%;padding:11px 12px;border:1px solid #e2e8f0;border-radius:9px;font-size:14px;box-sizing:border-box}.login-field.row{display:flex;gap:8px;align-items:flex-end}.login-field.row input{flex:1}.login-submit{width:100%;margin-top:6px;padding:12px;border:none;border-radius:10px;background:#1e40af;color:#fff;font-size:15px;font-weight:600;cursor:pointer}.login-hint{font-size:11px;color:#94a3b8;line-height:1.6;margin-top:14px}</style>';
+  html += '<div class="login-wrap"><div class="login-card">';
+  html += '<div class="login-brand">AI达学 · AIDAX</div>';
+  html += '<div class="login-sub">企业AI学习一站式服务</div>';
+  html += '<div class="login-tabs">'+ tab('account','账号登录') + tab('guest','游客登录') + tab('register','注册') +'</div>';
+  if (mode === 'account') {
+    html += '<div class="login-field"><label>账号ID</label><input id="accId" placeholder="企业ID / 注册ID / admin" autocomplete="username"></div>';
+    html += '<div class="login-field"><label>密码</label><input id="accPwd" type="password" placeholder="请输入密码" autocomplete="current-password"></div>';
+    html += '<button class="login-submit" data-action="doLoginAccount">登 录</button>';
+    html += '<div class="login-hint">管理员：ID 填 <b>admin</b> + 管理员密码；企业账号：管理员分配的 CO-XXXX + 密码；注册用户：注册时的 ID + 密码。</div>';
+  } else if (mode === 'guest') {
+    html += '<div class="login-field"><label>公司名称</label><input id="guestCompany" placeholder="请输入公司名称"></div>';
+    html += '<div class="login-field"><label>手机号码</label><input id="guestPhone" placeholder="11位手机号" inputmode="numeric"></div>';
+    html += '<div class="login-field row"><input id="guestCode" placeholder="验证码"><button class="login-submit" style="width:auto;margin:0;padding:11px 14px" data-action="sendCode">获取验证码</button></div>';
+    html += '<button class="login-submit" data-action="doLoginGuest">游客进入</button>';
+  } else {
+    html += '<div class="login-field"><label>公司名称</label><input id="regCompany" placeholder="请输入公司名称"></div>';
+    html += '<div class="login-field"><label>账号ID</label><input id="regId" placeholder="3-20位字母/数字/下划线"></div>';
+    html += '<div class="login-field"><label>密码</label><input id="regPwd" type="password" placeholder="至少6位"></div>';
+    html += '<div class="login-field"><label>确认密码</label><input id="regPwd2" type="password" placeholder="再次输入密码"></div>';
+    html += '<button class="login-submit" data-action="doRegister">注册并登录</button>';
+  }
+  html += '</div></div>';
+  return html;
+}
+
 // ==================== RENDER ====================
 function render() {
   const app = document.getElementById('app');
@@ -7243,7 +7339,7 @@ function render() {
     case 'questmap': app.innerHTML = renderQuestMap(); break;
     case 'quest': app.innerHTML = renderQuestView(); break;
     case 'final': app.innerHTML = renderFinalQuiz(); break;
-    case 'login': app.innerHTML = renderLogin(); break;
+    case 'login': app.innerHTML = renderLoginV2(); break;
     case 'admin': app.innerHTML = renderAdmin(); break;
     case 'map': app.innerHTML = renderLearningMap(); break;
     case 'schedule': app.innerHTML = renderSchedule(); break;
@@ -9751,7 +9847,7 @@ const DB = {
   },
   hydrate: function(cb){
     var cl = sbClient(); if (!cl) { cb && cb(); return; }
-    var cols = ['access_log','feedback','requirements','sales_plans','companies'];
+    var cols = ['access_log','feedback','requirements','sales_plans','companies','users'];
     var done = 0;
     cols.forEach(function(c){
       cl.from(c).select('*').then(function(res){
@@ -9805,7 +9901,7 @@ function cloudHydrateEmployees(cb){
 // 应用启动：未配置云端则静默跳过；配置了则从云端拉取跨设备数据（仅本地读，渲染即时）
 function bootCloud(){
   if (!sbClient()) return;
-  DB.hydrate(function(){ cloudHydrateEmployees(function(){ S.companies = DB.all('companies'); if (S.view === 'admin') render(); }); });
+  DB.hydrate(function(){ cloudHydrateEmployees(function(){ S.companies = DB.all('companies'); S.users = DB.all('users'); if (S.view === 'admin') render(); }); });
 }
 
 function uid(p){ return (p||'') + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
@@ -11223,11 +11319,11 @@ function bindEvents() {
             case 'saveAndFinish': S.saveAndFinish(); break;
             case 'reset': S.reset(); break;
             case 'goAdmin': S.goAdmin(); break;
-            case 'loginTab': S.loginTab(el.getAttribute('data-tab')); break;
+            case 'loginMode': S.loginMode(el.getAttribute('data-mode')); break;
             case 'sendCode': S.sendCode(); break;
-            case 'doLoginPersonal': S.doLoginPersonal(); break;
-            case 'doLoginEnt': S.doLoginEnt(); break;
-            case 'doLoginAdmin': S.doLoginAdmin(); break;
+            case 'doLoginAccount': S.doLoginAccount(); break;
+            case 'doLoginGuest': S.doLoginGuest(); break;
+            case 'doRegister': S.doRegister(); break;
             case 'genCompany': S.genCompany(); break;
             case 'regenCompanyPwd': S.regenCompanyPwd(el.getAttribute('data-id')); break;
             case 'toggleCompany': S.toggleCompany(el.getAttribute('data-id')); break;
@@ -11284,8 +11380,10 @@ function bindEvents() {
   var _sessRole = session && session.role;
   // 仅认可 v68 三类合法角色；老版本会话(guest/employee)或缺少公司/手机信息 → 强制重新登录（满足公司名称+手机号校验要求）
   var _validRole = (_sessRole === 'admin' || _sessRole === 'ent' || _sessRole === 'learner');
-  var _needsReLogin = !_validRole || ((_sessRole === 'learner' || _sessRole === 'ent') && (!session.company || !session.phone));
-  S.view = _needsReLogin ? 'login' : (_sessRole === 'admin' ? 'admin' : 'role');
+  var _needsReLogin = !_validRole
+    || ((_sessRole === 'learner' || _sessRole === 'ent') && !session.company)
+    || ((_sessRole === 'ent' || session.loginType === 'guest') && !session.phone);
+  S.view = _needsReLogin ? 'login' : ((_sessRole === 'admin' || _sessRole === 'ent') ? 'admin' : 'role');
   window.S = S;  // expose S for inline onclick handlers
   bootCloud();
   // 跨标签页实时同步：其他标签写入反馈/需求后，本标签若在后台则立即刷新
