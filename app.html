@@ -7041,16 +7041,66 @@ function genCompanyCreds(){
   return { loginId: loginId, pwd: pwd };
 }
 
+// ==================== v74 数据可见范围（账号级隔离：非管理员只能看到自己的成绩）====================
+function getSessionSafe(){ try { return JSON.parse(localStorage.getItem('ai_training_session') || '{}') || {}; } catch(e){ return {}; } }
+// 账号唯一标识：管理员=admin；企业账号=ent:企业ID；注册用户=user:注册ID；游客=guest:公司:手机号
+function currentOwnerKey(){
+  var s = getSessionSafe();
+  if (s.role === 'admin') return 'admin';
+  if (s.role === 'ent') return 'ent:' + (s.companyId || s.company || '');
+  if (s.loginType === 'user' && s.loginId) return 'user:' + s.loginId;
+  if (s.phone) return 'guest:' + (s.company || '') + ':' + s.phone;
+  if (s.loginId) return 'user:' + s.loginId;
+  return '';
+}
+// 档案归属：v74 之前的历史记录无 ownerKey（视为无主档案，仅管理员可见）
+function empOwnerKey(e){ return (e && e.ownerKey) || ''; }
+function isManagerRole(){ var r = getSessionSafe().role; return r === 'admin' || r === 'ent'; }
+// 学习端可见档案：管理员=全部；其他账号=仅自己
+function myEmployees(){
+  if (getSessionSafe().role === 'admin') return S.employees.slice();
+  var mine = currentOwnerKey();
+  if (!mine) return [];
+  return S.employees.filter(function(e){ return empOwnerKey(e) === mine; });
+}
+// 管理端可见档案：管理员=全部；企业账号=仅本企业；其他账号=空
+function teamEmployees(){
+  var s = getSessionSafe();
+  if (s.role === 'admin') return S.employees.slice();
+  if (s.role === 'ent') return S.employees.filter(function(e){
+    return (s.companyId && e.companyId === s.companyId) || (s.company && e.company === s.company);
+  });
+  return [];
+}
+// 非管理账号：本地档案中别人的记录移出到 hidden 暂存（管理员登录时自动恢复），避免越权数据驻留
+function scopeLocalEmployees(){
+  var s = getSessionSafe();
+  if (s.role === 'admin' || s.role === 'ent') { restoreHiddenEmployees(); return; }
+  var mine = currentOwnerKey();
+  var keep = [], hide = [];
+  S.employees.forEach(function(e){ (mine && empOwnerKey(e) === mine) ? keep.push(e) : hide.push(e); });
+  if (!hide.length) return;
+  S.employees = keep;
+  try { localStorage.setItem('aidax_employees_hidden', JSON.stringify(hide)); } catch(e){}
+  saveEmployees();
+}
+function restoreHiddenEmployees(){
+  var raw = null;
+  try { raw = localStorage.getItem('aidax_employees_hidden'); } catch(e){ return; }
+  if (!raw) return;
+  localStorage.removeItem('aidax_employees_hidden');
+  var hidden = [];
+  try { hidden = JSON.parse(raw) || []; } catch(e){ hidden = []; }
+  if (!hidden.length) return;
+  var map = {};
+  hidden.forEach(function(e){ if (e && e.id) map[e.id] = e; });
+  S.employees.forEach(function(e){ if (e && e.id) map[e.id] = e; });
+  S.employees = Object.keys(map).map(function(k){ return map[k]; });
+  saveEmployees();
+}
+
 // ---- 登录逻辑 ----
 S.loginTab = function(t){ S._loginTab = t; render(); };
-S.sendCode = function(){
-  var phoneId = (S._loginTab==='ent') ? 'entPhone' : 'loginPhone';
-  var phone = (document.getElementById(phoneId)||{}).value || '';
-  if (!/^1[3-9]\d{9}$/.test(phone)) { alert('请输入有效的 11 位手机号'); return; }
-  var code = String(Math.floor(100000 + Math.random()*900000));
-  S._sms = { phone: phone, code: code, exp: Date.now() + 5*60*1000 };
-  showToast('演示验证码：' + code + '（生产环境将通过短信发送）');
-};
 S.verifyCode = function(phone, code){
   if (!S._sms || S._sms.phone !== phone) return false;
   if (Date.now() > S._sms.exp) return false;
@@ -7273,7 +7323,7 @@ S.doLoginAccount = function(){
   // 注册用户
   var u = (S.users||[]).find(function(x){ return x.id === id.trim(); });
   if (u && u.pwdHash === adminPwdHash(pwd)) {
-    var su = { user: u.company || id.trim(), name: u.company || id.trim(), role:'learner', company: u.company || '', phone:'', loginType:'user', verified:true };
+    var su = { user: u.company || id.trim(), name: u.company || id.trim(), role:'learner', company: u.company || '', phone:'', loginId: u.id, loginType:'user', verified:true };
     localStorage.setItem('ai_training_session', JSON.stringify(su));
     recordAccess('login'); S.view='role'; render(); return;
   }
@@ -7304,7 +7354,7 @@ S.doRegister = function(){
   if ((S.companies||[]).some(function(c){ return c.loginId === id.trim(); })) { alert('该账号ID已被占用'); return; }
   var rec = { id: id.trim(), company: company.trim(), pwdHash: adminPwdHash(pwd), role:'learner', createdAt: Date.now() };
   DB.put('users', rec); S.users = DB.all('users');
-  var s = { user: company.trim(), name: company.trim(), role:'learner', company: company.trim(), phone:'', loginType:'user', verified:true };
+  var s = { user: company.trim(), name: company.trim(), role:'learner', company: company.trim(), phone:'', loginId: id.trim(), loginType:'user', verified:true };
   localStorage.setItem('ai_training_session', JSON.stringify(s));
   recordAccess('login'); showToast('注册成功，已自动登录'); S.view='role'; render();
 };
@@ -7389,6 +7439,8 @@ function renderLoginV2(){
 
 // ==================== RENDER ====================
 function render() {
+  // v74：进入学习/管理页时按账号可见范围收敛本地档案（每会话首次渲染执行一次）
+  if (S.view !== 'login' && !S._scopeDone) { S._scopeDone = true; try { scopeLocalEmployees(); } catch(e){} }
   const app = document.getElementById('app');
   switch(S.view) {
     case 'role': app.innerHTML = renderRoleSelection(); break;
@@ -7401,7 +7453,13 @@ function render() {
     case 'quest': app.innerHTML = renderQuestView(); break;
     case 'final': app.innerHTML = renderFinalQuiz(); break;
     case 'login': app.innerHTML = renderLoginV2(); break;
-    case 'admin': app.innerHTML = renderAdmin(); break;
+    case 'admin': {
+      // v74：管理面板仅管理员/企业账号可进（普通学员无入口，且此处二次校验防越权）
+      var _role = getSessionSafe().role;
+      if (_role !== 'admin' && _role !== 'ent') { S.view = 'role'; app.innerHTML = renderRoleSelection(); break; }
+      if (S.adminTab === 'companies' && _role !== 'admin') S.adminTab = 'overview';
+      app.innerHTML = renderAdmin(); break;
+    }
     case 'map': app.innerHTML = renderLearningMap(); break;
     case 'schedule': app.innerHTML = renderSchedule(); break;
   }
@@ -7476,12 +7534,14 @@ function renderRoleSelection() {
         <div class="text-center mt-4"><button class="btn btn-primary" data-action="startQuiz" ${!S.industry||!S.role?'disabled':''} onclick="if(typeof S!=='undefined'){S.startQuiz()}">测一测AI能力</button></div>
       </div>`;
 
-  // Show recent employees
-  if (S.employees.length > 0) {
-    html += `<div class="card mt-3"><p style="font-weight:600;font-size:14px;margin-bottom:12px;">最近测评记录</p>`;
-    S.employees.forEach((e, i) => {
+  // 可见测评记录（v74：管理员=全部；企业账号=本企业；其他账号=仅自己）
+  const _visEmps = myEmployees();
+  if (_visEmps.length > 0) {
+    const _recTitle = getSessionSafe().role === 'admin' ? '最近测评记录' : '我的测评记录';
+    html += `<div class="card mt-3"><p style="font-weight:600;font-size:14px;margin-bottom:12px;">${_recTitle}</p>`;
+    _visEmps.forEach((e) => {
       const r = ROLES[e.role];
-      html += `<div class="emp-row" data-action="loadEmployee" data-idx="${i}" style="cursor:pointer;">
+      html += `<div class="emp-row" data-action="loadEmployee" data-emp="${e.id}" style="cursor:pointer;">
         <div class="emp-avatar">${e.name[0]}</div>
         <div class="emp-info"><div class="emp-name">${e.name}</div><div class="emp-meta">${r ? r.icon+' '+r.name : e.role} · ${e.date}</div></div>
         <div class="emp-score" style="color:${e.finalScore>=80?'var(--green)':e.finalScore>=60?'var(--amber)':'var(--red)'}">${e.finalScore!=null?e.finalScore+'分':'测评中'}</div>
@@ -9966,6 +10026,8 @@ function cloudHydrateEmployees(cb){
       res.data.forEach(function(x){ if (x && x.id) map[x.id] = x.doc; });
       S.employees = Object.keys(map).map(function(k){ return map[k]; });
       localStorage.setItem('ai_training_employees', JSON.stringify(S.employees));
+      // v74：云端拉回后再次收敛（普通账号只留自己的，别人的移入 hidden 暂存）
+      scopeLocalEmployees();
     }
   }).catch(function(){}).finally(function(){ cb && cb(); });
 }
@@ -10033,7 +10095,7 @@ function dimScoresOf(e){
 }
 
 function aggregateBy(keyFn, list){
-  var src = list || S.employees, map = {};
+  var src = list || teamEmployees(), map = {}; // v74：管理端聚合按账号可见范围（管理员=全部；企业账号=本企业）
   src.forEach(function(e){
     var k = keyFn(e) || '未填写';
     if (!map[k]) map[k] = {key:k, n:0, completed:0, scores:[], dimSum:{}, dimN:{}, roles:{}, courses:0};
@@ -10511,7 +10573,7 @@ function renderAdmin() {
 }
 
 function renderAdminOverview(isAdmin) {
-  const all = S.employees;
+  const all = teamEmployees(); // v74：管理员=全部；企业账号=仅本企业
   const total = all.length;
   const completed = all.filter(e => e.finalScore != null).length;
   const avgScore = completed > 0 ? Math.round(all.filter(e=>e.finalScore!=null).reduce((s,e)=>s+e.finalScore,0)/completed) : 0;
@@ -10604,7 +10666,7 @@ function renderAdminOverview(isAdmin) {
         <div class="emp-avatar">${e.name[0]}</div>
         <div class="emp-info"><div class="emp-name">${e.name}</div><div class="emp-meta">${r?r.icon+' '+r.name:''} · ${e.company?e.company+' · ':''}${e.date} · ${e.doneCourses||0}/${COURSES[e.role]?.length||0}课</div></div>
         <div class="emp-score" style="color:${scoreCls}">${e.finalScore!=null?e.finalScore+'分':'学习中'}</div>
-        <button class="btn btn-sm btn-outline" data-action="loadAndGoDashboard" data-idx="${i}">查看</button>
+        <button class="btn btn-sm btn-outline" data-action="loadAndGoDashboard" data-emp="${e.id}">查看</button>
       </div>`;
     });
   }
@@ -11002,16 +11064,22 @@ S.submitFinal = function() {
   render();
 };
 S.saveAndFinish = function() {
-  const name = prompt('请输入你的姓名（用于管理看板）：', S.currentEmployee?.name || '');
+  var _sess = getSessionSafe();
+  const name = prompt('请输入你的姓名（用于管理看板）：', (S.currentEmployee && S.currentEmployee.name) || _sess.name || '');
   if (!name) return;
-  // #3 企业维度分析：登记所属企业（可留空）
-  let company = prompt('请输入所属企业/公司名称（用于企业维度汇总分析，可留空）：', S.currentEmployee?.company || '');
+  // #3 企业维度分析：登记所属企业（登录账号已带公司则默认填入）
+  let company = prompt('请输入所属企业/公司名称（用于企业维度汇总分析，可留空）：', (S.currentEmployee && S.currentEmployee.company) || _sess.company || '');
   if (company === null) company = '';
   const emp = {
     id: (S.currentEmployee && S.currentEmployee.id) || uid('e_'),
     name, role: S.role,
     industry: S.industry,
     company: company.trim() || '未填写',
+    // v74 账号归属：非管理员仅能在首页看到 ownerKey 与本人一致的记录
+    ownerKey: (S.currentEmployee && S.currentEmployee.ownerKey) || currentOwnerKey(),
+    companyId: _sess.companyId || '',
+    loginId: _sess.loginId || '',
+    phone: _sess.phone || '',
     date: new Date().toLocaleDateString('zh-CN'),
     quizScores: S.quizScores,
     _baseResult: S._baseResult || null,
@@ -11060,8 +11128,11 @@ S.logout = function() {
   localStorage.removeItem('ai_training_emp_role');
   window.location.replace('index.html');
 };
-S.loadEmployee = function(idx) {
-  const e = S.employees[idx];
+S.loadEmployee = function(ref) {
+  // v74：只能在"当前账号可见范围"内打开档案（管理员=全部 / 企业账号=本企业 / 其他=仅自己）
+  var _vis = (getSessionSafe().role === 'admin' || getSessionSafe().role === 'ent') ? teamEmployees() : myEmployees();
+  var e = (typeof ref === 'string') ? _vis.find(function(x){ return x.id === ref; }) : _vis[ref];
+  if (!e) { showToast('该测评记录不属于当前账号，无法查看'); return; }
   S.currentEmployee = e;
   S.role = e.role;
   S.quizScores = e.quizScores;
@@ -11426,7 +11497,7 @@ function bindEvents() {
             case 'shareReport': shareReport(); break;
             case 'prevQuestion': S.prevQuestion(); break;
             case 'nextQuestion': S.nextQuestion(); break;
-            case 'loadEmployee': S.loadEmployee(idx); break;
+            case 'loadEmployee': S.loadEmployee(el.getAttribute('data-emp') || idx); break;
             case 'goDashboard': S.goDashboard(); break;
             case 'goLearningMap': S.goLearningMap(); break;
             case 'goSchedule': S.goSchedule(); break;
@@ -11481,7 +11552,7 @@ function bindEvents() {
             case 'toggleTaskHint': S.toggleTaskHint(el.getAttribute('data-cid'), parseInt(el.getAttribute('data-ti'))); break;
             case 'toggleTaskAnswer': S.toggleTaskAnswer(el.getAttribute('data-cid'), parseInt(el.getAttribute('data-ti'))); break;
             case 'toggleFinalHint': S.toggleFinalHint(idx); break;
-            case 'loadAndGoDashboard': S.loadEmployee(idx); S.goDashboard(); break;
+            case 'loadAndGoDashboard': S.loadEmployee(el.getAttribute('data-emp') || idx); S.goDashboard(); break;
           }
           return;
         }
@@ -11514,7 +11585,8 @@ function bindEvents() {
   var _validRole = (_sessRole === 'admin' || _sessRole === 'ent' || _sessRole === 'learner');
   var _needsReLogin = !_validRole
     || ((_sessRole === 'learner' || _sessRole === 'ent') && !session.company)
-    || ((_sessRole === 'ent' || session.loginType === 'guest') && !session.phone);
+    || ((_sessRole === 'ent' || session.loginType === 'guest') && !session.phone)
+    || (session.loginType === 'user' && !session.loginId); // v74：注册账号会话需带 loginId（成绩归属标识）
   S.view = _needsReLogin ? 'login' : ((_sessRole === 'admin' || _sessRole === 'ent') ? 'admin' : 'role');
   window.S = S;  // expose S for inline onclick handlers
   bootCloud();
