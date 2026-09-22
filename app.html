@@ -9782,9 +9782,11 @@ function outboxFlush(){
   localStorage.removeItem('aidax_outbox'); // 先清，避免重复补推
   q.forEach(function(job){
     try {
-      if (job.op === 'upsert') cl.from(job.c).upsert({ id: job.item.id, doc: job.item }, { onConflict: 'id' });
-      else if (job.op === 'delete') cl.from(job.c).delete().eq('id', job.item.id);
-    } catch(e){}
+      if (job.op === 'upsert') cl.from(job.c).upsert({ id: job.item.id, doc: job.item }, { onConflict: 'id' })
+        .then(function(){}).catch(function(){ outboxPush(job.c, job.op, job.item); }); // 失败回流入队
+      else if (job.op === 'delete') cl.from(job.c).delete().eq('id', job.item.id)
+        .then(function(){}).catch(function(){ outboxPush(job.c, job.op, job.item); });
+    } catch(e){ outboxPush(job.c, job.op, job.item); }
   });
 }
 
@@ -9827,8 +9829,12 @@ const DB = {
     var cl = sbClient(); // 若本次调用才完成依赖初始化，会顺带补推既有 outbox
     if (cl) {
       try {
-        if (op === 'upsert') cl.from(c).upsert({ id: item.id, doc: item }, { onConflict: 'id' });
-        else if (op === 'delete') cl.from(c).delete().eq('id', item.id);
+        if (op === 'upsert') {
+          cl.from(c).upsert({ id: item.id, doc: item }, { onConflict: 'id' })
+            .then(function(){}).catch(function(){ outboxPush(c, op, item); }); // 网络抖动：回流入队，连接恢复后补推
+        } else if (op === 'delete') {
+          cl.from(c).delete().eq('id', item.id).then(function(){}).catch(function(){});
+        }
         return;
       } catch(e){}
     }
@@ -9859,15 +9865,19 @@ function cloudConfig(){
   return null;
 }
 // 懒加载 Supabase 客户端（配置缺失/网络不可达时返回 null → 纯本地）
-var _sbClient = null;
+// 注意：仅在「已成功建连」时缓存客户端；若 supabase 尚在延迟加载（window.supabase 未定义），
+// 本次返回 null 但不写死，下次 supabase 就绪后（__aidaxCloudReady / 下次调用）可重建——
+// 避免首屏过早调用把 null 永久缓存，导致云端从此再也连不上、outbox 永不补推。
+var _sbClient = undefined; // undefined=未初始化（可重试）；null=明确不可用；object=已建连
 function sbClient(){
-  if (_sbClient !== null) return _sbClient;
+  if (_sbClient && typeof _sbClient.from === 'function') return _sbClient;
+  if (_sbClient === null) return null;
   var cfg = cloudConfig();
   if (cfg && typeof window.supabase !== 'undefined') {
-    try { _sbClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey); DB.mode = 'cloud'; outboxFlush(); }
-    catch(e){ _sbClient = null; }
-  } else { _sbClient = null; }
-  return _sbClient;
+    try { _sbClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey); DB.mode = 'cloud'; outboxFlush(); return _sbClient; }
+    catch(e){ _sbClient = null; return null; }
+  }
+  return null; // supabase 延迟加载中：本次不建连，留待其就绪后触发
 }
 
 // 员工档案云端镜像（S.employees 本地优先 + 异步同步；id 为 upsert 主键）
@@ -10227,7 +10237,8 @@ S.fbSubmit = function(){
   });
   S._fbText = ''; S._fbMedia = {}; S._fbType = 'text'; S._fbSev = 'mid';
   S.fbClose();
-  showToast('反馈已提交，感谢！');
+  if (sbClient()) showToast('反馈已提交，感谢！');
+  else showToast('已保存到本地，联网后将自动同步到后台');
   if (S.view === 'admin') render();
 };
 
