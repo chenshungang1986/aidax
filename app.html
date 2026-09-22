@@ -670,6 +670,11 @@
 .fb-media-btn{flex:1;min-width:120px;padding:10px;border:1.5px dashed var(--border);border-radius:10px;background:var(--bg);font-size:12.5px;color:var(--text2);cursor:pointer;text-align:center;transition:all .15s;}
 .fb-media-btn:hover{border-color:var(--blue);color:var(--blue);}
 .fb-media-btn.recording{background:var(--red-bg);color:var(--red);border-color:var(--red);}
+.fb-editor{min-height:120px;max-height:260px;overflow:auto;border:1.5px solid var(--border);border-radius:10px;padding:12px 13px;font-size:13.5px;line-height:1.65;color:var(--text);outline:none;transition:border-color .15s,box-shadow .15s;background:#fff;word-break:break-word}
+.fb-editor:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(30,64,175,.1)}
+.fb-editor:empty:before{content:attr(data-ph);color:var(--text3);pointer-events:none}
+.fb-editor img{max-width:100%;border-radius:8px;margin:6px 0;display:block;border:1px solid var(--border)}
+.fb-paste-tip{font-size:11px;color:var(--text3);margin:8px 0 2px;line-height:1.5}
 .fb-preview{margin-top:12px;display:none;}
 .fb-preview.show{display:block;}
 .fb-preview img,.fb-preview video{max-width:100%;max-height:200px;border-radius:10px;border:1px solid var(--border);}
@@ -688,6 +693,8 @@
 .fb-item .fi-text{font-size:13.5px;color:var(--text);white-space:pre-wrap;line-height:1.6;}
 .fb-item .fi-meta{font-size:11.5px;color:var(--text3);margin-top:8px;display:flex;gap:12px;flex-wrap:wrap;}
 .fb-item .fi-thumb{margin-top:8px;max-width:120px;max-height:90px;border-radius:8px;border:1px solid var(--border);}
+.fb-item .fi-imgs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.fb-item .fi-imgs .fi-thumb{max-width:160px;max-height:120px}
 .status-pill{padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;}
 .status-new{background:var(--red-bg);color:var(--red);}
 .status-triaged{background:var(--amber-bg);color:var(--amber);}
@@ -7228,6 +7235,22 @@ S.sendCode = function(){
   var code = String(Math.floor(100000 + Math.random()*900000));
   S._sms = { phone: phone, code: code, exp: Date.now() + 5*60*1000 };
   showToast('演示验证码：' + code + '（生产环境将通过短信发送）');
+  // 60s 倒计时（直接操作按钮 DOM，避免整页重渲染丢失输入焦点）
+  var btn = document.getElementById('sendCodeBtn');
+  if (!btn) return;
+  var left = 60; btn.disabled = true; btn.textContent = left + 's 后重发';
+  clearInterval(S._codeTimer);
+  S._codeTimer = setInterval(function(){
+    left--;
+    if (left <= 0) { clearInterval(S._codeTimer); btn.disabled = false; btn.textContent = '获取验证码'; }
+    else { btn.textContent = left + 's 后重发'; }
+  }, 1000);
+};
+S.togglePwd = function(id){
+  var el = document.getElementById(id); if (!el) return;
+  var eye = document.querySelector('.login-pwd-eye[data-id="' + id + '"]');
+  if (el.type === 'password') { el.type = 'text'; if (eye) eye.textContent = '🙈'; }
+  else { el.type = 'password'; if (eye) eye.textContent = '👁️'; }
 };
 S.doLoginAccount = function(){
   var id = (document.getElementById('accId')||{}).value || '';
@@ -7289,29 +7312,78 @@ function renderLoginV2(){
   var mode = S._loginMode || 'account';
   var tab = function(k,label){ return '<button class="login-tab'+(mode===k?' active':'')+'" data-action="loginMode" data-mode="'+k+'">'+label+'</button>'; };
   var html = '';
-  html += '<style>.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#eef2ff,#f8fafc);padding:24px}.login-card{width:100%;max-width:380px;background:#fff;border-radius:16px;box-shadow:0 10px 40px rgba(30,64,175,.12);padding:32px 28px}.login-brand{font-size:22px;font-weight:800;color:#1e40af;text-align:center}.login-sub{font-size:13px;color:#64748b;text-align:center;margin:6px 0 18px}.login-tabs{display:flex;gap:6px;background:#f1f5f9;padding:4px;border-radius:10px;margin-bottom:18px}.login-tab{flex:1;border:none;background:transparent;padding:9px 0;border-radius:8px;font-size:13px;color:#475569;cursor:pointer}.login-tab.active{background:#1e40af;color:#fff;font-weight:600}.login-field{margin-bottom:14px}.login-field label{display:block;font-size:12px;color:#475569;margin-bottom:6px}.login-field input{width:100%;padding:11px 12px;border:1px solid #e2e8f0;border-radius:9px;font-size:14px;box-sizing:border-box}.login-field.row{display:flex;gap:8px;align-items:flex-end}.login-field.row input{flex:1}.login-submit{width:100%;margin-top:6px;padding:12px;border:none;border-radius:10px;background:#1e40af;color:#fff;font-size:15px;font-weight:600;cursor:pointer}.login-hint{font-size:11px;color:#94a3b8;line-height:1.6;margin-top:14px}</style>';
-  html += '<div class="login-wrap"><div class="login-card">';
-  html += '<div class="login-brand">AI达学 · AIDAX</div>';
-  html += '<div class="login-sub">企业AI学习一站式服务</div>';
+  html += '<style>'
+    + '.login-v2{min-height:100vh;display:flex;background:linear-gradient(135deg,#eef2ff 0%,#f8fafc 55%,#eaf1ff 100%)}'
+    + '.login-hero{flex:1.05;display:flex;flex-direction:column;justify-content:center;padding:52px 56px;color:#fff;background:radial-gradient(130% 130% at 0% 0%,#3b5bdb 0%,#1e40af 52%,#1e3a8a 100%);position:relative;overflow:hidden}'
+    + '.login-hero:before{content:"";position:absolute;right:-80px;top:-80px;width:320px;height:320px;border-radius:50%;background:rgba(255,255,255,.08)}'
+    + '.login-hero:after{content:"";position:absolute;left:-60px;bottom:-90px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.06)}'
+    + '.lh-logo{font-size:24px;font-weight:800;display:flex;align-items:center;gap:10px;z-index:1}'
+    + '.lh-logo .lh-badge{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:18px}'
+    + '.login-hero h1{font-size:30px;line-height:1.4;margin:30px 0 14px;font-weight:800;z-index:1;max-width:460px}'
+    + '.login-hero p{font-size:14.5px;opacity:.9;max-width:430px;line-height:1.75;z-index:1}'
+    + '.lh-feats{margin-top:28px;display:flex;flex-direction:column;gap:13px;z-index:1}'
+    + '.lh-feat{display:flex;gap:11px;align-items:center;font-size:13.5px;opacity:.96}'
+    + '.lh-feat .dot{width:28px;height:28px;border-radius:9px;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;font-size:14px;flex:none}'
+    + '.login-formwrap{flex:.95;display:flex;align-items:center;justify-content:center;padding:24px}'
+    + '.login-card{width:100%;max-width:390px;background:#fff;border-radius:20px;box-shadow:0 14px 50px rgba(30,64,175,.14);padding:34px 30px;animation:modalSlideIn .3s ease}'
+    + '.login-brand{font-size:20px;font-weight:800;color:#1e40af;text-align:center}'
+    + '.login-sub{font-size:12.5px;color:#64748b;text-align:center;margin:5px 0 18px}'
+    + '.login-tabs{display:flex;gap:4px;background:#f1f5f9;padding:4px;border-radius:11px;margin-bottom:18px}'
+    + '.login-tab{flex:1;border:none;background:transparent;padding:9px 0;border-radius:8px;font-size:13px;color:#475569;cursor:pointer;transition:all .15s;font-weight:500}'
+    + '.login-tab.active{background:#1e40af;color:#fff;font-weight:600;box-shadow:0 2px 8px rgba(30,64,175,.25)}'
+    + '.login-field{margin-bottom:13px}'
+    + '.login-field label{display:block;font-size:12px;color:#475569;margin-bottom:6px;font-weight:500}'
+    + '.login-field input{width:100%;padding:11px 13px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;box-sizing:border-box;transition:border-color .15s,box-shadow .15s;background:#fbfdff}'
+    + '.login-field input:focus{outline:none;border-color:#1e40af;box-shadow:0 0 0 3px rgba(30,64,175,.12)}'
+    + '.login-field.row{display:flex;gap:8px;align-items:flex-end}'
+    + '.login-field.row input{flex:1}'
+    + '.login-pwd-wrap{position:relative}'
+    + '.login-pwd-wrap input{padding-right:42px}'
+    + '.login-pwd-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:15px;user-select:none;opacity:.55}'
+    + '.login-pwd-eye:hover{opacity:1}'
+    + '.login-submit{width:100%;margin-top:8px;padding:12px;border:none;border-radius:11px;background:#1e40af;color:#fff;font-size:15px;font-weight:600;cursor:pointer;transition:background .15s,transform .05s}'
+    + '.login-submit:hover{background:#1d4ed8}'
+    + '.login-submit:active{transform:scale(.99)}'
+    + '.login-submit:disabled{background:#94a3b8;cursor:not-allowed}'
+    + '.login-hint{font-size:11px;color:#94a3b8;line-height:1.7;margin-top:14px}'
+    + '.login-foot{font-size:11px;color:#cbd5e1;text-align:center;margin-top:16px}'
+    + '@media(max-width:780px){.login-hero{display:none}.login-v2{background:#f8fafc}}'
+    + '</style>';
+  html += '<div class="login-v2">';
+  // 左：品牌价值面板
+  html += '<div class="login-hero">'
+    + '<div class="lh-logo"><span class="lh-badge">🎓</span>AI达学 · AIDAX</div>'
+    + '<h1>企业 AI 能力测评与训战<br>一站式学习平台</h1>'
+    + '<p>面向 8 大岗位、7 大行业的 AI 素养评测、个性化课程与关卡陪练，帮助企业快速摸清团队 AI 能力短板并补齐。</p>'
+    + '<div class="lh-feats">'
+    + '<div class="lh-feat"><span class="dot">📊</span>千人千面自适应测评，8 维 AI 能力精准画像</div>'
+    + '<div class="lh-feat"><span class="dot">🎯</span>按短板自动生成个性化课程与陪练</div>'
+    + '<div class="lh-feat"><span class="dot">🏢</span>企业专属账号，管理后台实时查看学习进度与反馈</div>'
+    + '</div></div>';
+  // 右：登录卡片
+  html += '<div class="login-formwrap"><div class="login-card">';
+  html += '<div class="login-brand">欢迎使用 AIDAX</div>';
+  html += '<div class="login-sub">请选择登录方式</div>';
   html += '<div class="login-tabs">'+ tab('account','账号登录') + tab('guest','游客登录') + tab('register','注册') +'</div>';
   if (mode === 'account') {
     html += '<div class="login-field"><label>账号ID</label><input id="accId" placeholder="企业ID / 注册ID / admin" autocomplete="username"></div>';
-    html += '<div class="login-field"><label>密码</label><input id="accPwd" type="password" placeholder="请输入密码" autocomplete="current-password"></div>';
+    html += '<div class="login-field"><label>密码</label><div class="login-pwd-wrap"><input id="accPwd" type="password" placeholder="请输入密码" autocomplete="current-password"><span class="login-pwd-eye" data-action="togglePwd" data-id="accPwd">👁️</span></div></div>';
     html += '<button class="login-submit" data-action="doLoginAccount">登 录</button>';
     html += '<div class="login-hint">管理员：ID 填 <b>admin</b> + 管理员密码；企业账号：管理员分配的 CO-XXXX + 密码；注册用户：注册时的 ID + 密码。</div>';
   } else if (mode === 'guest') {
     html += '<div class="login-field"><label>公司名称</label><input id="guestCompany" placeholder="请输入公司名称"></div>';
     html += '<div class="login-field"><label>手机号码</label><input id="guestPhone" placeholder="11位手机号" inputmode="numeric"></div>';
-    html += '<div class="login-field row"><input id="guestCode" placeholder="验证码"><button class="login-submit" style="width:auto;margin:0;padding:11px 14px" data-action="sendCode">获取验证码</button></div>';
+    html += '<div class="login-field row"><input id="guestCode" placeholder="验证码"><button class="login-submit" id="sendCodeBtn" style="width:auto;margin:0;padding:11px 14px" data-action="sendCode">获取验证码</button></div>';
     html += '<button class="login-submit" data-action="doLoginGuest">游客进入</button>';
   } else {
     html += '<div class="login-field"><label>公司名称</label><input id="regCompany" placeholder="请输入公司名称"></div>';
     html += '<div class="login-field"><label>账号ID</label><input id="regId" placeholder="3-20位字母/数字/下划线"></div>';
-    html += '<div class="login-field"><label>密码</label><input id="regPwd" type="password" placeholder="至少6位"></div>';
-    html += '<div class="login-field"><label>确认密码</label><input id="regPwd2" type="password" placeholder="再次输入密码"></div>';
+    html += '<div class="login-field"><label>密码</label><div class="login-pwd-wrap"><input id="regPwd" type="password" placeholder="至少6位"><span class="login-pwd-eye" data-action="togglePwd" data-id="regPwd">👁️</span></div></div>';
+    html += '<div class="login-field"><label>确认密码</label><div class="login-pwd-wrap"><input id="regPwd2" type="password" placeholder="再次输入密码"><span class="login-pwd-eye" data-action="togglePwd" data-id="regPwd2">👁️</span></div></div>';
     html += '<button class="login-submit" data-action="doRegister">注册并登录</button>';
   }
-  html += '</div></div>';
+  html += '<div class="login-foot">登录即表示同意《用户协议》与《隐私政策》</div>';
+  html += '</div></div></div>';
   return html;
 }
 
@@ -10102,7 +10174,8 @@ function fbModalHtml(){
           + '<span class="ft-ico">' + FB_TYPE[k].i + '</span>' + FB_TYPE[k].n + '</button>';
   });
   html += '</div>';
-  html += '<textarea id="fbText" class="fb-textarea" placeholder="遇到什么问题？请描述操作步骤、预期与实际结果…">' + escapeHtml(S._fbText || '') + '</textarea>';
+  html += '<div id="fbEditor" class="fb-editor" contenteditable="true" data-ph="遇到什么问题？可直接 Ctrl/⌘+V 粘贴截图，文字与截图自由混排描述…"></div>';
+  html += '<div class="fb-paste-tip">💡 支持直接粘贴截图（Ctrl/⌘+V）或拖拽图片到上方输入框，文字与截图可图文混编</div>';
   html += '<div class="fb-media-row">';
   html += '<button class="fb-media-btn" onclick="document.getElementById(\'fbImg\').click()">🖼️ 上传截图</button>';
   html += '<button class="fb-media-btn' + (_fbRec && _fbRec.state === 'recording' ? ' recording' : '') + '" onclick="S.fbToggleRec()">' + (_fbRec && _fbRec.state === 'recording' ? '⏹ 停止录音' : '🎙️ 录制语音') + '</button>';
@@ -10133,6 +10206,63 @@ function fbModalHtml(){
 function fbRenderInner(){
   var m = document.getElementById('fbModalInner');
   if (m) m.innerHTML = fbModalHtml();
+  var ed = document.getElementById('fbEditor');
+  if (ed) {
+    ed.innerHTML = S._fbHtml || '';
+    ed.addEventListener('paste', handleFbPaste);
+    ed.addEventListener('dragover', function(e){ e.preventDefault(); ed.style.borderColor = 'var(--blue)'; });
+    ed.addEventListener('dragleave', function(e){ ed.style.borderColor = ''; });
+    ed.addEventListener('drop', handleFbDrop);
+  }
+}
+// 把当前编辑器内容（纯文本 + 内联图片 dataURL）存入 S，供重渲染恢复与提交提取
+function fbSaveEditor(){
+  var ed = document.getElementById('fbEditor'); if (!ed) return;
+  S._fbText = (ed.innerText || '').replace(/ /g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+  S._fbImages = Array.prototype.slice.call(ed.querySelectorAll('img')).map(function(img){ return img.getAttribute('src'); }).filter(Boolean);
+  S._fbHtml = ed.innerHTML;
+}
+function fbInsertImgAtCaret(ed, src){
+  ed.focus();
+  var img = document.createElement('img');
+  img.src = src; img.className = 'fb-inline-img'; img.alt = '截图';
+  var sel = window.getSelection();
+  if (sel && sel.rangeCount && ed.contains(sel.anchorNode)) {
+    var range = sel.getRangeAt(0); range.deleteContents();
+    range.insertNode(img);
+    var sp = document.createTextNode(' '); img.after(sp);
+    var nr = document.createRange(); nr.setStartAfter(sp); nr.collapse(true);
+    sel.removeAllRanges(); sel.addRange(nr);
+  } else {
+    ed.appendChild(img); ed.appendChild(document.createTextNode(' '));
+  }
+  fbSaveEditor();
+}
+function handleFbPaste(e){
+  var items = (e.clipboardData && e.clipboardData.items) || [];
+  var imgItem = null;
+  for (var i = 0; i < items.length; i++) { if (items[i].type && items[i].type.indexOf('image') === 0) { imgItem = items[i]; break; } }
+  if (!imgItem) return; // 非图片（如纯文本）放行默认粘贴
+  e.preventDefault();
+  var file = imgItem.getAsFile(); if (!file) return;
+  fbReadImage(file, function(dataUrl){
+    var ed = document.getElementById('fbEditor'); if (!ed) return;
+    fbInsertImgAtCaret(ed, dataUrl); showToast('已粘贴截图');
+  });
+}
+function handleFbDrop(e){
+  var files = (e.dataTransfer && e.dataTransfer.files) || [];
+  var hasImg = false;
+  for (var i = 0; i < files.length; i++) { if (files[i].type && files[i].type.indexOf('image') === 0) { hasImg = true; break; } }
+  if (!hasImg) return; // 放行非图片拖拽（如文字）
+  e.preventDefault();
+  var ed = document.getElementById('fbEditor'); if (!ed) return;
+  ed.style.borderColor = '';
+  for (var j = 0; j < files.length; j++) {
+    if (files[j].type && files[j].type.indexOf('image') === 0) {
+      (function(f){ fbReadImage(f, function(dataUrl){ fbInsertImgAtCaret(ed, dataUrl); showToast('已插入图片'); }); })(files[j]);
+    }
+  }
 }
 
 S.fbOpen = function(){
@@ -10146,14 +10276,8 @@ S.fbClose = function(){
   document.getElementById('fbModal').classList.remove('show');
   if (_fbRec && _fbRec.state !== 'inactive') { try { _fbRec.stop(); } catch(e){} }
 };
-S.fbSetType = function(t){
-  var ta = document.getElementById('fbText'); if (ta) S._fbText = ta.value;
-  S._fbType = t; fbRenderInner();
-};
-S.fbSev = function(v){
-  var ta = document.getElementById('fbText'); if (ta) S._fbText = ta.value;
-  S._fbSev = v; fbRenderInner();
-};
+S.fbSetType = function(t){ fbSaveEditor(); S._fbType = t; fbRenderInner(); };
+S.fbSev = function(v){ fbSaveEditor(); S._fbSev = v; fbRenderInner(); };
 S.fbClearMedia = function(){ S._fbMedia = {}; fbRenderInner(); };
 
 function fbReadImage(file, cb){
@@ -10222,20 +10346,22 @@ S.fbToggleRec = function(){
 };
 
 S.fbSubmit = function(){
-  var ta = document.getElementById('fbText');
-  var text = ta ? ta.value.trim() : (S._fbText || '');
+  fbSaveEditor();
+  var text = S._fbText || '';
+  var imgs = S._fbImages || [];
   var media = S._fbMedia || {};
-  if (!text && !media.image && !media.audio && !media.video) { showToast('请填写描述或附加截图/语音/录屏'); return; }
+  if (!text && !imgs.length && !media.audio && !media.video) { showToast('请填写描述或粘贴/附加截图'); return; }
   var session = JSON.parse(localStorage.getItem('ai_training_session') || '{}');
+  var type = imgs.length ? 'image' : (media.audio ? 'audio' : (media.video ? 'video' : 'text'));
   DB.put('feedback', {
     id: uid('f_'), ts: Date.now(),
     user: session.user || '游客', role: session.role || '',
-    type: S._fbType || 'text', sev: S._fbSev || 'mid',
-    text: text, media: media,
+    type: type, sev: S._fbSev || 'mid',
+    text: text, images: imgs, media: media,
     page: VIEW_LABEL[S.view] || S.view || '', industry: S.industry || '',
     status: 'new'
   });
-  S._fbText = ''; S._fbMedia = {}; S._fbType = 'text'; S._fbSev = 'mid';
+  S._fbText = ''; S._fbImages = []; S._fbHtml = ''; S._fbMedia = {}; S._fbType = 'text'; S._fbSev = 'mid';
   S.fbClose();
   if (sbClient()) showToast('反馈已提交，感谢！');
   else showToast('已保存到本地，联网后将自动同步到后台');
@@ -10570,7 +10696,12 @@ function renderAdminFeedback() {
           <span style="margin-left:auto;font-size:11.5px;color:var(--text3)">${fmtTs(f.ts)} · ${escapeHtml(f.user||'')}</span>
         </div>
         <div class="fi-text">${escapeHtml(f.text || '（无文字描述）')}</div>`;
-      if (m.image) html += `<img class="fi-thumb" src="${m.image}" alt="截图">`;
+      var imgs = (f.images && f.images.length) ? f.images : (m.image ? [m.image] : []);
+      if (imgs.length) {
+        html += '<div class="fi-imgs">';
+        imgs.forEach(function(src){ html += '<img class="fi-thumb" src="' + src + '" alt="截图">'; });
+        html += '</div>';
+      }
       if (m.audio) html += `<audio class="fi-thumb" src="${m.audio}" controls style="width:100%;max-width:220px"></audio>`;
       if (m.video) html += `<video class="fi-thumb" src="${m.video}" controls></video>`;
       if (f._mediaDropped) html += `<div style="font-size:11px;color:var(--amber);margin-top:6px">（附件因存储空间不足未保留）</div>`;
@@ -11320,6 +11451,7 @@ function bindEvents() {
             case 'reset': S.reset(); break;
             case 'goAdmin': S.goAdmin(); break;
             case 'loginMode': S.loginMode(el.getAttribute('data-mode')); break;
+            case 'togglePwd': S.togglePwd(el.getAttribute('data-id')); break;
             case 'sendCode': S.sendCode(); break;
             case 'doLoginAccount': S.doLoginAccount(); break;
             case 'doLoginGuest': S.doLoginGuest(); break;
