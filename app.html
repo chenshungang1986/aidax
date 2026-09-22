@@ -713,7 +713,36 @@
 @keyframes modalSlideIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:560px){.plan-form{grid-template-columns:1fr;}.fb-type-grid{grid-template-columns:repeat(2,1fr);}}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./vendor/supabase-js.umd.js"></script>
+<script id="aidaxCloudFallback">
+  // 主用同源自托管：避免 jsdelivr 国内不可达导致 window.supabase 缺失，
+  // 进而 sbClient() 恒为 null、反馈/访问日志/企业账号等全部无法同步云端（管理员收不到）。
+  // 自托管文件缺失时回退备用 CDN；任一就绪后初始化客户端并补推 outbox、拉取云端。
+  window.__aidaxCloudReady = function(){
+    if (typeof window.supabase === 'undefined') return false;
+    try { sbClient(); outboxFlush(); bootCloud(); } catch(e){}
+    return true;
+  };
+  (function(){
+    if (typeof window.supabase !== 'undefined') return; // 已就绪：交给主脚本启动时的 bootCloud()
+    var sources = [
+      'https://registry.npmmirror.com/@supabase/supabase-js/2.116.0/files/dist/umd/supabase.js',
+      'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js',
+      'https://unpkg.com/@supabase/supabase-js@2.116.0/dist/umd/supabase.js'
+    ];
+    var i = 0;
+    function tryNext(){
+      if (typeof window.supabase !== 'undefined') { window.__aidaxCloudReady(); return; }
+      if (i >= sources.length) return;
+      var s = document.createElement('script');
+      s.src = sources[i++];
+      s.onload = function(){ if (typeof window.supabase !== 'undefined') window.__aidaxCloudReady(); else tryNext(); };
+      s.onerror = tryNext;
+      document.head.appendChild(s);
+    }
+    tryNext();
+  })();
+</script>
 </head>
 <body data-page-node-id="Prs4Mp8xI4LQUblNgECgE9">
 <div class="app" id="app" data-page-node-id="iVtQgw6qKgLzQxdvwF5oCC"><div class="card text-center" style="padding:60px 20px" data-page-node-id="d5xSIRIQrO2LUB7EdYduS8"><p style="color:var(--text2);font-size:14px" data-page-node-id="xgoCTH1RiURl1B80TiSVoJ">正在加载 AI达学...</p></div></div>
