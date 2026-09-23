@@ -10417,7 +10417,7 @@ S.fbSubmit = function(){
   var type = imgs.length ? 'image' : (media.audio ? 'audio' : (media.video ? 'video' : 'text'));
   DB.put('feedback', {
     id: uid('f_'), ts: Date.now(),
-    user: session.user || '游客', role: session.role || '',
+    user: session.user || '游客', role: session.role || '', company: session.company || '',
     type: type, sev: S._fbSev || 'mid',
     text: text, images: imgs, media: media,
     page: VIEW_LABEL[S.view] || S.view || '', industry: S.industry || '',
@@ -10463,7 +10463,8 @@ S.fbAggregate = function(){
   DB.put('requirements', {
     id: uid('r_'), ts: Date.now(),
     title: '【' + topPage + '】' + items.length + ' 条用户反馈待优化',
-    desc: desc, src: ids, status: 'todo'
+    desc: desc, src: ids, status: 'todo',
+    company: (items[0] && items[0].company) || getSessionSafe().company || ''
   });
   items.forEach(function(f){ f.status = 'triaged'; DB.put('feedback', f); });
   S._fbSel = {};
@@ -10731,8 +10732,15 @@ function renderAdminCompany() {
 }
 
 function renderAdminFeedback() {
+  // v75：企业账号仅看本企业反馈/需求（管理员看全部；无归属的历史记录仅管理员可见）
+  var _s = getSessionSafe();
+  var _co = _s.role === 'ent' ? (_s.company || '') : null;
   var list = DB.all('feedback').slice().sort(function(a,b){ return b.ts - a.ts; });
   var reqs = DB.all('requirements').slice().sort(function(a,b){ return b.ts - a.ts; });
+  if (_co !== null) {
+    list = list.filter(function(f){ return (f.company || '') === _co; });
+    reqs = reqs.filter(function(r){ return !r.company || r.company === _co; });
+  }
   var sel = S._fbSel || {};
   var selCount = Object.keys(sel).filter(function(k){ return sel[k]; }).length;
   var newCount = list.filter(function(f){ return f.status === 'new'; }).length;
