@@ -10031,7 +10031,7 @@ function sbClient(){
   var cfg = cloudConfig();
   if (cfg && typeof window.supabase !== 'undefined') {
     try {
-      // v75b：优先用登录后签发的租户 JWT；无或过期则回退 anon（现行行为，RLS 收紧前不影响）
+      // v75c：优先用登录后签发的租户 JWT（由 Postgres mint_token RPC 签发）；无或过期则回退 anon
       var jwt = (typeof S !== 'undefined' && S._cloudJwt && (Date.now() - (S._cloudJwtAt || 0) < 60*60*1000)) ? S._cloudJwt : null;
       var key = jwt || cfg.supabaseAnonKey;
       _sbClient = window.supabase.createClient(cfg.supabaseUrl, key); DB.mode = 'cloud'; outboxFlush(); return _sbClient;
@@ -10047,8 +10047,12 @@ S.mintCloudToken = function(meta, cb){
   try {
     var cfg = cloudConfig();
     if (!cfg || !cfg.supabaseUrl) { cb(); return; }
-    var fnUrl = cfg.supabaseUrl.replace(/\/$/, '') + '/functions/v1/mint-token';
-    var body = Object.assign({ ownerKey: currentOwnerKey() }, meta || {});
+    var fnUrl = cfg.supabaseUrl.replace(/\/$/, '') + '/rest/v1/rpc/mint_token'; // v75c：改为 Postgres 内 mint_token RPC（密钥存私有 schema，免 Edge Function Secret 配置）
+    var m = meta || {};
+    var body = {
+      p_type: m.type, p_loginId: m.loginId, p_password: m.password,
+      p_company: m.company, p_phone: m.phone, p_owner: currentOwnerKey()
+    };
     fetch(fnUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': cfg.supabaseAnonKey, 'Authorization': 'Bearer ' + cfg.supabaseAnonKey },
