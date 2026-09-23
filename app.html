@@ -7061,12 +7061,13 @@ function genCompanyCreds(){
 
 // ==================== v74 数据可见范围（账号级隔离：非管理员只能看到自己的成绩）====================
 function getSessionSafe(){ try { return JSON.parse(localStorage.getItem('ai_training_session') || '{}') || {}; } catch(e){ return {}; } }
-// 账号唯一标识：管理员=admin；企业账号=ent:企业ID；注册用户=user:注册ID；游客=guest:公司:手机号
+// 账号唯一标识：管理员=admin；企业账号=ent:企业ID；注册用户=user:注册ID；游客=guest:公司:手机号:个人ID
 function currentOwnerKey(){
   var s = getSessionSafe();
   if (s.role === 'admin') return 'admin';
   if (s.role === 'ent') return 'ent:' + (s.companyId || s.company || '');
   if (s.loginType === 'user' && s.loginId) return 'user:' + s.loginId;
+  if (s.loginType === 'guest' && s.loginId) return 'guest:' + (s.company || '') + ':' + s.phone + ':' + s.loginId;
   if (s.phone) return 'guest:' + (s.company || '') + ':' + s.phone;
   if (s.loginId) return 'user:' + s.loginId;
   return '';
@@ -7353,31 +7354,35 @@ S.doLoginAccount = function(){
 };
 S.doLoginGuest = function(){
   var company = (document.getElementById('guestCompany')||{}).value || '';
+  var loginId = (document.getElementById('guestLoginId')||{}).value || '';
   var phone = (document.getElementById('guestPhone')||{}).value || '';
   var code = (document.getElementById('guestCode')||{}).value || '';
   if (!company.trim()) { alert('请填写公司名称'); return; }
+  if (!/^[A-Za-z0-9_]{3,20}$/.test(loginId.trim())) { alert('个人登录ID为3-20位字母、数字或下划线'); return; }
   if (!/^1[3-9]\d{9}$/.test(phone)) { alert('请输入有效的 11 位手机号'); return; }
   if (!S.verifyCode(phone, code)) { alert('验证码错误或已过期，请重新获取'); return; }
-  var s = { user: company.trim(), name: company.trim(), role:'learner', company: company.trim(), phone: phone, loginType:'guest', verified:true };
+  var s = { user: company.trim(), name: company.trim(), role:'learner', company: company.trim(), phone: phone, loginId: loginId.trim(), loginType:'guest', verified:true };
   localStorage.setItem('ai_training_session', JSON.stringify(s));
-  S.mintCloudToken({ type:'guest', company: company.trim(), phone: phone }); // v75b：游客租户 JWT（无密码，限本人 ownerKey）
+  S.mintCloudToken({ type:'guest', company: company.trim(), phone: phone, loginId: loginId.trim() }); // v75b：游客租户 JWT（无密码，限本人 ownerKey）
   recordAccess('login'); S.view='role'; render();
 };
 S.doRegister = function(){
   var company = (document.getElementById('regCompany')||{}).value || '';
   var id = (document.getElementById('regId')||{}).value || '';
+  var phone = (document.getElementById('regPhone')||{}).value || '';
   var pwd = (document.getElementById('regPwd')||{}).value || '';
   var pwd2 = (document.getElementById('regPwd2')||{}).value || '';
   if (!company.trim()) { alert('请填写公司名称'); return; }
-  if (!/^[A-Za-z0-9_]{3,20}$/.test(id.trim())) { alert('账号ID为3-20位字母、数字或下划线'); return; }
+  if (!/^[A-Za-z0-9_]{3,20}$/.test(id.trim())) { alert('个人登录ID为3-20位字母、数字或下划线'); return; }
+  if (!/^1[3-9]\d{9}$/.test(phone)) { alert('请输入有效的 11 位手机号'); return; }
   if (pwd.length < 6) { alert('密码至少 6 位'); return; }
   if (pwd !== pwd2) { alert('两次输入的密码不一致'); return; }
   if (id.trim() === 'admin') { alert('该账号ID不可用'); return; }
   if ((S.users||[]).some(function(x){ return x.id === id.trim(); })) { alert('该账号ID已被注册'); return; }
   if ((S.companies||[]).some(function(c){ return c.loginId === id.trim(); })) { alert('该账号ID已被占用'); return; }
-  var rec = { id: id.trim(), company: company.trim(), pwdHash: adminPwdHash(pwd), role:'learner', createdAt: Date.now() };
+  var rec = { id: id.trim(), company: company.trim(), phone: phone, pwdHash: adminPwdHash(pwd), role:'learner', createdAt: Date.now() };
   DB.put('users', rec); S.users = DB.all('users');
-  var s = { user: company.trim(), name: company.trim(), role:'learner', company: company.trim(), phone:'', loginId: id.trim(), loginType:'user', verified:true };
+  var s = { user: company.trim(), name: company.trim(), role:'learner', company: company.trim(), phone: phone, loginId: id.trim(), loginType:'user', verified:true };
   localStorage.setItem('ai_training_session', JSON.stringify(s));
   S.mintCloudToken({ type:'user', loginId: id.trim(), password: pwd }); // v75b：注册用户租户 JWT
   recordAccess('login'); showToast('注册成功，已自动登录'); S.view='role'; render();
@@ -7446,12 +7451,14 @@ function renderLoginV2(){
     html += '<div class="login-hint">管理员：ID 填 <b>admin</b> + 管理员密码；企业账号：管理员分配的 CO-XXXX + 密码；注册用户：注册时的 ID + 密码。</div>';
   } else if (mode === 'guest') {
     html += '<div class="login-field"><label>公司名称</label><input id="guestCompany" placeholder="请输入公司名称"></div>';
+    html += '<div class="login-field"><label>个人登录ID</label><input id="guestLoginId" placeholder="3-20位字母/数字/下划线（用于识别您的身份）"></div>';
     html += '<div class="login-field"><label>手机号码</label><input id="guestPhone" placeholder="11位手机号" inputmode="numeric"></div>';
     html += '<div class="login-field row"><input id="guestCode" placeholder="验证码"><button class="login-submit" id="sendCodeBtn" style="width:auto;margin:0;padding:11px 14px" data-action="sendCode">获取验证码</button></div>';
     html += '<button class="login-submit" data-action="doLoginGuest">游客进入</button>';
   } else {
     html += '<div class="login-field"><label>公司名称</label><input id="regCompany" placeholder="请输入公司名称"></div>';
-    html += '<div class="login-field"><label>账号ID</label><input id="regId" placeholder="3-20位字母/数字/下划线"></div>';
+    html += '<div class="login-field"><label>个人登录ID</label><input id="regId" placeholder="3-20位字母/数字/下划线"></div>';
+    html += '<div class="login-field"><label>手机号码</label><input id="regPhone" placeholder="11位手机号" inputmode="numeric"></div>';
     html += '<div class="login-field"><label>密码</label><div class="login-pwd-wrap"><input id="regPwd" type="password" placeholder="至少6位"><span class="login-pwd-eye" data-action="togglePwd" data-id="regPwd">👁️</span></div></div>';
     html += '<div class="login-field"><label>确认密码</label><div class="login-pwd-wrap"><input id="regPwd2" type="password" placeholder="再次输入密码"><span class="login-pwd-eye" data-action="togglePwd" data-id="regPwd2">👁️</span></div></div>';
     html += '<button class="login-submit" data-action="doRegister">注册并登录</button>';
