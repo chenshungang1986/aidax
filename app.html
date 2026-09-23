@@ -703,6 +703,22 @@
 .req-card h4{font-size:14px;font-weight:700;margin-bottom:6px;}
 .req-card .rc-desc{font-size:12.5px;color:var(--text2);white-space:pre-wrap;line-height:1.6;}
 .req-card .rc-meta{font-size:11.5px;color:var(--text3);margin-top:8px;}
+.req-card .rc-overview{font-size:12px;color:var(--text2);margin:6px 0 8px;padding:7px 10px;background:var(--blue-bg);border-radius:8px;}
+.req-card .rc-rec{font-size:12.5px;color:var(--purple);background:var(--purple-bg);border-radius:8px;padding:8px 10px;margin-bottom:10px;line-height:1.5;}
+.req-card .epic{border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:9px;background:rgba(255,255,255,0.4);}
+.req-card .epic-h{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+.req-card .epic-h b{font-size:13px;}
+.req-card .epic-meta{font-size:11px;color:var(--text3);margin-left:auto;}
+.req-card .epic-row{font-size:12px;color:var(--text2);margin:5px 0;line-height:1.55;display:flex;gap:8px;align-items:flex-start;}
+.req-card .epic-k{flex:0 0 56px;color:var(--text3);font-weight:600;}
+.req-card .quotes{display:flex;flex-direction:column;gap:4px;flex:1;}
+.req-card .quote{font-size:11.5px;color:var(--text1);background:#fff;border-left:3px solid var(--amber);padding:5px 8px;border-radius:0 7px 7px 0;}
+.req-card .moscow{display:inline-block;color:#fff;font-size:11px;font-weight:700;border-radius:6px;padding:2px 7px;min-width:26px;text-align:center;}
+.req-card .moscow.mw-sm{font-size:10px;padding:1px 6px;min-width:22px;}
+.req-card .rc-table-title{font-size:12px;font-weight:700;color:var(--text1);margin:12px 0 6px;}
+.req-card .rc-table{width:100%;border-collapse:collapse;font-size:11.5px;}
+.req-card .rc-table th,.req-card .rc-table td{border:1px solid var(--border);padding:5px 7px;text-align:left;color:var(--text2);}
+.req-card .rc-table th{background:var(--blue-bg);font-weight:600;}
 
 /* Sales plan */
 .plan-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
@@ -10110,6 +10126,133 @@ var VIEW_LABEL = {role:'场景/岗位选择', quiz:'测评', results:'能力结�
 var FB_TYPE = {text:{n:'文字',i:'✍️'}, image:{n:'截图',i:'🖼️'}, audio:{n:'语音',i:'🎙️'}, video:{n:'录屏',i:'🎬'}};
 var FB_STATUS = {new:'待处理', triaged:'处理中', done:'已解决'};
 var FB_SEV = {high:'高', mid:'中', low:'低'};
+// ===== 反馈产品分类与需求分析引擎（PM 级） =====
+// 产品分类：缺陷 / 功能建议 / 体验问题 / 其他（与 FB_TYPE 录入形态区分）
+var FB_CAT = {
+  bug:  {n:'功能缺陷', i:'🐞', d:'功能异常、报错、崩溃、数据错误'},
+  feat: {n:'功能建议', i:'💡', d:'新功能、能力增强、用户明确期望但缺失'},
+  ux:   {n:'体验问题', i:'😣', d:'操作繁琐、找不到入口、卡顿、文案歧义、视觉不适'},
+  other:{n:'其他',     i:'💬', d:'咨询、赞美、无法归入以上三类'}
+};
+// 主题聚类词表：反馈归入「问题域」，便于 PM 归并同类诉求
+var FB_TOPICS = [
+  {k:'登录与账号', kw:['登录','账号','密码','注册','验证码','企业','游客','身份','权限','管理员']},
+  {k:'测评与题目', kw:['测评','题目','测验','考试','答题','选项','得分','雷达','自适应','试卷','能力']},
+  {k:'课程与学习', kw:['课程','学习','视频','关卡','陪练','知识点','课件','任务','内容','作业']},
+  {k:'反馈与提交', kw:['反馈','提交','上传','截图','语音','录屏','附件','气泡','描述']},
+  {k:'性能与稳定', kw:['卡','慢','崩','闪退','白屏','加载','超时','响应','性能','掉线']},
+  {k:'界面与体验', kw:['界面','页面','布局','样式','颜色','图标','按钮','导航','菜单','字体','适配','手机','移动端','pc','居中','遮挡']},
+  {k:'数据与同步', kw:['同步','云端','数据','保存','丢失','存储','缓存','本地','刷新']},
+  {k:'管理后台', kw:['后台','管理','看板','汇总','统计','分析','员工','报表']}
+];
+function classifyFeedback(text){
+  text = (text || '') + '';
+  var s = {bug:0, feat:0, ux:0};
+  ['报错','错误','崩','闪退','打不开','无法','不能','失效','白屏','卡死','异常','乱码','丢失','失败','不对','重复','bug','404','无反应','没反应','提示错误'].forEach(function(w){ if(text.indexOf(w)>=0) s.bug++; });
+  ['希望','建议','增加','添加','支持','期待','想要','最好能','能否','能不能','希望有','上新','拓展','能不能加','应该提供','缺少','没有','需要','功能'].forEach(function(w){ if(text.indexOf(w)>=0) s.feat++; });
+  ['太慢','太卡','卡顿','找不到','难找','复杂','繁琐','麻烦','看不懂','不清楚','不明显','丑','难用','体验','布局','样式','太小','太大','遮挡','误触','引导','提示不清','别扭','绕','步骤多','点不到'].forEach(function(w){ if(text.indexOf(w)>=0) s.ux++; });
+  var best='other', bn=0;
+  ['bug','feat','ux'].forEach(function(c){ if(s[c]>bn){ bn=s[c]; best=c; } });
+  return best;
+}
+function topicOfFeedback(f){
+  var text = (f.text || '') + ' ' + (f.page || '');
+  // 页面 → 主题优先映射（反馈发生在某页面，大概率属于该域）
+  var PAGE_TOPIC = {
+    '登录':'登录与账号','login':'登录与账号',
+    '测评':'测评与题目','能力结果':'测评与题目','终极测验':'测评与题目','quiz':'测评与题目','results':'测评与题目',
+    '课程学习':'课程与学习','学习地图':'课程与学习','闯关地图':'课程与学习','闯关练习':'课程与学习','任务提交':'课程与学习',
+    'course':'课程与学习','map':'课程与学习','quest':'课程与学习','questmap':'课程与学习','task':'课程与学习',
+    '管理后台':'管理后台','admin':'管理后台',
+    '场景/岗位选择':'反馈与提交','role':'反馈与提交'
+  };
+  var best=null, bn=-1;
+  FB_TOPICS.forEach(function(t){
+    var n = (PAGE_TOPIC[f.page] === t.k) ? 5 : 0; // 页面命中给强权重
+    t.kw.forEach(function(w){ if(text.indexOf(w)>=0) n++; });
+    if(n>bn){ bn=n; best=t.k; }
+  });
+  return best || (f.page || '未分类页面');
+}
+function sevNum(s){ return s==='high'?3 : s==='low'?1 : 2; }
+function rootHypothesis(e){
+  if(e.domCat==='bug')  return '「'+e.topic+'」在部分路径/数据组合下未正确处理，触发异常或错误结果；需结合代表反馈复现并定位代码分支。';
+  if(e.domCat==='feat') return '「'+e.topic+'」场景用户有明确诉求但产品未覆盖，属能力缺口；建议明确用户故事与验收标准后排入迭代。';
+  if(e.domCat==='ux')   return '「'+e.topic+'」交互/信息架构/视觉未贴合用户心智，导致操作成本高或理解偏差；建议还原用户路径后优化。';
+  return '「'+e.topic+'」收到多条反馈，性质待人工甄别，建议结合原文判断是否归并为缺陷或需求。';
+}
+function solutionTemplate(e){
+  if(e.domCat==='bug')  return '① 复现代表路径 → ② 定位根因（前端/接口/数据）→ ③ 修复并补回归用例 → ④ 灰度验证后全量。';
+  if(e.domCat==='feat') return '① 写用户故事与验收标准 → ② 评估工作量与依赖 → ③ 排期开发 → ④ 上线后回收使用数据。';
+  if(e.domCat==='ux')   return '① 还原用户操作路径 → ② 优化交互/文案/布局（可出原型）→ ③ 小范围可用性验证 → ④ 全量并监控指标。';
+  return '先人工定性，再按对应类型推进。';
+}
+// 核心：把一批反馈转成 PM 需求分析
+function analyzeFeedback(items){
+  var catCount = {bug:0, feat:0, ux:0, other:0};
+  items.forEach(function(f){ f._cat = f.cat || classifyFeedback(f.text); catCount[f._cat]++; });
+  var groups = {};
+  items.forEach(function(f){ var t = topicOfFeedback(f); (groups[t] = groups[t] || []).push(f); });
+  var epics = Object.keys(groups).map(function(t){
+    var ms = groups[t], catMix={bug:0,feat:0,ux:0,other:0}, sevMix={high:0,mid:0,low:0};
+    var pages={}, inds={}, comps={}, sevScore=0, quotes=[];
+    ms.forEach(function(f){
+      catMix[f._cat]++; sevMix[f.sev||'mid']++;
+      pages[f.page||'—']=1; if(f.industry) inds[f.industry]=1; if(f.company) comps[f.company]=1;
+      sevScore += sevNum(f.sev);
+      quotes.push({sev:f.sev||'mid', text:f.text||'（无文字，见附件）', user:f.user||''});
+    });
+    quotes.sort(function(a,b){ return sevNum(b.sev)-sevNum(a.sev); });
+    var reach = Object.keys(pages).length + Object.keys(inds).length*0.5 + Object.keys(comps).length*0.5;
+    var freq = ms.length;
+    var score = Math.round(freq * sevScore * (1 + reach) * 10) / 10;
+    var dom='other', dn=0; Object.keys(catMix).forEach(function(c){ if(catMix[c]>dn){ dn=catMix[c]; dom=c; } });
+    var hasHigh = sevMix.high>0, moscow, rank;
+    if((hasHigh && freq>=2) || (reach>=3 && freq>=2) || freq>=4){ moscow='P0'; rank=0; }
+    else if(freq>=2 || sevScore>=4){ moscow='P1'; rank=1; }
+    else if(sevMix.low>0 && freq===1){ moscow='P3'; rank=3; }
+    else { moscow='P2'; rank=2; }
+    return { topic:t, members:ms.map(function(f){ return f.id; }), count:freq, catMix:catMix, sevMix:sevMix,
+      domCat:dom, pages:Object.keys(pages), industries:Object.keys(inds), companies:Object.keys(comps),
+      reach:Math.round(reach*10)/10, sevScore:sevScore, score:score, moscow:moscow, rank:rank,
+      quotes:quotes.slice(0,3) };
+  });
+  epics.sort(function(a,b){ return (a.rank-b.rank) || (b.score-a.score); });
+  epics.forEach(function(e){ e.root = rootHypothesis(e); e.solution = solutionTemplate(e); });
+  return { catCount:catCount, total:items.length, epics:epics,
+    doNow:epics.filter(function(e){ return e.moscow==='P0'||e.moscow==='P1'; }),
+    later:epics.filter(function(e){ return e.moscow==='P2'||e.moscow==='P3'; }) };
+}
+function buildReqMarkdown(A, title, recLine){
+  var L = [];
+  L.push('# ' + title);
+  L.push('');
+  L.push('> 样本 ' + A.total + ' 条 · 分类：' + Object.keys(A.catCount).filter(function(c){return A.catCount[c];}).map(function(c){return FB_CAT[c].i+FB_CAT[c].n+' '+A.catCount[c];}).join(' / '));
+  L.push('');
+  L.push('## 一、数据概览');
+  L.push('- 样本量：' + A.total + ' 条');
+  L.push('- 缺陷 ' + A.catCount.bug + ' / 功能建议 ' + A.catCount.feat + ' / 体验问题 ' + A.catCount.ux + ' / 其他 ' + A.catCount.other);
+  L.push('- 归并主题数：' + A.epics.length + ' 个');
+  L.push('');
+  L.push('## 二、需求主题与优先级（P0→P3）');
+  A.epics.forEach(function(e){
+    L.push('');
+    L.push('### [' + e.moscow + '] ' + e.topic + '（频次 ' + e.count + ' / 主导 ' + FB_CAT[e.domCat].n + ' / 评分 ' + e.score + '）');
+    L.push('- 分类构成：' + Object.keys(e.catMix).filter(function(c){return e.catMix[c];}).map(function(c){return FB_CAT[c].n+' '+e.catMix[c];}).join('、'));
+    L.push('- 影响面：页面【' + e.pages.join('、') + '】' + (e.industries.length?' · 行业【'+e.industries.join('、')+'】':'') + (e.companies.length?' · 企业【'+e.companies.join('、')+'】':''));
+    L.push('- 代表原声：');
+    e.quotes.forEach(function(q){ L.push('  - [' + FB_SEV[q.sev] + '] ' + q.text); });
+    L.push('- 根因假设：' + e.root);
+    L.push('- 建议方案：' + e.solution);
+  });
+  L.push('');
+  L.push('## 三、迭代建议');
+  L.push('- 本迭代优先：' + (A.doNow.length ? A.doNow.map(function(e){return e.topic+'('+e.moscow+')';}).join('、') : '无高优项'));
+  L.push('- 后续需求池：' + (A.later.length ? A.later.map(function(e){return e.topic+'('+e.moscow+')';}).join('、') : '无'));
+  L.push('');
+  L.push('> ' + recLine);
+  return L.join('\n');
+}
 
 // ---- 访问日志（#2 看板「访问情况」数据源）----
 var _accessThrottle = {};
@@ -10310,6 +10453,12 @@ function fbModalHtml(){
     html += '<button class="chip ' + (sev === k ? 'active' : '') + '" onclick="S.fbSev(\'' + k + '\')">' + FB_SEV[k] + '</button>';
   });
   html += '</div>';
+  var fcat = S._fbCat || '';
+  html += '<div class="sev-row"><span class="sev-lbl">反馈类型</span>';
+  Object.keys(FB_CAT).forEach(function(k){
+    html += '<button class="chip ' + (fcat === k ? 'active' : '') + '" onclick="S.fbSetCat(\'' + k + '\')">' + FB_CAT[k].i + FB_CAT[k].n + '</button>';
+  });
+  html += '</div>';
   html += '<p style="font-size:11.5px;color:var(--text3);margin-top:12px">当前页面：' + (VIEW_LABEL[S.view] || S.view || '—') + '（自动附带，便于定位）</p>';
   html += '</div><div class="fb-foot">'
         + '<button class="btn btn-outline" style="flex:1" onclick="S.fbClose()">取消</button>'
@@ -10392,6 +10541,7 @@ S.fbClose = function(){
 };
 S.fbSetType = function(t){ fbSaveEditor(); S._fbType = t; fbRenderInner(); };
 S.fbSev = function(v){ fbSaveEditor(); S._fbSev = v; fbRenderInner(); };
+S.fbSetCat = function(c){ fbSaveEditor(); S._fbCat = c; fbRenderInner(); };
 S.fbClearMedia = function(){ S._fbMedia = {}; fbRenderInner(); };
 
 function fbReadImage(file, cb){
@@ -10467,15 +10617,16 @@ S.fbSubmit = function(){
   if (!text && !imgs.length && !media.audio && !media.video) { showToast('请填写描述或粘贴/附加截图'); return; }
   var session = JSON.parse(localStorage.getItem('ai_training_session') || '{}');
   var type = imgs.length ? 'image' : (media.audio ? 'audio' : (media.video ? 'video' : 'text'));
+  var cat = S._fbCat || classifyFeedback(text); // 用户自选优先，否则关键词分类
   DB.put('feedback', {
     id: uid('f_'), ts: Date.now(),
     user: session.user || '游客', role: session.role || '', company: session.company || '',
-    type: type, sev: S._fbSev || 'mid',
+    type: type, sev: S._fbSev || 'mid', cat: cat,
     text: text, images: imgs, media: media, ownerKey: currentOwnerKey(), // v75b：服务端按 ownerKey 隔离
     page: VIEW_LABEL[S.view] || S.view || '', industry: S.industry || '',
     status: 'new'
   });
-  S._fbText = ''; S._fbImages = []; S._fbHtml = ''; S._fbMedia = {}; S._fbType = 'text'; S._fbSev = 'mid';
+  S._fbText = ''; S._fbImages = []; S._fbHtml = ''; S._fbMedia = {}; S._fbType = 'text'; S._fbSev = 'mid'; S._fbCat = '';
   S.fbClose();
   if (sbClient()) showToast('反馈已提交，感谢！');
   else showToast('已保存到本地，联网后将自动同步到后台');
@@ -10488,40 +10639,43 @@ S.fbToggleSel = function(id){
   S._fbSel[id] = !S._fbSel[id];
   if (S.view === 'admin') render(); // 仅在后台视图重渲染，避免侵入学员侧渲染状态
 };
+// 汇总为产品需求（PM 级）：分类 → 聚类 → 根因/方案 → 优先级 → 迭代建议
 S.fbAggregate = function(){
   var sel = S._fbSel || {};
   var ids = Object.keys(sel).filter(function(k){ return sel[k]; });
   if (!ids.length) { showToast('请先勾选要汇总的反馈'); return; }
   var items = DB.all('feedback').filter(function(f){ return ids.indexOf(f.id) >= 0; });
   if (!items.length) { showToast('未找到对应反馈'); return; }
-  var byType = {}, bySev = {high:0, mid:0, low:0}, byPage = {};
-  items.forEach(function(f){
-    byType[f.type] = (byType[f.type] || 0) + 1;
-    bySev[f.sev] = (bySev[f.sev] || 0) + 1;
-    byPage[f.page || '未标注'] = (byPage[f.page || '未标注'] || 0) + 1;
-  });
-  var topPage = Object.keys(byPage).sort(function(a,b){ return byPage[b] - byPage[a]; })[0] || '全局';
-  var typeStr = Object.keys(byType).map(function(t){ return FB_TYPE[t] ? FB_TYPE[t].n : t; }).join(' / ');
-  var desc = '来源：' + items.length + ' 条用户反馈（' + typeStr + '），其中高优先级 ' + bySev.high + ' 条。\n'
-           + '集中页面：' + topPage + '\n\n反馈原文摘要：\n';
-  items.forEach(function(f, i){
-    desc += (i + 1) + '. [' + (FB_TYPE[f.type] ? FB_TYPE[f.type].n : f.type) + '｜'
-          + (FB_SEV[f.sev] || '中') + '] ' + (f.text || '（无文字描述，见附件）') + '\n';
-  });
-  desc += '\n建议处理方向：\n'
-        + '- 复现 ' + topPage + ' 页面的触发路径，定位根因\n'
-        + '- 评估影响面（涉及角色 / 行业 / 设备终端）\n'
-        + '- 输出修复方案与回归用例，排入下一迭代';
+  var A = analyzeFeedback(items);
+  var catLine = Object.keys(A.catCount).filter(function(c){ return A.catCount[c]; })
+    .map(function(c){ return FB_CAT[c].i + FB_CAT[c].n + ' ' + A.catCount[c]; }).join('，');
+  var title = '用户反馈需求分析 · ' + new Date().toLocaleDateString('zh-CN') + '（' + A.total + ' 条 / ' + catLine + '）';
+  var recLine = A.doNow.length
+    ? ('建议本迭代优先处理 ' + A.doNow.length + ' 个主题：' + A.doNow.map(function(e){ return e.topic + '(' + e.moscow + ')'; }).join('、') + '。')
+    : '本批反馈暂无高优项，建议纳入常规需求池评估。';
+  var md = buildReqMarkdown(A, title, recLine);
   DB.put('requirements', {
-    id: uid('r_'), ts: Date.now(),
-    title: '【' + topPage + '】' + items.length + ' 条用户反馈待优化',
-    desc: desc, src: ids, status: 'todo',
+    id: uid('r_'), ts: Date.now(), title: title,
+    desc: md, analysis: A, src: ids, status: 'todo', rec: recLine,
     company: (items[0] && items[0].company) || getSessionSafe().company || ''
   });
   items.forEach(function(f){ f.status = 'triaged'; DB.put('feedback', f); });
   S._fbSel = {};
-  showToast('已汇总为 1 条产品迭代需求');
+  showToast('已生成 PM 需求分析（' + A.epics.length + ' 个主题 / ' + A.total + ' 条反馈）');
   if (S.view === 'admin') render();
+};
+// 复制需求文档（markdown）到剪贴板
+S.reqCopy = function(id){
+  var r = DB.get('requirements', id); if (!r) return;
+  var txt = r.desc || '';
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt);
+    else {
+      var ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    }
+    showToast('需求文档已复制，可粘贴到 PRD / 飞书 / 企微');
+  } catch(e){ showToast('复制失败，请手动选择文本'); }
 };
 S.fbStatus = function(id, st){
   var f = DB.get('feedback', id);
@@ -10783,6 +10937,51 @@ function renderAdminCompany() {
   return html;
 }
 
+// 结构化渲染 PM 需求分析卡片（兼容旧版 desc 字符串）
+function renderRequirementCard(r, REQ_ST){
+  REQ_ST = REQ_ST || {todo:'待排期', doing:'开发中', done:'已上线'};
+  var A = r.analysis;
+  var head = '<div class="req-card"><h4>' + escapeHtml(r.title) + '</h4>';
+  if (!A) {
+    head += '<div class="rc-desc">' + escapeHtml(r.desc || '') + '</div>';
+  } else {
+    var catLine = Object.keys(A.catCount).filter(function(c){ return A.catCount[c]; })
+      .map(function(c){ return FB_CAT[c].i + FB_CAT[c].n + ' ' + A.catCount[c]; }).join(' · ');
+    head += '<div class="rc-overview">样本 ' + A.total + ' 条 · ' + catLine + ' · 归并 ' + A.epics.length + ' 个主题</div>';
+    // 迭代建议
+    head += '<div class="rc-rec">📌 ' + escapeHtml(r.rec || '') + '</div>';
+    // 主题卡片
+    A.epics.forEach(function(e){
+      var mColor = e.moscow==='P0' ? 'var(--red)' : e.moscow==='P1' ? 'var(--amber)' : e.moscow==='P2' ? 'var(--blue)' : 'var(--text3)';
+      head += '<div class="epic">';
+      head += '<div class="epic-h"><span class="moscow" style="background:' + mColor + '">' + e.moscow + '</span>'
+            + '<b>' + escapeHtml(e.topic) + '</b><span class="epic-meta">频次 ' + e.count + ' · 主导 ' + FB_CAT[e.domCat].n + ' · 评分 ' + e.score + '</span></div>';
+      head += '<div class="epic-row"><span class="epic-k">分类</span>' + Object.keys(e.catMix).filter(function(c){return e.catMix[c];}).map(function(c){return '<span class="tag tag-purple">'+FB_CAT[c].i+FB_CAT[c].n+' '+e.catMix[c]+'</span>';}).join('') + '</div>';
+      head += '<div class="epic-row"><span class="epic-k">影响面</span>页面【' + (e.pages.join('、')||'—') + '】'
+            + (e.industries.length?' · 行业【'+e.industries.join('、')+'】':'') + (e.companies.length?' · 企业【'+e.companies.join('、')+'】':'') + '</div>';
+      head += '<div class="epic-row"><span class="epic-k">代表原声</span><div class="quotes">'
+            + e.quotes.map(function(q){ return '<div class="quote">[' + FB_SEV[q.sev] + '] ' + escapeHtml(q.text) + '</div>'; }).join('') + '</div></div>';
+      head += '<div class="epic-row"><span class="epic-k">根因假设</span>' + escapeHtml(e.root) + '</div>';
+      head += '<div class="epic-row"><span class="epic-k">建议方案</span>' + escapeHtml(e.solution) + '</div>';
+      head += '</div>';
+    });
+    // 优先级总表
+    head += '<div class="rc-table-title">优先级总表（P0→P3）</div><table class="rc-table"><thead><tr><th>优先级</th><th>主题</th><th>频次</th><th>主导</th><th>评分</th></tr></thead><tbody>';
+    A.epics.forEach(function(e){
+      head += '<tr><td><span class="moscow mw-sm" style="background:' + (e.moscow==='P0'?'var(--red)':e.moscow==='P1'?'var(--amber)':e.moscow==='P2'?'var(--blue)':'var(--text3)') + '">' + e.moscow + '</span></td>'
+            + '<td>' + escapeHtml(e.topic) + '</td><td>' + e.count + '</td><td>' + FB_CAT[e.domCat].n + '</td><td>' + e.score + '</td></tr>';
+    });
+    head += '</tbody></table>';
+  }
+  head += '<div class="rc-meta">' + fmtTs(r.ts) + ' · 关联 ' + (r.src||[]).length + ' 条反馈 · 状态：' + (REQ_ST[r.status||'todo']||r.status) + '</div>';
+  head += '<div class="fi-meta">'
+    + '<button class="chip" data-action="reqCopy" data-id="' + r.id + '">📋 复制需求文档</button>'
+    + '<button class="chip" data-action="reqStatus" data-id="' + r.id + '" data-st="doing">开发中</button>'
+    + '<button class="chip" data-action="reqStatus" data-id="' + r.id + '" data-st="done">已上线</button>'
+    + '</div></div>';
+  return head;
+}
+
 function renderAdminFeedback() {
   // v75：企业账号仅看本企业反馈/需求（管理员看全部；无归属的历史记录仅管理员可见）
   var _s = getSessionSafe();
@@ -10814,6 +11013,7 @@ function renderAdminFeedback() {
         <div class="fi-top">
           <span class="tag tag-blue">${FB_TYPE[f.type]?FB_TYPE[f.type].i+' '+FB_TYPE[f.type].n:f.type}</span>
           <span class="tag ${f.sev==='high'?'tag-red':f.sev==='low'?'tag-green':'tag-amber'}">${FB_SEV[f.sev]||'中'}优先级</span>
+          <span class="tag tag-purple">${FB_CAT[f.cat||classifyFeedback(f.text)]?FB_CAT[f.cat||classifyFeedback(f.text)].i+' '+FB_CAT[f.cat||classifyFeedback(f.text)].n:'其他'}</span>
           <span class="status-pill status-${f.status||'new'}">${FB_STATUS[f.status||'new']}</span>
           <span style="margin-left:auto;font-size:11.5px;color:var(--text3)">${fmtTs(f.ts)} · ${escapeHtml(f.user||'')}</span>
         </div>
@@ -10846,15 +11046,7 @@ function renderAdminFeedback() {
   }
   var REQ_ST = {todo:'待排期', doing:'开发中', done:'已上线'};
   reqs.forEach(function(r){
-    html += `<div class="req-card">
-      <h4>${escapeHtml(r.title)}</h4>
-      <div class="rc-desc">${escapeHtml(r.desc)}</div>
-      <div class="rc-meta">${fmtTs(r.ts)} · 关联 ${(r.src||[]).length} 条反馈 · 状态：${REQ_ST[r.status||'todo']}</div>
-      <div class="fi-meta">
-        <button class="chip" data-action="reqStatus" data-id="${r.id}" data-st="doing">开发中</button>
-        <button class="chip" data-action="reqStatus" data-id="${r.id}" data-st="done">已上线</button>
-      </div>
-    </div>`;
+    html += renderRequirementCard(r, REQ_ST);
   });
   html += `</div>`;
   return html;
@@ -11604,6 +11796,7 @@ function bindEvents() {
             case 'fbDelete': S.fbDelete(id); break;
             case 'fbRefresh': S.fbRefresh(); break;
             case 'reqStatus': S.reqStatus(id, el.getAttribute('data-st')); break;
+            case 'reqCopy': S.reqCopy(id); break;
             case 'genSalesPlan': S.genSalesPlan(); break;
             case 'copyPlan': S.copyPlan(); break;
             case 'downloadPlan': S.downloadPlan(); break;
