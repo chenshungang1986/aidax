@@ -6866,7 +6866,9 @@ const S = {
   companies: JSON.parse(localStorage.getItem('aidax_companies') || '[]'),
   users: JSON.parse(localStorage.getItem('aidax_users') || '[]'),
   adminLogFilter: { date:'', month:'' },
-  _sms: null, _loginTab: 'personal', _lastCompanyCreds: null
+  _sms: null, _loginTab: 'personal', _lastCompanyCreds: null,
+  _cloudJwt: localStorage.getItem('aidax_cloud_jwt') || null, // v75b：登录后由 mint-token 签发，sbClient 优先使用；无则回退 anon
+  _cloudJwtAt: parseInt(localStorage.getItem('aidax_cloud_jwt_at') || '0', 10) || 0
 };
 
 function saveEmployees() {
@@ -7309,6 +7311,8 @@ S.doLoginAccount = function(){
   // 管理员（ID=admin + 管理员密码）
   if (id.trim() === 'admin' && adminPwdHash(pwd) === getAdminPwdHash()) {
     localStorage.setItem('ai_training_session', JSON.stringify({ user:'管理员', role:'admin', loginType:'admin' }));
+    // v75b：签发管理员租户 JWT；成功回调内把管理员哈希写入 config 表（供 Edge Function 校验，首次为空时回退默认）
+    S.mintCloudToken({ type:'admin', loginId:'admin', password: pwd }, function(){ DB.put('config', { id:'admin', pwdHash: getAdminPwdHash() }); });
     if (sbClient()) { DB.hydrate(function(){ S.companies = DB.all('companies'); S.users = DB.all('users'); S.view='admin'; render(); }); }
     else { S.view='admin'; render(); }
     return;
@@ -7318,6 +7322,7 @@ S.doLoginAccount = function(){
   if (co && co.active && co.pwdHash === adminPwdHash(pwd)) {
     var se = { user: co.name, name: co.name, role:'ent', company: co.name, companyId: co.id, loginType:'ent', verified:true };
     localStorage.setItem('ai_training_session', JSON.stringify(se));
+    S.mintCloudToken({ type:'ent', loginId: id.trim(), password: pwd }); // v75b：企业租户 JWT
     recordAccess('login'); S.view='admin'; render(); return;
   }
   // 注册用户
@@ -7325,6 +7330,7 @@ S.doLoginAccount = function(){
   if (u && u.pwdHash === adminPwdHash(pwd)) {
     var su = { user: u.company || id.trim(), name: u.company || id.trim(), role:'learner', company: u.company || '', phone:'', loginId: u.id, loginType:'user', verified:true };
     localStorage.setItem('ai_training_session', JSON.stringify(su));
+    S.mintCloudToken({ type:'user', loginId: id.trim(), password: pwd }); // v75b：注册用户租户 JWT
     recordAccess('login'); S.view='role'; render(); return;
   }
   alert('账号或密码错误');
@@ -7338,6 +7344,7 @@ S.doLoginGuest = function(){
   if (!S.verifyCode(phone, code)) { alert('验证码错误或已过期，请重新获取'); return; }
   var s = { user: company.trim(), name: company.trim(), role:'learner', company: company.trim(), phone: phone, loginType:'guest', verified:true };
   localStorage.setItem('ai_training_session', JSON.stringify(s));
+  S.mintCloudToken({ type:'guest', company: company.trim(), phone: phone }); // v75b：游客租户 JWT（无密码，限本人 ownerKey）
   recordAccess('login'); S.view='role'; render();
 };
 S.doRegister = function(){
@@ -7356,6 +7363,7 @@ S.doRegister = function(){
   DB.put('users', rec); S.users = DB.all('users');
   var s = { user: company.trim(), name: company.trim(), role:'learner', company: company.trim(), phone:'', loginId: id.trim(), loginType:'user', verified:true };
   localStorage.setItem('ai_training_session', JSON.stringify(s));
+  S.mintCloudToken({ type:'user', loginId: id.trim(), password: pwd }); // v75b：注册用户租户 JWT
   recordAccess('login'); showToast('注册成功，已自动登录'); S.view='role'; render();
 };
 function renderLoginV2(){
@@ -10006,11 +10014,55 @@ function sbClient(){
   if (_sbClient === null) return null;
   var cfg = cloudConfig();
   if (cfg && typeof window.supabase !== 'undefined') {
-    try { _sbClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey); DB.mode = 'cloud'; outboxFlush(); return _sbClient; }
+    try {
+      // v75b：优先用登录后签发的租户 JWT；无或过期则回退 anon（现行行为，RLS 收紧前不影响）
+      var jwt = (typeof S !== 'undefined' && S._cloudJwt && (Date.now() - (S._cloudJwtAt || 0) < 60*60*1000)) ? S._cloudJwt : null;
+      var key = jwt || cfg.supabaseAnonKey;
+      _sbClient = window.supabase.createClient(cfg.supabaseUrl, key); DB.mode = 'cloud'; outboxFlush(); return _sbClient;
+    }
     catch(e){ _sbClient = null; return null; }
   }
   return null; // supabase 延迟加载中：本次不建连，留待其就绪后触发
 }
+
+// v75b：登录后向 Edge Function(mint-token) 换取租户 JWT；失败则清空、回退 anon（不影响现有云同步）
+S.mintCloudToken = function(meta, cb){
+  cb = cb || function(){};
+  try {
+    var cfg = cloudConfig();
+    if (!cfg || !cfg.supabaseUrl) { cb(); return; }
+    var fnUrl = cfg.supabaseUrl.replace(/\/$/, '') + '/functions/v1/mint-token';
+    var body = Object.assign({ ownerKey: currentOwnerKey() }, meta || {});
+    fetch(fnUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': cfg.supabaseAnonKey, 'Authorization': 'Bearer ' + cfg.supabaseAnonKey },
+      body: JSON.stringify(body)
+    }).then(function(r){ return r.json(); }).then(function(j){
+      if (j && j.jwt) {
+        S._cloudJwt = j.jwt; S._cloudJwtAt = Date.now();
+        localStorage.setItem('aidax_cloud_jwt', j.jwt);
+        localStorage.setItem('aidax_cloud_jwt_at', String(S._cloudJwtAt));
+        // JWT 换了 key，旧的 client 缓存失效，下次 sbClient 重建
+        _sbClient = undefined;
+        cb(j);
+      } else {
+        S._cloudJwt = null; localStorage.removeItem('aidax_cloud_jwt');
+        cb();
+      }
+    }).catch(function(){ S._cloudJwt = null; localStorage.removeItem('aidax_cloud_jwt'); cb(); });
+  } catch(e){ S._cloudJwt = null; cb(); }
+};
+// 定时续期（JWT 1h 有效，50min 时若仍有会话则重签）。
+// 仅游客可无密码续期；企业/管理员/注册密码不落地，超期后由重新登录续签（期间云端降级为本地）。
+setInterval(function(){
+  try {
+    if (!S._cloudJwt) return;
+    if (Date.now() - (S._cloudJwtAt || 0) < 50*60*1000) return;
+    var s = getSessionSafe();
+    if (!s || !s.role) { S._cloudJwt = null; localStorage.removeItem('aidax_cloud_jwt'); return; }
+    if (s.loginType === 'guest') S.mintCloudToken({ type:'guest', company: s.company, phone: s.phone });
+  } catch(e){}
+}, 5*60*1000);
 
 // 员工档案云端镜像（S.employees 本地优先 + 异步同步；id 为 upsert 主键）
 function cloudPushEmployee(emp){
@@ -10419,7 +10471,7 @@ S.fbSubmit = function(){
     id: uid('f_'), ts: Date.now(),
     user: session.user || '游客', role: session.role || '', company: session.company || '',
     type: type, sev: S._fbSev || 'mid',
-    text: text, images: imgs, media: media,
+    text: text, images: imgs, media: media, ownerKey: currentOwnerKey(), // v75b：服务端按 ownerKey 隔离
     page: VIEW_LABEL[S.view] || S.view || '', industry: S.industry || '',
     status: 'new'
   });
