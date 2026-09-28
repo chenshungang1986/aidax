@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>金融 + 产品经理 AI 实战 · 课程播放器（B-2）</title>
+<style>
+  :root{
+    --blue:#2563eb; --blue-bg:#eff4ff; --blue-d:#1e40af;
+    --text:#1f2937; --text2:#6b7280; --border:#e5e7eb; --bg:#f8fafc;
+    --green:#16a34a; --green-bg:#ecfdf5; --amber:#d97706; --amber-bg:#fffbeb;
+    --radius:12px; --shadow:0 1px 3px rgba(0,0,0,.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+  header{padding:16px 24px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  header h1{font-size:18px;font-weight:700}
+  header .tag{font-size:12px;color:var(--blue);background:var(--blue-bg);padding:3px 10px;border-radius:20px}
+  .scenario{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .scenario label{font-size:12px;color:var(--text2)}
+  .scenario input{padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;width:120px}
+  .layout{display:flex;height:calc(100vh - 73px)}
+  .sidebar{width:280px;background:#fff;border-right:1px solid var(--border);overflow-y:auto;padding:12px}
+  .module{border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+  .module-head{padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px}
+  .module-head .dot{font-size:11px;color:var(--text2)}
+  .module-body{display:none;padding:0 8px 8px}
+  .module.open .module-body{display:block}
+  .tier-label{font-size:11px;color:var(--text2);padding:6px 6px 2px;font-weight:600}
+  .unit{padding:7px 10px;border-radius:8px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px}
+  .unit:hover{background:var(--blue-bg)}
+  .unit.active{background:var(--blue);color:#fff}
+  .unit .step{font-size:10px;padding:1px 6px;border-radius:6px;background:var(--bg);color:var(--text2);flex-shrink:0}
+  .unit.active .step{background:rgba(255,255,255,.25);color:#fff}
+  .main{flex:1;overflow-y:auto;padding:24px 32px}
+  .crumb{font-size:12px;color:var(--text2);margin-bottom:6px}
+  .utitle{font-size:22px;font-weight:700;margin-bottom:4px}
+  .umeta{font-size:13px;color:var(--text2);margin-bottom:18px}
+  .umeta .chip{display:inline-block;background:var(--blue-bg);color:var(--blue-d);padding:2px 9px;border-radius:20px;font-size:12px;margin-right:6px}
+  .tabs{display:flex;gap:6px;border-bottom:1px solid var(--border);margin-bottom:18px;flex-wrap:wrap}
+  .tab{padding:8px 14px;cursor:pointer;font-size:14px;color:var(--text2);border-bottom:2px solid transparent}
+  .tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
+  .panel{display:none;animation:fade .2s}
+  .panel.active{display:block}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
+  .card h3{font-size:15px;margin-bottom:10px;color:var(--blue-d);display:flex;align-items:center;gap:8px}
+  .card .badge{font-size:11px;background:var(--amber-bg);color:var(--amber);padding:2px 8px;border-radius:6px}
+  ul.li{list-style:none}
+  ul.li li{padding:6px 0 6px 20px;position:relative}
+  ul.li li:before{content:"▸";position:absolute;left:0;color:var(--blue)}
+  .ppt-page{border:1px dashed var(--border);border-radius:10px;padding:14px;margin-bottom:10px;background:#fcfdff}
+  .ppt-page .pg{font-size:11px;color:var(--blue);font-weight:700;letter-spacing:.5px}
+  .ppt-page .pg.case{color:var(--amber)} .ppt-page .pg.demo{color:var(--green)}
+  textarea{width:100%;min-height:90px;border:1px solid var(--border);border-radius:8px;padding:10px;font-family:ui-monospace,Menlo,monospace;font-size:13px;resize:vertical;background:#fcfdff}
+  .btn{display:inline-block;padding:8px 16px;background:var(--blue);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;margin-top:8px}
+  .btn.ghost{background:#fff;color:var(--blue);border:1px solid var(--blue)}
+  .deliver{background:var(--green-bg);border:1px solid #bbf7d0;color:#166534;padding:10px 14px;border-radius:8px;font-size:14px;margin-top:8px}
+  details.ex{border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-top:10px;background:#fcfdff}
+  summary{cursor:pointer;font-weight:600;color:var(--blue-d);font-size:14px}
+  .note{font-size:12px;color:var(--text2);background:var(--amber-bg);border:1px solid #fde68a;padding:10px 14px;border-radius:8px}
+  footer{padding:14px 24px;font-size:12px;color:var(--text2);background:#fff;border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+<header>
+  <h1>金融 + 产品经理 AI 实战</h1>
+  <span class="tag">B-2 播放器 · 全 64 单元已产出</span>
+  <div class="scenario">
+    <label>行业</label><input id="f-industry" value="消费金融">
+    <label>公司</label><input id="f-company" value="模拟银行 X">
+    <label>产品</label><input id="f-product" value="闪电贷">
+  </div>
+</header>
+<div class="layout">
+  <div class="sidebar" id="sidebar"></div>
+  <div class="main" id="main">
+    <div class="crumb" id="crumb"></div>
+    <div class="utitle" id="utitle">选择左侧单元开始</div>
+    <div class="umeta" id="umeta"></div>
+    <div class="tabs" id="tabs"></div>
+    <div id="panels"></div>
+  </div>
+</div>
+<footer>B-2 交付：8 模块 × 入门/进阶 × 四步 = 64 单元全部产出（视频脚本 + PPT 三页 + WorkBuddy 演示脚本 + 练习卡+示范 + 陪练角色/必问）。配音=火山豆包；真实陪练/演示 AI=DeepSeek API（B-4 接入）。视频/真实陪练接口在 B-4/B-5 接入。</footer>
+
+<script>
+/* ============ 课程数据 ============ */
+const COURSE = {
+  id:'fin_pm', role:'pm',
+  customization:{ industry:'消费金融', company:'模拟银行 X', product:'闪电贷' },
+  modules:[
+    /* ===================== M0 导论 ===================== */
+    { id:'M0', title:'导论：金融 PM 的 AI 机会与红线', dims:['strategy','security'],
+      units:[
+        { id:'M0U1', tier:'basic', step:'understand', title:'金融 PM 的 6 类 AI 机会与 3 条红线',
+          video:{ dur:'8min', script:[
+            '开场：为什么金融 PM 是 AI 落地最关键的角色之一（既要懂业务又要懂做产品）',
+            '6 类机会：洞察/研究/设计/分析/协同/合规，逐一对应日常痛点',
+            '3 条红线：数据不出域、不替人决策、可解释可追溯 —— 任何 AI 用法都不能越过'] },
+          ppt:{ method:'六类机会矩阵图 + 红线三原则清单（每张机会卡标注"AI 能帮/人要把关"）',
+                case:'某消费金融团队用 AI 把竞品监控周期从 2 周压到 1 天',
+                demo:'红线对照卡：把"贴客户数据进公开 AI"标记为高危' } },
+        { id:'M0U2', tier:'basic', step:'demo', title:'同一需求：踩红线 vs 守红线',
+          video:{ dur:'8min', script:['演示准备：一份含客户信息的产品需求','踩红线：整段粘贴到公开大模型 → 演示数据泄露风险','守红线：本地脱敏 + 仅给结构化字段 → 安全拿到 AI 辅助'] },
+          ppt:{ method:'红线判定三步法（识别敏感/脱敏/最小化）',
+                case:'需求文档脱敏前后对比示例（姓名/手机号/身份证 → 字段占位）',
+                demo:'WorkBuddy 脱敏操作截图位（粘贴→AI 返回脱敏版）' },
+          demoScript:{ steps:['打开 WorkBuddy，新建会话','粘贴「{{product}} 产品需求（已脱敏字段）」','输入提示词要求 AI 仅基于给定字段给建议'],
+            prompt:'你是金融产品经理的 AI 助手。以下是「{{product}}」已脱敏的产品需求字段：\n[粘贴脱敏后的需求]\n请仅基于以上字段，给出 3 条产品优化建议，不得要求补充任何敏感个人信息。' } },
+        { id:'M0U3', tier:'basic', step:'todo', title:'画一张你的 AI 提效地图',
+          video:{ dur:'8min', script:['任务说明：把你岗位的高频工作列出来','给每项标注：能否用 AI、用在哪一步、是否触红线','产出一张可分享的提效地图'] },
+          ppt:{ method:'提效地图模板（工作项 / AI 切入点 / 红线标注）',
+                case:'「{{product}}」团队提效地图样例（8 项工作 × 三列）',
+                demo:'地图填写操作指引（先列工作再标 AI 点）' },
+          practice:{ steps:['列出你本周 8 项主要工作','对每项填：AI 能帮哪一步 / 用什么工具 / 是否触红线','用模板汇成一张地图'],
+            exemplar:'工作项：竞品周报｜AI 切入：自动汇总公开信息并摘要｜红线：仅用公开来源，不贴内部数据\n工作项：需求评审｜AI 切入：预读 PRD 提 3 个漏洞｜红线：不涉及客户 PII' },
+          deliverable:'个人 AI 提效地图' },
+        { id:'M0U4', tier:'basic', step:'spar', title:'合规官挑战你的提效地图',
+          video:{ dur:'8min', script:['陪练说明：合规官会挑你地图里越过红线的点','目标：把每条红线标注补全，让合规官放行'] },
+          ppt:{ method:'合规挑战清单（数据/决策/可追溯）',
+                case:'典型越线写法 vs 合规写法（贴 PII vs 脱敏字段）',
+                demo:'陪练对话界面说明（在 WorkBuddy 内粘贴系统提示词）' },
+          spar:{ role:'合规官', persona:'严谨、只认制度，追问数据来源与可追溯性',
+            mustAsk:['这项 AI 用法涉及的数据是否可能包含客户个人信息？','如果 AI 给了错误建议，责任与可追溯链条怎么定？','有无"人最终决策"的卡点？'] },
+          deliverable:'个人 AI 提效地图（已通过合规挑战）' },
+        { id:'M0U5', tier:'adv', step:'understand', title:'组织级 AI 落地路线与治理',
+          video:{ dur:'8min', script:['从个人提效到团队落地：试点→推广→治理','ROI 怎么度量（效率/质量/风险三类指标）','人机协同治理：谁定规则、谁审计'] },
+          ppt:{ method:'落地三阶段路线图 + 治理三角（规则/审计/问责）',
+                case:'某银行 AI 提效治理框架（三层委员会）',
+                demo:'治理机制清单模板（数据/模型/输出三层）' } },
+        { id:'M0U6', tier:'adv', step:'demo', title:'模拟银行 PM 团队提效方案',
+          video:{ dur:'8min', script:['演示：把 M0U3 的个人地图合并成团队方案','加入治理机制与试点节奏'] },
+          ppt:{ method:'团队提效方案结构（机会/路线/治理）',
+                case:'「{{company}}」PM 团队方案节选（脱敏）',
+                demo:'WorkBuddy 生成团队方案演示（粘贴 3 份个人地图）' },
+          demoScript:{ steps:['汇总 3 份个人提效地图','让 WorkBuddy 归纳共性机会与风险','补治理机制与试点排期'],
+            prompt:'以下是 3 位「{{product}}」产品经理的 AI 提效地图摘要：\n[粘贴]\n请归纳共性机会、共性风险，并给出试点排期与治理机制建议，输出一页团队方案。' } },
+        { id:'M0U7', tier:'adv', step:'todo', title:'写一页部门 AI 规划',
+          video:{ dur:'8min', script:['任务：站部门负责人视角输出一页纸','含机会 / 路线 / 风险三块'] },
+          ppt:{ method:'一页纸规划模板（机会/路线/风险）',
+                case:'规划样例（脱敏）：3 机会 + 季度路线 + 3 风险',
+                demo:'填写指引（先机会后风险）' },
+          practice:{ steps:['选 3 个最高价值机会','写试点路线（季度）','列 3 类风险与对策'],
+            exemplar:'机会：竞品监控自动化、PRD 智能初稿、监管简报摘要\n路线：Q1 试点 PRD 初稿→Q2 推广→Q3 治理固化\n风险：数据泄露(脱敏)、幻觉(人审)、合规(红线条款)' },
+          deliverable:'部门 AI 规划一页纸' },
+        { id:'M0U8', tier:'adv', step:'spar', title:'高管答辩：追问 ROI 与风险',
+          video:{ dur:'8min', script:['陪练说明：高管只关心 ROI、战略对齐、风险','被问倒就回去补，直到放行'] },
+          ppt:{ method:'高管答辩高频问题清单（ROI/战略/风险）',
+                case:'高分回答 vs 低分回答对照',
+                demo:'陪练对话说明' },
+          spar:{ role:'高管', persona:'结果导向、不耐烦、逼你算清账',
+            mustAsk:['这事的 ROI 怎么算、多久回本？','和部门战略哪条对齐？','最坏风险是什么、你准备怎么兜？'] },
+          deliverable:'部门 AI 规划一页纸（已通过答辩）' }
+      ] },
+    /* ===================== M1 业务与监管洞察 ===================== */
+    { id:'M1', title:'用 AI 做金融业务与监管洞察', dims:['prompt','data'],
+      units:[
+        { id:'M1U1', tier:'basic', step:'understand', title:'金融监管信息源与 AI 解读边界',
+          video:{ dur:'8min', script:['央行/金管总局/行业协会三大信息源及其更新频率','AI 能做的：归纳、摘要、比对；不能做的：替合规下结论','为什么"AI 说合规"不等于"真合规"'] },
+          ppt:{ method:'监管信息源地图 + 解读边界框（归纳✓ / 下结论✗）',
+                case:'一条新规从发布到落地的信息链路',
+                demo:'边界自查卡（这条是归纳还是结论？）' } },
+        { id:'M1U2', tier:'basic', step:'demo', title:'新规 → 结构化简报',
+          video:{ dur:'8min', script:['演示：把一份模拟新规贴入 WorkBuddy','按 影响范围/产品动作/时间表 三段输出','强调：结论留白，由人定'] },
+          ppt:{ method:'简报四段式（背景/影响/动作/时间表）',
+                case:'「{{industry}}」新规简报样例（脱敏）',
+                demo:'WorkBuddy 简报演示（粘贴→结构化）' },
+          demoScript:{ steps:['粘贴模拟新规要点','要求按 影响范围/产品动作/时间表 输出','检查是否越界下结论'],
+            prompt:'你是合规研究员。请把以下「{{industry}}」监管新规要点整理成简报：影响范围、需产品做的动作、时间表。不得自行下合规结论，仅归纳材料。\n[粘贴]' } },
+        { id:'M1U3', tier:'basic', step:'todo', title:'生成你行业的政策简报',
+          video:{ dur:'8min', script:['任务：选本行业一条新规产出简报','自检：是否守住"不替合规下结论"边界'] },
+          ppt:{ method:'简报模板（四段式）',
+                case:'样例：消费金融个贷披露新规',
+                demo:'填写指引（先摘原文再归纳）' },
+          practice:{ steps:['选本行业一条新规','按四段式产出','自检不越界'], exemplar:'影响：{{industry}} 个贷额度披露要求收紧。动作：PRD 增加披露字段。时间表：Q2 前。' },
+          deliverable:'政策解读简报模板 + 提示词' },
+        { id:'M1U4', tier:'basic', step:'spar', title:'合规官挑简报漏洞',
+          video:{ dur:'8min', script:['陪练：合规官挑你越界或遗漏的条款','改到放行'] },
+          ppt:{ method:'简报评审单（越界/遗漏/依据）',
+                case:'越界写法："本条合规" → 应改为"需合规确认"',
+                demo:'陪练对话说明' },
+          spar:{ role:'合规官', persona:'抠"是否替合规下结论"',
+            mustAsk:['这条是你归纳还是 AI 替合规下的结论？','遗漏了哪些适用产品？','时间表依据哪条原文？'] },
+          deliverable:'政策简报（已过合规）' },
+        { id:'M1U5', tier:'adv', step:'understand', title:'竞品监控与市场扫描框架',
+          video:{ dur:'8min', script:['监控框架：产品动作/定价/渠道/舆情四个维度','信号源：官网/公告/应用商店/媒体','扫描频率与告警阈值设定'] },
+          ppt:{ method:'竞品监控框架（四维度 + 信号源）',
+                case:'信贷赛道监控看板样例',
+                demo:'监控清单模板' } },
+        { id:'M1U6', tier:'adv', step:'demo', title:'监控 3 家竞品动向',
+          video:{ dur:'8min', script:['演示：让 WorkBuddy 汇总 {{product}} 赛道 3 家竞品','输出 动作/亮点/风险 列表'] },
+          ppt:{ method:'监控月报结构（逐家 + 横向对比）',
+                case:'「{{product}}」赛道 3 家对比样例',
+                demo:'WorkBuddy 演示（仅用公开源）' },
+          demoScript:{ steps:['列出 3 家竞品','让 WorkBuddy 汇总近况','核对是否仅用公开信息'], prompt:'请基于公开信息，汇总 「{{product}}」 赛道 3 家竞品近一季度动向，按"动作/亮点/风险"列表。仅用公开来源。' } },
+        { id:'M1U7', tier:'adv', step:'todo', title:'产出竞品监控月报模板',
+          video:{ dur:'8min', script:['任务：做一份可复用的月报模板','定义维度 + 本期数据 + 固化结构'] },
+          ppt:{ method:'月报模板（维度/数据/结论占位）',
+                case:'样例：月度竞品月报',
+                demo:'填写指引' },
+          practice:{ steps:['定监控维度','填本期数据','固化成模板'], exemplar:'维度：产品动作/定价/渠道。本期：A 降息、B 上新、C 静默。结论占位：待 PM 研判。' },
+          deliverable:'竞品监控月报模板' },
+        { id:'M1U8', tier:'adv', step:'spar', title:'战略负责人复盘',
+          video:{ dur:'8min', script:['陪练：战略负责人追问取舍与威胁判断'] },
+          ppt:{ method:'复盘问题单（威胁/取舍/投入）',
+                case:'样例复盘记录',
+                demo:'陪练对话说明' },
+          spar:{ role:'战略负责人', persona:'看趋势与取舍',
+            mustAsk:['这 3 家谁对我们威胁最大？','我们该跟哪条？','资源投哪最值？'] },
+          deliverable:'竞品月报（已过复盘）' }
+      ] },
+    /* ===================== M2 需求与用户研究 ===================== */
+    { id:'M2', title:'AI 辅助需求与用户研究', dims:['prompt','tools','data'],
+      units:[
+        { id:'M2U1', tier:'basic', step:'understand', title:'访谈→洞察方法与 AI 角色',
+          video:{ dur:'8min', script:['研究方法链：转录→编码→聚类→需求点','AI 在转录/编码/聚类中的角色与省时点','边界：AI 不做"需求真伪"判断，人定'] },
+          ppt:{ method:'研究流程图（人做设计/AI做机械/人做判断）',
+                case:'一段访谈从录音到需求点的链路',
+                demo:'边界卡（哪些让 AI / 哪些人做）' } },
+        { id:'M2U2', tier:'basic', step:'demo', title:'1 段访谈 → 画像 + 需求点',
+          video:{ dur:'8min', script:['演示：把 1 段 {{product}} 用户访谈贴入','WorkBuddy 做开放式编码并给画像+3 需求点','演示：要求回贴证据原文'] },
+          ppt:{ method:'编码方法（开放式→轴向→需求点）',
+                case:'「{{product}}」用户画像样例',
+                demo:'WorkBuddy 编码演示（粘贴访谈）' },
+          demoScript:{ steps:['粘贴 1 段访谈','要求输出画像+需求点','要求标注证据原文'], prompt:'你是用户研究员。请对以下「{{product}}」用户访谈做开放式编码，归纳用户画像与 3 个需求点，标注证据原文。\n[粘贴]' } },
+        { id:'M2U3', tier:'basic', step:'todo', title:'3 段访谈 → 画像 + 需求池',
+          video:{ dur:'8min', script:['任务：处理 3 段访谈','产出 1 张画像 + 1 个需求池'] },
+          ppt:{ method:'需求池模板（需求/证据/优先级/状态）',
+                case:'样例需求池（5 条）',
+                demo:'填写指引' },
+          practice:{ steps:['逐段编码','汇总画像','建需求池'], exemplar:'画像：28 岁白领、怕拒贷、嫌慢。需求：进度透明、快速反馈、被拒有原因。' },
+          deliverable:'用户画像 + 需求池' },
+        { id:'M2U4', tier:'basic', step:'spar', title:'用户深挖需求',
+          video:{ dur:'8min', script:['陪练：用户反问"你真懂我吗"','逼你把需求挖到真实动机'] },
+          ppt:{ method:'深挖清单（动机/场景/阻力）',
+                case:'表层需求 vs 真实动机',
+                demo:'陪练对话说明' },
+          spar:{ role:'用户', persona:'真实、爱反问',
+            mustAsk:['你这个需求是真痛点还是你想的？','我说的场景你覆盖了吗？','我为什么要信你这功能？'] },
+          deliverable:'用户画像+需求池（已过用户）' },
+        { id:'M2U5', tier:'adv', step:'understand', title:'定量+定性混合与分层',
+          video:{ dur:'8min', script:['定性建假设、定量验假设的逻辑','用户分层：按价值/行为/风险三维','旅程地图的作用与画法'] },
+          ppt:{ method:'分层框架（三维）+ 旅程地图结构',
+                case:'信贷用户分层样例',
+                demo:'分层模板' } },
+        { id:'M2U6', tier:'adv', step:'demo', title:'千人画像聚类 → 分层',
+          video:{ dur:'8min', script:['演示：把多份画像贴入做聚类','输出分层：名称/特征/规模感/核心需求'] },
+          ppt:{ method:'聚类输出格式（层卡）',
+                case:'「{{product}}」三层聚类样例',
+                demo:'WorkBuddy 聚类演示' },
+          demoScript:{ steps:['粘贴多份画像','要求聚类分层'], prompt:'以下为「{{product}}」用户画像若干，请做聚类分层，每层给名称/特征/规模感/核心需求。\n[粘贴]' } },
+        { id:'M2U7', tier:'adv', step:'todo', title:'建用户分层 + 旅程地图',
+          video:{ dur:'8min', script:['任务：产出分层 + 主旅程','标痛点与机会点'] },
+          ppt:{ method:'旅程模板（阶段/触点/情绪/痛点）',
+                case:'样例：申请→放款旅程',
+                demo:'填写指引' },
+          practice:{ steps:['定层','画主旅程','标痛点与机会'], exemplar:'层：急用型/比价型/观望型。旅程：认知→申请→等待→使用→续借。痛点：等待无反馈。' },
+          deliverable:'用户分层 + 旅程地图' },
+        { id:'M2U8', tier:'adv', step:'spar', title:'焦点小组',
+          video:{ dur:'8min', script:['陪练：焦点小组多角色质疑分层与旅程'] },
+          ppt:{ method:'焦点问题单（层代表/流失点/机会）',
+                case:'样例焦点记录',
+                demo:'陪练对话说明' },
+          spar:{ role:'焦点小组', persona:'多人视角',
+            mustAsk:['这层划分你站哪类用户？','旅程里哪步最易流失？','机会点排序理由？'] },
+          deliverable:'分层+旅程（已过焦点）' }
+      ] },
+    /* ===================== M3 PRD ===================== */
+    { id:'M3', title:'AI 辅助 PRD 与产品定义', dims:['content','tools','dev'],
+      units:[
+        { id:'M3U1', tier:'basic', step:'understand', title:'PRD 是什么，AI 能/不能写什么',
+          video:{ dur:'8min', script:['PRD 六段式：背景/目标/范围/功能/非功能/验收','AI 写骨架、人定判断 —— 边界讲清','为什么 AI 不能替你定业务优先级'] },
+          ppt:{ method:'PRD 六段式结构图 + AI 边界框（写骨架/不写判断）',
+                case:'一份好的最小 PRD 长什么样',
+                demo:'边界自查清单' } },
+        { id:'M3U2', tier:'basic', step:'demo', title:'一句话需求 → 结构化 PRD',
+          video:{ dur:'8min', script:['演示：「{{company}} 想做 {{product}}」一句话','WorkBuddy 扩成六段式 PRD','点评：哪些该人工确认'] },
+          ppt:{ method:'需求展开提示词结构（角色/格式/约束）',
+                case:'「{{product}}」PRD 节选（脱敏）',
+                demo:'WorkBuddy 生成 PRD 截图位' },
+          demoScript:{ steps:['打开 WorkBuddy，新建「PRD 助手」会话','输入一句话需求 + 行业/公司/产品占位','要求按六段式输出'],
+            prompt:'你是资深金融产品经理。请用 PRD 六段式（背景/目标/范围/功能/非功能/验收）把下面需求展开：\n行业={{industry}}，公司={{company}}，产品={{product}}\n需求：「想做一个线上{{product}}，用户申请后能快速出额度。」\n功能部分先给 3 个核心功能即可，标注哪些需人工确认。' } },
+        { id:'M3U3', tier:'basic', step:'todo', title:'产出你的「最小 PRD」',
+          video:{ dur:'8min', script:['任务：用模板产出背景+目标+3 核心功能','不必追求完整，先走通闭环'] },
+          ppt:{ method:'最小 PRD 模板（背景/目标/3 功能/验收）',
+                case:'「{{product}}」最小 PRD 样例',
+                demo:'填写指引' },
+          practice:{ steps:['填「我的场景」行业/公司/产品','写 1 句背景 + 1 句目标','列 3 个核心功能（含 1 句验收口径）'],
+            exemplar:'背景：{{company}} 想用 {{product}} 服务无抵押小额消费客群。\n目标：申请到出额度 ≤ 3 分钟，首月授信通过率 ≥ 30%。\n核心功能：① 线上申请（身份证+活体）② 实时风控预筛（自动拒/转人工）③ 额度试算（输入收入给预估额度）。验收：3 功能均可演示。' },
+          deliverable:'最小 PRD' },
+        { id:'M3U4', tier:'basic', step:'spar', title:'评审挑 3 个尖锐问题',
+          video:{ dur:'8min', script:['陪练说明：内部评审专挑逻辑漏洞与边界','改到评审放行'] },
+          ppt:{ method:'PRD 评审检查单（完整/自洽/边界）',
+                case:'典型被挑战点（指标无主/功能冲突/异常缺失）',
+                demo:'陪练对话说明' },
+          spar:{ role:'内部评审', persona:'挑剔、爱问"如果…怎么办"',
+            mustAsk:['目标和指标怎么度量、谁来认？','这 3 个功能之间有无冲突或遗漏？','异常/边界场景（拒贷、超时）PRD 写了吗？'] },
+          deliverable:'最小 PRD（已通过评审）' },
+        { id:'M3U5', tier:'adv', step:'understand', title:'多角色 PRD 与风控/验收口径',
+          video:{ dur:'8min', script:['多端多角色 PRD 怎么组织','风控规则写进 PRD 的写法','与算法协同的验收口径（可解释、可回放）'] },
+          ppt:{ method:'多角色 PRD 分层 + 风控规则写法（IF/阈值/处置）',
+                case:'含风控的信贷 PRD 片段',
+                demo:'验收口径模板（可解释/可回放）' } },
+        { id:'M3U6', tier:'adv', step:'demo', title:'含风控策略 + 埋点的完整 PRD',
+          video:{ dur:'8min', script:['演示：把最小 PRD 升级为含风控+埋点全貌','重点看风控策略段落与指标定义'] },
+          ppt:{ method:'完整 PRD 结构（含风控/埋点章）',
+                case:'「{{product}}」完整 PRD 节选',
+                demo:'WorkBuddy 生成完整 PRD 演示' },
+          demoScript:{ steps:['在最小 PRD 基础上追加风控章','追加数据埋点与非功能指标','让 WorkBuddy 补全验收用例'],
+            prompt:'在以下最小 PRD 基础上，请补充：①风控策略段落（准入/额度/反欺诈要点）②数据埋点清单 ③非功能与验收指标。\n[粘贴最小 PRD]\n输出完整 PRD，风控部分明确标注需合规与风控岗联签。' } },
+        { id:'M3U7', tier:'adv', step:'todo', title:'产出含风控与指标的完整 PRD',
+          video:{ dur:'8min', script:['任务：交付完整 PRD','含风控策略 + 指标定义 + 埋点'] },
+          ppt:{ method:'完整 PRD 自检表（八段全覆盖）',
+                case:'完整 PRD 样例（脱敏）',
+                demo:'填写指引' },
+          practice:{ steps:['扩展功能为完整清单','写风控策略段落（3 条以上）','定义核心指标与埋点'],
+            exemplar:'风控：准入需实名+活体；额度按收入×系数且封顶；反欺诈命中规则转人工。\n指标：申请转化率、自动通过率、逾期率(≤1.5%)。\n埋点：申请开始/提交、风控结果、额度试算。' },
+          deliverable:'完整 PRD' },
+        { id:'M3U8', tier:'adv', step:'spar', title:'风控+研发+合规三方会审',
+          video:{ dur:'8min', script:['陪练说明：三方逐条过，任一不放行就改','终稿需三方都点头'] },
+          ppt:{ method:'三方会审 checkList（规则/可行/红线）',
+                case:'会审典型拉锯点',
+                demo:'陪练对话说明' },
+          spar:{ role:'风控+研发+合规 三方', persona:'风控抠规则、研发抠可行性、合规抠红线',
+            mustAsk:['风控规则可解释、可回放吗？','研发说这指标算不清，你改哪？','合规上这条用户授权拿到了吗？'] },
+          deliverable:'完整 PRD（三方会审终稿）' }
+      ] },
+    /* ===================== M4 数据分析 ===================== */
+    { id:'M4', title:'AI 驱动数据分析与增长决策', dims:['data','tools'],
+      units:[
+        { id:'M4U1', tier:'basic', step:'understand', title:'指标口径与 NL2SQL 边界',
+          video:{ dur:'8min', script:['北极星指标与一级指标关系','归因基础：相关≠因果','NL2SQL 最大坑：口径对不上仓库定义'] },
+          ppt:{ method:'指标字典结构（定义/口径/来源表）',
+                case:'"转化率"三种口径对照',
+                demo:'口径自查卡' } },
+        { id:'M4U2', tier:'basic', step:'demo', title:'NL2SQL 查一个核心指标',
+          video:{ dur:'8min', script:['演示：自然语言→SQL→结果解释','强调：先确认口径再查'] },
+          ppt:{ method:'NL2SQL 写法（明确口径 + 限定时间）',
+                case:'「{{product}}」申请转化率查询',
+                demo:'WorkBuddy 演示（自然语言→SQL）' },
+          demoScript:{ steps:['描述要查的指标','让 WorkBuddy 出 SQL+解释'], prompt:'请用 SQL 查询「{{product}}」近 30 天申请转化率（申请数/提交数），并解释口径与可能偏差。' } },
+        { id:'M4U3', tier:'basic', step:'todo', title:'查 3 指标 + 一句话归因',
+          video:{ dur:'8min', script:['任务：查 3 个核心指标并给一句话归因','归因只说相关，不妄称因果'] },
+          ppt:{ method:'归因模板（现象/可能因子/需验证）',
+                case:'样例归因：通过率降',
+                demo:'填写指引' },
+          practice:{ steps:['定 3 指标','逐一查','写归因'], exemplar:'通过率降 2pt：因风控规则收紧（新反欺诈上线）。建议：对边缘客群做人工复核分流。' },
+          deliverable:'查数提示词 + 指标口径表' },
+        { id:'M4U4', tier:'basic', step:'spar', title:'数据分析师复核',
+          video:{ dur:'8min', script:['陪练：分析师挑口径与归因严谨性'] },
+          ppt:{ method:'复核单（口径/因果/样本）',
+                case:'典型错误归因',
+                demo:'陪练对话说明' },
+          spar:{ role:'数据分析师', persona:'抠口径与因果',
+            mustAsk:['这口径和仓库定义一致吗？','归因是相关还是因果？','样本/时间段有无偏？'] },
+          deliverable:'查数产出（已过分析师）' },
+        { id:'M4U5', tier:'adv', step:'understand', title:'实验设计基础',
+          video:{ dur:'8min', script:['AB 实验逻辑：随机分流/对照','因果推断基础：随机化消混杂','样本量、显著性、周期的关系'] },
+          ppt:{ method:'实验框架（假设/分组/指标/样本/周期）',
+                case:'申请页改版实验',
+                demo:'实验设计模板' } },
+        { id:'M4U6', tier:'adv', step:'demo', title:'一个 AB 实验全流程',
+          video:{ dur:'8min', script:['演示：假设→分组→主指标→周期','WorkBuddy 输出完整方案'] },
+          ppt:{ method:'实验方案结构',
+                case:'「{{product}}」简化申请页实验',
+                demo:'WorkBuddy 演示' },
+          demoScript:{ steps:['定义假设','让 WorkBuddy 出方案'], prompt:'为「{{product}}」设计 AB 实验：假设"简化申请页提升转化率"，给出分组、主指标、样本量、周期与注意事项。' } },
+        { id:'M4U7', tier:'adv', step:'todo', title:'设计产品实验方案',
+          video:{ dur:'8min', script:['任务：产出实验方案','假设/指标/样本/周期齐备'] },
+          ppt:{ method:'方案模板（假设/指标/样本/周期/风险）',
+                case:'样例方案',
+                demo:'填写指引' },
+          practice:{ steps:['写假设','定指标与样本','排周期'], exemplar:'假设：额度试算前置提升转化。分组：对照/试算前置。主指标：转化率。样本：各 5000。周期：2 周。' },
+          deliverable:'实验设计方案' },
+        { id:'M4U8', tier:'adv', step:'spar', title:'实验评审',
+          video:{ dur:'8min', script:['陪练：评审挑显著性/偏倚/可解释'] },
+          ppt:{ method:'评审单（样本量/多重检验/结论）',
+                case:'典型翻车实验',
+                demo:'陪练对话说明' },
+          spar:{ role:'实验评审', persona:'抠统计严谨',
+            mustAsk:['样本量怎么来的？','多重检验了吗？','结果不可信时怎么办？'] },
+          deliverable:'实验方案（已过评审）' }
+      ] },
+    /* ===================== M5 研发协同 ===================== */
+    { id:'M5', title:'AI 嵌入研发协同与运营', dims:['workflow','dev'],
+      units:[
+        { id:'M5U1', tier:'basic', step:'understand', title:'需求澄清与验收标准',
+          video:{ dur:'8min', script:['PM 与研发对齐的三件物：需求/接口/验收','看懂 API 与模型输出的基本素养','验收标准写法：前置/操作/预期'] },
+          ppt:{ method:'验收标准写法（Given/When/Then）',
+                case:'"风控要快"的歧义 vs 明确',
+                demo:'对齐清单' } },
+        { id:'M5U2', tier:'basic', step:'demo', title:'模糊需求 → 验收用例',
+          video:{ dur:'8min', script:['演示：一句话模糊需求→多条可测用例','要求 WorkBuddy 给预期结果'] },
+          ppt:{ method:'用例结构（前置/操作/预期）',
+                case:'「{{product}}」风控预筛用例',
+                demo:'WorkBuddy 演示' },
+          demoScript:{ steps:['描述模糊需求','让 WorkBuddy 出验收用例'], prompt:'把以下「{{product}}」模糊需求拆成可测试验收用例（前置/操作/预期）："风控要快一点"。' } },
+        { id:'M5U3', tier:'basic', step:'todo', title:'写验收用例',
+          video:{ dur:'8min', script:['任务：给一个需求写验收用例','覆盖主流程+异常'] },
+          ppt:{ method:'用例模板（主流程/异常/边界）',
+                case:'样例用例集',
+                demo:'填写指引' },
+          practice:{ steps:['选需求','拆用例','标预期'], exemplar:'用例：提交申请→实时预筛→(自动通过/转人工/拒)。预期：转人工率≤20%。' },
+          deliverable:'验收用例模板' },
+        { id:'M5U4', tier:'basic', step:'spar', title:'研发挑需求漏洞',
+          video:{ dur:'8min', script:['陪练：研发挑字段/异常/性能漏洞'] },
+          ppt:{ method:'挑洞单（字段/异常/性能/并发）',
+                case:'典型漏写项',
+                demo:'陪练对话说明' },
+          spar:{ role:'研发', persona:'抠可行性边界',
+            mustAsk:['这字段哪来？','异常分支写了？','性能/并发要求？'] },
+          deliverable:'验收用例（已过研发）' },
+        { id:'M5U5', tier:'adv', step:'understand', title:'监控告警与运营看板',
+          video:{ dur:'8min', script:['监控三层：业务/系统/模型','告警：阈值/趋势/突变三类','异常定位的分诊思路'] },
+          ppt:{ method:'监控框架（指标/阈值/响应）',
+                case:'「{{product}}」监控看板',
+                demo:'告警规则模板' } },
+        { id:'M5U6', tier:'adv', step:'demo', title:'配一条关键指标告警',
+          video:{ dur:'8min', script:['演示：定义自动通过率告警规则','WorkBuddy 输出触发条件+响应'] },
+          ppt:{ method:'告警规则结构（条件/级别/响应）',
+                case:'通过率跌幅告警',
+                demo:'WorkBuddy 演示' },
+          demoScript:{ steps:['定指标','让 WorkBuddy 出规则'], prompt:'为「{{product}}」设计一条监控告警：当自动通过率连续 1h 跌幅>10% 时告警，给出触发条件与响应动作。' } },
+        { id:'M5U7', tier:'adv', step:'todo', title:'写运营监控方案',
+          video:{ dur:'8min', script:['任务：指标+阈值+响应成方案'] },
+          ppt:{ method:'方案模板（指标/阈值/响应/升级）',
+                case:'样例方案',
+                demo:'填写指引' },
+          practice:{ steps:['选指标','定阈值','写响应'], exemplar:'指标：自动通过率。阈值：跌幅>10%/1h 或 <基线 2σ。响应：暂停策略+人工排查。' },
+          deliverable:'运营监控方案' },
+        { id:'M5U8', tier:'adv', step:'spar', title:'线上事故复盘',
+          video:{ dur:'8min', script:['陪练：事故复盘追根因与监控缺口'] },
+          ppt:{ method:'复盘单（时间线/根因/改进）',
+                case:'典型复盘记录',
+                demo:'陪练对话说明' },
+          spar:{ role:'事故复盘', persona:'追根因',
+            mustAsk:['监控为什么没提前抓？','阈值设错还是没设？','下次怎么防？'] },
+          deliverable:'监控方案（已过复盘）' }
+      ] },
+    /* ===================== M6 合规安全 ===================== */
+    { id:'M6', title:'金融合规与安全下的 AI 用法', dims:['security'],
+      units:[
+        { id:'M6U1', tier:'basic', step:'understand', title:'金融数据分级与 AI 红线',
+          video:{ dur:'8min', script:['数据三级：公开/内部/敏感（含 PII）','AI 红线：敏感不出域、不贴 PII 到公开 AI','最小化和脱敏原则'] },
+          ppt:{ method:'数据分级图 + 红线三原则',
+                case:'客户信息分级示例',
+                demo:'分级自查卡' } },
+        { id:'M6U2', tier:'basic', step:'demo', title:'「安全用 AI」规范样例',
+          video:{ dur:'8min', script:['演示：给若干场景判级','WorkBuddy 输出 安全/需脱敏/禁止 + 理由'] },
+          ppt:{ method:'规范样例（场景/级别/理由）',
+                case:'「{{product}}」用 AI 场景判级',
+                demo:'WorkBuddy 演示' },
+          demoScript:{ steps:['列场景','让 WorkBuddy 判级'], prompt:'请对以下 AI 使用场景判级（安全/需脱敏/禁止），并给理由：①贴用户姓名给 AI 写话术 ②用脱敏字段让 AI 摘要 ③把内部风控规则贴公开 AI。' } },
+        { id:'M6U3', tier:'basic', step:'todo', title:'写岗位 AI 红线清单',
+          video:{ dur:'8min', script:['任务：列出本岗位 AI 场景并判级','固化成红线清单'] },
+          ppt:{ method:'清单模板（场景/级别/动作）',
+                case:'样例清单',
+                demo:'填写指引' },
+          practice:{ steps:['列场景','逐条判级','固化清单'], exemplar:'禁止：贴 PII 到公开 AI。需脱敏：用户对话摘要。安全：用内部脱敏数据做训练摘要。' },
+          deliverable:'岗位 AI 红线清单' },
+        { id:'M6U4', tier:'basic', step:'spar', title:'合规审计',
+          video:{ dur:'8min', script:['陪练：审计挑遗漏场景'] },
+          ppt:{ method:'审计单（数据/模型/外包）',
+                case:'典型遗漏：模型输出缓存',
+                demo:'陪练对话说明' },
+          spar:{ role:'合规审计', persona:'逐条核验',
+            mustAsk:['这条覆盖模型输出缓存吗？','跨境/外包场景写了？','违规怎么上报？'] },
+          deliverable:'红线清单（已过审计）' },
+        { id:'M6U5', tier:'adv', step:'understand', title:'监管报送与可解释',
+          video:{ dur:'8min', script:['监管报送的材料要求与频率','模型可解释：特征重要性/决策依据','算法审计要点'] },
+          ppt:{ method:'报送框架（材料/频率/口径）',
+                case:'「{{product}}」报送清单',
+                demo:'可解释模板' } },
+        { id:'M6U6', tier:'adv', step:'demo', title:'AI 辅助监管报送材料',
+          video:{ dur:'8min', script:['演示：脱敏数据→WorkBuddy 起草报送','强调：结论由人定'] },
+          ppt:{ method:'报送材料结构（摘要/数据/说明）',
+                case:'报送草稿样例',
+                demo:'WorkBuddy 演示' },
+          demoScript:{ steps:['给脱敏数据','让 WorkBuddy 起草'], prompt:'基于以下脱敏后的「{{product}}」运营数据，起草一份监管报送材料草稿（仅结构化整理，结论由人工定）。\n[粘贴]' } },
+        { id:'M6U7', tier:'adv', step:'todo', title:'出合规检查清单',
+          video:{ dur:'8min', script:['任务：覆盖 {{product}} 的合规检查清单'] },
+          ppt:{ method:'清单模板（项/证据要求）',
+                case:'样例清单',
+                demo:'填写指引' },
+          practice:{ steps:['列合规点','转检查项','附证据要求'], exemplar:'□ 用户授权留痕 □ 模型决策可解释 □ 数据最小化 □ 审计日志开启' },
+          deliverable:'合规检查清单' },
+        { id:'M6U8', tier:'adv', step:'spar', title:'监管检查',
+          video:{ dur:'8min', script:['陪练：监管按条文问话'] },
+          ppt:{ method:'迎检话术（依据/保障/责任）',
+                case:'样例问答',
+                demo:'陪练对话说明' },
+          spar:{ role:'监管', persona:'按条文问',
+            mustAsk:['这条材料依据哪条法规？','数据怎么保的？','出问题谁负责？'] },
+          deliverable:'检查清单（已过监管）' }
+      ] },
+    /* ===================== M7 综合实战 ===================== */
+    { id:'M7', title:'综合实战：从 0 到 1 设计金融产品', dims:['全 8 维'],
+      units:[
+        { id:'M7U1', tier:'basic', step:'understand', title:'0→1 金融产品方法论',
+          video:{ dur:'8min', script:['0→1 五步：机会→立项→PRD→上线→复盘','每步的关键交付物回顾','AI 在各步的杠杆点'] },
+          ppt:{ method:'方法论图（五步 + 交付物）',
+                case:'信贷产品从 0 到 1 路径',
+                demo:'步骤检查表' } },
+        { id:'M7U2', tier:'basic', step:'demo', title:'模拟产品立项到 PRD 全流程',
+          video:{ dur:'8min', script:['演示：串起前面模块产出','WorkBuddy 整合为简版方案'] },
+          ppt:{ method:'全流程图（模块→产出映射）',
+                case:'「{{product}}」全流程',
+                demo:'WorkBuddy 演示' },
+          demoScript:{ steps:['选场景','串联产出'], prompt:'请把以下「{{product}}」从机会识别到 PRD 串成一份简版方案，复用前面模块的方法。\n[粘贴要点]' } },
+        { id:'M7U3', tier:'basic', step:'todo', title:'交付最小产品方案',
+          video:{ dur:'8min', script:['任务：定位+PRD+指标成方案'] },
+          ppt:{ method:'方案模板（定位/PRD/指标）',
+                case:'样例最小方案',
+                demo:'填写指引' },
+          practice:{ steps:['写定位','出最小 PRD','定指标'], exemplar:'定位：年轻客群小额周转。PRD：申请+风控预筛+额度。指标：3 分钟出额、通过率≥30%。' },
+          deliverable:'最小产品方案' },
+        { id:'M7U4', tier:'basic', step:'spar', title:'立项评审',
+          video:{ dur:'8min', script:['陪练：立项评审挑战价值与可行'] },
+          ppt:{ method:'评审单（价值/可行/度量）',
+                case:'典型被挑战点',
+                demo:'陪练对话说明' },
+          spar:{ role:'立项评审', persona:'看价值与可行',
+            mustAsk:['这产品解决谁的真问题？','资源/风控能撑吗？','上线后怎么度量？'] },
+          deliverable:'最小方案（已过立项）' },
+        { id:'M7U5', tier:'adv', step:'understand', title:'跨模块整合与治理',
+          video:{ dur:'8min', script:['整合各模块产出的顺序','规模化：模板化与复用','治理：红线贯穿全流程'] },
+          ppt:{ method:'整合图（模块→全案）',
+                case:'全案结构',
+                demo:'整合清单' } },
+        { id:'M7U6', tier:'adv', step:'demo', title:'带风控+合规的完整全案',
+          video:{ dur:'8min', script:['演示：补全风控与合规章节','WorkBuddy 整合为可汇报全案'] },
+          ppt:{ method:'全案结构（定位/PRD/风控/合规/数据）',
+                case:'「{{product}}」全案',
+                demo:'WorkBuddy 演示' },
+          demoScript:{ steps:['整合各模块产出','补风控合规'], prompt:'请把以下「{{product}}」各模块产出整合为一份可汇报全案，重点补全风控与合规章节。\n[粘贴]' } },
+        { id:'M7U7', tier:'adv', step:'todo', title:'交付可汇报全案',
+          video:{ dur:'8min', script:['任务：含风控/合规/数据的全案'] },
+          ppt:{ method:'全案模板（八段全覆盖）',
+                case:'样例全案',
+                demo:'填写指引' },
+          practice:{ steps:['整合成稿','补风控合规','排汇报逻辑'], exemplar:'全案=定位+PRD+风控策略+合规清单+数据指标+路线图。' },
+          deliverable:'可汇报产品全案' },
+        { id:'M7U8', tier:'adv', step:'spar', title:'高管汇报',
+          video:{ dur:'8min', script:['陪练：高管汇报答辩'] },
+          ppt:{ method:'汇报骨架（价值/ROI/风险）',
+                case:'高分汇报结构',
+                demo:'陪练对话说明' },
+          spar:{ role:'高管', persona:'结果导向',
+            mustAsk:['一句话说清这产品价值？','ROI 与风险？','为什么现在做？'] },
+          deliverable:'全案（已过汇报）' }
+      ] }
+  ]
+};
+
+/* ============ 渲染逻辑 ============ */
+const STEP_LABEL = { understand:'理解', demo:'演示', todo:'我要做', spar:'陪练' };
+let cur = null;
+
+function fill(s){
+  if(typeof s!=='string') return s;
+  const ind=document.getElementById('f-industry').value.trim()||'消费金融';
+  const com=document.getElementById('f-company').value.trim()||'模拟银行 X';
+  const pro=document.getElementById('f-product').value.trim()||'闪电贷';
+  return s.replace(/\{\{industry\}\}/g,ind).replace(/\{\{company\}\}/g,com).replace(/\{\{product\}\}/g,pro);
+}
+
+function buildSidebar(){
+  const sb=document.getElementById('sidebar'); sb.innerHTML='';
+  COURSE.modules.forEach((m,mi)=>{
+    const mod=document.createElement('div'); mod.className='module'+(mi===0?' open':'');
+    mod.innerHTML=`<div class="module-head"><span>${m.id}</span> ${fill(m.title)} <span class="dot">${m.dims.join('·')}</span></div>`;
+    const body=document.createElement('div'); body.className='module-body';
+    ['basic','adv'].forEach(tier=>{
+      const tl=document.createElement('div'); tl.className='tier-label';
+      tl.textContent = tier==='basic'?'入门档 (U1–U4)':'进阶档 (U5–U8)';
+      body.appendChild(tl);
+      m.units.filter(u=>u.tier===tier).forEach(u=>{
+        const el=document.createElement('div'); el.className='unit'; el.dataset.uid=u.id;
+        el.innerHTML=`<span class="step">${STEP_LABEL[u.step]}</span> ${fill(u.title)}`;
+        el.onclick=()=>openUnit(m,u);
+        body.appendChild(el);
+      });
+    });
+    mod.querySelector('.module-head').onclick=()=>mod.classList.toggle('open');
+    mod.appendChild(body); sb.appendChild(mod);
+  });
+}
+
+function openUnit(m,u){
+  cur={m,u};
+  document.querySelectorAll('.unit').forEach(e=>e.classList.toggle('active',e.dataset.uid===u.id));
+  const cr=document.getElementById('crumb');
+  cr.textContent=`${m.id} · ${u.tier==='basic'?'入门档':'进阶档'} · ${STEP_LABEL[u.step]}`;
+  const t=document.getElementById('utitle'); t.textContent=fill(u.title);
+  document.getElementById('umeta').innerHTML=
+    `<span class="chip">维度 ${m.dims.join('·')}</span><span class="chip">视频约 ${u.video.dur}</span>`;
+  renderTabs(u);
+}
+
+function renderTabs(u){
+  const tabs=document.getElementById('tabs'); const panels=document.getElementById('panels');
+  const defs=[['video','🎬 视频'],['ppt','📑 PPT 课件']];
+  if(u.step==='demo') defs.push(['demo','🤖 WorkBuddy 演示脚本']);
+  if(u.step==='todo') defs.push(['practice','✅ 练习卡 + 示范']);
+  if(u.step==='spar') defs.push(['spar','🎯 陪练（角色+必问）']);
+  tabs.innerHTML=defs.map((d,i)=>`<div class="tab ${i===0?'active':''}" data-t="${d[0]}">${d[1]}</div>`).join('');
+  panels.innerHTML=defs.map((d,i)=>`<div class="panel ${i===0?'active':''}" data-p="${d[0]}">${renderPanel(u,d[0])}</div>`).join('');
+  tabs.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+    tabs.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    panels.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    panels.querySelector(`.panel[data-p="${t.dataset.t}"]`).classList.add('active');
+  });
+}
+
+function renderPanel(u,key){
+  if(key==='video'){
+    return `<div class="card"><h3>视频脚本 <span class="badge">约 ${u.video.dur}·生产中</span></h3>
+      <ul class="li">${u.video.script.map(s=>`<li>${fill(s)}</li>`).join('')}</ul>
+      <div class="note">视频生产管线在 B-5 接入（PPT 排版 + 火山引擎豆包配音），此处先放脚本供跟拍/跟练。</div></div>`;
+  }
+  if(key==='ppt'){
+    const p=u.ppt;
+    return `<div class="card"><h3>平台内 H5 课件（三页）</h3>
+      <div class="ppt-page"><div class="pg">方法论页</div>${fill(p.method)}</div>
+      <div class="ppt-page"><div class="pg case">案例页</div>${fill(p.case)}</div>
+      <div class="ppt-page"><div class="pg demo">演示实操页</div>${fill(p.demo)}</div></div>`;
+  }
+  if(key==='demo'){
+    const d=u.demoScript;
+    return `<div class="card"><h3>WorkBuddy 演示脚本</h3>
+      <ul class="li">${d.steps.map(s=>`<li>${fill(s)}</li>`).join('')}</ul>
+      <p style="font-size:13px;color:var(--text2);margin:8px 0 4px">复制以下提示词到 WorkBuddy 复现演示：</p>
+      <textarea readonly id="dlg">${fill(d.prompt)}</textarea>
+      <button class="btn" onclick="copy('dlg')">复制提示词</button></div>`;
+  }
+  if(key==='practice'){
+    const p=u.practice;
+    return `<div class="card"><h3>练习步骤卡</h3>
+      <ul class="li">${p.steps.map(s=>`<li>${fill(s)}</li>`).join('')}</ul>
+      <details class="ex"><summary>查看产出物示范（exemplar）</summary>
+      <div style="white-space:pre-wrap;margin-top:8px;font-size:13px">${fill(p.exemplar)}</div></details>
+      ${u.deliverable?`<div class="deliver">📦 本单元带走物：${fill(u.deliverable)}</div>`:''}</div>`;
+  }
+  if(key==='spar'){
+    const s=u.spar;
+    const sys=`你是「${s.role}」，在金融产品经理 AI 实训中担任陪练。\n当前任务：${fill(u.title)}。\n学员需交付：${fill(u.deliverable||'本单元产出')}。\n请基于你的角色视角（${s.persona}）挑战学员，重点追问：\n${s.mustAsk.map(q=>'· '+q).join('\n')}\n当学员回答达到"完整性/可用性/合规"三维度要求时给予通过，并说明通过/未通过理由。`;
+    return `<div class="card"><h3>陪练角色：${s.role}</h3>
+      <p style="font-size:13px;color:var(--text2)">角色设定：${s.persona}</p>
+      <p style="font-weight:600;margin:8px 0 4px">必问清单（挑战到通过）：</p>
+      <ul class="li">${s.mustAsk.map(q=>`<li>${q}</li>`).join('')}</ul>
+      <p style="font-size:13px;color:var(--text2);margin:8px 0 4px">复制完整陪练提示词（角色+任务+rubric）到 WorkBuddy（B-4 将直连 DeepSeek API 自动注入），即可开始真实陪练：</p>
+      <textarea readonly id="slg">${sys}</textarea>
+      <button class="btn" onclick="copy('slg')">复制陪练提示词</button>
+      ${u.deliverable?`<div class="deliver">📦 本单元带走物：${fill(u.deliverable)}</div>`:''}</div>`;
+  }
+  return '';
+}
+
+function copy(id){
+  const el=document.getElementById(id); el.select();
+  navigator.clipboard.writeText(el.value).then(()=>{
+    const b=event.target; const t=b.textContent; b.textContent='已复制 ✓';
+    setTimeout(()=>b.textContent=t,1500);
+  });
+}
+
+['f-industry','f-company','f-product'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',()=>{ buildSidebar(); if(cur) openUnit(cur.m,cur.u); });
+});
+
+buildSidebar();
+openUnit(COURSE.modules[0], COURSE.modules[0].units[0]);
+</script>
+</body>
+</html>
