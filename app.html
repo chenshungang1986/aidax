@@ -176,6 +176,11 @@
   .video-placeholder { background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius:var(--radius); padding:40px; text-align:center; color:#fff; margin-bottom:16px; cursor:pointer; transition:transform .2s; }
   .video-placeholder:hover { transform:scale(1.02); }
   .video-placeholder .play-btn { width:64px; height:64px; border-radius:50%; background:rgba(255,255,255,0.25); margin:0 auto 12px; display:flex; align-items:center; justify-content:center; font-size:24px; }
+  /* 播放状态条：点播放后必须马上有反馈，否则会被当成「视频打不开」 */
+  #ttsNotice { font-size:12px; margin-top:8px; text-align:center; min-height:16px; color:var(--text3,#8a93a6); }
+  #ttsNotice[data-tone="audio"] { color:#16a34a; }
+  #ttsNotice[data-tone="info"] { color:var(--text3,#8a93a6); }
+  #ttsNotice[data-tone="warn"] { color:#c2410c; }
 
   /* Gap card */
   .gap-item { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); }
@@ -11438,6 +11443,9 @@ let _audioEl = null; // 方案B：预生成 mp3 播放元素
 let _pptInterval = null;
 let _subtitleTimer = null;
 let _narrTimer = null;
+let _ttsKeepAlive = null;   // speechSynthesis 长播保活定时器（Chrome 约 15s 会自动断）
+let _ttsWatchdog = null;    // 无声看门狗：判断语音是否真的开始播
+let _ttsClock = null;       // 语音不可用时的时长兜底：仍按估算时长推进到下一页
 
 function clearNarr() {
   if (_narrTimer) { clearInterval(_narrTimer); _narrTimer = null; }
@@ -11518,12 +11526,14 @@ function initPPT() {
 }
 
 function stopVoice() {
-  if (_voiceUtterance) { _voiceUtterance.onend = null; }
-  _voiceSynth.cancel();
+  if (_voiceUtterance) { _voiceUtterance.onend = null; _voiceUtterance.onerror = null; }
+  clearTtsTimers();
+  try { _voiceSynth.cancel(); } catch(e) {}
   if (_audioEl) { try { _audioEl.pause(); _audioEl.onended = null; _audioEl.onerror = null; _audioEl.onloadedmetadata = null; } catch(e){} }
   if (_pptInterval) clearInterval(_pptInterval);
   if (_subtitleTimer) clearInterval(_subtitleTimer);
   clearNarr();
+  setPlayStatus('', 'info');
   S.voicePlaying = false;
   S.voicePaused = false;
 }
@@ -11579,6 +11589,7 @@ function playCurrentSlide() {
   S.voicePlaying = true;
   S.voicePaused = false;
   updateVoiceButton();
+  setPlayStatus('正在装载音频…', 'info');
   var c = getRoleCourses()?.[S.courseIdx];
   if (!c) return;
   const slides = getPPTSlides(c.id, c.title, c.desc);
@@ -11602,16 +11613,30 @@ function playCurrentSlide() {
     }
     const exts = ['mp3', 'm4a'];
     let ei = 0;
+    // 一次失败只允许推进一次扩展名：媒体资源加载失败时 onerror 与 play().catch
+    // 可能会先后触发，不加闸门会让 ei 直接跳到 2，把 .m4a 整轮跳过、掉进 TTS ——
+    // 这正是「明明有音频却没声音」的根因。
+    let advanced = false;
+    function advance() { if (advanced) return; advanced = true; ei++; tryNext(); }
     function tryNext() {
-      if (ei >= exts.length) { a.onerror = null; a.onended = null; a.onloadedmetadata = null; playSlideTTS(rawNotes, segs); return; }
-      a.onerror = function() { a.onerror = null; ei++; tryNext(); };
+      if (ei >= exts.length) {
+        advanced = false;
+        a.onerror = null; a.onended = null; a.onloadedmetadata = null;
+        setPlayStatus('info', '本页暂无预生成真人配音，已切换本机语音播报（音色会略有不同）。');
+        playSlideTTS(rawNotes, segs);
+        return;
+      }
+      advanced = false;
+      a.onerror = advance;
       a.onloadedmetadata = segs ? function() { startNarrSync(segs, function(){ return a.currentTime; }, function(){ return a.duration; }); } : null;
       a.src = audioBase + '.' + exts[ei];
-      const pr = a.play();
-      if (pr && pr.catch) pr.catch(function() { ei++; tryNext(); });
+      let pr = null;
+      try { pr = a.play(); } catch (e) { advance(); return; }
+      if (pr && pr.catch) pr.catch(function() { advance(); });
     }
     tryNext();
     if (!segs) updateSubtitle(rawNotes); // 静态字幕
+    setPlayStatus('🔊 真人配音播放中', 'audio');
     return;
   }
   // 无 Audio 支持，直接 TTS
@@ -11631,32 +11656,102 @@ function onSlideAudioEnded() {
   } else {
     S.voicePlaying = false;
     updateVoiceButton();
+    setPlayStatus('✅ 本节播完了，点击进入练习。', 'done');
     updateSubtitle('课程语音播放完成，可进入关卡练习。');
   }
 }
 
 // 浏览器内置 TTS 回退（原 playCurrentSlide 逻辑），支持字幕逐句高亮
+// 语音播报健壮性：① Chrome/Edge 长时间朗读会在约 15s 处自动中断，用周期性
+// pause+resume 维持会话；② 环境不支持语音（无中文语音包 / 内嵌 webview 关了 TTS）时
+// speak() 既不发声也不触发 onend，会永久卡在当前页 —— 看门狗 1.6s 内没进入 speaking
+// 就判定不可用，给出可见提示，并按字数估算时长继续把课程推进下去（无声但完整）。
+function clearTtsTimers() {
+  if (_ttsKeepAlive) { clearInterval(_ttsKeepAlive); _ttsKeepAlive = null; }
+  if (_ttsWatchdog) { clearTimeout(_ttsWatchdog); _ttsWatchdog = null; }
+  if (_ttsClock) { clearTimeout(_ttsClock); _ttsClock = null; }
+}
+
+// 播放状态条。tone: info(中性) / warn(本机语音兜底) / done(播完)
+// 要点：用户点播放后必须**立刻**看到状态，否则「没反应」就会被当成视频打不开。
+function setPlayStatus(msg, tone) {
+  var host = document.getElementById('pptContainer');
+  if (!host) return;
+  var tip = document.getElementById('ttsNotice');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.id = 'ttsNotice';
+    tip.setAttribute('data-tone', 'info');
+    host.appendChild(tip);
+  }
+  tip.textContent = msg || '';
+  tip.setAttribute('data-tone', tone || 'info');
+}
+function ttsNotice(msg) { setPlayStatus(msg, 'info'); }
+
+function speakSafely(notes, segs, estSeconds) {
+  var supported = false;
+  try { supported = !!(window.speechSynthesis && window.SpeechSynthesisUtterance); } catch (e) { supported = false; }
+  clearTtsTimers();
+  if (!supported) { ttsFallbackByClock(estSeconds, '当前环境不支持语音播报，已按讲解时长自动翻页，可阅读下方字幕学习。'); return; }
+  try { _voiceSynth.cancel(); } catch (e) {}
+  _voiceUtterance = new SpeechSynthesisUtterance(notes);
+  _voiceUtterance.lang = 'zh-CN';
+  _voiceUtterance.rate = S.voiceRate || 1;
+  _voiceUtterance.onend = function() { clearTtsTimers(); clearNarr(); ttsNotice(''); onSlideAudioEnded(); };
+  _voiceUtterance.onerror = function() {
+    clearTtsTimers();
+    ttsFallbackByClock(estSeconds, '当前环境未能播放语音（可能未安装中文语音包），已按讲解时长自动翻页，可阅读下方字幕学习。');
+  };
+  try { _voiceSynth.speak(_voiceUtterance); } catch (e) {
+    ttsFallbackByClock(estSeconds, '当前环境未能播放语音（可能未安装中文语音包），已按讲解时长自动翻页，可阅读下方字幕学习。');
+    return;
+  }
+  // 看门狗
+  _ttsWatchdog = setTimeout(function() {
+    var alive = false;
+    try { alive = !!(_voiceSynth.speaking || _voiceSynth.pending); } catch (e) {}
+    if (!alive && S.voicePlaying) {
+      ttsFallbackByClock(estSeconds, '没检测到语音输出（可能未安装中文语音包），已按讲解时长自动翻页，可阅读下方字幕学习。');
+    }
+  }, 1600);
+  // 长播保活
+  _ttsKeepAlive = setInterval(function() {
+    if (!S.voicePlaying) { clearTtsTimers(); return; }
+    var sp = false;
+    try { sp = _voiceSynth.speaking; } catch (e) {}
+    if (!sp) { clearInterval(_ttsKeepAlive); _ttsKeepAlive = null; return; }
+    try { _voiceSynth.pause(); _voiceSynth.resume(); } catch (e) {}
+  }, 8000);
+}
+
+function ttsFallbackByClock(estSeconds, msg) {
+  clearTtsTimers();
+  setPlayStatus(msg || '', 'warn');
+  var sec = Math.max(3, Number(estSeconds) || 12);
+  if (_ttsClock) clearTimeout(_ttsClock);
+  _ttsClock = setTimeout(function() {
+    if (S.voicePlaying && !S.voicePaused) onSlideAudioEnded();
+  }, sec * 1000);
+}
+
 function playSlideTTS(rawNotes, segs) {
   const sentences = splitChineseSentences(rawNotes);
   const notes = sentences.join('。');
   S._currentSentences = sentences;
   S._currentSentenceIdx = 0;
-  _voiceUtterance = new SpeechSynthesisUtterance(notes);
-  _voiceUtterance.lang = 'zh-CN';
-  _voiceUtterance.rate = S.voiceRate || 1;
-  _voiceUtterance.onend = function() { clearNarr(); onSlideAudioEnded(); };
+  const total = (segs && segs.length ? segs.reduce(function(a, s){ return a + Math.max(1, s.text.length); }, 0) : notes.length);
+  const est = total / 4.5 / (S.voiceRate || 1);   // 估算朗读秒数（约 4.5 字/秒）
   if (!segs || !segs.length) {
     updateSubtitle(notes, sentences);
-    _voiceSynth.speak(_voiceUtterance);
+    speakSafely(notes, segs, est);
     return;
   }
   // 用虚拟时钟驱动高亮（按字数估算总时长，随语速缩放）
   S._ttsStart = Date.now();
-  const total = segs.reduce(function(a, s){ return a + Math.max(1, s.text.length); }, 0);
-  const dur = total / 4.5 / (S.voiceRate || 1);
-  startNarrSync(segs, function(){ return (Date.now() - S._ttsStart) / 1000; }, function(){ return dur; });
+  startNarrSync(segs, function(){ return (Date.now() - S._ttsStart) / 1000; }, function(){ return est; });
   updateSubtitle(notes, sentences);
-  _voiceSynth.speak(_voiceUtterance);
+  speakSafely(notes, segs, est);
 }
 
 function updatePPTUI() {
