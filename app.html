@@ -11262,6 +11262,12 @@ S.calcResults = function() {
 S.openCourse = function(idx) {
   const courses = getRoleCourses();
   const c = courses[idx];
+  // 金融×产品经理：直接进入完整 64 单元真人声课程（含 8 项修复 + 管理员预览模式），
+  // 而非主站内嵌的轻量 5 单元课。其它岗位/行业仍走原内嵌课程。
+  if (S.industry === 'finance' && S.role === 'pm') {
+    window.open('course_finance_pm_full.html', '_blank', 'noopener');
+    return;
+  }
   S.courseIdx = idx; S.courseTaskIdx = 0; S.pptCurrentSlide = 0; S.voicePlaying = false; S.view = 'course'; render();
 };
 S.goDashboard = function() { stopVoice(); S.view = 'dashboard'; S.courseIdx = null; S.courseTaskIdx = 0; render(); };
