@@ -866,14 +866,14 @@ const ROLES = {
 // ==================== AI CAPABILITY MODEL ====================
 // 8 universal AI capability dimensions
 const AI_DIMS = {
-  prompt:   {id:'prompt',   name:'提示词工程',     icon:'💬', short:'Prompt',   desc:'设计有效AI提示词的结构化能力'},
-  tools:    {id:'tools',    name:'AI工具实战',     icon:'🛠️', short:'Tools',    desc:'熟练运用各类AI工具解决实际工作问题'},
-  data:     {id:'data',     name:'AI数据分析与决策', icon:'📊', short:'Data',    desc:'用AI处理业务数据、生成洞察、辅助决策'},
-  content:  {id:'content',  name:'AI内容创作',     icon:'✍️', short:'Content',  desc:'用AI创作文案、报告、方案等各类专业内容'},
-  dev:      {id:'dev',      name:'AI辅助开发',     icon:'💻', short:'Dev',      desc:'用AI辅助编程、测试、技术方案设计'},
-  workflow: {id:'workflow', name:'AI协同工作流',   icon:'⚡', short:'Workflow', desc:'将AI嵌入日常工作流程，实现效率跃升'},
-  security: {id:'security', name:'AI安全与合规',   icon:'🔒', short:'Security', desc:'AI使用中的安全风险识别与合规管理'},
-  strategy: {id:'strategy', name:'AI战略思维',     icon:'🎯', short:'Strategy', desc:'从战略层面理解和规划AI在企业中的应用'}
+  prompt:   {id:'prompt',   name:'提示词工程',     icon:'💬', short:'Prompt',   shortCn:'提示词',  desc:'设计有效AI提示词的结构化能力'},
+  tools:    {id:'tools',    name:'AI工具实战',     icon:'🛠️', short:'Tools',    shortCn:'工具',    desc:'熟练运用各类AI工具解决实际工作问题'},
+  data:     {id:'data',     name:'AI数据分析与决策', icon:'📊', short:'Data',    shortCn:'数据',    desc:'用AI处理业务数据、生成洞察、辅助决策'},
+  content:  {id:'content',  name:'AI内容创作',     icon:'✍️', short:'Content',  shortCn:'内容',    desc:'用AI创作文案、报告、方案等各类专业内容'},
+  dev:      {id:'dev',      name:'AI辅助开发',     icon:'💻', short:'Dev',      shortCn:'开发',    desc:'用AI辅助编程、测试、技术方案设计'},
+  workflow: {id:'workflow', name:'AI协同工作流',   icon:'⚡', short:'Workflow', shortCn:'工作流',  desc:'将AI嵌入日常工作流程，实现效率跃升'},
+  security: {id:'security', name:'AI安全与合规',   icon:'🔒', short:'Security', shortCn:'安全',    desc:'AI使用中的安全风险识别与合规管理'},
+  strategy: {id:'strategy', name:'AI战略思维',     icon:'🎯', short:'Strategy', shortCn:'战略',    desc:'从战略层面理解和规划AI在企业中的应用'}
 };
 
 // Level descriptions (0-4 scale)
@@ -4691,11 +4691,14 @@ const COURSES = {
     {id:'mfg_pm5', title:'制造业AI竞品分析与技术路线规划', desc:'用AI监控工业4.0技术趋势，制定产品技术路线', type:'text', dur:'35分钟', skills:[{s:4,w:0.55},{s:1,w:0.2},{s:2,w:0.15},{s:3,w:0.1}], tasks:[{t:'AI工业4.0技术扫描',h:'用AI分析工业AI领域的最新技术动态和标杆案例。'},{t:'制造执行系统竞品分析',h:'选择3个主流MES产品，用AI做功能/技术/体验全维度对比。'},{t:'AI生成技术路线图',h:'基于竞品分析和技术趋势，用AI辅助生成产品12个月技术路线图。'}] }
   ],
   finance_pm: [
-    {id:'fin_pm1', title:'金融场景AI需求洞察：信贷·风控·理财', desc:'用AI从金融业务数据中挖掘真实需求，精准定义产品方向', type:'video', dur:'45分钟', skills:[{s:0,w:0.5},{s:1,w:0.2},{s:3,w:0.2},{s:2,w:0.1}], tasks:[{t:'AI分析信贷审批拒绝原因',h:'上传脱敏审批数据，用AI分析拒绝原因分布，识别策略优化机会。'},{t:'风控规则效果评估',h:'用AI分析风控规则的命中率和误杀率，提出规则优化建议。'},{t:'AI生成金融产品PRD',h:'基于分析结果，用AI生成一份结构化的金融产品需求文档。'}], video:'https://player.bilibili.com/player.html?bvid=BV1...'},
-    {id:'fin_pm2', title:'金融用户画像与行为数据分析', desc:'用AI深度分析金融用户行为，构建精准用户画像', type:'text', dur:'45分钟', skills:[{s:1,w:0.45},{s:2,w:0.3},{s:0,w:0.15},{s:4,w:0.1}], tasks:[{t:'AI交易行为聚类分析',h:'用AI分析用户交易数据，发现不同用户群的消费和投资模式。'},{t:'风险偏好识别',h:'基于用户持仓和交易历史，用AI评估用户风险偏好等级。'},{t:'AI生成财富管理建议框架',h:'用AI设计一个基于用户画像的智能推荐框架。'}] },
-    {id:'fin_pm3', title:'金融AI数据驱动决策：风险定价·反欺诈·额度策略', desc:'用AI量化分析金融核心决策，提升风控精度和业务效率', type:'video', dur:'40分钟', skills:[{s:2,w:0.5},{s:1,w:0.2},{s:4,w:0.2},{s:0,w:0.1}], tasks:[{t:'AI风险定价模型分析',h:'将历史借贷数据输入AI，分析不同风险等级客户的损失率和定价合理性。'},{t:'反欺诈规则优化',h:'用AI分析欺诈案例特征，生成反欺诈规则建议和检测逻辑。'},{t:'AI额度策略模拟',h:'用AI模拟不同额度策略对GMV和坏账率的影响，给出最优建议。'}], video:'https://player.bilibili.com/player.html?bvid=BV1...'},
-    {id:'fin_pm4', title:'金融产品AI原型与合规设计', desc:'在合规框架下用AI设计金融产品原型和交互流程', type:'text', dur:'35分钟', skills:[{s:3,w:0.55},{s:0,w:0.2},{s:2,w:0.15},{s:1,w:0.1}], tasks:[{t:'AI生成理财产品申购流程',h:'描述合规要求（适当性管理·风险揭示·冷静期），让AI设计申购交互流程。'},{t:'风控审批页面设计',h:'用AI设计风控审批工作台页面，包含规则管理/案例审核/策略监控。'},{t:'AI合规审查嵌入设计',h:'设计在产品原型中嵌入AI合规审查节点的交互方案。'}] },
-    {id:'fin_pm5', title:'金融科技竞品深度分析与监管趋势洞察', desc:'用AI持续监控FinTech竞品和监管变化，保持战略敏锐', type:'text', dur:'35分钟', skills:[{s:4,w:0.55},{s:1,w:0.2},{s:2,w:0.15},{s:3,w:0.1}], tasks:[{t:'AI FinTech竞品矩阵分析',h:'用AI对比蚂蚁/微众/招行/京东科技在AI金融产品上的布局。'},{t:'监管政策影响评估',h:'上传最新监管文件，用AI分析对现有产品线的影响并生成整改建议。'},{t:'AI金融科技趋势报告',h:'用AI综合竞品和监管信息，生成季度金融科技产品趋势报告。'}] }
+    {id:'fin_pm_m0', title:'导论：金融 PM 的 AI 机会与红线', desc:'6 类 AI 机会与 3 条红线——任何用法都不能越过的底线', type:'video', dur:'8 单元', dims:['strategy','security'], requires:[]},
+    {id:'fin_pm_m1', title:'用 AI 做金融业务与监管洞察', desc:'监管信息源解读、竞品监控、市场扫描——把外部信号变成产品判断', type:'video', dur:'8 单元', dims:['prompt','data'], requires:['fin_pm_m0']},
+    {id:'fin_pm_m2', title:'AI 辅助需求与用户研究', desc:'访谈→洞察、千人画像聚类、用户分层与旅程地图', type:'video', dur:'8 单元', dims:['prompt','tools','data'], requires:['fin_pm_m0']},
+    {id:'fin_pm_m3', title:'AI 辅助 PRD 与产品定义', desc:'一句话需求→结构化 PRD、多角色评审、含风控与埋点的完整 PRD', type:'video', dur:'8 单元', dims:['content','tools','dev'], requires:['fin_pm_m0']},
+    {id:'fin_pm_m4', title:'AI 驱动数据分析与增长决策', desc:'指标口径、NL2SQL 边界、AB 实验设计与复盘', type:'video', dur:'8 单元', dims:['data','tools'], requires:['fin_pm_m0']},
+    {id:'fin_pm_m5', title:'AI 嵌入研发协同与运营', desc:'模糊需求→验收用例、监控告警看板、线上事故复盘', type:'video', dur:'8 单元', dims:['workflow','dev'], requires:['fin_pm_m0']},
+    {id:'fin_pm_m6', title:'金融合规与安全下的 AI 用法', desc:'数据分级、红线清单、监管报送与可解释', type:'video', dur:'8 单元', dims:['security'], requires:['fin_pm_m0']},
+    {id:'fin_pm_m7', title:'综合实战：从 0 到 1 设计金融产品', desc:'立项→PRD→交付→评审→跨模块整合，带风控合规的完整全案', type:'video', dur:'8 单元', dims:['prompt','tools','data','content','dev','workflow','security','strategy'], requires:['fin_pm_m3','fin_pm_m5']}
   ],
   auto_pm: [
     {id:'auto_pm1', title:'智能座舱AI需求洞察：语音·导航·个性化', desc:'用AI分析车载场景数据，挖掘智能座舱的产品创新机会', type:'video', dur:'45分钟', skills:[{s:0,w:0.5},{s:1,w:0.2},{s:3,w:0.2},{s:2,w:0.1}], tasks:[{t:'AI座舱语音交互分析',h:'用AI分析车载语音助手的使用日志，识别高频失败场景和用户期望。'},{t:'导航行为需求挖掘',h:'分析车主导航偏好数据，用AI发现路径规划/POI推荐的优化方向。'},{t:'AI生成座舱功能PRD',h:'基于用户行为分析，用AI撰写一份座舱新功能的需求文档。'}], video:'https://player.bilibili.com/player.html?bvid=BV1...'},
@@ -4916,11 +4919,22 @@ const COURSES = {
 };
 
 // Industry-aware course getter — tries role_industry key first, falls back to role
-function getRoleCourses() {
-  const key = S.industry ? S.role + '_' + S.industry : S.role;
-  const base = COURSES[key] || COURSES[S.role] || [];
+// 按 岗位×行业 取课程集合（学习地图 / 课程列表 / 学习计划 / 后台统计共用同一口径）
+function courseListFor(roleId, industryId) {
+  // 金融 × 产品经理：课程实体 = 64 单元丰富课（course_finance_pm_full.html）的 8 个模块。
+  // 学习地图 / 课程列表 / 学习计划必须与该丰富课一一对应（点击带 ?m=Mx 深链定位模块），
+  // 否则会出现「地图列通用产品课、点进去却是金融 PM 课」的错位。
+  // 注意：这里也刻意不追加通用「AI 工具指南」5 门——它们在丰富课内无法完成，会卡死「成果测验」解锁。
+  if (industryId === 'finance' && roleId === 'pm') return (COURSES.finance_pm || []).slice();
+  const key = industryId ? roleId + '_' + industryId : roleId;
+  const base = COURSES[key] || COURSES[roleId] || [];
   // v37: AI工具指南系列为全岗位通用课，追加到每个岗位的课程列表末尾
   return (COURSES.tools && COURSES.tools.length) ? base.concat(COURSES.tools) : base;
+}
+
+// Industry-aware course getter — tries role_industry key first, falls back to role
+function getRoleCourses() {
+  return courseListFor(S.role, S.industry);
 }
 
 // Normalize course skills to [{s:index, w:weight}] format (backward compatible)
@@ -4940,9 +4954,29 @@ function getPrimarySkillIdx(course) {
   return best.s;
 }
 
+// 课程维度解析：优先用课程自带 dims（数组，多维度）/dim（单维度），否则回退到 role.dimKeys[skill] 的 legacy 路径
+function courseDimKeys(course) {
+  if (course.dims && course.dims.length) return course.dims;
+  if (course.dim) return [course.dim];
+  return null; // legacy：交由 dimKeys 映射
+}
+
 // Compute weighted composite score from the 8-dim result
 function getCourseCompositeScore(course) {
   const result = S._quizResult;
+  const dks = courseDimKeys(course);
+  if (dks) {
+    // 新体系：取覆盖维度中的「最弱分」——任一弱维即可触发必修，确保短板必须补齐
+    let vals = [];
+    dks.forEach(dk => {
+      let v = 0;
+      if (result && result.dimScores && result.dimScores[dk] !== undefined) v = result.dimScores[dk];
+      else if (S.quizScores && S.quizScores[dk] !== undefined) v = S.quizScores[dk];
+      vals.push(v);
+    });
+    return vals.length ? Math.min.apply(null, vals) : 0;
+  }
+  // legacy path（不破坏既有 PM/研发/运营等课程行为）
   const role = ROLES[S.role];
   const skills = normalizeSkills(course.skills);
   let totalW = 0, totalWS = 0;
@@ -4967,7 +5001,7 @@ function getCoursePriority(course) {
 
   // Industry dimension multiplier: higher weight dims get more urgency when weak
   const weights = S._quizResult ? (S._quizResult.weights || getWeights(S.industry, S.role)) : getWeights(S.industry, S.role);
-  const dimKey = (ROLES[S.role] && ROLES[S.role].dimKeys && ROLES[S.role].dimKeys[getPrimarySkillIdx(course)]) || null;
+  const dimKey = courseDimKey(course);
   let indBoost = 1.0;
   if (dimKey && weights && weights[dimKey] !== undefined) {
     indBoost = 0.7 + (weights[dimKey] / 100) * 0.6; // 0.7 ~ 1.3 range
@@ -5022,6 +5056,8 @@ function selfDimKeys() {
   return keys;
 }
 function courseDimKey(course) {
+  const dks = courseDimKeys(course);
+  if (dks && dks.length) return dks[0];
   const role = ROLES[S.role];
   if (!role) return null;
   const skillIdx = getPrimarySkillIdx(course);
@@ -8718,9 +8754,17 @@ function renderLearningMap() {
       const prereqUnmet = c.requires && c.requires.length && c.requires.some(rid => !S.courseProgress[rid]?.done);
       const isCurrent = !isDone && globalIdx === currentIdx;
       const selfRel = isSelfRelated(c);
-      const skillIdx = getPrimarySkillIdx(c);
-      const skillName = role.skills[skillIdx] || '';
-      const skillPct = S.quizScores ? Math.round((S.quizScores[skillIdx]||0)/4*100) : 0;
+      // 新体系课程（自带 dims，如金融PM 8 模块）：标签展示其覆盖的能力维度，紧急度取覆盖维度中最弱的一项
+      const cDims = courseDimKeys(c);
+      let skillName, skillPct;
+      if (cDims && cDims.length) {
+        skillName = cDims.map(dk => (AI_DIMS[dk] && (AI_DIMS[dk].shortCn || AI_DIMS[dk].short)) || dk).join('·');
+        skillPct = getCourseDimPct(c);
+      } else {
+        const skillIdx = getPrimarySkillIdx(c);
+        skillName = role.skills[skillIdx] || '';
+        skillPct = S.quizScores ? Math.round((S.quizScores[skillIdx]||0)/4*100) : 0;
+      }
       const urgency = skillPct < 40 ? '🔴 急需' : skillPct < 70 ? '🟡 建议' : '🟢 进阶';
 
       let nodeCls = 'map-node';
@@ -8852,7 +8896,9 @@ function renderSchedule() {
 
     weekCourses.forEach((c, ci) => {
       const compScore = getCourseCompositeScore(c);
-      const skillPct = compScore > 0 ? Math.round(compScore/4*100) : (scores ? Math.round((scores[getPrimarySkillIdx(c)]||0)/4*100) : 50);
+      const _cd = courseDimKeys(c);
+      const skillPct = (_cd && _cd.length) ? getCourseDimPct(c)
+        : (compScore > 0 ? Math.round(compScore/4*100) : (scores ? Math.round((scores[getPrimarySkillIdx(c)]||0)/4*100) : 50));
       const priorityCls = skillPct < 40 ? 'priority-high' : skillPct < 70 ? 'priority-mid' : 'priority-low';
       const day = weekDays[ci] || weekDays[0];
       const dur = parseInt(c.dur) || 30;
@@ -9461,12 +9507,22 @@ function totalQuestXP() { return Object.values(S.questProg||{}).reduce((a,p)=>a+
 
 // 必修/选修分层：课程主维度掌握度 <70% → 必修（短板补齐），否则选修
 function getCourseDimPct(c) {
+  const dks = courseDimKeys(c);
+  const result = S._quizResult;
+  if (dks && dks.length) {
+    let mn = 4;
+    dks.forEach(dk => {
+      const v = (result && result.dimScores && result.dimScores[dk] !== undefined) ? result.dimScores[dk]
+              : (S.quizScores && S.quizScores[dk] !== undefined ? S.quizScores[dk] : 0);
+      if (v < mn) mn = v;
+    });
+    return Math.round(mn/4*100);
+  }
   let pct = Math.round(getCourseCompositeScore(c)/4*100);
   if (pct === 0) {
     const role = ROLES[S.role];
     const skillIdx = getPrimarySkillIdx(c);
     const dimKey = (role.dimKeys && role.dimKeys[skillIdx]) || null;
-    const result = S._quizResult;
     if (dimKey && result && result.dimScores) pct = Math.round((result.dimScores[dimKey]||2)/4*100);
     else if (S.quizScores && S.quizScores[skillIdx] !== undefined) pct = Math.round((S.quizScores[skillIdx]||0)/4*100);
     else pct = 100;
@@ -10357,7 +10413,7 @@ function buildSalesPlan(o){
   var groups = aggregateBy(function(e){ return e.industry; });
   var g = null;
   groups.forEach(function(x){ if (x.key === o.industry) g = x; });
-  var clist = COURSES[o.role + '_' + o.industry] || COURSES[o.role] || [];
+  var clist = COURSES[o.role + '_' + o.industry] || COURSES[o.industry + '_' + o.role] || COURSES[o.role] || [];
   var weak = (g && g.weak && g.weak.length) ? g.weak : [];
   var weakNames = weak.map(function(d){ return AI_DIMS[d].name; });
   if (!weakNames.length) { // 无实测数据时用岗位能力基线兜底
@@ -10890,7 +10946,7 @@ function renderAdminOverview(isAdmin) {
       const scoreCls = e.finalScore>=80?'var(--green)':e.finalScore>=60?'var(--amber)':'var(--red)';
       html += `<div class="emp-row">
         <div class="emp-avatar">${e.name[0]}</div>
-        <div class="emp-info"><div class="emp-name">${e.name}</div><div class="emp-meta">${r?r.icon+' '+r.name:''} · ${e.company?e.company+' · ':''}${e.date} · ${e.doneCourses||0}/${COURSES[e.role]?.length||0}课</div></div>
+        <div class="emp-info"><div class="emp-name">${e.name}</div><div class="emp-meta">${r?r.icon+' '+r.name:''} · ${e.company?e.company+' · ':''}${e.date} · ${e.doneCourses||0}/${courseListFor(e.role, e.industry).length||0}课</div></div>
         <div class="emp-score" style="color:${scoreCls}">${e.finalScore!=null?e.finalScore+'分':'学习中'}</div>
         <button class="btn btn-sm btn-outline" data-action="loadAndGoDashboard" data-emp="${e.id}">查看</button>
       </div>`;
@@ -11263,13 +11319,24 @@ S.openCourse = function(idx) {
   const courses = getRoleCourses();
   const c = courses[idx];
   // 金融×产品经理：直接进入完整 64 单元真人声课程（含 8 项修复 + 管理员预览模式），
-  // 而非主站内嵌的轻量 5 单元课。其它岗位/行业仍走原内嵌课程。
+  // 而非主站内嵌的轻量课。带 ?m=Mx 深链定位模块、&weak= 弱维用于个性化高亮。其它岗位/行业仍走原内嵌课程。
   if (S.industry === 'finance' && S.role === 'pm') {
-    window.open('course_finance_pm_full.html', '_blank', 'noopener');
+    const mparam = (c && c.id && /fin_pm_m(\d+)/.test(c.id)) ? ('?m=M' + c.id.match(/fin_pm_m(\d+)/)[1]) : '';
+    const weak = weakDimList();
+    const wparam = weak.length ? ((mparam ? '&' : '?') + 'weak=' + encodeURIComponent(weak.join(','))) : '';
+    window.open('course_finance_pm_full.html' + mparam + wparam, '_blank', 'noopener');
     return;
   }
   S.courseIdx = idx; S.courseTaskIdx = 0; S.pptCurrentSlide = 0; S.voicePlaying = false; S.view = 'course'; render();
 };
+
+// 取测评中低于 70%（<2.8/4）的维度，作为「短板」传给丰富课做个性化高亮
+function weakDimList() {
+  const r = S._quizResult; const out = [];
+  if (!r || !r.dimScores) return out;
+  Object.keys(r.dimScores).forEach(k => { if (r.dimScores[k] < 2.8) out.push(k); });
+  return out;
+}
 S.goDashboard = function() { stopVoice(); S.view = 'dashboard'; S.courseIdx = null; S.courseTaskIdx = 0; render(); };
 S.goLearningMap = function() { stopVoice(); S.view = 'map'; render(); };
 S.goSchedule = function() { stopVoice(); S.view = 'schedule'; render(); };
@@ -11963,6 +12030,11 @@ function bindEvents() {
     if (!e || !e.key) return;
     if (e.key === DB._key('feedback') || e.key === DB._key('requirements') || e.key === 'aidax_outbox') {
       if (S.view === 'admin') render();
+    }
+    // 丰富课（course_finance_pm_full.html）通关后写回 ai_training_progress → 学习地图实时刷新
+    if (e.key === 'ai_training_progress') {
+      try { S.courseProgress = JSON.parse(e.newValue || '{}'); } catch(_) {}
+      if (S.view === 'map' || S.view === 'role') render();
     }
   });
 })();
