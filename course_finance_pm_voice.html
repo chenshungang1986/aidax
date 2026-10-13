@@ -48,7 +48,7 @@
   .kv b{color:var(--blue-d)}
   /* 视频播放器 */
   .vp{position:relative;background:#0c1430;border-radius:14px;overflow:hidden;aspect-ratio:16/9}
-  .vp .stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px}
+  .vp .stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;pointer-events:none}
   .slide{display:none;width:100%;height:100%;align-items:center;justify-content:center;flex-direction:column;text-align:center;color:#eaf0ff}
   .slide.on{display:flex}
   .slide h4{font-size:16px;margin:0 0 8px;color:#fff}
@@ -193,10 +193,10 @@ function renderUnit(uid){
   +'<div class="umeta"><span class="chip">'+(u.tier==='adv'?'进阶':'入门')+'</span><span class="chip">'+STEP_LABEL[u.step]+'环节</span><span class="chip">讲解视频 '+u.vslides.length+' 段 · 约 '+mins+' 分钟</span><span class="chip">交付物：'+(u.deliverable||'本单元产出')+'</span></div>'
   +'<div class="card"><h3>🎬 视频讲解</h3>'
   +  '<div class="vp"><div class="stage" id="p-stage"></div><div class="dots" id="p-dots"></div>'
-  +  '<div class="cap" id="p-sub">点击播放，字幕与人声同步</div>'
+  +  '<div class="cap" id="p-sub">点击播放，字幕与人声同步</div></div>'
   +  '<div class="vbar"><button class="play" id="p-play">▶ 播放</button>'
   +  '<div class="seek" id="p-seek"><div class="fill"></div><div class="knob"></div></div>'
-  +  '<span class="time" id="p-time">0:00 / 0:00</span></div></div>'
+  +  '<span class="time" id="p-time">0:00 / 0:00</span></div>'
   +  '<div class="aud-note" id="p-note"></div>'
   +'</div>'
   +'<div class="card"><h3>📑 课件要点</h3>'
@@ -228,7 +228,7 @@ function doneCard(st,uid){
 function makePlayer(uid, slides, aud){
   const stage=document.getElementById('p-stage'), subEl=document.getElementById('p-sub'), dots=document.getElementById('p-dots'),
         seek=document.getElementById('p-seek'), timeEl=document.getElementById('p-time'), playBtn=document.getElementById('p-play');
-  let cur=-1, playing=false, mode=null, audio=null, ttsTimer=null, ttsPulse=null, ttsStart=0, pulsedIdx=-1;
+  let cur=0, playing=false, mode=null, audio=null, ttsTimer=null, ttsPulse=null, ttsStart=0, pulsedIdx=-1, ttsGuard=null;
   const dur=slides.map(s=>Math.max(2, sub(s.n).length*0.205)); /* 0.205 s/字 = 豆包实测 4.9 字/秒 */
   const fmt=t=>{t=Math.max(0,t);const m=Math.floor(t/60),s=Math.floor(t%60);return m+':'+(s<10?'0':'')+s;};
   const total=()=>dur.reduce((a,b)=>a+b,0);
@@ -265,28 +265,55 @@ function makePlayer(uid, slides, aud){
       const dot=document.createElement('i'); if(i===cur)dot.className='on'; dots.appendChild(dot);
     });
   }
+  /* 完全无语音环境：按估算时长滚筒式推进，保证画面一定会走 */
+  function clockSlide(i){
+    mode='tts'; ttsStart=performance.now();
+    setCaption(i,0); updateSeek();
+    clearInterval(ttsTimer); ttsTimer=setInterval(updateSeek,200);
+    clearInterval(ttsPulse); ttsPulse=setInterval(()=>{ maybePulse(i,(performance.now()-ttsStart)/1000/(dur[i]||1)); },150);
+    clearTimeout(ttsGuard);
+    ttsGuard=setTimeout(()=>{ if(playing&&mode==='tts'&&cur===i) advance(); }, Math.round((dur[i]+1)*1000));
+  }
+  function ttsSlide(i){
+    var sup=true;
+    try{ sup=!!(typeof speechSynthesis!=='undefined'&&typeof SpeechSynthesisUtterance!=='undefined'); }catch(e){ sup=false; }
+    if(!sup){ clockSlide(i); return; }
+    var u2;
+    try{ u2=new SpeechSynthesisUtterance(sub(slides[i].n)); }catch(e){ clockSlide(i); return; }
+    mode='tts'; ttsStart=performance.now();
+    u2.lang='zh-CN'; u2.rate=1;
+    u2.onboundary=e=>{ const n=sub(slides[i].n), before=n.slice(0,e.charIndex); let acc=0,k=0;
+      for(let x=0;x<linesOf(i).length;x++){ acc+=linesOf(i)[x].length; if(before.length<acc){k=x;break;} k=x; }
+      const f=before.length/Math.max(1,n.length); setCaption(i,f); maybePulse(i,f); updateSeek(); };
+    u2.onend=()=>{ if(playing) advance(); };
+    try{ speechSynthesis.cancel(); speechSynthesis.speak(u2); }catch(e){ clockSlide(i); return; }
+    setCaption(i,0); updateSeek();
+    clearInterval(ttsTimer); ttsTimer=setInterval(updateSeek,200);
+    clearInterval(ttsPulse); ttsPulse=setInterval(()=>{ maybePulse(i,(performance.now()-ttsStart)/1000/(dur[i]||1)); },150);
+    /* 语音静默失败兜底：到估算时长还没在播报，就自动翻页，避免永久卡住 */
+    clearTimeout(ttsGuard);
+    ttsGuard=setTimeout(()=>{
+      if(!playing||mode!=='tts'||cur!==i) return;
+      let sp=false; try{ sp=!!(speechSynthesis.speaking||speechSynthesis.pending); }catch(e){}
+      if(!sp) advance();
+    }, Math.round((dur[i]+1.5)*1000));
+  }
   function playSlide(i){
-    cur=i; render(); pulsedIdx=-1; clearInterval(ttsPulse);
-    if(aud&&aud[i]){ mode='audio'; audio=new Audio(aud[i]);
+    cur=i; render(); pulsedIdx=-1; clearInterval(ttsPulse); clearTimeout(ttsGuard);
+    if(aud&&aud[i]){
+      mode='audio'; audio=new Audio(aud[i]);
       audio.onloadedmetadata=()=>{ if(dur[i]&&audio.duration) dur[i]=audio.duration; updateSeek(); };
       audio.onended=()=>{ if(playing) advance(); };
       audio.ontimeupdate=()=>{ if(mode==='audio'){ const f=(audio.currentTime)/(audio.duration||dur[i]); setCaption(i,f); maybePulse(i,f); updateSeek(); } };
-      audio.onerror=()=>{ if(playing) advance(); };
-      audio.play().catch(()=>{}); setCaption(i,0); updateSeek();
-    }else{ mode='tts'; ttsStart=performance.now();
-      const u2=new SpeechSynthesisUtterance(sub(slides[i].n)); u2.lang='zh-CN'; u2.rate=1;
-      u2.onboundary=e=>{ const n=sub(slides[i].n), before=n.slice(0,e.charIndex); let acc=0,k=0;
-        for(let x=0;x<linesOf(i).length;x++){ acc+=linesOf(i)[x].length; if(before.length<acc){k=x;break;} k=x; }
-        const f=before.length/Math.max(1,n.length); setCaption(i,f); maybePulse(i,f); updateSeek(); };
-      u2.onend=()=>{ if(playing) advance(); };
-      speechSynthesis.cancel(); speechSynthesis.speak(u2);
+      /* 音频真的加载不出来时降级本机语音，绝不静默跳过（静默跳过会表现为「点了没反应」） */
+      audio.onerror=()=>{ if(playing&&mode==='audio'){ try{audio.pause();}catch(e){} ttsSlide(i); } };
+      const pr=audio.play();
+      if(pr&&pr.catch) pr.catch(()=>{ if(playing&&mode==='audio'&&!(audio.duration>0)) ttsSlide(i); });
       setCaption(i,0); updateSeek();
-      clearInterval(ttsTimer); ttsTimer=setInterval(updateSeek,200);
-      clearInterval(ttsPulse); ttsPulse=setInterval(()=>{ maybePulse(i,(performance.now()-ttsStart)/1000/(dur[i]||1)); },150);
-    }
+    }else{ ttsSlide(i); }
   }
-  function advance(){ const ni=cur+1; if(ni>=slides.length){ stop(); return; } playSlide(ni); }
-  function stop(){ playing=false; if(audio){try{audio.pause();}catch(e){}} speechSynthesis.cancel(); clearInterval(ttsTimer); clearInterval(ttsPulse); playBtn.textContent='▶ 播放'; }
+  function advance(){ const ni=cur+1; if(ni>=slides.length){ stop(); subEl.textContent='本节讲解结束，可继续下方环节活动'; return; } playSlide(ni); }
+  function stop(){ playing=false; if(audio){try{audio.pause();}catch(e){}} try{speechSynthesis.cancel();}catch(e){} clearInterval(ttsTimer); clearInterval(ttsPulse); clearTimeout(ttsGuard); playBtn.textContent='▶ 播放'; }
   function play(){ if(playing){ stop(); return; } playing=true; playBtn.textContent='⏸ 暂停'; playSlide(cur<0?0:cur); }
   playBtn.onclick=play;
   seek.addEventListener('pointerdown',ev=>{
@@ -297,6 +324,7 @@ function makePlayer(uid, slides, aud){
     if(mode==='audio'&&audio) audio.currentTime=Math.min(g-acc,(audio.duration||dur[idx])-0.05);
     updateSeek();
   });
+  render();   /* 进入单元先渲染第一页，避免一片黑让人误以为播放器坏了 */
   updateSeek();
   return {stop:stop, play:play};
 }
