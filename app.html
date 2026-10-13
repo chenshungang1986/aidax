@@ -193,6 +193,20 @@
   .gap-bar-fill.weak { background:var(--red); }
   .gap-score { font-size:13px; font-weight:600; width:30px; text-align:right; }
 
+  /* P4: 对标行业目标能力画像 */
+  .tp-row { display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid var(--border); font-size:12.5px; flex-wrap:wrap; }
+  .tp-row:last-child { border-bottom:none; }
+  .tp-name { flex:0 0 96px; font-weight:600; }
+  .tp-bar { flex:0 0 120px; height:6px; background:var(--border); border-radius:3px; overflow:hidden; }
+  .tp-fill { height:100%; border-radius:3px; }
+  .tp-fill.ok { background:var(--green); }
+  .tp-fill.weak { background:var(--red); }
+  .tp-actual { flex:0 0 130px; color:var(--text2); }
+  .tp-target { flex:0 0 150px; color:var(--blue); }
+  .tp-gap { flex:0 0 70px; text-align:right; font-weight:700; }
+  .tp-gap.ok { color:var(--green); }
+  .tp-gap.weak { color:var(--red); }
+
   /* Back nav */
   .back-nav { display:flex; align-items:center; gap:8px; cursor:pointer; color:var(--blue); font-size:14px; font-weight:500; border:none; background:none; }
   .back-nav:hover { opacity:0.7; }
@@ -466,6 +480,7 @@
   .map-node.self-related { box-shadow:0 0 0 2px rgba(0,113,227,.28); }
   .map-node-badge.suggested-badge { background:var(--amber-bg); color:var(--amber); }
   .map-node-badge.self-badge { background:rgba(0,113,227,.12); color:var(--blue); }
+  .map-node-badge.gap-badge { background:rgba(255,59,48,.12); color:var(--red); }
   .course-card.suggested { border-left:3px solid var(--amber); }
   .composite-breakdown { font-size:11px; color:var(--text2); margin-top:6px; }
   .self-map-card { border:1px dashed var(--accent); background:linear-gradient(180deg,transparent,rgba(0,113,227,.05)); border-radius:var(--radius); padding:14px 16px; margin-bottom:14px; }
@@ -927,6 +942,25 @@ function getWeights(industryId, roleId) {
   let sum = Object.values(dims).reduce((a,b)=>a+b,0);
   if (sum !== 100) { const keys=Object.keys(dims); dims[keys[0]]+=100-sum; }
   return dims;
+}
+
+// P4: 行业×岗位「目标能力画像」——金融×PM 等专属达标基准（0-4 量表，对标行业对该岗位 AI 的能力要求）
+// 含义：行业对该岗位 AI 能力的「期望达标线」。学前测实测低于该线，即「未达行业要求、需重点补齐」。
+const TARGET_PROFILES = {
+  finance_pm: {
+    prompt:   {target:3, why:'金融 PM 每天用 AI 写 PRD/需求/监管沟通，需体系化提示词'},
+    tools:    {target:2, why:'需了解 fintech AI 工具生态、能选型，但不必深度工程化'},
+    data:     {target:4, why:'金融数据是核心，需专家级用 AI 做风控/量化/经营分析'},
+    content:  {target:3, why:'监管报送、产品方案、对外材料均由 AI 辅助起草'},
+    dev:      {target:2, why:'能与工程师对齐 AI 能力边界、读懂技术方案，不深度编码'},
+    workflow: {target:4, why:'需把 AI 嵌入信贷/财富/保险的产品与运营工作流'},
+    security: {target:4, why:'金融合规红线，AI 使用必须合规可控、不可逾越'},
+    strategy: {target:3, why:'能规划金融产品 AI 路线图、评估投入产出'}
+  }
+};
+function getTargetProfile(industryId, roleId) {
+  const key = (industryId && roleId) ? industryId + '_' + roleId : (roleId || '');
+  return TARGET_PROFILES[key] || null; // null = 走原 2.8 通用阈值，避免其他岗位行为回归
 }
 
 // Adaptive assessment questions per role
@@ -8264,8 +8298,27 @@ function exportReport() {
     <p style="font-size:12px;color:#86868b;">本次未作答能力自评（可重新测评时在入口作答）。</p>`;
   }
 
+  // P4: 对标行业目标能力画像（仅金融×PM 等已定义专属画像的岗位）
+  const tp = getTargetProfile(S.industry, S.role);
+  let targetReportHtml = '';
+  if (tp) {
+    const lvlName = ['未接触','入门','应用','精通','专家'];
+    const tRows = dimKeys.map(k => {
+      if (!tp[k]) return '';
+      const score = result.dimScores[k] !== undefined ? result.dimScores[k] : 0;
+      const t = tp[k].target;
+      const gap = t - score;
+      const reach = score >= t;
+      return `<tr><td>${AI_DIMS[k].icon} ${escHtml(AI_DIMS[k].name)}</td><td class="num">${score.toFixed(1)}</td><td class="num">${t}（${lvlName[t]}）</td><td class="num"><span class="badge ${reach?'green':'red'}">${reach?'已达标':'差'+gap+'级'}</span></td></tr>`;
+    }).filter(Boolean).join('');
+    targetReportHtml = `<h2>对标行业目标能力画像 <span style="font-size:11px;color:#86868b;font-weight:400;">（行业对该岗位 AI 的达标要求）</span></h2>
+    <table>
+      <tr><th>维度</th><th class="num">实测(0-4)</th><th class="num">行业要求</th><th>差距</th></tr>
+      ${tRows}
+    </table>`;
+  }
+
   const now = new Date();
-  const dateStr = now.toLocaleDateString('zh-CN') + ' ' + now.toLocaleTimeString('zh-CN', {hour:'2-digit', minute:'2-digit'});
   const fileName = `AIDAX测评报告_${industry ? industry.name : ''}_${role ? role.name : ''}_${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}.html`;
 
   const html = `<!DOCTYPE html>
@@ -8334,6 +8387,8 @@ function exportReport() {
     ${dimRows.map(d => `<tr><td>${d.icon} ${escHtml(d.name)}</td><td class="num">${d.score.toFixed(1)}</td><td class="num">${d.pct}%</td><td class="num">${d.w.toFixed(1)}%</td><td><span class="badge ${d.state.c}">${d.state.t}</span></td></tr>`).join('')}
   </table>
 
+  ${targetReportHtml}
+
   <h2>能力短板诊断</h2>
   <div class="weak-list">
     ${weakest.map(d => `<div class="weak-item"><div class="wname">${d.icon} ${escHtml(d.name)}</div><div class="wpct" style="color:${d.pct >= 70 ? '#1d8a44' : d.pct >= 40 ? '#c77d00' : '#c92a22'};">${d.pct}%</div><div style="font-size:11px;color:#86868b;margin-top:4px;">${d.pct < 40 ? '建议优先学习相关课程' : '建议结合课程持续提升'}</div></div>`).join('')}
@@ -8381,12 +8436,19 @@ function shareReport() {
   const toPct = k => Math.round((result.dimScores[k] || 0) / 4 * 100);
   const top = [...dimKeys].map(k => ({ k, pct: toPct(k) })).sort((a, b) => b.pct - a.pct).slice(0, 2);
   const weak = [...dimKeys].map(k => ({ k, pct: toPct(k) })).sort((a, b) => a.pct - b.pct).slice(0, 2);
+  const tp = getTargetProfile(S.industry, S.role);
+  let gapLine = '';
+  if (tp) {
+    const gaps = dimKeys.filter(k => tp[k] && (result.dimScores[k] || 0) < tp[k].target).map(k => AI_DIMS[k].name);
+    gapLine = gaps.length ? `🎯 未达行业目标：${gaps.join('、')}` : '🎯 已全面达到行业目标能力画像';
+  }
   const text = [
     '【AI达学 · AI能力测评报告】',
     `行业：${industry ? industry.name : '—'} ｜ 岗位：${role ? role.name : '—'}`,
     `综合指数：${result.overall}%`,
     `💪 最强：${top.map(t => AI_DIMS[t.k].name + ' ' + t.pct + '%').join('、')}`,
     `⚠️ 短板：${weak.map(w => AI_DIMS[w.k].name + ' ' + w.pct + '%').join('、')}`,
+    gapLine,
     baseResultSummaryText() ? baseResultSummaryText() + '（占综合分 30%）' : 'AI基础素养：本次未作答',
     selfShareText() ? selfShareText() + '（独立 · 不计入综合分）' : '能力自评：本次未作答',
     '—— 来自 AI达学(AIDAX) 8维自适应测评'
@@ -8443,6 +8505,39 @@ function baseResultSummaryText() {
   if (!r) return null;
   const tag = r.pct >= 80 ? '🎉' : r.pct >= 60 ? '📖' : '🌱';
   return 'AI基础素养：' + r.correct + '/' + r.total + ' 题（' + r.pct + '% ' + tag + '）';
+}
+
+// P4: 对标行业目标能力画像卡片（结果页）
+function renderTargetProfileCard(result) {
+  const tp = getTargetProfile(S.industry, S.role);
+  if (!tp) return ''; // 仅金融×PM 等已定义专属画像的岗位展示
+  const industry = INDUSTRIES[S.industry], role = ROLES[S.role];
+  const lvlTxt = l => ['未接触','入门','应用','精通','专家'][l] || l;
+  let rows = '', gapN = 0;
+  Object.keys(AI_DIMS).forEach(dk => {
+    if (!tp[dk]) return;
+    const t = tp[dk].target;
+    const actual = (result && result.dimScores && result.dimScores[dk] != null) ? result.dimScores[dk] : 0;
+    const gap = t - actual;
+    const reach = actual >= t;
+    if (!reach) gapN++;
+    const cls = reach ? 'ok' : 'weak';
+    const why = tp[dk].why ? `<div style="flex-basis:100%;font-size:11px;color:var(--text3);padding:2px 0 4px 104px;">为何要求 ${t}（${lvlTxt(t)}）：${tp[dk].why}</div>` : '';
+    rows += `<div class="tp-row">
+      <span class="tp-name">${AI_DIMS[dk].icon} ${AI_DIMS[dk].name}</span>
+      <span class="tp-bar"><div class="tp-fill ${cls}" style="width:${Math.round(actual/4*100)}%"></div></span>
+      <span class="tp-actual">实测 ${actual}（${lvlTxt(actual)}）</span>
+      <span class="tp-target">行业要求 ${t}（${lvlTxt(t)}）</span>
+      <span class="tp-gap ${cls}">${reach ? '已达标' : '差'+gap+'级'}</span>
+      ${why}
+    </div>`;
+  });
+  return `<div class="card mt-3 slide-up">
+    <p style="font-weight:600;font-size:14px;margin-bottom:2px;">🎯 对标行业目标能力画像（${industry?industry.name:'行业'} · ${role?role.name:'岗位'}）</p>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:10px;">左为你的实测水平（0-4 级），右为<b>行业对该岗位 AI 能力的达标要求</b>。标红即「未达行业要求、需重点补齐」的维度，已自动进入你的必修学习地图。</p>
+    ${rows}
+    <p style="font-size:12px;color:var(--text2);margin-top:8px;">共 <b style="color:var(--red)">${gapN}</b> 个维度未达行业要求。</p>
+  </div>`;
 }
 
 function renderResults() {
@@ -8542,6 +8637,9 @@ function renderResults() {
       <span class="gap-score">${d.pct}%</span></div>`;
   });
   html += `</div>`;
+
+  // P4: 对标行业目标能力画像（金融×PM 等已定义专属画像的岗位）
+  html += renderTargetProfileCard(result);
 
   // Recommended courses (sorted by dim score of associated skill)
   const courses = getRoleCourses();
@@ -8767,6 +8865,13 @@ function renderLearningMap() {
       }
       const urgency = skillPct < 40 ? '🔴 急需' : skillPct < 70 ? '🟡 建议' : '🟢 进阶';
 
+      // P4: 课程覆盖维度中若有「实测 < 行业目标」者，标记「未达行业目标」
+      const tpMap = getTargetProfile(S.industry, S.role);
+      let targetGap = false;
+      if (tpMap && cDims && cDims.length) {
+        targetGap = cDims.some(dk => tpMap[dk] && (result && result.dimScores && result.dimScores[dk] != null ? result.dimScores[dk] : 0) < tpMap[dk].target);
+      }
+
       let nodeCls = 'map-node';
       if (selfRel) nodeCls += ' self-related';
       let iconContent = c.type==='video'?'🎬':'📖';
@@ -8794,7 +8899,7 @@ function renderLearningMap() {
           <div class="map-node-title">${c.title}</div>
           <div class="map-node-meta">${c.dur} · ${c.type==='video'?'视频课程':'图文课程'}</div>
           <span class="map-skill-tag">${skillName} ${urgency}</span>
-          <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">${courseTierBadge(c)}${selfRel?'<span class="map-node-badge self-badge">🪞自评相关</span>':''}</div>
+          <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">${courseTierBadge(c)}${targetGap?'<span class="map-node-badge gap-badge">🎯未达行业目标</span>':''}${selfRel?'<span class="map-node-badge self-badge">🪞自评相关</span>':''}</div>
         </div>
         <span class="map-node-badge ${badgeCls}">${badgeText}</span>
       </div>`;
@@ -9529,7 +9634,20 @@ function getCourseDimPct(c) {
   }
   return pct;
 }
-function getCourseTier(c) { return getCourseDimPct(c) < 70 ? 'must' : 'elec'; }
+function getCourseTier(c) {
+  if (getCourseDimPct(c) < 70) return 'must';
+  // P4: 有专属目标画像时，覆盖维度「实测 < 行业要求」也判必修（对标行业要求输出学习地图）
+  const tp = getTargetProfile(S.industry, S.role);
+  const result = S._quizResult;
+  if (tp && result && result.dimScores) {
+    const dks = courseDimKeys(c);
+    if (dks && dks.length) {
+      const gap = dks.some(dk => tp[dk] && (result.dimScores[dk] != null ? result.dimScores[dk] : 0) < tp[dk].target);
+      if (gap) return 'must';
+    }
+  }
+  return 'elec';
+}
 function courseTierBadge(c) {
   const must = getCourseTier(c) === 'must';
   return `<span class="tag ${must?'tag-must':'tag-elec'}">${must?'📌 必修':'选修'}</span>`;
@@ -11334,7 +11452,12 @@ S.openCourse = function(idx) {
 function weakDimList() {
   const r = S._quizResult; const out = [];
   if (!r || !r.dimScores) return out;
-  Object.keys(r.dimScores).forEach(k => { if (r.dimScores[k] < 2.8) out.push(k); });
+  const tp = getTargetProfile(S.industry, S.role);
+  Object.keys(r.dimScores).forEach(k => {
+    // P4: 有专属目标画像则「实测 < 行业要求」即弱；否则回落原 2.8 通用阈值（避免其他岗位行为回归）
+    const target = (tp && tp[k] && tp[k].target != null) ? tp[k].target : 2.8;
+    if (r.dimScores[k] < target) out.push(k);
+  });
   return out;
 }
 S.goDashboard = function() { stopVoice(); S.view = 'dashboard'; S.courseIdx = null; S.courseTaskIdx = 0; render(); };
