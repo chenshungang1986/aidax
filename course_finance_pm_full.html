@@ -191,6 +191,26 @@
   .lf-report{white-space:pre-wrap;font-size:12.4px;background:#0e1530;color:#d7e3ff;border-radius:10px;padding:12px 14px;max-height:230px;overflow:auto;margin-top:10px;font-family:ui-monospace,Consolas,monospace;line-height:1.6}
   @media(max-width:560px){.lf-type-grid{grid-template-columns:repeat(2,1fr)}}
   @media(max-width:860px){.layout{flex-direction:column}.sidebar{width:100%;max-height:36vh;border-right:none;border-bottom:1px solid var(--line)}}
+  /* ===== 多邻国式分步通关 ===== */
+  .stepper{display:flex;gap:6px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+  .stepper .st{display:flex;align-items:center;gap:6px;font-size:13px;padding:6px 13px;border-radius:999px;border:1.5px solid var(--line);background:#fff;color:var(--mut);font-weight:600;white-space:nowrap}
+  .stepper .st .si{font-size:15px}
+  .stepper .st.cur{border-color:var(--blue);background:var(--blue);color:#fff}
+  .stepper .st.done{background:#eafaf0;border-color:#9fe0bd;color:#166534}
+  .stepper .st .ck{font-size:10px;opacity:.8}
+  .stepper .sbar{flex:1;height:6px;background:#e4eaf7;border-radius:6px;overflow:hidden;min-width:44px}
+  .stepper .sbar i{display:block;height:100%;background:var(--green);transition:width .3s}
+  .cp{max-width:680px;margin:0 auto}
+  .cp-head{margin:2px 0 10px}
+  .cp-title{font-size:19px;font-weight:800}
+  .cp-sub{font-size:12.6px;color:var(--mut);margin-top:2px;line-height:1.6}
+  .cp-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+  .cp-notes{margin:10px 0}
+  .cp.centered{text-align:center}
+  .settle{background:linear-gradient(135deg,#ecfdf5,#f3fbf6);border:1.9px solid #86efac;border-radius:14px;padding:26px 20px}
+  .settle .cp-score{font-size:34px;font-weight:800;color:#16a34a;margin:8px 0}
+  .settle .cp-actions{justify-content:center}
+  .xp-tag{display:inline-flex;align-items:center;gap:4px;background:#fff7e6;color:#b45309;border:1px solid #fde2a8;border-radius:999px;padding:2px 10px;font-weight:700}
 </style>
 </head>
 <body>
@@ -203,7 +223,7 @@
     <button onclick="applyCustom()">应用</button>
   </div>
   <div class="llm" id="llm-badge" onclick="openLlm()"><i></i><span id="llm-text">模型未检测</span></div>
-  <div class="prog">已完成 <b id="prog-done">0</b> / 64 单元 · 模块测验通过 <b id="prog-quiz">0</b> / 8 · <b id="prog-pct">0%</b> · 产出物评审 <b id="prog-score">0</b> 份</div>
+  <div class="prog">已完成 <b id="prog-done">0</b> / 64 单元 · 模块测验通过 <b id="prog-quiz">0</b> / 8 · <b id="prog-pct">0%</b> · 产出物评审 <b id="prog-score">0</b> 份 · <span class="xp-tag">⭐ 积分 <b id="prog-xp">0</b></span></div>
   <span class="cap-entry" onclick="openScore('capstone')">🏁 结业测验 · 产出物评审</span>
   <button id="admin-toggle" class="admin-toggle" onclick="toggleAdmin()">管理员预览：关</button>
 </header>
@@ -283,6 +303,7 @@ function refreshProg(){
   document.getElementById('prog-quiz').textContent=q;
   document.getElementById('prog-pct').textContent=Math.round(u/64*100)+'%';
   const sp=document.getElementById('prog-score'); if(sp) sp.textContent=s;
+  const xp=document.getElementById('prog-xp'); if(xp) xp.textContent=totalXP();
 }
 
 /* 占位符替换 */
@@ -438,6 +459,7 @@ function renderSidebar(){
 
 /* ===================== 单元主页 ===================== */
 let CUR=null;   /* 当前单元播放器句柄，切换单元时先 stop */
+let CHECK=null; /* 多邻国式分步通关状态：{uid, idx, steps} */
 function findUnit(uid){ for(const m of COURSE.modules){ const u=m.units.find(x=>x.id===uid); if(u) return {m,u}; } return null; }
 function flatUnits(){ const a=[]; COURSE.modules.forEach(m=>m.units.forEach(u=>a.push(u))); return a; }
 function nextUnit(uid){ const a=flatUnits(), i=a.findIndex(x=>x.id===uid); return i>=0&&i+1<a.length?a[i+1]:null; }
@@ -452,40 +474,110 @@ function renderUnit(uid){
   if(CUR){ try{CUR.stop();}catch(e){} CUR=null; }
   const f=findUnit(uid); if(!f) return;
   const {m,u}=f;
-  const st=prog.units[uid]||{};
+  CHECK={uid:uid, idx:resumeIdx(uid), steps:buildSteps(u)};
   const mn=document.getElementById('main');
-  const mins=(u.vslides.reduce((a,s)=>a+Math.max(2,sub(s.n).length*0.205),0)/60).toFixed(1);
-  const pv=prevUnit(uid), nx=nextUnit(uid);
-  let _h=
-   '<div class="crumb">'+m.id+' · '+m.title+' \u2192 单元 '+uid+'（'+STEP_LABEL[u.step]+'）</div>'
-  +'<div class="utitle">'+sub(u.title)+(st.done?'<span class="tag-done">已通关 '+(st.score||0)+' 分</span>':'')+'</div>'
-  +'<div class="umeta"><span class="chip">'+(u.tier==='adv'?'进阶':'入门')+'</span><span class="chip">'+STEP_LABEL[u.step]+'环节</span><span class="chip">讲解视频 '+u.vslides.length+' 段 · 约 '+mins+' 分钟</span><span class="chip">交付物：'+(u.deliverable&&u.deliverable.name?u.deliverable.type+'·'+u.deliverable.name:'本单元产出')+'</span></div>'
-  +'<div class="card"><h3>\uD83C\uDFAC 视频讲解</h3>'
-  +  '<div class="vp"><div class="stage" id="p-stage"></div><div class="dots" id="p-dots"></div>'
-  +  '<div class="cap" id="p-sub">点击播放，字幕与人声同步</div></div>'
-  +  '<div class="vbar"><button class="play" id="p-play">\u25B6 播放</button>'
-  +  '<div class="seek" id="p-seek"><div class="fill"></div><div class="knob"></div></div>'
-  +  '<span class="time" id="p-time">0:00 / 0:00</span></div>'
-  +  '<div class="aud-note" id="p-note"></div>'
-  +'</div>'
-  + inlinePractice(u,uid)
-  +'<div class="card"><h3>\uD83D\uDCD1 课件要点</h3>'
-  +  '<div class="kv"><b>方法论：</b>'+sub(u.ppt.method)+'</div>'
-  +  '<div class="kv"><b>案例：</b>'+sub(u.ppt.case)+'</div>'
-  +  '<div class="kv"><b>演示要点：</b>'+sub(u.ppt.demo)+'</div>'
-  +'</div>'
-  +delivCard(u)
-  +'<div id="act-area"></div>'
-  +(st.done?doneCard(st,uid):'')
-  + navBar(pv,nx,uid);
-
-  mn.innerHTML=guideCard(uid,m,u,st)+_h;
-
-  const aud=(AUDIO[uid]||null);
-  document.getElementById('p-note').textContent = aud? '配音：火山引擎豆包真人声（'+aud.length+' 段）' : '配音：本机语音合成（豆包真人声版构建时用 --inline-voice 注入）';
-  CUR=makePlayer(uid,u.vslides,aud);
-  renderActivity(u,uid);
+  mn.innerHTML='<div class="stepper" id="stepper"></div><div class="cp" id="cp"></div>';
+  if(mn) mn.scrollTop=0;
+  renderCheckpoint();
 }
+
+/* ===== 多邻国式分步通关 ===== */
+function buildSteps(u){
+  const s=[{key:'watch',icon:'\uD83D\uDCFA',title:'看视频'},
+           {key:'task',icon:'\uD83D\uDCDD',title:'做任务'}];
+  if(u.deliverable&&u.deliverable.name) s.push({key:'deliv',icon:'\uD83D\uDCE6',title:'交付物'});
+  s.push({key:'settle',icon:'\uD83C\uDFC1',title:'结算'});
+  return s;
+}
+function resumeIdx(uid){
+  const st=prog.units[uid]||{};
+  const u=findUnit(uid).u;
+  const steps=buildSteps(u);
+  if(!st.watched) return 0;
+  if(!st.taskDone) return 1;
+  const di=steps.findIndex(s=>s.key==='deliv');
+  if(di>=0 && !st.delivSeen) return di;
+  return steps.length-1;
+}
+function renderStepper(){
+  const el=document.getElementById('stepper'); if(!el||!CHECK) return;
+  const pct=CHECK.steps.length>1? Math.round(CHECK.idx/(CHECK.steps.length-1)*100):0;
+  let h='';
+  CHECK.steps.forEach((s,i)=>{
+    const cls='st'+(i===CHECK.idx?' cur':'')+(i<CHECK.idx?' done':'');
+    const ck=i<CHECK.idx?'✓':'';
+    h+='<span class="'+cls+'"><span class="si">'+s.icon+'</span>'+s.title+(ck?' <span class="ck">'+ck+'</span>':'')+'</span>';
+  });
+  h+='<span class="sbar"><i style="width:'+pct+'%"></i></span>';
+  el.innerHTML=h;
+}
+function renderCheckpoint(){
+  if(!CHECK) return;
+  if(CUR){ try{CUR.stop();}catch(e){} CUR=null; }
+  const {uid}=CHECK;
+  const f=findUnit(uid); if(!f) return;
+  const {m,u}=f;
+  const step=CHECK.steps[CHECK.idx];
+  const cp=document.getElementById('cp');
+  const mins=(u.vslides.reduce((a,s)=>a+Math.max(2,sub(s.n).length*0.205),0)/60).toFixed(1);
+  const ui=m.units.indexOf(u);
+  if(step.key==='watch'){
+    cp.className='cp';
+    cp.innerHTML='<div class="cp-head"><div class="cp-title">\uD83D\uDCFA 视频讲解</div>'
+      +'<div class="cp-sub">'+m.id+' · '+m.title+' · 第 '+(ui+1)+'/'+m.units.length+' 单元 · 约 '+mins+' 分钟</div></div>'
+      +'<div class="card"><h3>\uD83C\uDFAC 视频讲解</h3>'
+      +'<div class="vp"><div class="stage" id="p-stage"></div><div class="dots" id="p-dots"></div>'
+      +'<div class="cap" id="p-sub">点击播放，字幕与人声同步</div></div>'
+      +'<div class="vbar"><button class="play" id="p-play">\u25B6 播放</button>'
+      +'<div class="seek" id="p-seek"><div class="fill"></div><div class="knob"></div></div>'
+      +'<span class="time" id="p-time">0:00 / 0:00</span></div>'
+      +'<div class="aud-note" id="p-note"></div></div>'
+      +'<details class="cp-notes"><summary>\uD83D\uDCCC 本课要点（讲义）</summary>'
+      +'<div class="kv"><b>方法论：</b>'+sub(u.ppt.method)+'</div>'
+      +'<div class="kv"><b>案例：</b>'+sub(u.ppt.case)+'</div>'
+      +'<div class="kv"><b>演示要点：</b>'+sub(u.ppt.demo)+'</div></details>'
+      +'<details class="cp-notes"><summary>\uD83D\uDDDE\uFE0F 本单元怎么学</summary>'+guideCard(uid,m,u,prog.units[uid]||{})+'</details>'
+      +'<div class="cp-actions"><button class="btn" onclick="setWatched(\''+uid+'\')">✓ 我看完这段了，继续 →</button></div>';
+    const aud=(AUDIO[uid]||null);
+    const note=document.getElementById('p-note');
+    if(note) note.textContent = aud? '配音：火山引擎豆包真人声（'+aud.length+' 段）' : '配音：本机语音合成';
+    CUR=makePlayer(uid,u.vslides,aud);
+  } else if(step.key==='task'){
+    cp.className='cp';
+    cp.innerHTML='<div class="cp-head"><div class="cp-title">\uD83D\uDCDD 做任务</div>'
+      +'<div class="cp-sub">'+STEP_LABEL[u.step]+'环节 · '+STEP_HINT[u.step]+'</div></div>'
+      +'<div id="act-area"></div>'
+      +'<div class="cp-actions"><button class="btn ghost" onclick="prevCheck()">← 返回看视频</button></div>';
+    renderActivity(u,uid);
+  } else if(step.key==='deliv'){
+    cp.className='cp';
+    cp.innerHTML='<div class="cp-head"><div class="cp-title">\uD83D\uDCE6 交付物与陪练</div>'
+      +'<div class="cp-sub">本单元产出物可在 WorkBuddy 里用 AI 陪练打磨，并做产出物评审（能力佐证）</div></div>'
+      +delivCard(u)
+      +'<div class="cp-actions"><button class="btn ghost" onclick="prevCheck()">← 返回</button>'
+      +'<button class="btn" onclick="setDelivSeen(\''+uid+'\')">我已了解，去结算 →</button></div>';
+  } else {
+    cp.className='cp centered settle';
+    const st=prog.units[uid]||{};
+    const nx=nextUnit(uid);
+    const score=st.score||0;
+    cp.innerHTML='<div style="font-size:40px">\uD83C\uDF89</div>'
+      +'<div class="cp-title" style="margin-top:6px">本单元通关</div>'
+      +'<div class="cp-score">+'+score+' 分</div>'
+      +'<p style="font-size:13px;color:#5b7a63">你已完成「'+sub(u.title)+'」，累计积分 '+totalXP()+' 分。</p>'
+      +doneNext(uid)
+      +'<div class="cp-actions">'
+      +(nx?'<button class="btn ok" onclick="openUnit(\''+nx.id+'\')">下一单元 '+nx.id+' →</button>':'<button class="btn ok" onclick="openUnit(\'M0U1\')">回到起点重学</button>')
+      +'<button class="btn ghost" onclick="replayUnit(\''+uid+'\')">再练一遍本单元</button></div>';
+  }
+  renderStepper();
+}
+function advCheck(){ if(!CHECK) return; if(CHECK.idx<CHECK.steps.length-1){ CHECK.idx++; renderCheckpoint(); } else { renderCheckpoint(); } }
+function prevCheck(){ if(!CHECK) return; if(CHECK.idx>0){ CHECK.idx--; renderCheckpoint(); } }
+function setWatched(uid){ const st=prog.units[uid]||{}; prog.units[uid]=Object.assign({},st,{watched:true}); saveProg(); if(CUR){try{CUR.stop();}catch(e){}CUR=null;} advCheck(); }
+function setDelivSeen(uid){ const st=prog.units[uid]||{}; prog.units[uid]=Object.assign({},st,{delivSeen:true}); saveProg(); advCheck(); }
+function totalXP(){ let s=0; for(const k in prog.units){ const u=prog.units[k]; if(u&&u.done) s+=(u.score||0); } return s; }
+function replayUnit(uid){ const st=prog.units[uid]||{}; prog.units[uid]=Object.assign({},st,{watched:false,taskDone:false,delivSeen:false,done:false,acts:{},score:0,detail:[]}); saveProg(); refreshProg(); renderSidebar(); openUnit(uid); }
 
 /* ===================== P1：可运行产出物卡片 + 真·AI 陪练（路线①） ===================== */
 function delivBadge(t){
@@ -877,7 +969,7 @@ function renderActivity(u,uid){
       +'<div style="margin-top:12px"><h4 style="font-size:13.5px;margin-bottom:6px">按模板写下你的收获（这一项计入得分）</h4>'
       +'<textarea id="u-note" placeholder="1) 本单元我记住的一个结论：&#10;2) 它能用在我手头的哪件事上：&#10;3) 我还不确定、需要再查的："></textarea></div>'
       +'<div id="u-score"></div>'
-      +'<button class="btn" onclick="finishUnit(\''+uid+'\')">提交并结算本单元</button></div>';
+      +'<button class="btn" onclick="submitTask(\''+uid+'\')">提交并结算本单元</button></div>';
     const n=document.getElementById('u-note');
     if(n){ n.addEventListener('input',()=>{ setAct(uid,'note',n.value); previewScore(uid,'u-score'); }); }
   } else if(u.step==='demo'){
@@ -893,7 +985,7 @@ function renderActivity(u,uid){
       +'<textarea id="demo-rec" placeholder="把上面模板的 4 小节贴进来：我用的提示词 / 哪里可用哪里不可用 / 我做了哪些人工修正 / 下次复用的固定句式"></textarea></div>'
       +'<label style="display:block;font-size:13px;margin:8px 0"><input type="checkbox" id="demo-check"> 我已人工核对过模型结果，清楚哪一步必须由人接手</label>'
       +'<div id="demo-score"></div>'
-      +'<button class="btn" onclick="finishUnit(\''+uid+'\')">提交并结算本单元</button></div>';
+      +'<button class="btn" onclick="submitTask(\''+uid+'\')">提交并结算本单元</button></div>';
     const r=document.getElementById('demo-rec');
     if(r){ r.addEventListener('input',()=>{ setAct(uid,'rec',r.value); previewScore(uid,'demo-score'); }); }
     const c=document.getElementById('demo-check');
@@ -922,8 +1014,8 @@ function renderActivity(u,uid){
       +'<textarea id="spar-text" placeholder="先给结论，再给依据，最后说取舍与边界。回车发送（Shift+回车换行）"></textarea>'
       +'<button class="btn" onclick="sendSpar()">发送</button>'
       +'<button class="btn ghost" onclick="askQ(-1)">让陪练先开题</button>'
-  +'<button class="btn ghost" onclick="openSparAI(\''+uid+'\')">\uD83E\uDD4A 开始真·AI 陪练（路线①）</button>'
-      +'<button class="btn ghost" onclick="finishUnit(\''+uid+'\')">结束陪练并结算</button>'
+      +'<button class="btn ghost" onclick="openSparAI(\''+uid+'\')">\uD83E\uDD4A 开始真·AI 陪练（路线①）</button>'
+      +'<button class="btn ghost" onclick="submitTask(\''+uid+'\')">结束陪练并结算</button>'
       +'<div id="spar-out"></div></div>';
     addBubble('ai','（'+sub(u.spar.role)+'）'+sub(u.spar.mustAsk[0]));
     bindEnter('spar-text',()=>sendSpar());
@@ -1010,12 +1102,12 @@ function previewScore(uid,elId){
    +'</div>';
 }
 
-function finishUnit(uid){
+function submitTask(uid){
   if(ADMIN){
     const st=prog.units[uid]||{};
-    prog.units[uid]=Object.assign({},st,{done:true,score:st.score||60,detail:[{k:'管理员预览模式：已标记观看（未计分）',ok:true}],acts:st.acts||{}});
-    saveProg(); refreshProg(); renderUnit(uid); renderSidebar();
-    return true;
+    prog.units[uid]=Object.assign({},st,{taskDone:true,done:true,score:st.score||60,detail:[{k:'管理员预览模式：已标记完成',ok:true}],acts:st.acts||{}});
+    saveProg(); refreshProg(); renderSidebar();
+    advCheck(); return true;
   }
   const r=computeUnit(uid);
   if(!r.ok){
@@ -1024,10 +1116,11 @@ function finishUnit(uid){
   }
   const st=prog.units[uid]||{};
   const prev=st.score||0;
-  prog.units[uid]=Object.assign({},st,{done:true,score:Math.max(prev,r.score),detail:r.detail,acts:st.acts||{}});
-  saveProg(); refreshProg(); renderUnit(uid); renderSidebar();
-  return true;
+  prog.units[uid]=Object.assign({},st,{taskDone:true,done:true,score:Math.max(prev,r.score),detail:r.detail,acts:st.acts||{}});
+  saveProg(); refreshProg(); renderSidebar();
+  advCheck(); return true;
 }
+function finishUnit(uid){ return submitTask(uid); } /* 兼容别名 */
 
 /* ---------- 判断题（理解环节） ---------- */
 function pickUnderstand(el,i){
