@@ -838,7 +838,8 @@ const INDUSTRIES = {
   elec:    {id:'elec', name:'消费电子', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>', desc:'手机 · 家电 · 可穿戴', color:'green'},
   cpg:     {id:'cpg', name:'日化快消', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>', desc:'个护 · 食品 · 零售', color:'purple'},
   internet: {id:'internet', name:'互联网', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>', desc:'电商 · 游戏 · 社交', subs:['电商','游戏','社交'], color:'cyan'},
-  mega:    {id:'mega', name:'大型项目', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/><path d="M9 10h.01"/><path d="M15 10h.01"/></svg>', desc:'能源 · 地产 · 政务', subs:['能源','地产','政务'], color:'amber'}
+  mega:    {id:'mega', name:'大型项目', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/><path d="M9 10h.01"/><path d="M15 10h.01"/></svg>', desc:'能源 · 地产 · 政务', subs:['能源','地产','政务'], color:'amber'},
+  newbie:  {id:'newbie', name:'新人小白', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V11"/><path d="M12 11C12 8 9 6 5 6c0 4 3 6 7 5"/><path d="M12 13c0-3 3-5 7-5 0 4-3 6-7 5"/></svg>', desc:'应届新生 · 职前启蒙', color:'green'}
 };
 
 const ROLES = {
@@ -881,6 +882,11 @@ const ROLES = {
     id:'legal', name:'法务', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 6v6c0 5 3.8 8.6 9 10 5.2-1.4 9-5 9-10V6l-9-4z"/><path d="M9 12l2 2 4-4"/></svg>', color:'red', desc:'合同审查、合规管理、风险防控',
     skills:['AI合同审查','AI法律检索研究','AI合规管理','AI风险数据分析','AI知识产权管理','AI争议处理'],
     dimKeys:['content','prompt','security','data','content','strategy']
+  },
+  graduate: {
+    id:'graduate', name:'应届生', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6"/><path d="M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1 2.5 2 6 2s6-1 6-2v-5"/></svg>', color:'green', desc:'AI 基础应用 · 职场新人赋能',
+    skills:['AI基础与工具入门','AI信息收集','AI工作PPT','AI数据处理','AI会议纪要','AI文生图','AI生视频','AI综合提效'],
+    dimKeys:['prompt','data','content','data','content','content','tools','workflow']
   }
 };
 
@@ -915,7 +921,8 @@ const BASE_ROLE_WEIGHTS = {
   hr:    {prompt:15, tools:15, data:18, content:14, dev: 0, workflow:16, security:10, strategy:12},
   fin:   {prompt:15, tools:15, data:22, content:10, dev: 0, workflow:13, security:15, strategy:10},
   po:    {prompt:15, tools:17, data:18, content:10, dev: 0, workflow:18, security:12, strategy:10},
-  legal: {prompt:15, tools:12, data:10, content:15, dev: 0, workflow:12, security:23, strategy:13}
+  legal: {prompt:15, tools:12, data:10, content:15, dev: 0, workflow:12, security:23, strategy:13},
+  graduate: {prompt:20, tools:18, data:16, content:18, dev: 4, workflow:14, security: 6, strategy: 4}
 };
 
 // Industry modifiers: amplify certain dimensions per industry
@@ -926,7 +933,8 @@ const INDUSTRY_MODIFIERS = {
   elec:    {prompt:1.0, tools:1.1, data:1.0, content:1.0, dev:1.2, workflow:1.0, security:0.9, strategy:1.0},
   cpg:     {prompt:1.0, tools:1.0, data:1.2, content:1.3, dev:0.7, workflow:1.0, security:0.8, strategy:1.0},
   internet: {prompt:1.1, tools:1.1, data:1.3, content:1.3, dev:1.2, workflow:1.1, security:1.1, strategy:1.0},
-  mega:    {prompt:1.0, tools:1.0, data:1.2, content:0.8, dev:0.9, workflow:1.2, security:1.3, strategy:1.4}
+  mega:    {prompt:1.0, tools:1.0, data:1.2, content:0.8, dev:0.9, workflow:1.2, security:1.3, strategy:1.4},
+  newbie:  {prompt:1.0, tools:1.0, data:1.0, content:1.0, dev:1.0, workflow:1.0, security:1.0, strategy:1.0}
 };
 
 function getWeights(industryId, roleId) {
@@ -962,6 +970,16 @@ const TARGET_PROFILES = {
     workflow: {target:4, why:'需把 AI 嵌入信贷/财富/保险的产品与运营工作流'},
     security: {target:4, why:'金融合规红线，AI 使用必须合规可控、不可逾越'},
     strategy: {target:3, why:'能规划金融产品 AI 路线图、评估投入产出'}
+  },
+  newbie_graduate: {
+    prompt:   {target:3, why:'新人必须先用 AI 学会「问对问题」，提示词是基础生产力'},
+    tools:    {target:3, why:'需熟练 3–5 个主流 AI 工具（对话/文生图/生视频/表格）'},
+    data:     {target:2, why:'能用 AI 整理/清洗/可视化基础业务数据即可'},
+    content:  {target:3, why:'PPT、纪要、文案是新人高频产出，AI 需达应用级'},
+    dev:      {target:1, why:'不要求编码，但要知道 AI 能辅助哪些技术活'},
+    workflow: {target:2, why:'能把 AI 嵌入日常信息收集/写作/汇报流程'},
+    security: {target:2, why:'必须建立「不把公司数据乱喂 AI」的底线意识'},
+    strategy: {target:1, why:'初步理解 AI 能/不能做什么，建立正确预期'}
   }
 };
 function getTargetProfile(industryId, roleId) {
@@ -1607,6 +1625,156 @@ const ADAPTIVE_QUIZ = {
      opts:['AI只是众多趋势之一', 'AI是重要但非核心变量', 'AI是重塑HR的核心变量，将改变人才管理的底层逻辑',
            'AI驱动HR战略：AI重新定义"人才"→重塑"组织"→重构"管理"→HR需成为AI时代的组织设计师',
            'AI原生组织愿景：从"人管人"到"AI增强的人管组织"，HR的角色是设计和运营人机协作的组织系统'],
+     dim:'strategy', level:2, difficulty:0.85}
+  ],
+  graduate: [
+    // ===== 提示词工程（prompt）=====
+    {q:'【提示词工程】你第一次让 AI 帮你写一份周报，会怎么开口？',
+     opts:['直接说"帮我写周报"', '说"我是应届生，帮我写这周工作周报"',
+           '给 AI 你的工作流水 + 要求"按 成果/进展/下周计划 三栏写"',
+           '设定角色(资深助理)+给上下文(新人/行业)+约束(1页/数据化)+输出格式',
+           '建模板：角色→背景→输入素材→格式→风格→自检清单，固化成可复用 Prompt'],
+     dim:'prompt', level:0, difficulty:0.25},
+    {q:'【提示词工程】团队要你整理一份"新人 AI 使用手册"，你怎么用提示词保证质量稳定？',
+     opts:['随手问，每次结果不一样也无所谓', '写一段话让 AI 直接出手册',
+           '给 AI 固定结构（定义/场景/步骤/避坑）+ 示例片段',
+           '建分场景 Prompt 库（写作/数据/PPT/图片），每类含角色+上下文+格式',
+           '建可参数化模板引擎：占位符填场景即生成，配 A/B 与效果评估持续迭代'],
+     dim:'prompt', level:1, difficulty:0.55},
+    {q:'【提示词工程】你要让 AI 连续完成"收集→写 PPT→做数据表"多步任务，怎么设计提示词？',
+     opts:['一句话让 AI 全做了', '分三次分别问，自己拼',
+           '给 AI 一个总目标 + 三步子任务清单',
+           '用结构化 JSON 串起三步：每步角色+输入+输出格式+验收标准',
+           '设计编排式 Prompt：任务分解→逐步执行→结果聚合→质量校验完整流水线'],
+     dim:'prompt', level:2, difficulty:0.85},
+    // ===== AI 工具实战（tools）=====
+    {q:'【工具实战】你第一次接触 AI 工具，会怎么开始？',
+     opts:['不知道有哪些可用', '随便试一个对话工具', '试用对话类工具完成一件小事',
+           '按"写作/画图/视频/表格"四类各试一个主流工具',
+           '建个人 AI 工具箱：每类选 1 个、记清能做什么/不能做什么'],
+     dim:'tools', level:0, difficulty:0.25},
+    {q:'【工具实战】怎么把多个 AI 工具串起来完成一项工作？',
+     opts:['只用单个工具', '在不同工具间手动复制结果',
+           '先用 A 出素材、再贴给 B 加工',
+           '设计"对话→文生图→生视频"的素材流转链路',
+           '固化多工具协作 SOP：哪一步用哪个工具、输入输出如何衔接'],
+     dim:'tools', level:1, difficulty:0.55},
+    {q:'【工具实战】怎么判断一个 AI 工具值不值得团队长期使用？',
+     opts:['看广告', '听别人说好就用', '自己觉得好玩',
+           '按 准确率/稳定性/成本/易用 四项试一轮',
+           '建评估清单：能力边界+数据安全+接入成本+可替代性，做选型决策'],
+     dim:'tools', level:2, difficulty:0.85},
+    // ===== AI 数据分析与决策（data）=====
+    {q:'【数据分析】你手上有一张乱糟糟的 Excel 表，第一次让 AI 帮忙怎么开口？',
+     opts:['直接把整表丢给 AI 说"帮我看"', '说"整理一下"',
+           '说明表头含义 + 想要的结果(去重/分类)',
+           '给字段说明+清洗规则(删空/统一格式)+目标表结构',
+           '给样例行+完整规则+验收口径，让 AI 输出可复用的清洗脚本'],
+     dim:'data', level:0, difficulty:0.25},
+    {q:'【数据分析】让 AI 帮你做一张数据图表，怎么提要求？',
+     opts:['"做个图"', '"做个柱状图"', '"按月份做销售趋势图"',
+           '指定 图表类型+维度+配色+结论标注',
+           '给数据+分析目的+受众，让 AI 选最合适的图并写出读图结论'],
+     dim:'data', level:1, difficulty:0.55},
+    {q:'【数据分析】怎么让 AI 从数据里给出"洞察+建议"而不是只给数字？',
+     opts:['只要数字', '让 AI 随便说', '让 AI 描述数字变化',
+           '要求 AI 按"现象→原因→建议"三步输出',
+           '给业务背景+口径定义，让 AI 做假设→验证→可行动建议的完整分析'],
+     dim:'data', level:2, difficulty:0.85},
+    // ===== AI 内容创作（content）=====
+    {q:'【内容创作】你用 AI 做第一份工作 PPT，会怎么开头？',
+     opts:['"帮我做个 PPT"', '"做个周会汇报 PPT"',
+           '给主题 + 页数要求',
+           '给 主题+受众+结构大纲+每页要点',
+           '给 背景素材+目标+风格+页数，让 AI 产出可编辑的完整框架'],
+     dim:'content', level:0, difficulty:0.25},
+    {q:'【内容创作】怎么让 AI 生成的 PPT 结构不乱、有逻辑？',
+     opts:['接受 AI 随便给的结构', '让它"再好一点"',
+           '指定目录层级',
+           '要求 金字塔结构：结论先行+分论点支撑',
+           '给 信息架构模板(背景→问题→方案→计划)，AI 按模板填内容'],
+     dim:'content', level:1, difficulty:0.55},
+    {q:'【内容创作】怎么用 AI 把"一堆零散素材"变成可汇报的完整内容？',
+     opts:['直接丢给 AI 拼', '自己先归类再让 AI 写',
+           '让 AI 先列大纲再填充',
+           '给 素材+受众+用途，AI 出 大纲→初稿→润色 三稿',
+           '建"素材→结构化→多形态输出(PPT/纪要/长文)"的内容生产线'],
+     dim:'content', level:2, difficulty:0.85},
+    // ===== AI 辅助开发（dev）=====
+    {q:'【辅助开发】你不是程序员，AI 能帮你做哪些"技术活"？',
+     opts:['AI 跟我没关系', '只会聊天',
+           '能帮我写 Excel 公式',
+           '能写简单脚本/公式/正则，自动化重复操作',
+           '能把"重复手工操作"描述给 AI，让它给出可落地的自动化方案'],
+     dim:'dev', level:0, difficulty:0.25},
+    {q:'【辅助开发】你想让 AI 帮你写一个 Excel 复杂公式，怎么提？',
+     opts:['"写个公式"', '"做个求和"',
+           '描述 输入列+想要的计算结果',
+           '给 样例数据+规则+边界情况，AI 出公式并解释',
+           '给 业务规则+异常口径，AI 出公式+测试样例+出错排查'],
+     dim:'dev', level:1, difficulty:0.55},
+    {q:'【辅助开发】怎么判断"这件事该不该让 AI 写代码"，以及怎么验收？',
+     opts:['全部交给 AI', '看结果像就行',
+           '简单的事让 AI 试',
+           '按 风险/可逆性 判断；要 AI 给测试与说明',
+           '建决策清单：低风险可自动化、高风险须人审；要求 AI 附测试与回滚说明'],
+     dim:'dev', level:2, difficulty:0.85},
+    // ===== AI 协同工作流（workflow）=====
+    {q:'【协同工作流】你怎么开始把 AI 用进日常工作？',
+     opts:['偶尔想到才用', '每天固定用一次',
+           '把一件重复工作交给 AI',
+           '列 3 件高频事务，逐一用 AI 提速',
+           '画一张"日/周工作流地图"，标出每个环节 AI 可介入的点'],
+     dim:'workflow', level:0, difficulty:0.25},
+    {q:'【协同工作流】怎么把"信息收集→整理→产出"串成固定流程？',
+     opts:['每次手动重来', '用 AI 做其中一步',
+           '三步分别用 AI 再自己拼',
+           '设计 三段式 SOP：谁收集/谁整理/谁产出',
+           '固化可复用模板：输入源→AI 处理→人工校验→标准产出物'],
+     dim:'workflow', level:1, difficulty:0.55},
+    {q:'【协同工作流】怎么设计一个可复用的"一周 AI 工作流"模板？',
+     opts:['不需要模板', '凭感觉用',
+           '按天记哪步用了 AI',
+           '按 周一收集/周三产出/周五复盘 排布 AI 任务',
+           '建周模板：固定时段+对应 AI 动作+产出物+复盘指标，周周复用'],
+     dim:'workflow', level:2, difficulty:0.85},
+    // ===== AI 安全与合规（security）=====
+    {q:'【安全合规】你拿到一份含同事手机号的名单，要不要直接贴给公开 AI？',
+     opts:['直接贴，方便', '先问问再贴',
+           '去掉手机号再贴',
+           '涉及个人信息一律不外发，用脱敏/本地处理',
+           '建红线清单：PII/商业机密不出域，敏感材料走本地或审批'],
+     dim:'security', level:0, difficulty:0.25},
+    {q:'【安全合规】怎么判断一份材料能不能喂给 AI？',
+     opts:['看着不敏感就喂', '全都不喂',
+           '含客户名就不喂',
+           '按 公开/内部/敏感 三级分类再决定',
+           '建数据分级标准+可发清单，团队共享，越级须审批'],
+     dim:'security', level:1, difficulty:0.55},
+    {q:'【安全合规】怎么在公司里建立"AI 使用红线"的个人与团队习惯？',
+     opts:['靠自觉', '看别人怎么做',
+           '自己记几条',
+           '写一页红线卡贴工位',
+           '推动可见、易得的红线规范(场景+禁区+替代方案)，纳入新人培训'],
+     dim:'security', level:2, difficulty:0.85},
+    // ===== AI 战略思维（strategy）=====
+    {q:'【战略思维】你怎么看"AI 会不会取代我这个新人"？',
+     opts:['肯定会取代我', '跟我没关系',
+           '会取代一部分重复活',
+           'AI 替代任务不替代人，核心在判断力',
+           '把 AI 当杠杆：用得好的人淘汰用不好的人，关键在人机协作能力'],
+     dim:'strategy', level:0, difficulty:0.25},
+    {q:'【战略思维】怎么判断一个工作任务"该不该用 AI 做"？',
+     opts:['都让 AI 做', '都不让 AI 做',
+           '重复的就让 AI 做',
+           '按 重复性/容错性/是否需判断 三维判断',
+           '建任务分诊矩阵：可自动化/需人把关/禁用 AI，按类施策'],
+     dim:'strategy', level:1, difficulty:0.55},
+    {q:'【战略思维】怎么规划自己未来半年的 AI 能力成长路线？',
+     opts:['走一步看一步', '报个课就行',
+           '练熟几个工具',
+           '按 基础→场景→精通 三阶段定目标',
+           '画能力地图：缺哪项补哪项，配 学习→实践→产出 闭环与里程碑'],
      dim:'strategy', level:2, difficulty:0.85}
   ]
 };
@@ -4740,6 +4908,16 @@ const COURSES = {
     {id:'fin_pm_m6', title:'金融合规与安全下的 AI 用法', desc:'数据分级、红线清单、监管报送与可解释', type:'video', dur:'8 单元', dims:['security'], requires:['fin_pm_m0']},
     {id:'fin_pm_m7', title:'综合实战：从 0 到 1 设计金融产品', desc:'立项→PRD→交付→评审→跨模块整合，带风控合规的完整全案', type:'video', dur:'8 单元', dims:['prompt','tools','data','content','dev','workflow','security','strategy'], requires:['fin_pm_m3','fin_pm_m5']}
   ],
+  newbie_graduate: [
+    {id:'newbie_grad_m0', title:'M0 · AI 基础认知与工具入门', desc:'搞懂 AI 能/不能做什么，配齐你的第一套 AI 工具箱', type:'video', dur:'3 单元', dims:['prompt','tools','security'], requires:[]},
+    {id:'newbie_grad_m1', title:'M1 · 用 AI 做信息收集', desc:'把"搜一圈"变成"出一份能用的情报简报"', type:'video', dur:'3 单元', dims:['prompt','data'], requires:['newbie_grad_m0']},
+    {id:'newbie_grad_m2', title:'M2 · 用 AI 做工作 PPT', desc:'从空白页到一套能汇报的 10 页 PPT', type:'video', dur:'3 单元', dims:['content'], requires:['newbie_grad_m0']},
+    {id:'newbie_grad_m3', title:'M3 · 用 AI 处理数据', desc:'乱表变干净、脏数变图表，新人也能交差', type:'video', dur:'3 单元', dims:['data','tools'], requires:['newbie_grad_m0']},
+    {id:'newbie_grad_m4', title:'M4 · 用 AI 做会议纪要', desc:'录音/聊天记录→结构化纪要+行动项', type:'video', dur:'3 单元', dims:['content','workflow'], requires:['newbie_grad_m0']},
+    {id:'newbie_grad_m5', title:'M5 · 用 AI 文生图', desc:'不用会画画，也能产出岗位配图', type:'video', dur:'2 单元', dims:['content','tools'], requires:['newbie_grad_m0']},
+    {id:'newbie_grad_m6', title:'M6 · 用 AI 生视频', desc:'30 秒口播/演示视频，零拍摄也能做', type:'video', dur:'2 单元', dims:['tools'], requires:['newbie_grad_m0']},
+    {id:'newbie_grad_m7', title:'M7 · 综合提效实战', desc:'把前面 7 块拼成你的一周 AI 工作流', type:'video', dur:'3 单元', dims:['prompt','tools','data','content','dev','workflow','security','strategy'], requires:['newbie_grad_m1','newbie_grad_m2','newbie_grad_m3','newbie_grad_m4']}
+  ],
   auto_pm: [
     {id:'auto_pm1', title:'智能座舱AI需求洞察：语音·导航·个性化', desc:'用AI分析车载场景数据，挖掘智能座舱的产品创新机会', type:'video', dur:'45分钟', skills:[{s:0,w:0.5},{s:1,w:0.2},{s:3,w:0.2},{s:2,w:0.1}], tasks:[{t:'AI座舱语音交互分析',h:'用AI分析车载语音助手的使用日志，识别高频失败场景和用户期望。'},{t:'导航行为需求挖掘',h:'分析车主导航偏好数据，用AI发现路径规划/POI推荐的优化方向。'},{t:'AI生成座舱功能PRD',h:'基于用户行为分析，用AI撰写一份座舱新功能的需求文档。'}], video:'https://player.bilibili.com/player.html?bvid=BV1...'},
     {id:'auto_pm2', title:'车联网用户研究与驾驶行为分析', desc:'用AI分析车联网数据，深入理解驾驶者和乘客需求', type:'text', dur:'40分钟', skills:[{s:1,w:0.45},{s:2,w:0.3},{s:0,w:0.15},{s:4,w:0.1}], tasks:[{t:'AI驾驶行为画像',h:'用车联网数据让AI分析不同驾驶风格的用户画像（激进型/经济型/安全型）。'},{t:'充电/加油行为模式分析',h:'分析能源补充数据，用AI发现用户充电习惯和里程焦虑模式。'},{t:'AI用户旅程地图生成',h:'用AI从"选车→购车→用车→维保→换车"全链路分析用户触点。'}] },
@@ -4966,6 +5144,9 @@ function courseListFor(roleId, industryId) {
   // 否则会出现「地图列通用产品课、点进去却是金融 PM 课」的错位。
   // 注意：这里也刻意不追加通用「AI 工具指南」5 门——它们在丰富课内无法完成，会卡死「成果测验」解锁。
   if (industryId === 'finance' && roleId === 'pm') return (COURSES.finance_pm || []).slice();
+  // 新人小白 × 应届生：课程实体 = 轻量课（course_newbie_graduate.html）的 8 个模块，
+  // 学习地图/课程列表/学习计划须与该课一一对应（点击带 ?m=Mx 深链定位模块）。
+  if (industryId === 'newbie' && roleId === 'graduate') return (COURSES.newbie_graduate || []).slice();
   const key = industryId ? roleId + '_' + industryId : roleId;
   const base = COURSES[key] || COURSES[roleId] || [];
   // v37: AI工具指南系列为全岗位通用课，追加到每个岗位的课程列表末尾
@@ -11467,6 +11648,12 @@ S.openCourse = function(idx) {
     const weak = weakDimList();
     const wparam = weak.length ? ((mparam ? '&' : '?') + 'weak=' + encodeURIComponent(weak.join(','))) : '';
     window.open('course_finance_pm_full.html' + mparam + wparam, '_blank', 'noopener');
+    return;
+  }
+  // 新人小白 × 应届生：进入轻量课（course_newbie_graduate.html），带 ?m=Mx 深链定位模块。
+  if (S.industry === 'newbie' && S.role === 'graduate') {
+    const mparam = (c && c.id && /newbie_grad_m(\d+)/.test(c.id)) ? ('?m=M' + c.id.match(/newbie_grad_m(\d+)/)[1]) : '';
+    window.open('course_newbie_graduate.html' + mparam, '_blank', 'noopener');
     return;
   }
   S.courseIdx = idx; S.courseTaskIdx = 0; S.pptCurrentSlide = 0; S.voicePlaying = false; S.view = 'course'; render();
