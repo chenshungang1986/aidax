@@ -1,0 +1,2197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>新人小白 × 应届生 · AI 职场轻量实战课程（M0–M7 · 22 单元）</title>
+<style>
+  :root{--blue:#1a5cff;--blue-d:#0e3aa8;--blue-bg:#eff4ff;--line:#e3e9f5;--card:#fff;--txt:#16213f;--mut:#6b7891;--bg:#f6f8fd;--green:#16a34a;--green-bg:#ecfdf5;--amber:#d97706;--red:#e11d48;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--txt);line-height:1.7}
+  header{padding:12px 20px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  header h1{font-size:17px;font-weight:700}
+  header h1 span{font-size:12px;font-weight:500;color:var(--mut);margin-left:8px}
+  .scn{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--mut)}
+  .scn input{padding:5px 8px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;width:112px}
+  .scn button{padding:5px 12px;background:var(--blue);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12.5px}
+  .llm{display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;border:1px solid var(--line);border-radius:20px;padding:4px 11px;background:#fff;user-select:none}
+  .llm:hover{border-color:var(--blue)}
+  .llm i{width:8px;height:8px;border-radius:50%;background:#cbd5e1;display:inline-block;flex:none}
+  .admin-toggle{margin-left:10px;background:#fff;border:1.5px solid var(--blue);color:var(--blue-d);padding:6px 12px;border-radius:9px;font-size:12.5px;cursor:pointer;font-weight:600}
+  .admin-toggle:hover{background:#eef3ff}
+  .admin-banner{background:linear-gradient(90deg,#eef3ff,#e7f0ff);color:var(--blue-d);font-size:13px;padding:10px 18px;border-bottom:1px solid #cfe0ff}
+  .llm.on i{background:var(--green);box-shadow:0 0 0 3px #dcfce7}
+  .llm.off i{background:#f59e0b;box-shadow:0 0 0 3px #fef3c7}
+  .prog{margin-left:auto;font-size:12.5px;color:var(--mut)}
+  .prog b{color:var(--blue-d);font-size:14px}
+  .layout{display:flex;height:calc(100vh - 62px)}
+  .sidebar{width:288px;background:#fff;border-right:1px solid var(--line);overflow-y:auto;padding:10px}
+  .mod{border:1px solid var(--line);border-radius:11px;margin-bottom:9px;overflow:hidden}
+  .mod-h{padding:9px 11px;cursor:pointer;font-size:13.5px;font-weight:600;display:flex;gap:7px;align-items:center;background:#fbfcff}
+  .mod-h .mid{font-size:10.5px;background:var(--blue-bg);color:var(--blue-d);border-radius:5px;padding:1px 6px}
+  .mod-h .mdone{margin-left:auto;font-size:11px;color:var(--green);font-weight:700}
+  .mod-h .mquiz{font-size:11px;color:var(--amber);border:1px solid #ffd9a8;background:#fffbeb;border-radius:6px;padding:0 5px;cursor:pointer;white-space:nowrap}
+  .mod-b{display:none;padding:2px 6px 6px}
+  .mod.open .mod-b{display:block}
+  .mod.weak{border-color:#fca5a5;box-shadow:0 0 0 1px #fecaca}
+  .mod.weak>.mod-h{background:#fff5f5}
+  .unit{padding:6px 9px;border-radius:8px;cursor:pointer;font-size:12.8px;display:flex;align-items:center;gap:7px}
+  .unit:hover{background:var(--blue-bg)}
+  .unit.active{background:var(--blue);color:#fff}
+  .unit.done:after{content:"✓";margin-left:auto;color:var(--green);font-weight:700}
+  .unit.active.done:after{color:#d8ffe8}
+  .unit .st{font-size:10px;padding:1px 6px;border-radius:5px;background:#f1f4fa;color:var(--mut)}
+  .unit.active .st{background:rgba(255,255,255,.25);color:#fff}
+  .main{flex:1;overflow-y:auto;padding:20px 26px 70px;max-width:980px;margin:0 auto;width:100%}
+  .crumb{font-size:12px;color:var(--mut)}
+  .utitle{font-size:21px;font-weight:700;margin:2px 0 4px}
+  .umeta{font-size:12.5px;color:var(--mut);margin-bottom:14px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .chip{display:inline-block;background:var(--blue-bg);color:var(--blue-d);padding:2px 9px;border-radius:20px;font-size:12px}
+  .chip.g{background:var(--green-bg);color:#166534}
+  .chip.a{background:#fff6ec;color:var(--amber)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:15px 17px;margin:11px 0;box-shadow:0 1px 3px rgba(20,40,90,.04)}
+  .card h3{font-size:14.5px;margin-bottom:8px;color:var(--blue-d);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .card h3 .bd{font-size:11px;background:var(--amber);color:#fff;padding:1px 7px;border-radius:6px}
+  ul.li{list-style:none}
+  ul.li li{padding:4px 0 4px 18px;position:relative;font-size:13.4px}
+  ul.li li:before{content:"▸";position:absolute;left:0;color:var(--blue)}
+  .kv{background:#f8faff;border:1px solid var(--line);border-radius:9px;padding:9px 12px;font-size:13.2px;margin:6px 0}
+  .kv b{color:var(--blue-d)}
+  /* 视频播放器 */
+  .vp{position:relative;background:#0c1430;border-radius:14px;overflow:hidden;aspect-ratio:16/9}
+  .vp .stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:14px;pointer-events:none}
+  .slide{display:none;width:100%;height:100%;align-items:center;justify-content:center;flex-direction:column;text-align:center;color:#eaf0ff}
+  .slide.on{display:flex}
+  .slide h4{font-size:16px;margin:0 0 6px;color:#fff;flex:none}
+  .slide svg{width:100%;height:100%;max-width:100%;max-height:100%;min-height:0}
+  @keyframes pulse{0%,100%{filter:none}50%{filter:drop-shadow(0 0 11px #ffd84d)}}
+  .pulse{animation:pulse .78s ease-in-out 3 both}
+  .cap{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(0deg,rgba(0,0,0,.92) 0%,rgba(0,0,0,.72) 55%,rgba(0,0,0,0) 100%);color:#fff;font-size:19px;font-weight:500;line-height:1.5;padding:20px 28px 16px;min-height:70px;display:block;text-align:center;letter-spacing:.4px;text-shadow:0 2px 6px rgba(0,0,0,.95)}
+  .dots{position:absolute;top:11px;left:0;right:0;display:flex;gap:6px;justify-content:center}
+  .dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.4)}
+  .dots i.on{background:#fff}
+  .vbar{display:flex;align-items:center;gap:12px;margin-top:9px}
+  .play{background:var(--blue);color:#fff;border:none;padding:8px 17px;border-radius:9px;font-size:13.5px;cursor:pointer;font-weight:600;white-space:nowrap}
+  .seek{flex:1;height:8px;border-radius:6px;background:#e4eaf7;position:relative;cursor:pointer}
+  .seek .fill{height:100%;background:var(--blue);border-radius:6px;width:0}
+  .seek .knob{position:absolute;top:-4px;width:15px;height:15px;border-radius:50%;background:#fff;border:3px solid var(--blue);margin-left:-7px;left:0}
+  .time{font-size:12.5px;color:var(--mut);font-variant-numeric:tabular-nums}
+  .aud-note{font-size:12px;color:var(--mut);margin-top:5px}
+  textarea{width:100%;min-height:86px;border:1px solid var(--line);border-radius:9px;padding:10px;font-size:13px;font-family:inherit;resize:vertical;background:#fcfdff}
+  input.tin{width:100%;border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:13px;font-family:inherit;background:#fcfdff}
+  .btn{display:inline-block;padding:8px 16px;background:var(--blue);color:#fff;border:none;border-radius:9px;cursor:pointer;font-size:13.2px;margin:6px 6px 0 0}
+  .btn.ghost{background:#fff;color:var(--blue-d);border:1px solid var(--blue)}
+  .btn.ok{background:var(--green)}
+  .btn[disabled]{background:#c9d3e6;cursor:not-allowed;border-color:#c9d3e6;color:#fff}
+  .wb{background:#0e1530;color:#dce6ff;border-radius:12px;padding:14px;font-size:12.8px;white-space:pre-wrap;line-height:1.7}
+  .wb .me{color:#ffd98a}.wb .ai{color:#9be8b0}.wb .hl-line{color:#fff;font-weight:600}
+  .chat{display:flex;flex-direction:column;gap:9px;margin:6px 0}
+  .bub{max-width:82%;padding:9px 12px;border-radius:11px;font-size:13.3px;white-space:pre-wrap}
+  .bub.ai{background:#eef4ff;color:var(--blue-d);align-self:flex-start}
+  .bub.me{background:var(--blue);color:#fff;align-self:flex-end}
+  .bub.sys{background:#f1f4fa;color:var(--mut);align-self:center;font-size:12px;max-width:100%}
+  .qs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+  .qbtn{padding:5px 11px;border:1px solid var(--line);background:#fff;border-radius:20px;font-size:12.4px;cursor:pointer}
+  .qbtn:hover{border-color:var(--blue);color:var(--blue)}
+  .done-card{background:linear-gradient(135deg,#ecfdf5,#f3fbf6);border:1.9px solid #86efac;border-radius:14px;padding:18px;text-align:center}
+  .done-card h3{font-size:19px;color:#166534;margin-bottom:4px}
+  .cp-score{font-size:30px;font-weight:800;color:#16a34a;margin:6px 0}
+  .tag-done{display:inline-block;background:var(--green);color:#fff;font-size:12px;padding:1px 9px;border-radius:20px;margin-left:6px}
+  /* 题干 / 模板 / 评分 */
+  .ip{border-left:4px solid var(--blue)}
+  .ip-task{font-size:14.5px;font-weight:700;margin:2px 0 8px;color:var(--txt)}
+  .brief{background:#f8faff;border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-size:13.1px;white-space:pre-wrap;line-height:1.78;color:#28345a}
+  .tpl{background:#0e1530;color:#d7e3ff;border-radius:11px;padding:13px 15px;font-size:12.6px;white-space:pre-wrap;line-height:1.75;max-height:340px;overflow:auto;font-family:ui-monospace,Menlo,Consolas,monospace}
+  details>summary{cursor:pointer;font-size:13.3px;color:var(--blue-d);font-weight:600;margin:10px 0 6px;list-style:none;display:flex;align-items:center;gap:6px}
+  details>summary::-webkit-details-marker{display:none}
+  details>summary:before{content:"\25B8";transition:transform .15s;display:inline-block}
+  details[open]>summary:before{transform:rotate(90deg)}
+  .rub{list-style:none;font-size:13px;color:var(--mut);margin:4px 0}
+  .rub li{padding:2px 0 2px 20px;position:relative}
+  .rub li:before{content:"\25CB";position:absolute;left:2px;color:#c3ccdf}
+  .rub li.ok{color:#166534}
+  .rub li.ok:before{content:"\25CF";color:var(--green)}
+  .rub li span.hint{color:#b4682a;font-size:12px}
+  .bar{height:9px;background:#e4eaf7;border-radius:6px;overflow:hidden;margin:7px 0 3px}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,#1a5cff,#4d8bff);transition:width .3s}
+  /* 测验 */
+  .qz-item{border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin:9px 0;background:#fff}
+  .qz-item .q{font-size:13.8px;font-weight:600;margin-bottom:7px}
+  .qz-item .op{padding:5px 10px;border-radius:8px;cursor:pointer;font-size:13.2px;border:1px solid transparent}
+  .qz-item .op:hover{background:#f5f8ff}
+  .qz-item .op.right{background:var(--green-bg);color:#166534;border-color:#86efac}
+  .qz-item .op.wrong{background:#fff1f2;color:#be123c;border-color:#fecdd3}
+  .qz-item .tip{font-size:12.5px;color:var(--mut);display:none;margin-top:6px}
+  .modal{position:fixed;inset:0;background:rgba(8,16,40,.55);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+  .modal.on{display:flex}
+  .modal .box{background:#fff;border-radius:16px;padding:24px 26px;max-width:520px;width:100%;text-align:center;max-height:86vh;overflow-y:auto;position:relative}
+  .modal .box h3{font-size:19px;margin-bottom:4px;color:var(--txt)}
+  .modal .box p{font-size:13.4px;color:var(--mut);margin:6px 0 14px}
+  .modal .box .acts{margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  .modal .box.wide{max-width:800px;text-align:left}
+  .art-body{white-space:pre-wrap;font-size:12.4px;line-height:1.62;background:#f6f8fc;border:1px solid #e2e8f5;border-radius:10px;padding:14px 16px;max-height:58vh;overflow:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .deliv{border:1px solid #e2e8f5;border-left:4px solid #2f6bff;background:#fbfcff;border-radius:12px;padding:14px 16px;margin-top:12px}
+  .deliv .dhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+  .deliv .dname{font-weight:700;font-size:15px}
+  .badge{font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:999px;color:#fff}
+  .badge.skill{background:#2f6bff}.badge.agent{background:#7c3aed}.badge.workflow{background:#0e9f6e}.badge.kb{background:#d97706}
+  .deliv .dacc{font-size:12.8px;color:var(--mut);margin:6px 0 10px;line-height:1.55}
+  .deliv .rub{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}
+  .deliv .rub .chip2{font-size:11.5px;background:#eef2fb;color:#274690;padding:2px 9px;border-radius:999px}
+  .score-ta{width:100%;min-height:160px;box-sizing:border-box;margin-top:10px;padding:12px 14px;border:1px solid #d7e0f2;border-radius:10px;font-size:13px;line-height:1.6;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;resize:vertical;background:#fff;color:#1a2233}
+  .score-ta:focus{outline:none;border-color:#2f6bff;box-shadow:0 0 0 3px rgba(47,107,255,.12)}
+  .score-inp{width:110px;padding:8px 10px;border:1px solid #d7e0f2;border-radius:8px;font-size:14px}
+  .cap-entry{display:inline-flex;align-items:center;gap:6px;margin-left:10px;padding:5px 12px;border:1px solid #2f6bff;color:#2f6bff;background:#f3f7ff;border-radius:999px;cursor:pointer;font-size:12.5px;font-weight:600}
+  .cap-entry:hover{background:#e6efff}
+  .deliv .dacts{display:flex;gap:8px;flex-wrap:wrap}
+  .mclose{position:absolute;top:10px;right:14px;font-size:18px;color:var(--mut);cursor:pointer}
+  .fm{text-align:left;font-size:13px}
+  .fm label{display:block;font-size:12.6px;color:var(--mut);margin:10px 0 4px}
+  .fm .note{font-size:12.2px;color:var(--mut);background:#f8faff;border:1px solid var(--line);border-radius:9px;padding:9px 11px;line-height:1.7}
+  .fm code{background:#eef2fb;border-radius:4px;padding:1px 5px;font-size:12px}
+  /* ===== 学习指引 ===== */
+  .guide{border:1px solid #cfe0ff;background:linear-gradient(135deg,#f3f8ff,#eef4ff);border-radius:13px;padding:13px 16px;margin:4px 0 12px;box-shadow:0 1px 3px rgba(20,40,90,.04)}
+  .guide h3{font-size:14px;color:var(--blue-d);margin-bottom:7px;display:flex;align-items:center;gap:6px}
+  .guide .g-ctx{font-size:12.4px;color:var(--mut);margin-bottom:8px}
+  .g-steps{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+  .g-step{display:inline-flex;align-items:center;gap:5px;font-size:12.2px;padding:4px 10px;border-radius:999px;border:1px solid #d7e3ff;background:#fff;color:var(--mut)}
+  .g-step.cur{border-color:var(--blue);background:var(--blue);color:#fff;font-weight:700}
+  .g-step.done{background:#eafaf0;border-color:#9fe0bd;color:#166534}
+  .g-path{list-style:none;margin:8px 0 2px;padding:0}
+  .g-path li{font-size:13px;line-height:1.85;color:#28345a;padding-left:22px;position:relative}
+  .g-path li:before{content:"▢";position:absolute;left:4px;color:var(--blue)}
+  .g-path li.lead:before{content:"▶";color:var(--blue-d);font-weight:700}
+  .g-next{font-size:12.7px;color:var(--blue-d);background:#fff;border:1px dashed #b9d0ff;border-radius:9px;padding:9px 11px;margin-top:8px;line-height:1.7}
+  .g-next b{color:var(--blue-d)}
+  /* ===== 反馈气泡 + 弹窗（参考测评设计） ===== */
+  #lf-fab{position:fixed;right:18px;bottom:18px;z-index:150;display:flex;align-items:center;gap:7px;background:var(--blue);color:#fff;border:none;border-radius:999px;padding:11px 16px;font-size:13.5px;font-weight:600;cursor:pointer;box-shadow:0 6px 18px rgba(26,92,255,.35)}
+  #lf-fab:hover{background:var(--blue-d)}
+  #lf-modal .box{max-width:560px;text-align:left}
+  .lf-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .lf-head h3{font-size:17px;margin:0}
+  .lf-close{margin-left:auto;font-size:22px;color:var(--mut);background:none;border:none;cursor:pointer;line-height:1}
+  .lf-meta{font-size:12.3px;color:var(--mut);background:#f8faff;border:1px solid var(--line);border-radius:9px;padding:8px 11px;line-height:1.6;margin-bottom:10px}
+  .lf-label{font-size:12.8px;color:var(--blue-d);font-weight:600;margin:12px 0 6px}
+  .lf-type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .lf-type{padding:9px 4px;border:1.5px solid var(--line);border-radius:10px;background:#fff;font-size:12px;font-weight:600;color:var(--mut);cursor:pointer;text-align:center;transition:.15s}
+  .lf-type .ti{font-size:18px;display:block;margin-bottom:3px}
+  .lf-type.on{border-color:var(--blue);background:var(--blue-bg);color:var(--blue-d)}
+  .lf-cat-row,.lf-sev-row{display:flex;gap:7px;flex-wrap:wrap}
+  .lf-cat,.lf-sev{padding:6px 12px;border:1px solid var(--line);background:#fff;border-radius:999px;font-size:12.6px;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+  .lf-cat.on{background:#7c3aed;color:#fff;border-color:#7c3aed}
+  .lf-sev.on{background:var(--amber);color:#fff;border-color:var(--amber)}
+  .lf-media-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .lf-media-row button{padding:7px 12px;border:1px solid var(--line);background:#fff;border-radius:9px;font-size:12.8px;cursor:pointer}
+  .lf-media-row button:hover{border-color:var(--blue);color:var(--blue-d)}
+  .lf-preview{margin-top:8px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .lf-thumb-wrap{position:relative;display:inline-block}
+  .lf-preview img{max-width:130px;max-height:110px;border-radius:8px;border:1px solid var(--line);cursor:zoom-in;display:block}
+  .lf-preview .lf-file{font-size:12px;background:#f1f4fa;border-radius:8px;padding:4px 9px;color:var(--mut)}
+  .lf-drop{border:1.5px dashed var(--line);border-radius:10px;padding:10px;text-align:center;font-size:12.3px;color:var(--mut);margin-top:8px}
+  .lf-drop.over{border-color:var(--blue);background:var(--blue-bg);color:var(--blue-d)}
+  /* 图片放大灯箱 */
+  .lb-mask{position:fixed;inset:0;background:rgba(8,12,24,.82);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:zoom-out;padding:24px}
+  .lb-mask img{max-width:96vw;max-height:92vh;border-radius:10px;box-shadow:0 18px 50px rgba(0,0,0,.5)}
+  .lb-close{position:absolute;top:16px;right:22px;font-size:30px;color:#fff;background:none;border:none;cursor:pointer;line-height:1}
+  /* 内嵌 AI 陪练抽屉 */
+  .spar-modal .box{width:min(560px,94vw);height:min(76vh,720px);display:flex;flex-direction:column;padding:0;overflow:hidden}
+  .spar-hd{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px;background:#f8faff}
+  .spar-hd h3{font-size:15px;margin:0}
+  .spar-hd .sub{font-size:11.8px;color:var(--mut);margin-top:2px}
+  .spar-hd .x{margin-left:auto;font-size:22px;color:var(--mut);background:none;border:none;cursor:pointer;line-height:1}
+  .spar-body{flex:1;overflow:auto;padding:12px 14px;background:#fff}
+  .spar-msg{margin-bottom:10px;display:flex}
+  .spar-msg.me{justify-content:flex-end}
+  .spar-msg .b{max-width:82%;padding:9px 12px;border-radius:12px;font-size:13.4px;line-height:1.65;white-space:pre-wrap}
+  .spar-msg.ai .b{background:#f1f4fa;color:#1a2233;border-top-left-radius:3px}
+  .spar-msg.me .b{background:var(--blue);color:#fff;border-top-right-radius:3px}
+  .spar-msg.sys .b{background:#fff8e6;color:#8a5a00;font-size:12.4px;border:1px solid #f0dca8;max-width:100%}
+  .spar-typing{font-size:12.4px;color:var(--mut);padding:4px 2px}
+  .spar-ft{border-top:1px solid var(--line);padding:10px 12px;display:flex;gap:8px;align-items:flex-end;background:#fbfcfe}
+  .spar-ft textarea{flex:1;min-height:52px;max-height:120px;resize:none;border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:13.4px;font-family:inherit}
+  .spar-ft button{padding:9px 14px;border-radius:9px;border:none;background:var(--blue);color:#fff;font-size:13.4px;cursor:pointer;white-space:nowrap}
+  .spar-ft button:disabled{opacity:.55;cursor:default}
+  .spar-status{font-size:11.8px;color:var(--mut);padding:0 12px 8px;background:#fbfcfe}
+  .spar-status .on{color:#166534;font-weight:600}
+  .spar-status .off{color:#be123c;font-weight:600}
+  .lf-foot{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .lf-note{font-size:11.8px;color:var(--mut);margin-top:10px;line-height:1.6}
+  .lf-report{white-space:pre-wrap;font-size:12.4px;background:#0e1530;color:#d7e3ff;border-radius:10px;padding:12px 14px;max-height:230px;overflow:auto;margin-top:10px;font-family:ui-monospace,Consolas,monospace;line-height:1.6}
+  @media(max-width:560px){.lf-type-grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:860px){.layout{flex-direction:column}.sidebar{width:100%;max-height:36vh;border-right:none;border-bottom:1px solid var(--line)}}
+  /* ===== 多邻国式分步通关 ===== */
+  .stepper{display:flex;gap:6px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+  .stepper .st{display:flex;align-items:center;gap:6px;font-size:13px;padding:6px 13px;border-radius:999px;border:1.5px solid var(--line);background:#fff;color:var(--mut);font-weight:600;white-space:nowrap}
+  .stepper .st .si{font-size:15px}
+  .stepper .st.cur{border-color:var(--blue);background:var(--blue);color:#fff}
+  .stepper .st.done{background:#eafaf0;border-color:#9fe0bd;color:#166534}
+  .stepper .st .ck{font-size:10px;opacity:.8}
+  .stepper .sbar{flex:1;height:6px;background:#e4eaf7;border-radius:6px;overflow:hidden;min-width:44px}
+  .stepper .sbar i{display:block;height:100%;background:var(--green);transition:width .3s}
+  .cp{max-width:680px;margin:0 auto}
+  .cp-head{margin:2px 0 10px}
+  .cp-title{font-size:19px;font-weight:800}
+  .cp-sub{font-size:12.6px;color:var(--mut);margin-top:2px;line-height:1.6}
+  .cp-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+  .cp-notes{margin:10px 0}
+  .cp.centered{text-align:center}
+  .settle{background:linear-gradient(135deg,#ecfdf5,#f3fbf6);border:1.9px solid #86efac;border-radius:14px;padding:26px 20px}
+  .settle .cp-score{font-size:34px;font-weight:800;color:#16a34a;margin:8px 0}
+  .settle .cp-actions{justify-content:center}
+  .xp-tag{display:inline-flex;align-items:center;gap:4px;background:#fff7e6;color:#b45309;border:1px solid #fde2a8;border-radius:999px;padding:2px 10px;font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <h1>新人小白 × 应届生 · AI 职场轻量实战<span>完整学习课程 M0–M7 · 22 单元</span></h1>
+  <div class="scn">
+    <label>行业</label><input id="cfg-industry">
+    <label>机构</label><input id="cfg-company">
+    <label>产品</label><input id="cfg-product">
+    <button onclick="applyCustom()">应用</button>
+  </div>
+  <div class="llm" id="llm-badge" onclick="openLlm()"><i></i><span id="llm-text">模型未检测</span></div>
+  <div class="prog">已完成 <b id="prog-done">0</b> / 22 单元 · 模块测验通过 <b id="prog-quiz">0</b> / 8 · <b id="prog-pct">0%</b> · 产出物评审 <b id="prog-score">0</b> 份 · <span class="xp-tag">⭐ 积分 <b id="prog-xp">0</b></span></div>
+  <span class="cap-entry" onclick="openScore('capstone')">🏁 结业测验 · 产出物评审</span>
+<span class="cap-entry" onclick="openSparChat()">🤼 AI 陪练</span>
+  <button id="admin-toggle" class="admin-toggle" onclick="toggleAdmin()">管理员预览：关</button>
+</header>
+<div id="admin-banner" class="admin-banner" style="display:none">🔓 管理员预览模式已开启：可直接观看全部 22 单元视频，练习 / 陪练 / 测验均为可选，无需完成即可标记已观看。</div>
+<div id="host-note" style="background:#eef3ff;color:#0e3aa8;border-bottom:1px solid #cfe0ff;font-size:12.5px;line-height:1.65;padding:9px 18px;display:flex;gap:10px;align-items:flex-start">
+  <span style="flex:none">ℹ️</span>
+  <span style="flex:1">本页托管于 <b>aidax.cn</b>。云端 AI 陪练（WorkBuddy 云服务）要求<b>精确域名匹配</b>，因此本页的 AI 陪练会<b>自动降级</b>为：① 本地代理 <code style="background:#fff;padding:0 4px;border-radius:4px">127.0.0.1:3000</code>（需先运行 <code style="background:#fff;padding:0 4px;border-radius:4px">tools/deepseek_proxy.cjs</code>）；② 你本机填入的 DeepSeek Key（仅存浏览器本地）；③ 本地规则引擎（仍可正常陪练与打分）。想要「打开即用」的<b>零配置云端陪练</b>，请使用 <b>workbuddy.host</b> 站点（本任务按产品决策暂未单独建站）。课程的讲解 / 演示 / 我要做 / AI 陪练 / 评分 / 进度记录均不受影响。</span>
+  <button onclick="document.getElementById('host-note').style.display='none'" style="flex:none;background:#fff;border:1px solid #cfe0ff;border-radius:6px;cursor:pointer;font-size:14px;line-height:1;padding:3px 9px;color:#0e3aa8">×</button>
+</div>
+<div class="layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main" id="main"></main>
+</div>
+<div class="modal" id="quiz-modal"><div class="box" id="quiz-box"></div></div>
+<div class="modal" id="llm-modal"><div class="box fm" id="llm-box"></div></div>
+<div class="modal spar-modal" id="spar-chat-modal"><div class="box" id="spar-chat-box"></div></div>
+<div class="modal" id="art-modal"><div class="box wide" id="art-box"></div></div>
+
+<button id="lf-fab" onclick="openFb()">💬 反馈 / 建议</button>
+<div class="modal" id="lf-modal"><div class="box fm" id="lf-box"></div></div>
+
+<script src="./vendor/supabase-js.umd.js"></script>
+<script src="./vendor/workbuddy-cloud-sdk.global.js"></script>
+<script>
+/* ===================== 课程数据（构建时注入） ===================== */
+const COURSE = {"modules": [{"id": "M0", "title": "M0 · AI 基础认知与工具入门", "units": [{"id": "grad_m0u1", "tier": "newbie", "step": "understand", "title": "AI 是什么、不是什么", "task": "用 3 句话向同事讲清：AI 能帮你做什么、不能替你做什么。", "template": "我的结论：\n1) AI 能做的：___\n2) AI 不能替我做的：___\n3) 我的使用红线：___", "ppt": {"method": "AI 是「放大器」不是「替身」：它擅长检索、草稿、整理、生成，不擅长替你承担判断与责任。", "case": "新人常把 AI 当搜索引擎或枪手，结果产出空泛或踩合规红线。", "demo": "先用「它帮我打草稿、我来做判断」的姿势入门，最稳。"}, "vslides": [{"t": "AI 到底能干什么", "s": "<p>AI 擅长：信息检索与归纳、写草稿、整理表格、生成图片/视频、做初版方案。</p>", "n": "AI 擅长信息检索归纳、写草稿、整理表格、生成图文视频和初版方案。它不是万能的，但没有它你会慢很多。"}, {"t": "AI 不能替你做什么", "s": "<p>AI 不替你承担判断责任、不保证事实正确（会幻觉）、不能处理涉密数据。</p>", "n": "AI 不替你做最终判断，不保证每条都正确，也不能碰涉密或隐私数据。结论与风险必须由人拍板。"}]}, {"id": "grad_m0u2", "tier": "newbie", "step": "demo", "title": "配齐你的第一套 AI 工具箱", "task": "把「对话 / 文生图 / 生视频 / 表格」四类工具各选 1 个，记下来。", "template": "我的工具箱：\n- 对话：___\n- 文生图：___\n- 生视频：___\n- 表格/数据：___\n每类能做什么/不能做什么：___", "ppt": {"method": "按「写作、画图、视频、数据」四类各选一个主流工具，比追新更重要。", "case": "新人容易工具囤一堆却没一个用熟。", "demo": "先各选一个、用熟，再谈进阶。"}, "demoScript": {"prompt": "我是职场新人，请帮我按「对话/文生图/生视频/表格数据」四类各推荐 1 个国内常用、免费或低门槛的 AI 工具，并说明每类最适合新人的 1 个用法和 1 个避坑点。用表格输出。"}}, {"id": "grad_m0u3", "tier": "newbie", "step": "spar", "title": "面试官问「你怎么看 AI」", "task": "面对「AI 会不会取代你」这类问题，先给结论再给依据。", "template": "我的回答结构：结论 → 依据 → 边界。\n结论：___\n依据：___\n边界：___", "ppt": {"method": "AI 替代任务不替代人；用得好的人淘汰用不好的人。", "case": "新人常回答「肯定会取代」或「跟我没关系」，都偏激。", "demo": "把 AI 当杠杆：关键在人机协作能力。"}, "spar": {"role": "模拟面试官", "mustAsk": ["你觉得 AI 会取代你这个岗位吗？", "你平时怎么用 AI 提效？举个具体例子。", "如果让你用 AI 做一份周报，你会怎么开头？"]}, "brief": "模拟面试场景：面试官问你对 AI 的看法。请先给结论，再给依据，最后讲清边界与你的应对。"}]}, {"id": "M1", "title": "M1 · 用 AI 做信息收集", "units": [{"id": "grad_m1u1", "tier": "newbie", "step": "understand", "title": "信息收集的正确姿势", "task": "列出你做「行业/竞品简报」时，AI 能帮你做的 3 个环节。", "template": "我的信息收集流程：\n1) 定问题：___\n2) 让 AI 做的：___\n3) 我必须自己做的：___", "ppt": {"method": "信息收集 = 先定问题，再让 AI 检索归纳，最后你交叉核验。", "case": "新人常把「让 AI 搜一圈」当完成，结果没有结论。", "demo": "AI 给的是线索不是结论，关键事实要核验。"}, "vslides": [{"t": "先定问题再搜", "s": "<p>没有好问题，AI 只会给你一堆信息。先写清：我想弄明白什么、给谁用。</p>", "n": "先定问题：我想弄明白什么、给谁用。问题清楚了，AI 的检索归纳才有方向。"}, {"t": "AI 给线索不给结论", "s": "<p>让 AI 列来源、做摘要、给结构，但关键数字/结论你要回查原文。</p>", "n": "AI 负责列来源、做摘要、搭结构；关键数字和结论你必须回查原文再采信。"}]}, {"id": "grad_m1u2", "tier": "newbie", "step": "demo", "title": "用 AI 做一份竞品/行业简报", "task": "用模板提示词，让 AI 产出一份可汇报的简报骨架。", "template": "我的简报骨架：背景 / 3 个发现 / 1 个建议 / 来源清单。", "ppt": {"method": "简报 = 背景 + 关键发现 + 建议 + 来源，四段式最稳。", "case": "新人容易产出大段文字没有重点。", "demo": "四段式：背景、发现、建议、来源。"}, "demoScript": {"prompt": "我要做一份「新人视角」的【某行业/竞品】AI 信息简报，给主管看。请按：①背景（3 句话）②3 个关键发现（带来源类型）③1 条可执行建议 ④来源清单格式，给出可直接填的骨架。提醒我哪些数字必须自己核验。"}}, {"id": "grad_m1u3", "tier": "newbie", "step": "todo", "title": "交付一份情报简报", "task": "产出一份 1 页的信息简报，含背景/发现/建议/来源。", "template": "照模板填：背景___ / 发现1-3___ / 建议___ / 来源___", "ppt": {"method": "一份能用的简报 = 有结论、有依据、有来源、有建议。", "case": "新人简报常见问题是只有信息没有结论。", "demo": "评分看：有没有结论、有没有来源、有没有建议。"}, "brief": "选一个你熟悉的行业或产品，用 AI 辅助做一份 1 页信息简报，必须含：背景、3 个发现（注明来源类型）、1 条建议。关键数字要标注「待核验」。", "rubric": ["有清晰的背景与一个问题", "有 ≥3 个发现且每条带来源类型", "有 1 条可执行的建议", "关键数字标注了「待核验」或已核验", "结构清晰、1 页可读完"], "deliverable": {"name": "1 页信息简报", "desc": "背景+3发现+1建议+来源清单"}}]}, {"id": "M2", "title": "M2 · 用 AI 做工作 PPT", "units": [{"id": "grad_m2u1", "tier": "newbie", "step": "understand", "title": "PPT 的结构逻辑", "task": "写出一份工作汇报 PPT 的 5 页必备结构。", "template": "我的 PPT 结构：封面 / 背景目标 / 进展 / 问题 / 下一步。", "ppt": {"method": "PPT = 结论先行，金字塔结构：观点→分论点→证据。", "case": "新人常把 PPT 做成流水账。", "demo": "结论先行，每页一个核心观点。"}, "vslides": [{"t": "结论先行", "s": "<p>第一页就亮结论，再展开。别让听众猜你想说啥。</p>", "n": "第一页就亮结论，再展开论据。别让听众猜你想要表达什么。"}, {"t": "每页一个观点", "s": "<p>一页只讲一件事，标题就是结论句。</p>", "n": "每页只讲一件事，标题直接写成结论句，而不是「工作情况」这种空标题。"}]}, {"id": "grad_m2u2", "tier": "newbie", "step": "demo", "title": "让 AI 出 PPT 框架", "task": "把主题丢给 AI，拿到可编辑的 10 页大纲。", "template": "我的 10 页大纲：___\n每页核心句：___", "ppt": {"method": "先让 AI 出大纲与每页核心句，你再填内容。", "case": "新人常直接让 AI 写满整页，结果空泛。", "demo": "框架你定，内容 AI 帮你起。"}, "demoScript": {"prompt": "我要做一份 10 页工作汇报 PPT（主题：___）。请给出：①每页的标题（写成结论句）②每页 3 个要点 ③封面与封底文案。不要写满正文，给我可编辑的骨架。"}}, {"id": "grad_m2u3", "tier": "newbie", "step": "todo", "title": "做一套能汇报的 PPT", "task": "完成一份 10 页工作汇报 PPT（框架 + 每页要点）。", "template": "照模板填每页：核心句 + 3 要点 + 是否需要配图。", "ppt": {"method": "能汇报的 PPT = 结论句标题 + 每页要点 + 必要的图。", "case": "新人 PPT 常见问题是标题空泛、没有图。", "demo": "评分看：标题是否结论句、要点是否具体。"}, "brief": "选一个你手头真实或模拟的工作主题，产出 10 页 PPT 框架：每页一个结论句标题 + 3 个要点。至少 2 页标注「需配图」。", "rubric": ["有 10 页且结构完整", "每页标题是结论句而非空泛词", "每页要点具体（非套话）", "≥2 页标注了配图需求", "整体逻辑连贯、可汇报"], "deliverable": {"name": "10 页工作 PPT 框架", "desc": "结论句标题 + 每页要点 + 配图标注"}}]}, {"id": "M3", "title": "M3 · 用 AI 处理数据", "units": [{"id": "grad_m3u1", "tier": "newbie", "step": "understand", "title": "数据清洗的常识", "task": "列出你拿到脏 Excel 时会让 AI 做的 3 件清洗动作。", "template": "我的清洗清单：去重 / 统一格式 / 处理缺失值。", "ppt": {"method": "数据清洗 = 去重、统一格式、处理缺失、校验口径。", "case": "新人常直接让 AI「帮我分析」而数据还是脏的。", "demo": "先洗干净再分析，结论才靠谱。"}, "vslides": [{"t": "先清洗再分析", "s": "<p>脏数据直接分析 = 垃圾进垃圾出。先去重、统一格式、补缺失。</p>", "n": "脏数据直接分析会得到错误结论。先去重、统一格式、处理缺失值，再让 AI 分析。"}, {"t": "口径要对齐", "s": "<p>「销售额」到底含不含退货？先和 AI 对齐定义再算。</p>", "n": "分析前先和 AI 对齐指标口径：销售额含不含退货、时间怎么算，否则数字对不上。"}]}, {"id": "grad_m3u2", "tier": "newbie", "step": "demo", "title": "让 AI 清洗并可视化", "task": "给 AI 一段脏数据描述，拿到清洗步骤 + 图表建议。", "template": "我的清洗步骤：___\n建议图表：___", "ppt": {"method": "让 AI 出可复用的清洗步骤 + 合适的图表类型。", "case": "新人常要图却没说清维度和受众。", "demo": "说清维度、口径、受众，AI 才选对图。"}, "demoScript": {"prompt": "我有一张销售表（列：月份、区域、销售额、是否退货）。数据有重复行、金额为文本、空白缺失。请给：①分步清洗规则（可复用到 Excel/Python）②用哪类图展示「各月销售趋势」和「区域占比」③提醒我必须确认的口径。"}}, {"id": "grad_m3u3", "tier": "newbie", "step": "todo", "title": "交一份干净的数据表", "task": "产出一张「清洗规则 + 1 张图表结论」的数据作业。", "template": "照模板填：清洗规则 / 图表类型 / 读图结论 / 口径备注。", "ppt": {"method": "能交差的数据作业 = 清洗可复现 + 图有结论 + 口径清楚。", "case": "新人常见问题是只给图不给结论。", "demo": "评分看：清洗是否可复现、图是否带结论。"}, "brief": "用你的一段真实或模拟数据（≥20 行），写一份数据作业：①清洗规则清单 ②选 1 张图并说明为什么 ③一句话读图结论 ④标注口径假设。", "rubric": ["清洗规则具体可复现", "选图理由合理", "有读图结论而非只放图", "标注了口径/假设", "数据量足以支撑结论"], "deliverable": {"name": "数据清洗+可视化作业", "desc": "清洗规则 + 图表 + 结论 + 口径"}}]}, {"id": "M4", "title": "M4 · 用 AI 做会议纪要", "units": [{"id": "grad_m4u1", "tier": "newbie", "step": "understand", "title": "纪要的结构", "task": "写出一份会议纪要的必备 5 要素。", "template": "我的纪要结构：时间人物 / 结论 / 行动项 / 责任人 / 时间。", "ppt": {"method": "纪要 = 结论 + 行动项（谁、做什么、何时） + 待决问题。", "case": "新人常把纪要写成聊天记录全文。", "demo": "纪要要可行动，不是记录。"}, "vslides": [{"t": "纪要是行动清单", "s": "<p>好的纪要让人看完知道「接下来谁做什么、何时」。</p>", "n": "好的纪要 = 结论 + 行动项（谁、做什么、何时）+ 待决问题。让人看完就知道下一步。"}, {"t": "别记流水账", "s": "<p>逐字记录是录音做的事，纪要提炼结论与待办。</p>", "n": "逐字记录交给录音/AI 转写，你负责提炼结论和待办，而不是抄写全文。"}]}, {"id": "grad_m4u2", "tier": "newbie", "step": "demo", "title": "让 AI 出结构化纪要", "task": "把一段会议记录贴给 AI，拿到结构化纪要。", "template": "我的纪要：结论 / 行动项(人+事+时) / 待决。", "ppt": {"method": "让 AI 按「结论/行动项/待决」三段输出，行动项带责任人时间。", "case": "新人常让 AI 直接「写纪要」结果杂乱。", "demo": "给固定结构，AI 才不乱。"}, "demoScript": {"prompt": "下面是一段会议记录（粘贴）。请输出结构化纪要：①核心结论 ②行动项清单（每项含：责任人、动作、截止时间）③待决问题（标「需确认」）。用清单格式，不要段落。"}}, {"id": "grad_m4u3", "tier": "newbie", "step": "todo", "title": "交一份结构化纪要", "task": "产出一份会议纪要，含结论/行动项/待决。", "template": "照模板填：结论 / 行动项(人+事+时) / 待决问题。", "ppt": {"method": "能用的纪要 = 结论清楚 + 行动项有责任人时间 + 待决标出。", "case": "新人纪要常见问题：行动项没有责任人和时间。", "demo": "评分看：行动项是否有人、事、时。"}, "brief": "模拟一场 30 分钟项目会（你编 5-8 句关键对话），用 AI 产出结构化纪要：结论、行动项（责任人/动作/截止）、待决问题。", "rubric": ["有清晰的核心结论", "行动项含责任人+动作+时间", "待决问题被标出", "格式为清单可扫读", "无流水账"], "deliverable": {"name": "结构化会议纪要", "desc": "结论 + 行动项 + 待决"}}]}, {"id": "M5", "title": "M5 · 用 AI 文生图", "units": [{"id": "grad_m5u1", "tier": "newbie", "step": "understand", "title": "文生图的提示词", "task": "写出一个能出好图的提示词四要素。", "template": "我的提示词公式：主体 + 风格 + 场景 + 约束。", "ppt": {"method": "文生图提示词 = 主体 + 风格 + 场景 + 画质约束。", "case": "新人常写「画个好看的图」一无所获。", "demo": "越具体，图越可控。"}, "vslides": [{"t": "四要素公式", "s": "<p>主体（画什么）+ 风格（什么风）+ 场景（在哪）+ 约束（比例/画质）。</p>", "n": "文生图提示词四要素：主体（画什么）、风格（什么视觉风）、场景（在什么环境）、约束（比例与画质）。越具体越可控。"}, {"t": "给参考与负向", "s": "<p>说清「不要什么」比只说「要什么」更省返工。</p>", "n": "除了要什么，也写清不要什么（如不要文字水印、不要变形），能少返工。"}]}, {"id": "grad_m5u2", "tier": "newbie", "step": "todo", "title": "产出岗位配图", "task": "用 AI 生成 3 张岗位/工作场景配图。", "template": "照模板填：每张图的提示词 + 用途 + 是否需要重生成。", "ppt": {"method": "能用的配图 = 提示词可控 + 用途明确 + 风格统一。", "case": "新人常见问题是图风格乱、带乱码文字。", "demo": "评分看：提示词是否具体、风格是否统一。"}, "brief": "为你手头一个工作场景（如周报封面/活动海报/产品示意图）生成 3 张配图，记录每张的提示词、用途，并说明哪张需重生成及原因。", "rubric": ["生成 ≥3 张且用途明确", "提示词含主体/风格/场景/约束", "风格基本统一", "识别了带乱码/变形需重生成的图", "说明重生成原因"], "deliverable": {"name": "岗位配图一组", "desc": "3 张图 + 提示词 + 用途"}}]}, {"id": "M6", "title": "M6 · 用 AI 生视频", "units": [{"id": "grad_m6u1", "tier": "newbie", "step": "understand", "title": "生视频的流程", "task": "写出用 AI 做一条 30 秒口播视频的步骤。", "template": "我的流程：脚本 → 分镜 → 配音 → 成片。", "ppt": {"method": "生视频 = 脚本 → 分镜 → 配音/画面 → 合成。", "case": "新人常想「一步出片」结果不可控。", "demo": "先脚本后画面，节奏才稳。"}, "vslides": [{"t": "脚本优先", "s": "<p>30 秒视频先写逐字稿，再想画面，比直接生成可控得多。</p>", "n": "30 秒口播先写逐字稿，再拆分镜和画面。先脚本后画面，成片才可控。"}, {"t": "画面要匹配文案", "s": "<p>每句文案对应一个画面/镜头，别让画面和台词脱节。</p>", "n": "把逐字稿按句拆成镜头，每句对应一个画面，避免声画脱节。"}]}, {"id": "grad_m6u2", "tier": "newbie", "step": "todo", "title": "产出视频脚本+分镜", "task": "写一条 30 秒口播视频的脚本与分镜表。", "template": "照模板填：逐字稿 / 每句对应画面 / 时长。", "ppt": {"method": "能交付的视频脚本 = 逐字稿 + 分镜（句→画面）+ 时长。", "case": "新人常见问题是只有稿没有分镜。", "demo": "评分看：是否逐句拆了分镜。"}, "brief": "选一个你熟悉的职场小知识，写一条 30 秒口播视频：①逐字稿（约 80-100 字）②分镜表（每句对应画面与时长）③配音/画面建议。", "rubric": ["有完整逐字稿", "按句拆了分镜", "标注了时长", "画面与台词匹配", "时长约 30 秒可行"], "deliverable": {"name": "30 秒视频脚本+分镜", "desc": "逐字稿 + 分镜表"}}]}, {"id": "M7", "title": "M7 · 综合提效实战", "units": [{"id": "grad_m7u1", "tier": "newbie", "step": "understand", "title": "一周 AI 工作流蓝图", "task": "画出你的一周工作里 AI 可介入的 4 个节点。", "template": "我的周工作流：周一收集 / 周三产出 / 周五复盘 / 日常沟通。", "ppt": {"method": "工作流 = 把高频事务逐个标出 AI 介入点，固化成习惯。", "case": "新人常「想到才用」，不成体系。", "demo": "先画地图，再固化。"}, "vslides": [{"t": "标出介入点", "s": "<p>把「信息收集/写作/汇报/复盘」四件事标出 AI 能帮的环节。</p>", "n": "把你每周高频做的四件事（收集、写作、汇报、复盘）逐一标出 AI 能帮的环节，形成地图。"}, {"t": "固化成习惯", "s": "<p>固定时段做固定 AI 动作，比临时抱佛脚强。</p>", "n": "把 AI 动作排进固定时段（如周一收集、周五复盘），形成可复用习惯而非临时起意。"}]}, {"id": "grad_m7u2", "tier": "newbie", "step": "demo", "title": "搭一个可复用模板", "task": "用 AI 帮你生成一份「周工作流模板」。", "template": "我的模板：固定时段 + 对应 AI 动作 + 产出物。", "ppt": {"method": "让 AI 出周模板：时段→AI 动作→产出物→复盘指标。", "case": "新人常要模板却没说清自己的节奏。", "demo": "模板要贴合你的真实节奏。"}, "demoScript": {"prompt": "我是一周工作节奏：周一收信息、周三出材料、周五复盘、日常沟通多。请帮我生成一份「周 AI 工作流模板」：每行含 时段 / 对应 AI 动作 / 产出物 / 复盘指标。用表格。"}}, {"id": "grad_m7u3", "tier": "newbie", "step": "todo", "title": "产出个人 AI 工作流手册", "task": "写一份你的一周 AI 工作流手册（可带走）。", "template": "照模板填：时段 / AI 动作 / 产出物 / 红线。", "ppt": {"method": "能带走的手册 = 时段+动作+产出+红线，且红线被写明。", "case": "新人手册常漏掉「什么不能用 AI」。", "demo": "评分看：是否写了红线与安全。"}, "brief": "汇总前 7 个模块，写一份你个人的《一周 AI 工作流手册》：含 4-6 个时段及对应 AI 动作、每步产出物、以及你的「AI 使用红线」（至少 2 条）。", "rubric": ["覆盖 ≥4 个真实工作节点", "每节点有 AI 动作与产出物", "写了 ≥2 条 AI 使用红线", "手册可实际执行（非空洞）", "结构清晰可带走"], "deliverable": {"name": "个人 AI 工作流手册", "desc": "时段+动作+产出+红线"}}]}]};
+const AUDIO  = {};
+const QUIZ   = {"M0": [{"q": "关于 AI 的能力边界，下面哪句最准？", "opts": ["AI 什么都能替我做", "AI 擅长草稿/整理/生成，但判断与责任归人", "用了 AI 就一定合规", "AI 输出可以直接当定稿发"], "a": 1, "tip": "AI 是放大器不是替身：它做草稿与整理，判断和责任始终在人。"}, {"q": "新人最稳妥的 AI 起步姿势是？", "opts": ["把所有事都交给 AI", "先各选一类工具用熟", "囤一堆工具不深挖", "只用搜索引擎"], "a": 1, "tip": "按写作/画图/视频/数据四类各选一个用熟，比追新更重要。"}, {"q": "把含同事手机号的名单贴给公开大模型，主要风险？", "opts": ["速度变慢", "敏感个人信息出域，可能违规", "模型不准", "额外收费"], "a": 1, "tip": "PII 一旦进入外部服务即出域，免费也不能例外，须脱敏或本地处理。"}, {"q": "被问「AI 会不会取代你」，最好怎么答？", "opts": ["肯定会取代我", "跟我没关系", "AI 替代任务不替代人，关键在人机协作", "全部交给 AI 就行"], "a": 2, "tip": "结论先行：AI 替代任务不替代人，用得好的人淘汰用不好的人。"}], "M1": [{"q": "做信息简报第一步该做什么？", "opts": ["直接让 AI 搜一圈", "先定清楚要弄明白什么", "把全文贴给 AI", "等别人给结论"], "a": 1, "tip": "没有问题，AI 只给信息不给结论。先定问题再搜。"}, {"q": "AI 给的数字和结论，你应该？", "opts": ["直接采信", "回查原文/来源再采信", "忽略不看", "只信不查"], "a": 1, "tip": "AI 会幻觉，关键数字与结论必须回查来源再采信。"}, {"q": "一份能用的简报至少含？", "opts": ["背景+发现+建议+来源", "只有大段文字", "只有图表", "只有标题"], "a": 0, "tip": "四段式：背景、关键发现（带来源）、建议、来源清单。"}, {"q": "信息收集里「必须由人做」的是？", "opts": ["检索", "归纳", "判断真伪与定结论", "列来源"], "a": 2, "tip": "检索归纳 AI 做，真伪判断与最终结论只能人做。"}], "M2": [{"q": "工作 PPT 最该遵循的原则？", "opts": ["流水账记录", "结论先行、每页一个观点", "文字越多越好", "标题越空越好"], "a": 1, "tip": "第一页亮结论，每页标题写成结论句，一页只讲一件事。"}, {"q": "让 AI 写 PPT，正确做法是？", "opts": ["让它直接写满正文", "先要大纲与每页结论句，你再填", "只给主题不干预", "让它自由发挥"], "a": 1, "tip": "框架你定（大纲+结论句），内容 AI 帮你起，你控质量。"}, {"q": "PPT 标题写成「工作情况」这类空标题的问题是？", "opts": ["太短", "没表达结论，听众要猜", "字数不够", "格式不对"], "a": 1, "tip": "标题应直接是结论句，而非「工作情况」这种空泛词。"}, {"q": "一份能汇报的 PPT 还应包含？", "opts": ["只有文字", "必要的配图与数据", "无关动画", "大段引用"], "a": 1, "tip": "关键页配图或数据，增强说服力，但别堆砌。"}], "M3": [{"q": "拿到脏 Excel 表，第一步？", "opts": ["直接让 AI 分析", "先清洗（去重/统一格式/补缺失）", "删除一半", "不管直接用"], "a": 1, "tip": "垃圾进垃圾出：先清洗再分析，结论才靠谱。"}, {"q": "分析前必须和 AI 对齐的是？", "opts": ["字体", "指标口径（如销售额含不含退货）", "文件格式", "行数"], "a": 1, "tip": "口径不一致，算出来的数字会对不上。"}, {"q": "让 AI 做图表，最该说清？", "opts": ["随便画", "维度、口径、受众", "颜色", "作者"], "a": 1, "tip": "说清维度和受众，AI 才选对图并写对读图结论。"}, {"q": "一张「能交差」的数据作业应有？", "opts": ["只有图", "清洗可复现+图带结论+口径清楚", "只有结论", "只有原始数据"], "a": 1, "tip": "清洗可复现、图有读图结论、口径标注，三者缺一不可。"}], "M4": [{"q": "会议纪要的核心目的是？", "opts": ["记录全文", "让人知道接下来谁做什么何时", "越长越好", "存档即可"], "a": 1, "tip": "纪要要可行动：结论 + 行动项（人/事/时）+ 待决。"}, {"q": "行动项最该写明？", "opts": ["只写动作", "责任人+动作+截止时间", "只写时间", "只写责任人"], "a": 1, "tip": "行动项缺责任人或时间，就等于没安排。"}, {"q": "逐字记录应该交给？", "opts": ["人工抄写", "录音/AI 转写，人提炼结论", "不记录", "只记开头"], "a": 1, "tip": "转写交给工具，人负责提炼结论与待办。"}, {"q": "纪要里的「待决问题」应？", "opts": ["删除", "标注「需确认」", "假装不存在", "写进结论"], "a": 1, "tip": "待决问题标「需确认」，责任边界才清楚。"}], "M5": [{"q": "文生图提示词四要素是？", "opts": ["主体+风格+场景+约束", "随便写", "只要主体", "只要风格"], "a": 0, "tip": "主体（画什么）+风格+场景（环境）+约束（比例/画质），越具体越可控。"}, {"q": "想少返工，还应告诉 AI？", "opts": ["不要什么（负向约束）", "越多越好", "只说要什么", "不管"], "a": 0, "tip": "说清「不要什么」（水印/变形）比只说要什么更省返工。"}, {"q": "一组岗位配图最重要的是？", "opts": ["数量多", "风格统一+用途明确", "随便生成", "带乱码也行"], "a": 1, "tip": "风格统一、用途明确，才像一套而不是拼凑。"}, {"q": "文生图常见问题？", "opts": ["太快", "画面带乱码文字/变形需重生成", "太清晰", "太小"], "a": 1, "tip": "乱码文字、肢体变形是常见的，需识别并重生成。"}], "M6": [{"q": "用 AI 做 30 秒口播视频，正确顺序？", "opts": ["一步出片", "脚本→分镜→画面/配音→合成", "先画面后脚本", "直接生成"], "a": 1, "tip": "先逐字稿，再拆分镜和画面，成片才可控。"}, {"q": "分镜表应该？", "opts": ["不需要", "逐句对应画面与时长", "只写总时长", "随便标"], "a": 1, "tip": "每句台词对应一个画面与时长，声画才不脱节。"}, {"q": "30 秒口播的逐字稿大约？", "opts": ["10 字", "80-100 字", "500 字", "越长越好"], "a": 1, "tip": "约 80-100 字对应 30 秒，太长念不完。"}, {"q": "画面与台词的关系是？", "opts": ["无关", "每句对应一个画面", "随机", "只听不看"], "a": 1, "tip": "逐句拆镜，画面匹配台词，避免声画脱节。"}], "M7": [{"q": "搭建个人 AI 工作流第一步？", "opts": ["直接买工具", "画出周工作里 AI 可介入的节点", "全交给 AI", "不规划"], "a": 1, "tip": "先画地图：把高频事务标出 AI 介入点，再固化。"}, {"q": "工作流模板最好包含？", "opts": ["只有时段", "时段+AI动作+产出物+复盘指标", "只有产出", "只有指标"], "a": 1, "tip": "时段→AI 动作→产出物→复盘指标，四列齐才可执行。"}, {"q": "个人 AI 手册绝不能漏的是？", "opts": ["配色", "AI 使用红线（什么不能用 AI）", "页眉", "字体"], "a": 1, "tip": "必须写明红线：涉密/隐私数据不出域等，否则容易踩坑。"}, {"q": "关于「AI 提效」，最稳妥的认知？", "opts": ["AI 全自动", "AI 放大你的能力，你做判断", "不用学", "越贵越好"], "a": 1, "tip": "AI 是杠杆，放大你的能力；判断、责任、红线始终在人。"}]};
+const QUIZ_BANK = {};   /* 单元练习：每个『理解』单元 5 道场景选择题 */
+
+const STORE='aidax_grad_v1';
+let prog = loadProg();
+function loadProg(){ try{ return JSON.parse(localStorage.getItem(STORE))||{units:{},quizzes:{}}; }catch(e){ return {units:{},quizzes:{}}; } }
+function saveProg(){ try{ localStorage.setItem(STORE, JSON.stringify(prog)); }catch(e){} syncMapProgress(); }
+
+// 主站 URL 参数：?m=MX 深链定位模块；?weak=a,b 测评弱维（用于个性化高亮）。与主站进度 key 解耦又互通。
+const UP=new URLSearchParams(location.search);
+const WEAK=(UP.get('weak')||'').split(',').map(s=>s.trim()).filter(Boolean);
+const DEEP_MODULE=UP.get('m')||'';
+
+// 把「模块 8 单元全部通关」回写主站学习地图进度（localStorage 同源共享），主站监听 storage 事件实时刷新。
+function syncMapProgress(){
+  try{
+    const key='ai_training_progress';
+    let cp={}; try{ cp=JSON.parse(localStorage.getItem(key))||{}; }catch(_){}
+    COURSE.modules.forEach((m,mi)=>{
+      const cid='newbie_grad_m'+mi;
+      const allDone=m.units.every(u=>prog.units[u.id]&&prog.units[u.id].done);
+      if(allDone) cp[cid]=Object.assign({},cp[cid],{done:true,completedAt:Date.now()});
+    });
+    localStorage.setItem(key, JSON.stringify(cp));
+  }catch(_){}
+}
+
+/* ===================== 管理员预览模式 =====================
+   开启方式：URL 带 ?admin=1 或 ?preview=1，或点击页头「管理员预览」开关。
+   作用：顶部显示横幅，练习/陪练/测验标注为可选，结算可跳过测试直接标记已观看。
+   对学员（未开启）流程零影响。 */
+const ADMIN_KEY='aidax_fin_admin';
+function isAdmin(){
+  try{
+    const p=new URLSearchParams(location.search);
+    if(p.has('admin')||p.has('preview')){ try{localStorage.setItem(ADMIN_KEY,'1');}catch(e){} return true; }
+    return localStorage.getItem(ADMIN_KEY)==='1';
+  }catch(e){ return false; }
+}
+let ADMIN=isAdmin();
+function toggleAdmin(){
+  ADMIN=!ADMIN;
+  try{ localStorage.setItem(ADMIN_KEY, ADMIN?'1':'0'); }catch(e){}
+  applyAdminUI();
+  if(prog.cur && findUnit(prog.cur)) openUnit(prog.cur);
+}
+function applyAdminUI(){
+  const tg=document.getElementById('admin-toggle');
+  if(tg) tg.textContent='管理员预览：'+(ADMIN?'开':'关');
+  const bn=document.getElementById('admin-banner');
+  if(bn) bn.style.display=ADMIN?'block':'none';
+}
+function refreshProg(){
+  const u=Object.values(prog.units).filter(x=>x&&x.done).length;
+  const q=Object.values(prog.quizzes).filter(Boolean).length;
+  const s=prog.scores? Object.values(prog.scores).filter(v=>typeof v==='number').length : 0;
+  document.getElementById('prog-done').textContent=u;
+  document.getElementById('prog-quiz').textContent=q;
+  document.getElementById('prog-pct').textContent=Math.round(u/Math.max(1,flatUnits().length)*100)+'%';
+  const sp=document.getElementById('prog-score'); if(sp) sp.textContent=s;
+  const xp=document.getElementById('prog-xp'); if(xp) xp.textContent=totalXP();
+}
+
+/* 占位符替换 */
+let CUSTOM={industry:'消费金融',company:'模拟银行 X',product:'闪电贷'};
+try{ const s=localStorage.getItem('aidax_fin_custom'); if(s) CUSTOM=Object.assign(CUSTOM,JSON.parse(s)); }catch(e){}
+function sub(t){ return (t||'').replace(/\{\{industry\}\}/g,CUSTOM.industry).replace(/\{\{company\}\}/g,CUSTOM.company).replace(/\{\{product\}\}/g,CUSTOM.product); }
+function applyCustom(){
+  CUSTOM={industry:document.getElementById('cfg-industry').value.trim()||CUSTOM.industry,
+          company:document.getElementById('cfg-company').value.trim()||CUSTOM.company,
+          product:document.getElementById('cfg-product').value.trim()||CUSTOM.product};
+  try{ localStorage.setItem('aidax_fin_custom',JSON.stringify(CUSTOM)); }catch(e){}
+  ['cfg-industry','cfg-company','cfg-product'].forEach(id=>document.getElementById(id).value=sub('{{'+id.slice(4)+'}}'));
+  renderUnit(prog.cur); renderSidebar();
+}
+const STEP_LABEL={understand:'理解',demo:'演示',todo:'我要做',spar:'陪练'};
+
+/* ===================== 模型接入层 =====================
+   三个通道，按优先级自动选择：
+   C 云服务（学员默认）——WorkBuddy 免密钥大模型，学员打开网页就能用，不需要任何 Key
+   A 本地代理——node tools/deepseek_proxy.cjs，Key 只在进程环境变量里
+   B 直连——临时填入 Key，仅存本机 localStorage
+   全部不可用时自动降级到本地规则引擎，学习流程不中断。 */
+const CLOUD_CFG = { endpoint:'https://fin-pm-course.app.workbuddy.host',
+                    publishableKey:'wbpk_mCexBpk6ZgEe6PYGEaPEwE_5vMGjN4mhnePzab48XXMJEHVj4quBg0Z' };
+let LLM = (function(){
+  try{ return JSON.parse(localStorage.getItem('aidax_llm'))||{}; }catch(e){ return {}; }
+})();
+LLM.base = LLM.base || 'http://127.0.0.1:3000';
+LLM.key  = LLM.key  || '';
+LLM.state = 'unknown';           /* unknown | cloud | proxy | direct | off */
+function saveLlm(){ try{ localStorage.setItem('aidax_llm', JSON.stringify({base:LLM.base,key:LLM.key})); }catch(e){} }
+
+/* ---- 通道 C：云服务免密钥大模型 ---- */
+let _cloudClient=null, _cloudModel=null, _cloudErr='';
+function cloudClient(){
+  if(_cloudClient) return _cloudClient;
+  if(typeof WorkBuddyCloud==='undefined' || !WorkBuddyCloud.createWorkBuddyCloud){ _cloudErr='SDK未加载'; return null; }
+  try{
+    _cloudClient=WorkBuddyCloud.createWorkBuddyCloud({endpoint:CLOUD_CFG.endpoint, publishableKey:CLOUD_CFG.publishableKey});
+  }catch(e){ _cloudErr=(e&&e.message)||String(e); return null; }
+  return _cloudClient;
+}
+async function cloudModel(){
+  if(_cloudModel) return _cloudModel;
+  const c=cloudClient(); if(!c) return null;
+  try{
+    const list=await c.llm.models.list();
+    const m=(list||[]).find(x=>x && x.disabled!==true);
+    if(m && m.id){ _cloudModel=m.id; _cloudErr=''; return m.id; }
+    _cloudErr='云端暂无可用模型';
+  }catch(e){
+    _cloudErr=(e&&e.error&&e.error&&e.error.code)?e.error.code:((e&&e.message)||String(e));
+  }
+  return null;
+}
+const CLOUD_FALLBACK_SYS='你是 AIDAX 企业 AI 实训课程的内嵌陪练教练。回答简洁具体、面向真实业务场景；需要真实数据的地方明确标出待填，绝不编造数字。';
+async function cloudChat(messages, opts){
+  const c=cloudClient(); if(!c) throw new Error(_cloudErr||'SDK未加载');
+  const model=await cloudModel(); if(!model) throw new Error(_cloudErr||'云端无可用模型');
+  const msgs=(messages||[]).slice();
+  if(!msgs.length || msgs[0].role!=='system') msgs.unshift({role:'system',content:CLOUD_FALLBACK_SYS});
+  let out='';
+  const ctl=new AbortController(); const tm=setTimeout(()=>ctl.abort(),45000);
+  try{
+    const stream=await c.llm.chat.completions.create({
+      model:model, messages:msgs, stream:true,
+      temperature:(opts&&opts.temperature)||0.6,
+      signal:ctl.signal
+    });
+    for await (const ch of stream){
+      const d=ch&&ch.choices&&ch.choices[0]&&ch.choices[0].delta;
+      if(d && d.content) out+=d.content;
+    }
+  } finally { clearTimeout(tm); }
+  if(!out.trim()) throw new Error('云端返回空回复');
+  return out.trim();
+}
+
+function llmEndpoint(){
+  if(LLM.state==='direct' && LLM.key){
+    return {url:'https://api.deepseek.com/chat/completions',
+            headers:{'Content-Type':'application/json','Authorization':'Bearer '+LLM.key}};
+  }
+  return {url:LLM.base.replace(/\/$/,'')+'/chat', headers:{'Content-Type':'application/json'}};
+}
+async function llmChat(messages, opts){
+  /* 优先通道 C（学员零配置）；仅在直连模式下跳过 */
+  if(LLM.state!=='direct'){
+    try{ return await cloudChat(messages, opts); }catch(e){ /* 继续降级 */ }
+  }
+  const ep=llmEndpoint();
+  const body=Object.assign({model:'deepseek-chat',messages:messages,temperature:0.6,max_tokens:700},opts||{});
+  const ctl=new AbortController(); const tm=setTimeout(()=>ctl.abort(), 25000);
+  try{
+    const r=await fetch(ep.url,{method:'POST',headers:ep.headers,body:JSON.stringify(body),signal:ctl.signal});
+    if(!r.ok){ const t=await r.text().catch(()=>''); throw new Error('HTTP '+r.status+' '+t.slice(0,120)); }
+    const j=await r.json();
+    const c=j&&j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content;
+    if(!c) throw new Error('空回复');
+    return String(c).trim();
+  } finally { clearTimeout(tm); }
+}
+async function llmProbe(silent){
+  let st='off';
+  try{ const m=await cloudModel(); if(m) st='cloud'; }catch(e){}
+  if(st==='off'){
+    try{
+      const r=await fetch(LLM.base.replace(/\/$/,'')+'/ping',{cache:'no-store'});
+      if(r.ok) st='proxy';
+    }catch(e){}
+  }
+  if(st==='off' && LLM.key){
+    try{
+      const r=await fetch('https://api.deepseek.com/models',{headers:{'Authorization':'Bearer '+LLM.key}});
+      if(r.ok) st='direct';
+    }catch(e){}
+  }
+  LLM.state=st; paintLlm();
+  if(!silent && st==='off') openLlm();
+  return st;
+}
+function paintLlm(){
+  const b=document.getElementById('llm-badge'); if(!b) return;
+  const t=document.getElementById('llm-text');
+  b.classList.remove('on','off');
+  if(LLM.state==='cloud'){ b.classList.add('on'); t.textContent='AI 陪练已就绪'; }
+  else if(LLM.state==='proxy'){ b.classList.add('on'); t.textContent='AI 已连接（本地代理）'; }
+  else if(LLM.state==='direct'){ b.classList.add('on'); t.textContent='AI 已连接（直连）'; }
+  else if(LLM.state==='off'){ b.classList.add('off'); t.textContent='AI 未连接 · 点此查看'; }
+  else { t.textContent='AI 能力检测中'; }
+}
+function llmReady(){ return LLM.state==='cloud' || LLM.state==='proxy' || LLM.state==='direct'; }
+
+/* ===================== 模型接入弹窗 ===================== */
+function openLlm(){
+  const box=document.getElementById('llm-box');
+  const cmd='DEEPSEEK_KEY=sk-xxxx node tools/deepseek_proxy.cjs';
+  const ready=(LLM.state==='cloud');
+  box.innerHTML='<div class="mclose" onclick="closeLlm()">\u2715</div>'
+   +'<h3>AI 陪练能力</h3>'
+   +'<div class="note" style="text-align:left;padding:10px 12px;'+(ready?'background:#ecfdf5;border-color:#86efac':'')+'">'
+   +(ready
+     ? '<b style="color:#166534">✓ 已就绪，学员无需任何配置</b><div style="margin-top:6px">AI 陪练、演示生成、实操点评都走云端大模型，打开网页直接可用。</div>'
+     : '<b>当前未连上云端模型</b><div style="margin-top:6px">学员版请用课程主页链接打开（本页需部署在应用自有域名下才会自动接通）。此刻陪练会走本地规则引擎，功能不中断但追问深度有限。</div>')
+   +'</div>'
+   +'<details style="margin-top:10px;text-align:left"><summary style="cursor:pointer;font-size:13px;color:var(--mut)">高级：用自己的 DeepSeek Key（可选，个人电脑适用）</summary>'
+   +'<div class="note" style="margin-top:8px;padding:10px 12px">'
+   +'<div><b>第 1 步</b> · 拿 Key：<a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener" style="color:var(--pri)">platform.deepseek.com → API Keys</a>，创建 <code>sk-</code> 开头的 Key（按量计费，练习量级约几分钱）。</div>'
+   +'<div style="margin-top:6px"><b>第 2 步</b> · 启动代理（二选一）：双击课程文件夹里的「启动AI代理.command」并粘贴 Key；或终端执行 '
+   +'<code>'+cmd+'</code> <button class="btn ghost" style="padding:2px 10px;font-size:12px;margin-left:4px" onclick="copyText(\''+cmd.replace(/'/g,"\\'")+'\')">复制</button></div>'
+   +'</div>'
+   +'<label style="margin-top:8px">本地代理地址</label>'
+   +'<input class="tin" id="llm-base" value="'+esc(LLM.base)+'">'
+   +'<label style="margin-top:8px">API Key 直连（备用；仅存本机 localStorage）</label>'
+   +'<input class="tin" id="llm-key" type="password" placeholder="sk-\u2026 留空则只用上面两种" value="'+esc(LLM.key)+'">'
+   +'</details>'
+   +'<div class="acts" style="margin-top:14px">'
+   +'<button class="btn" onclick="saveLlmForm()">重新检测</button>'
+   +'<button class="btn ghost" onclick="closeLlm()">关闭</button></div>'
+   +'<div id="llm-res" style="margin-top:10px;font-size:12.6px"></div>';
+  document.getElementById('llm-modal').classList.add('on');
+}
+function closeLlm(){ document.getElementById('llm-modal').classList.remove('on'); }
+async function saveLlmForm(){
+  LLM.base=document.getElementById('llm-base').value.trim()||'http://127.0.0.1:3000';
+  LLM.key=document.getElementById('llm-key').value.trim();
+  saveLlm();
+  const st=await llmProbe(true);
+  const res=document.getElementById('llm-res');
+  if(st==='cloud'){
+    let msg='云端模型已就绪';
+    try{ const t=await llmChat([{role:'user',content:'回复两个字：可用'}],{max_tokens:8}); msg='云端模型回话正常：'+t; }
+    catch(e){ msg='云端已连通，但调用失败：'+esc(e.message); }
+    res.innerHTML='<span style="color:#166534">\u2713 '+esc(msg)+'</span>';
+  } else if(st==='proxy'){
+    let msg='代理连通。';
+    try{ const t=await llmChat([{role:'user',content:'回复两个字：可用'}],{max_tokens:8}); msg='代理连通，模型回话：'+t; }
+    catch(e){ msg='代理在，但模型调用失败：'+esc(e.message); }
+    res.innerHTML='<span style="color:#166534">\u2713 '+esc(msg)+'</span>';
+  } else if(st==='direct'){
+    res.innerHTML='<span style="color:#166534">\u2713 直连成功。</span>';
+  } else {
+    let diag='';
+    if(_cloudErr && _cloudErr!=='SDK未加载') diag='云端：'+esc(_cloudErr)+'（若从其它域名打开本页，云端会拒绝跨域调用，请用课程主页链接打开）。';
+    else if(_cloudErr==='SDK未加载') diag='云端 SDK 未加载（vendor/workbuddy-cloud-sdk.global.js 缺失）。';
+    try{ await fetch(LLM.base.replace(/\/$/,'')+'/ping',{cache:'no-store'}); }catch(e){
+      diag += (e&&e.message==='Failed to fetch')
+        ? ' 本地代理也没启动。' : ' 探测失败：'+esc(e.message);
+    }
+    res.innerHTML='<span style="color:#be123c">\u2717 未连上模型。</span>'
+      +(diag?'<div style="margin-top:4px">诊断：'+diag+'</div>':'')
+      +'<div style="margin-top:4px">陪练仍可用（走本地规则引擎），只是追问深度有限。</div>';
+  }
+}
+
+/* ===================== 侧栏（问题 8：跟随当前学习进度） ===================== */
+function curModIndex(){
+  const i=COURSE.modules.findIndex(m=>m.units.some(x=>x.id===prog.cur));
+  return i<0?0:i;
+}
+function renderSidebar(){
+  const sb=document.getElementById('sidebar'); sb.innerHTML='';
+  const openIdx=curModIndex();
+  COURSE.modules.forEach((m,mi)=>{
+    const mod=document.createElement('div'); mod.className='mod'+(mi===openIdx?' open':'');
+    const done=m.units.filter(u=>prog.units[u.id]&&prog.units[u.id].done).length;
+    const allDone=done===m.units.length;
+    const passed=!!prog.quizzes[m.id];
+    const weakHit = m.dims && m.dims.some(d=>WEAK.includes(d));
+    if(weakHit) mod.className+=' weak';
+    const hd=document.createElement('div'); hd.className='mod-h';
+    hd.innerHTML='<span class="mid">'+m.id+'</span><span>'+m.title.slice(0,12)+'</span>'
+      +(allDone?'<span class="mdone">'+done+'/8 已通关</span>':'<span class="mdone" style="color:var(--mut);font-weight:500">'+done+'/8</span>')
+      +(weakHit?'<span class="mweak" style="font-size:11px;color:#dc2626;border:1px solid #fecaca;background:#fef2f2;border-radius:6px;padding:0 5px;cursor:default;white-space:nowrap">📌 短板</span>':'')
+      +'<span class="mquiz" style="'+(passed?'color:#166534;border-color:#86efac;background:#ecfdf5':'')+'">'+(passed?'\u2713 测验':'\uD83D\uDCDD 测验')+'</span>';
+    const body=document.createElement('div'); body.className='mod-b';
+    m.units.forEach(u=>{
+      const el=document.createElement('div');
+      el.className='unit'+(prog.cur===u.id?' active':'')+((prog.units[u.id]&&prog.units[u.id].done)?' done':'');
+      el.innerHTML='<span>'+u.title.slice(0,11)+'</span><span class="st">'+STEP_LABEL[u.step]+'</span>';
+      el.onclick=()=>openUnit(u.id);
+      body.appendChild(el);
+    });
+    mod.appendChild(hd); mod.appendChild(body);
+    hd.onclick=()=>mod.classList.toggle('open');
+    hd.querySelector('.mquiz').onclick=ev=>{ ev.stopPropagation(); openQuiz(m.id); };
+    sb.appendChild(mod);
+  });
+  const act=sb.querySelector('.unit.active');
+  if(act && act.scrollIntoView) act.scrollIntoView({block:'nearest'});
+}
+
+/* ===================== 单元主页 ===================== */
+let CUR=null;   /* 当前单元播放器句柄，切换单元时先 stop */
+let CHECK=null; /* 多邻国式分步通关状态：{uid, idx, steps} */
+function findUnit(uid){ for(const m of COURSE.modules){ const u=m.units.find(x=>x.id===uid); if(u) return {m,u}; } return null; }
+function flatUnits(){ const a=[]; COURSE.modules.forEach(m=>m.units.forEach(u=>a.push(u))); return a; }
+function nextUnit(uid){ const a=flatUnits(), i=a.findIndex(x=>x.id===uid); return i>=0&&i+1<a.length?a[i+1]:null; }
+function prevUnit(uid){ const a=flatUnits(), i=a.findIndex(x=>x.id===uid); return i>0?a[i-1]:null; }
+
+function openUnit(uid){
+  prog.cur=uid; saveProg(); renderUnit(uid); renderSidebar();
+  const mn=document.getElementById('main'); if(mn) mn.scrollTop=0;
+}
+
+function renderUnit(uid){
+  if(CUR){ try{CUR.stop();}catch(e){} CUR=null; }
+  const f=findUnit(uid); if(!f) return;
+  const {m,u}=f;
+  CHECK={uid:uid, idx:resumeIdx(uid), steps:buildSteps(u)};
+  const mn=document.getElementById('main');
+  mn.innerHTML='<div class="stepper" id="stepper"></div><div class="cp" id="cp"></div>';
+  if(mn) mn.scrollTop=0;
+  renderCheckpoint();
+}
+
+/* ===== 多邻国式分步通关 ===== */
+function buildSteps(u){
+  const s=[{key:'watch',icon:'\uD83D\uDCFA',title:'看视频'},
+           {key:'task',icon:'\uD83D\uDCDD',title:'做任务'}];
+  if(u.deliverable&&u.deliverable.name) s.push({key:'deliv',icon:'\uD83D\uDCE6',title:'交付物'});
+  s.push({key:'settle',icon:'\uD83C\uDFC1',title:'结算'});
+  return s;
+}
+function resumeIdx(uid){
+  const st=prog.units[uid]||{};
+  const u=findUnit(uid).u;
+  const steps=buildSteps(u);
+  if(!st.watched) return 0;
+  if(!st.taskDone) return 1;
+  const di=steps.findIndex(s=>s.key==='deliv');
+  if(di>=0 && !st.delivSeen) return di;
+  return steps.length-1;
+}
+function renderStepper(){
+  const el=document.getElementById('stepper'); if(!el||!CHECK) return;
+  const pct=CHECK.steps.length>1? Math.round(CHECK.idx/(CHECK.steps.length-1)*100):0;
+  let h='';
+  CHECK.steps.forEach((s,i)=>{
+    const cls='st'+(i===CHECK.idx?' cur':'')+(i<CHECK.idx?' done':'');
+    const ck=i<CHECK.idx?'✓':'';
+    h+='<span class="'+cls+'"><span class="si">'+s.icon+'</span>'+s.title+(ck?' <span class="ck">'+ck+'</span>':'')+'</span>';
+  });
+  h+='<span class="sbar"><i style="width:'+pct+'%"></i></span>';
+  el.innerHTML=h;
+}
+function renderCheckpoint(){
+  if(!CHECK) return;
+  if(CUR){ try{CUR.stop();}catch(e){} CUR=null; }
+  const {uid}=CHECK;
+  const f=findUnit(uid); if(!f) return;
+  const {m,u}=f;
+  const step=CHECK.steps[CHECK.idx];
+  const cp=document.getElementById('cp');
+  const mins=((u.vslides||[]).reduce((a,s)=>a+Math.max(2,sub(s.n).length*0.205),0)/60).toFixed(1);
+  const ui=m.units.indexOf(u);
+  if(step.key==='watch'){
+    cp.className='cp';
+    cp.innerHTML='<div class="cp-head"><div class="cp-title">\uD83D\uDCFA 视频讲解</div>'
+      +'<div class="cp-sub">'+m.id+' · '+m.title+' · 第 '+(ui+1)+'/'+m.units.length+' 单元 · 约 '+mins+' 分钟</div></div>'
+      +'<div class="card"><h3>\uD83C\uDFAC 视频讲解</h3>'
+      +'<div class="vp"><div class="stage" id="p-stage"></div><div class="dots" id="p-dots"></div>'
+      +'<div class="cap" id="p-sub">点击播放，字幕与人声同步</div></div>'
+      +'<div class="vbar"><button class="play" id="p-play">\u25B6 播放</button>'
+      +'<div class="seek" id="p-seek"><div class="fill"></div><div class="knob"></div></div>'
+      +'<span class="time" id="p-time">0:00 / 0:00</span></div>'
+      +'<div class="aud-note" id="p-note"></div></div>'
+      +'<details class="cp-notes"><summary>\uD83D\uDCCC 本课要点（讲义）</summary>'
+      +'<div class="kv"><b>方法论：</b>'+sub(u.ppt.method)+'</div>'
+      +'<div class="kv"><b>案例：</b>'+sub(u.ppt.case)+'</div>'
+      +'<div class="kv"><b>演示要点：</b>'+sub(u.ppt.demo)+'</div></details>'
+      +'<details class="cp-notes"><summary>\uD83D\uDDDE\uFE0F 本单元怎么学</summary>'+guideCard(uid,m,u,prog.units[uid]||{})+'</details>'
+      +'<div class="cp-actions">'
+      +'<button class="btn" onclick="setWatched(\''+uid+'\')">✓ 我看完这段了，继续 →</button>'
+      +'<button class="btn ghost" onclick="openSparChat(\''+uid+'\')">\uD83E\uDD4A 边看边问 AI 陪练</button>'
+      +'</div>';
+    const aud=(AUDIO[uid]||null);
+    const note=document.getElementById('p-note');
+    if(note) note.textContent = aud? '配音：火山引擎豆包真人声（'+aud.length+' 段）' : '配音：本机语音合成';
+    CUR=makePlayer(uid,u.vslides,aud);
+  } else if(step.key==='task'){
+    cp.className='cp';
+    cp.innerHTML='<div class="cp-head"><div class="cp-title">\uD83D\uDCDD 做任务</div>'
+      +'<div class="cp-sub">'+STEP_LABEL[u.step]+'环节 · '+STEP_HINT[u.step]+'</div></div>'
+      +'<div id="act-area"></div>'
+      +'<div class="cp-actions"><button class="btn ghost" onclick="prevCheck()">← 返回看视频</button></div>';
+    renderActivity(u,uid);
+  } else if(step.key==='deliv'){
+    cp.className='cp';
+    cp.innerHTML='<div class="cp-head"><div class="cp-title">\uD83D\uDCE6 交付物与陪练</div>'
+      +'<div class="cp-sub">本单元产出物可在 WorkBuddy 里用 AI 陪练打磨，并做产出物评审（能力佐证）</div></div>'
+      +delivCard(u)
+      +'<div class="cp-actions"><button class="btn ghost" onclick="prevCheck()">← 返回</button>'
+      +'<button class="btn" onclick="setDelivSeen(\''+uid+'\')">我已了解，去结算 →</button></div>';
+  } else {
+    cp.className='cp centered settle';
+    const st=prog.units[uid]||{};
+    const nx=nextUnit(uid);
+    const score=st.score||0;
+    cp.innerHTML='<div style="font-size:40px">\uD83C\uDF89</div>'
+      +'<div class="cp-title" style="margin-top:6px">本单元通关</div>'
+      +'<div class="cp-score">+'+score+' 分</div>'
+      +'<p style="font-size:13px;color:#5b7a63">你已完成「'+sub(u.title)+'」，累计积分 '+totalXP()+' 分。</p>'
+      +doneNext(uid)
+      +'<div class="cp-actions">'
+      +(nx?'<button class="btn ok" onclick="openUnit(\''+nx.id+'\')">下一单元 '+nx.id+' →</button>':'<button class="btn ok" onclick="openUnit(\'M0U1\')">回到起点重学</button>')
+      +'<button class="btn ghost" onclick="replayUnit(\''+uid+'\')">再练一遍本单元</button></div>';
+  }
+  renderStepper();
+}
+function advCheck(){ if(!CHECK) return; if(CHECK.idx<CHECK.steps.length-1){ CHECK.idx++; renderCheckpoint(); } else { renderCheckpoint(); } }
+function prevCheck(){ if(!CHECK) return; if(CHECK.idx>0){ CHECK.idx--; renderCheckpoint(); } }
+function setWatched(uid){ const st=prog.units[uid]||{}; prog.units[uid]=Object.assign({},st,{watched:true}); saveProg(); if(CUR){try{CUR.stop();}catch(e){}CUR=null;} advCheck(); }
+function setDelivSeen(uid){ const st=prog.units[uid]||{}; prog.units[uid]=Object.assign({},st,{delivSeen:true}); saveProg(); advCheck(); }
+function totalXP(){ let s=0; for(const k in prog.units){ const u=prog.units[k]; if(u&&u.done) s+=(u.score||0); } return s; }
+function replayUnit(uid){ const st=prog.units[uid]||{}; prog.units[uid]=Object.assign({},st,{watched:false,taskDone:false,delivSeen:false,done:false,acts:{},score:0,detail:[]}); saveProg(); refreshProg(); renderSidebar(); openUnit(uid); }
+
+/* ===================== P1：可运行产出物卡片 + 真·AI 陪练（路线①） ===================== */
+function delivBadge(t){
+  const map={skill:'skill',agent:'agent',workflow:'workflow',kb:'kb'};
+  const k=map[t]||'skill';
+  return '<span class="badge '+k+'">'+(map[t]||t||'产出')+'</span>';
+}
+function delivCard(u){
+  const d=u.deliverable;
+  if(!d||typeof d!=='object') return '';
+  const uid=u.id;
+  const showTpl = d.templateText ? '<button class="btn ghost" onclick="openArt(\'tpl\',\''+uid+'\')">\uD83D\uDCCB 复制模板</button>' : '';
+  const showEx  = d.exemplarText ? '<button class="btn ghost" onclick="openArt(\'ex\',\''+uid+'\')">\uD83D\uDC1B 查看范例</button>' : '';
+  const rub = (d.rubric&&d.rubric.length)? '<div class="rub">'+d.rubric.map(r=>'<span class="chip2">'+esc(r)+'</span>').join('')+'</div>' : '';
+  return '<div class="card deliv">'
+    +'<div class="dhead">'+delivBadge(d.type)+'<span class="dname">'+esc(d.name)+'</span></div>'
+    +'<div class="dacc">验收标准：'+esc(d.acceptance||'')+'</div>'
+    +rub
+    +'<div class="dacts">'+showTpl+showEx+'<button class="btn ghost" onclick="openSparAI(\''+uid+'\')">\uD83E\uDD4A 开始真·AI 陪练</button><button class="btn ghost" onclick="openScore(\''+uid+'\')">\uD83D\uDCDD AI 打分</button></div>'
+    +'</div>';
+}
+function openArt(kind,uid){
+  const f=findUnit(uid); if(!f) return;
+  const d=f.u.deliverable; if(!d) return;
+  const text = kind==='tpl'? d.templateText : d.exemplarText;
+  const title = kind==='tpl'? ('模板 · '+d.name) : ('范例 · '+d.name);
+  const box=document.getElementById('art-box');
+  box.innerHTML='<h3 style="text-align:left">'+esc(title)+'</h3>'
+    +'<div class="art-body">'+esc(text||'（内容缺失）')+'</div>'
+    +'<div class="acts"><button class="btn" onclick="copyArt(\''+kind+'\',\''+uid+'\')">\uD83D\uDCCB 复制全文</button><button class="btn ghost" onclick="closeArt()">关闭</button></div>';
+  document.getElementById('art-modal').classList.add('on');
+}
+function copyArt(kind,uid){
+  const f=findUnit(uid); if(!f) return;
+  const d=f.u.deliverable;
+  copyText(kind==='tpl'? d.templateText : d.exemplarText);
+}
+function closeArt(){ document.getElementById('art-modal').classList.remove('on'); }
+function buildSparPrompt(u,m,d){
+  const STEP_LABEL={understand:'理解',demo:'演示',practice:'我要做',spar:'陪练'};
+  const stepLabel=STEP_LABEL[u.step]||u.step||'学习';
+  const dims=(m.dims&&m.dims.length)? m.dims.join('、') : 'AI 通用能力';
+  let rub=(d&&d.rubric&&d.rubric.length)? d.rubric.join('、')
+        : (u.rubric? (Array.isArray(u.rubric)? u.rubric.join('、') : u.rubric) : '完整性、可用性、红线合规');
+  const acc=(d&&d.acceptance)? d.acceptance : '产出可独立带回工作使用';
+  const tpl=(d&&d.templateText)? d.templateText : (u.template||'（本单元无特定模板）');
+  const ex=(d&&d.exemplarText)? d.exemplarText : '（暂无范例）';
+  const brief=(u.brief||'').slice(0,600);
+  const task=(u.task||'').slice(0,400);
+  const dn=(d? (d.type+' —— 《'+d.name+'》') : '本单元产出');
+  const L=[];
+  L.push('# 角色');
+  L.push('你是「AIDAX 金融×PM 课程 · '+m.title+' ·（'+stepLabel+'环节）《'+u.title+'》」的专属 AI 陪练（资深带教导师）。');
+  L.push('学员正在学习，并要亲手产出：'+dn+'。');
+  L.push('');
+  L.push('# 你的使命');
+  L.push('用苏格拉底式引导，帮助学员**自己**把这份产出做出来，而不是替他写。最终学员的产出要能对照下方验收标准打到「通过」。');
+  L.push('');
+  L.push('# 学员背景（本单元）');
+  L.push('- 行业：金融；岗位：产品经理(PM)');
+  L.push('- 能力维度：'+dims);
+  if(brief) L.push('- 单元要点：'+brief);
+  if(task)  L.push('- 本单元任务：'+task);
+  L.push('- 产出模板（引导学员按此结构填）：见「模板」');
+  L.push('- 合格范例（仅作对照，禁止直接给学员照搬）：见「范例」');
+  L.push('');
+  L.push('# 陪练工作流');
+  L.push('1. 先澄清：问学员当前理解、卡点（一次只问一个关键问题）。');
+  L.push('2. 带拆解：把《'+(d?d.name:'本单元产出')+'》拆成 3–5 个可执行子任务，先让学员说思路。');
+  L.push('3. 让动手：要求学员产出具体段落/字段，不接受泛泛而谈。');
+  L.push('4. 评与改：对照验收标准与 rubric 给 0–100 分 + Top3 改进项，明确「通过 / 待改进」。');
+  L.push('5. 通关：达标后总结这份产出可直接带回工作用的要点。');
+  L.push('');
+  L.push('# 评分标准（rubric）');
+  L.push(rub);
+  L.push('');
+  L.push('# 验收标准');
+  L.push(acc);
+  L.push('');
+  L.push('# 模板');
+  L.push(tpl);
+  L.push('');
+  L.push('# 范例（仅作对照，禁止直接照搬给学员）');
+  L.push(ex);
+  L.push('');
+  L.push('# 红线（必须遵守）');
+  L.push('- 金融合规/风控/放款/营销适当性等结论必须由人拍板，你不替用户下定性业务结论。');
+  L.push('- 不编造监管条款、文件号、数据；不确定的明说"需人工核实"。');
+  L.push('- 不回显任何可识别个人数据，不生成误导性金融建议。');
+  L.push('- 全程中文，语气像资深带教导师，给具体、可执行的反馈。');
+  return L.join('\n');
+}
+function openSparAI(uid){
+  const f=findUnit(uid); if(!f) return;
+  const m=f.m, u=f.u, d=u.deliverable||null;
+  const prompt=buildSparPrompt(u,m,d);
+  window.__sparPrompt=prompt;
+  copyText(prompt); // 进入即自动复制
+  const box=document.getElementById('art-box');
+  box.innerHTML='<h3 style="text-align:left">\uD83E\uDD4A 真·AI 陪练（路线① · 零后端）</h3>'
+    +'<p style="text-align:left;color:var(--muted)">陪练指令已自动复制到剪贴板 ✓。去 WorkBuddy 新建对话 → 把指令粘贴为系统设定 → 把你的产出贴给它即可开练。下方可查看 / 再复制完整指令。</p>'
+    +'<div class="art-body">'+esc(prompt)+'</div>'
+    +'<div class="acts">'
+      +'<button class="btn" onclick="copyText(window.__sparPrompt)">\uD83D\uDCCB 再复制一次</button>'
+      +'<button class="btn ghost" onclick="launchWorkBuddy()">打开 WorkBuddy</button>'
+      +'<button class="btn ghost" onclick="closeArt()">关闭</button>'
+    +'</div>';
+  document.getElementById('art-modal').classList.add('on');
+}
+function launchWorkBuddy(){
+  // 同步唤起，确保在用户手势内：先开网页版（可手动粘贴），再尝试客户端 scheme
+  try{ window.open('https://www.workbuddy.cn/','_blank'); }catch(e){}
+  try{ const a=document.createElement('a'); a.href='workbuddy://new'; a.style.display='none'; document.body.appendChild(a); a.click(); a.remove(); }catch(e){}
+  toast('已打开 WorkBuddy，指令在剪贴板，去粘贴即可');
+}
+/* ===================== P3：产出物评审 · AI 打分（路线①·零后端） ===================== */
+function buildScorePrompt(d, learnerText){
+  const name=(d&&d.name)? d.name : '结业产出物';
+  const type=(d&&d.type)? d.type : 'artifact';
+  const rub=(d&&d.rubric&&d.rubric.length)? d.rubric.join('、') : '完整性、可用性、合规';
+  const acc=(d&&d.acceptance)? d.acceptance : '产出可独立带回工作使用';
+  const tpl=(d&&d.templateText)? d.templateText : '（无特定模板）';
+  const ex =(d&&d.exemplarText)? d.exemplarText : '（暂无范例）';
+  const L=[];
+  L.push('# 角色');
+  L.push('你是「金融×PM 课程 · 产出物评审官」。你负责按统一三维 rubric 评审学员产出的 '+type+'：《'+name+'》。只评审、不代写。');
+  L.push('');
+  L.push('# 评审任务');
+  L.push('下面是一份学员提交的产出物。请严格按三维 rubric 打分并给改进建议，不要替学员重写，只指出该怎么改。');
+  L.push('');
+  L.push('# 三维 rubric（每项先给 0–100 子分，再给综合分）');
+  L.push('- 完整性：是否覆盖《'+name+'》应含的关键结构与要素（对照下方模板 / 范例）。');
+  L.push('- 可用性：学员拿到后能否真正用于工作（可落地、可执行、无空洞、贴合金融 PM 实际场景）。');
+  L.push('- 合规：是否触碰金融红线（数据出域、替人下结论、编造监管条款 / 文件号、给出误导性金融建议）；如有必须明确指出。');
+  L.push('');
+  L.push('# 评分标准');
+  L.push(rub);
+  L.push('');
+  L.push('# 验收标准');
+  L.push(acc);
+  L.push('');
+  L.push('# 期望模板（评审时对照结构）');
+  L.push(tpl);
+  L.push('');
+  L.push('# 合格范例（仅作结构对照，不要要求学员照抄）');
+  L.push(ex);
+  L.push('');
+  L.push('# 学员提交的产出物');
+  L.push('```');
+  L.push(learnerText);
+  L.push('```');
+  L.push('');
+  L.push('# 输出格式（必须照此返回）');
+  L.push('1. 三维子分：完整性 X / 可用性 Y / 合规 Z（各 0–100）');
+  L.push('2. 综合分：N / 100');
+  L.push('3. 结论：通过 / 待改进（综合 ≥ 60 为通过）');
+  L.push('4. Top3 改进项（具体、可操作，指向能改的地方）');
+  L.push('5. 一句话点评');
+  return L.join('\n');
+}
+function openScore(uid){
+  let d=null, name='', key='capstone';
+  if(uid && uid!=='capstone'){
+    const f=findUnit(uid); if(!f||!f.u.deliverable){ toast('该单元无产出物'); return; }
+    d=f.u.deliverable; name=d.name; key='u_'+uid;
+  } else {
+    d={ type:'artifact', name:'结业产出物（自选 skill / agent / workflow / kb）',
+        rubric:['完整性','可用性','合规'],
+        acceptance:'学员能运用课程方法，独立产出一份可带回工作使用的 AI 产物。',
+        templateText:'（按你选择的产物类型，对照课程中各模块模板）',
+        exemplarText:'（参考课程中各模块范例）' };
+    name='结业产出物'; key='capstone';
+  }
+  window.__scoreCtx={uid:uid,d:d,name:name,key:key};
+  const prev=(prog.scores&&prog.scores[key]!=null)? ('当前已记录 '+prog.scores[key]+' 分') : '';
+  const rub=(d.rubric&&d.rubric.length)? '<div class="rub" style="text-align:left">'+d.rubric.map(r=>'<span class="chip2">'+esc(r)+'</span>').join('')+'</div>' : '';
+  const box=document.getElementById('art-box');
+  box.innerHTML='<h3 style="text-align:left">\uD83D\uDCDD 产出物评审 · AI 打分（路线①·零后端）</h3>'
+    +'<p style="text-align:left;color:var(--muted)">把你的成品粘贴到下方 → 点「生成评审指令」→ 复制到 WorkBuddy 新会话、把产出贴给它，即得三维 rubric 打分 + 改进建议（本环节为选学·不计权重，仅作能力佐证）。</p>'
+    +rub
+    +'<textarea id="score-ta" class="score-ta" placeholder="在此粘贴你构建的 skill / agent / workflow / kb 文本…"></textarea>'
+    +'<div class="acts"><button class="btn" onclick="genScore()">\uD83D\uDCCB 生成评审指令（路线①）</button><button class="btn ghost" onclick="closeArt()">关闭</button></div>'
+    +'<hr style="margin:14px 0;border:none;border-top:1px solid #eef1f6">'
+    +'<div class="kv" style="text-align:left">回填分数：把 WorkBuddy 给的 0–100 分填这里，仅作能力佐证、不计权重'+(prev?'（'+prev+'）':'')+'</div>'
+    +'<div class="acts"><input id="score-back" type="number" min="0" max="100" placeholder="0–100" class="score-inp"><button class="btn ghost" onclick="saveScore()">保存分数到学习档案</button></div>'
+    +'<div id="score-saved" class="tip"></div>';
+  document.getElementById('art-modal').classList.add('on');
+}
+function genScore(){
+  const ta=document.getElementById('score-ta');
+  const text=(ta&&ta.value||'').trim();
+  const ctx=window.__scoreCtx; if(!ctx) return;
+  if(!text){ toast('请先粘贴你的产出物'); return; }
+  const prompt=buildScorePrompt(ctx.d, text);
+  copyText(prompt);
+  toast('评审指令已复制，去 WorkBuddy 粘贴');
+  launchWorkBuddy();
+}
+function saveScore(){
+  const inp=document.getElementById('score-back');
+  const ctx=window.__scoreCtx; if(!ctx) return;
+  const v=parseInt((inp&&inp.value)||'',10);
+  if(isNaN(v)||v<0||v>100){ toast('请填 0–100 的整数'); return; }
+  prog.scores=prog.scores||{};
+  prog.scores[ctx.key]=v;
+  saveProg(); refreshProg();
+  const el=document.getElementById('score-saved');
+  if(el) el.innerHTML='\u2705 已记录 '+v+' 分（'+(ctx.name||'产出物')+'），可在学习档案查看。';
+}
+
+function copyText(t){
+  if(!t) return;
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(t).then(()=>toast('已复制到剪贴板'),()=>fallbackCopy(t));
+  } else fallbackCopy(t);
+}
+function fallbackCopy(t){
+  const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); toast('已复制'); }catch(e){ toast('复制失败，请手动选择'); }
+  document.body.removeChild(ta);
+}
+let _toastT=null;
+function toast(msg){
+  let el=document.getElementById('toast');
+  if(!el){ el=document.createElement('div'); el.id='toast'; el.style.cssText='position:fixed;left:50%;bottom:32px;transform:translateX(-50%);background:#0f172a;color:#fff;padding:9px 16px;border-radius:10px;font-size:13px;z-index:200;opacity:0;transition:.2s'; document.body.appendChild(el); }
+  el.textContent=msg; el.style.opacity='1';
+  clearTimeout(_toastT); _toastT=setTimeout(()=>el.style.opacity='0',1600);
+}
+
+/* ---------- 问题 2：视频下方立刻给题 ---------- */
+function inlinePractice(u,uid){
+  const adminNote = ADMIN ? '<div style="margin:8px 0;font-size:12.5px;color:#1a5cff;background:#eef3ff;padding:8px 10px;border-radius:8px">🔓 管理员预览：本单元视频可直接观看，下方练习 / 模板 / 评分要点均为可选，无需完成。</div>' : '';
+  const tpl = u.template ? ('<details><summary>\uD83D\uDCCB 展开填写模板（照着填，不用从零想）</summary><div class="tpl">'+esc(sub(u.template))+'</div></details>') : '';
+  const rub = (u.rubric&&u.rubric.length)? ('<details><summary>\uD83C\uDFAF 评分要点（做完自检一遍）</summary><ul class="rub">'+u.rubric.map(r=>'<li>'+esc(r)+'</li>').join('')+'</ul></details>') : '';
+  return '<div class="card ip"><h3>\uD83D\uDCDD 看完就练 · 本单元题目 <span class="bd">'+STEP_LABEL[u.step]+'环节</span></h3>'
+    + '<div class="ip-task">'+esc(sub(u.task||'完成本单元练习'))+'</div>'
+    + '<div class="brief">'+esc(sub(u.brief||''))+'</div>'
+    + tpl + rub
+    + '<button class="btn" onclick="gotoAct()">开始作答 \u2193</button>'
+    + '<button class="btn ghost" onclick="document.getElementById(\'p-play\').click()">先看视频再答</button>'
+    + adminNote
+    + '</div>';
+}
+function gotoAct(){
+  const a=document.getElementById('act-area');
+  if(a){ a.scrollIntoView({behavior:'smooth',block:'start'});
+    setTimeout(()=>{ const t=document.querySelector('#act-area textarea'); if(t) t.focus(); },420); }
+}
+function navBar(pv,nx,uid){
+  return '<div class="card" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'
+   +(pv?'<button class="btn ghost" onclick="openUnit(\''+pv.id+'\')">\u2190 上一单元 '+pv.id+'</button>':'')
+   +(nx?'<button class="btn" onclick="openUnit(\''+nx.id+'\')">下一单元 '+nx.id+' \u2192</button>':'')
+   +'<span style="font-size:12.5px;color:var(--mut);margin-left:auto">本单元编号 '+uid+'</span></div>';
+}
+function doneCard(st,uid){
+  const nx=nextUnit(uid);
+  const det=(st.detail||[]).map(d=>'<li class="'+(d.ok?'ok':'')+'">'+esc(d.k)+(d.ok?'':' <span class="hint">（'+esc(d.hint||'')+'）</span>')+'</li>').join('');
+  return '<div class="done-card"><h3>\u2705 本单元通关</h3>'
+    +'<div class="cp-score">'+(st.score||'\u2014')+' 分</div>'
+    +'<p style="font-size:13px;color:#5b7a63;margin-bottom:8px">你已完成「'+sub(findUnit(uid).u.title)+'」，可继续下一单元。</p>'
+    + doneNext(uid)
+    +(det?('<ul class="rub" style="text-align:left;max-width:520px;margin:0 auto 10px">'+det+'</ul>'):'')
+    +'<div class="acts"><button class="btn ok" onclick="openUnit(\''+(nx?nx.id:uid)+'\')">'+(nx?'下一单元 '+(nx.id)+' \u2192':'回到起点重练')+'</button>'
+    +'<button class="btn ghost" onclick="openUnit(\''+uid+'\')">再练一遍本单元</button></div></div>';
+}
+
+/* ===================== 播放器（字幕与真人声对齐；高亮讲到才闪三下） ===================== */
+function makePlayer(uid, slides, aud){
+  const stage=document.getElementById('p-stage'), subEl=document.getElementById('p-sub'), dots=document.getElementById('p-dots'),
+        seek=document.getElementById('p-seek'), timeEl=document.getElementById('p-time'), playBtn=document.getElementById('p-play');
+  let cur=0, playing=false, mode=null, audio=null, ttsTimer=null, ttsPulse=null, ttsStart=0, pulsedIdx=-1, ttsGuard=null;
+  slides = (slides && slides.length) ? slides : [];
+  if (!slides.length) {
+    /* 无视频讲解（演示 / 实操 / 陪练类单元）：渲染文字占位，避免空播放器与 TTS 崩溃 */
+    try {
+      if (stage) stage.innerHTML = '<div class="slide on" style="padding:18px"><h4 style="color:#fff">本节为实操 / 演示讲解</h4><p style="color:#cbd5e1;font-size:14px;line-height:1.8">本单元不依赖视频，直接展开下方「做任务」即可。讲解要点（方法论 / 案例 / 演示要点）见上方讲义。</p></div>';
+      if (subEl) subEl.textContent = '本节无需视频讲解';
+      if (dots) dots.innerHTML = '';
+      if (seek) { const f = seek.querySelector('.fill'); if (f) f.style.width = '100%'; }
+      if (timeEl) timeEl.textContent = '—';
+      if (playBtn) { playBtn.textContent = '本节无视频'; playBtn.disabled = true; }
+    } catch (e) {}
+    return { stop: function () {}, play: function () {} };
+  }
+  const dur=slides.map(s=>Math.max(2, sub(s.n).length*0.205)); /* 0.205 s/字 = 豆包实测 4.9 字/秒 */
+  const fmt=t=>{t=Math.max(0,t);const m=Math.floor(t/60),s=Math.floor(t%60);return m+':'+(s<10?'0':'')+s;};
+  const total=()=>dur.reduce((a,b)=>a+b,0);
+  function linesOf(i){ const n=sub(slides[i].n); return n.split(/(?<=[。！？；\n])/).map(x=>x.trim()).filter(Boolean); }
+  function setCaption(i,frac){
+    const n=sub(slides[i].n), ls=linesOf(i), spoken=frac*Math.max(1,n.length);
+    let acc=0,k=0;
+    for(let x=0;x<ls.length;x++){ acc+=ls[x].length; if(spoken<acc){k=x;break;} k=x; }
+    subEl.textContent=ls[k];
+  }
+  function updateSeek(){
+    let start=0; for(let k=0;k<cur;k++) start+=dur[k];
+    let local=0,d=dur[cur]||1;
+    if(mode==='audio'&&audio){ local=audio.currentTime; d=audio.duration||d; }
+    else if(mode==='tts'){ local=(performance.now()-ttsStart)/1000; }
+    const g=start+Math.min(local,d), frac=total()?g/total():0;
+    seek.querySelector('.fill').style.width=(frac*100)+'%';
+    seek.querySelector('.knob').style.left=(frac*100)+'%';
+    timeEl.textContent=fmt(g)+' / '+fmt(total());
+  }
+  function pulseNow(){
+    const s=stage.querySelectorAll('.slide')[cur]; if(!s) return;
+    const h=s.querySelector('.hl'); if(!h) return;
+    h.classList.remove('pulse'); void h.offsetWidth; h.classList.add('pulse');
+    setTimeout(()=>h.classList.remove('pulse'),2600);
+  }
+  function maybePulse(i,frac){ if(pulsedIdx!==i && frac>=0.34){ pulsedIdx=i; pulseNow(); } }
+  function render(){
+    stage.innerHTML=''; dots.innerHTML='';
+    slides.forEach((s,i)=>{
+      const d=document.createElement('div'); d.className='slide'+(i===cur?' on':'');
+      d.innerHTML='<h4>'+sub(s.t)+'</h4>'+sub(s.s);
+      stage.appendChild(d);
+      const dot=document.createElement('i'); if(i===cur)dot.className='on'; dots.appendChild(dot);
+    });
+  }
+  /* 完全无语音环境：按估算时长滚筒式推进，保证画面一定会走 */
+  function clockSlide(i){
+    mode='tts'; ttsStart=performance.now();
+    setCaption(i,0); updateSeek();
+    clearInterval(ttsTimer); ttsTimer=setInterval(updateSeek,200);
+    clearInterval(ttsPulse); ttsPulse=setInterval(()=>{ maybePulse(i,(performance.now()-ttsStart)/1000/(dur[i]||1)); },150);
+    clearTimeout(ttsGuard);
+    ttsGuard=setTimeout(()=>{ if(playing&&mode==='tts'&&cur===i) advance(); }, Math.round((dur[i]+1)*1000));
+  }
+  function ttsSlide(i){
+    var sup=true;
+    try{ sup=!!(typeof speechSynthesis!=='undefined'&&typeof SpeechSynthesisUtterance!=='undefined'); }catch(e){ sup=false; }
+    if(!sup){ clockSlide(i); return; }
+    var u2;
+    try{ u2=new SpeechSynthesisUtterance(sub(slides[i].n)); }catch(e){ clockSlide(i); return; }
+    mode='tts'; ttsStart=performance.now();
+    u2.lang='zh-CN'; u2.rate=1;
+    u2.onboundary=e=>{ const n=sub(slides[i].n), before=n.slice(0,e.charIndex); let acc=0,k=0;
+      for(let x=0;x<linesOf(i).length;x++){ acc+=linesOf(i)[x].length; if(before.length<acc){k=x;break;} k=x; }
+      const f=before.length/Math.max(1,n.length); setCaption(i,f); maybePulse(i,f); updateSeek(); };
+    u2.onend=()=>{ if(playing) advance(); };
+    try{ speechSynthesis.cancel(); speechSynthesis.speak(u2); }catch(e){ clockSlide(i); return; }
+    setCaption(i,0); updateSeek();
+    clearInterval(ttsTimer); ttsTimer=setInterval(updateSeek,200);
+    clearInterval(ttsPulse); ttsPulse=setInterval(()=>{ maybePulse(i,(performance.now()-ttsStart)/1000/(dur[i]||1)); },150);
+    /* 语音静默失败兜底：到估算时长还没在播报，就自动翻页，避免永久卡住 */
+    clearTimeout(ttsGuard);
+    ttsGuard=setTimeout(()=>{
+      if(!playing||mode!=='tts'||cur!==i) return;
+      let sp=false; try{ sp=!!(speechSynthesis.speaking||speechSynthesis.pending); }catch(e){}
+      if(!sp) advance();
+    }, Math.round((dur[i]+1.5)*1000));
+  }
+  function playSlide(i){
+    cur=i; render(); pulsedIdx=-1; clearInterval(ttsPulse); clearTimeout(ttsGuard);
+    if(aud&&aud[i]){
+      mode='audio'; audio=new Audio(aud[i]);
+      audio.onloadedmetadata=()=>{ if(audio.duration) dur[i]=audio.duration; updateSeek(); };
+      audio.onended=()=>{ if(playing) advance(); };
+      audio.ontimeupdate=()=>{ if(mode==='audio'){ const f=(audio.currentTime)/(audio.duration||dur[i]); setCaption(i,f); maybePulse(i,f); updateSeek(); } };
+      /* 音频真的加载不出来时降级本机语音，绝不静默跳过（静默跳过会表现为「点了没反应」） */
+      audio.onerror=()=>{ if(playing&&mode==='audio'){ try{audio.pause();}catch(e){} ttsSlide(i); } };
+      const pr=audio.play();
+      if(pr&&pr.catch) pr.catch(()=>{ if(playing&&mode==='audio'&&!(audio.duration>0)) ttsSlide(i); });
+      setCaption(i,0); updateSeek();
+    }else{ ttsSlide(i); }
+  }
+  function advance(){ const ni=cur+1; if(ni>=slides.length){ stop(); subEl.textContent='本节讲解结束，可继续下方环节活动'; return; } playSlide(ni); }
+  function stop(){ playing=false; if(audio){try{audio.pause();}catch(e){}} try{speechSynthesis.cancel();}catch(e){} clearInterval(ttsTimer); clearInterval(ttsPulse); clearTimeout(ttsGuard); if(playBtn) playBtn.textContent='\u25B6 播放'; }
+  function play(){ if(playing){ stop(); return; } playing=true; if(playBtn) playBtn.textContent='\u23F8 暂停'; playSlide(cur<0?0:cur); }
+  playBtn.onclick=play;
+  seek.addEventListener('pointerdown',ev=>{
+    const r=seek.getBoundingClientRect(); let frac=Math.min(1,Math.max(0,(ev.clientX-r.left)/r.width));
+    let g=frac*total(),acc=0,idx=0;
+    for(let k=0;k<slides.length;k++){ if(acc+dur[k]>g){idx=k;break;} acc+=dur[k]; idx=k; }
+    stop(); playSlide(idx);
+    if(mode==='audio'&&audio) audio.currentTime=Math.min(g-acc,(audio.duration||dur[idx])-0.05);
+    updateSeek();
+  });
+  render();   /* 进入单元先渲染第一页，避免一片黑让人误以为播放器坏了 */
+  updateSeek();
+  return {stop:stop, play:play};
+}
+
+/* ===================== 环节活动 ===================== */
+let flow={tries:0,best:0,boundary:false};
+let sparHist=[];
+let sparBusy=false;
+function renderActivity(u,uid){
+  const box=document.getElementById('act-area'); if(!box) return;
+  flow={tries:0,best:0,boundary:false}; sparHist=[];
+  const adminNote = ADMIN ? '<div style="margin-bottom:10px;font-size:12.5px;color:#1a5cff;background:#eef3ff;padding:8px 10px;border-radius:8px">🔓 管理员预览模式：练习 / 陪练 / 测验均为可选，无需完成即可观看视频并标记已观看。</div>' : '';
+  const taskBox='<div class="ip-task">'+esc(sub(u.task||''))+'</div>';
+  if(u.step==='understand'){
+    const bank=(typeof QUIZ_BANK!=='undefined' && QUIZ_BANK[uid]) ? QUIZ_BANK[uid] : null;
+    let qzHtml='';
+    if(bank&&bank.length){
+      qzHtml='<div class="qz-bank" style="margin-top:10px">'
+        +'<div style="font-size:13px;color:var(--mut);margin-bottom:8px">本单元练习 · 共 '+bank.length+' 题（答对 '+Math.ceil(bank.length*0.8)+' 题才可进入下一步）</div>';
+      bank.forEach(function(it,i){
+        qzHtml+='<div class="qz-item" id="qzb'+i+'"><div class="q">'+(i+1)+'. '+esc(sub(it.q))+'</div>'
+          + it.opts.map(function(o,j){
+              const picked=((actsOf(uid).qzPick||{})[i]===j);
+              return '<div class="op'+(picked?' sel':'')+'" onclick="pickBankQ(\''+uid+'\','+i+','+j+')">'+esc(o)+'</div>';
+            }).join('')
+          +'<div class="tip" id="qzb-tip'+i+'" style="display:'+(typeof (actsOf(uid).qzPick||{})[i]==='number'?'block':'none')+'">'+esc(it.why||'')+'</div></div>';
+      });
+      qzHtml+='</div>';
+    } else {
+      qzHtml='<div class="qz-item" style="margin-top:10px"><div class="q">关于「'+sub(u.title)+'」，下面哪个说法最准确？</div>'
+        +[ 'AI 可以替你完成全部判断', 'AI 负责补结构与措辞，判断与取舍必须由你定', '只要用了 AI 就一定合规', 'AI 输出可以直接当定稿发布' ]
+          .map((o,i)=>'<div class="op" id="uop'+i+'" onclick="pickUnderstand(this,'+i+')">'+o+'</div>').join('')
+        +'<div class="tip" id="u-tip"></div></div>';
+    }
+    box.innerHTML=adminNote+'<div class="card"><h3>\uD83D\uDCD8 理解环节 · 自检</h3>'
+      + taskBox
+      + '<details><summary>\uD83D\uDCCB 展开填写模板</summary><div class="tpl">'+esc(sub(u.template||''))+'</div></details>'
+      + qzHtml
+      +'<div style="margin-top:12px"><h4 style="font-size:13.5px;margin-bottom:6px">按模板写下你的收获（这一项计入得分）</h4>'
+      +'<textarea id="u-note" placeholder="1) 本单元我记住的一个结论：&#10;2) 它能用在我手头的哪件事上：&#10;3) 我还不确定、需要再查的："></textarea></div>'
+      +'<div id="u-score"></div>'
+      +'<button class="btn" onclick="submitTask(\''+uid+'\')">提交并结算本单元</button></div>';
+    /* 回填已选答案的样式 */
+    const pk=(actsOf(uid).qzPick||{});
+    Object.keys(pk).forEach(function(i){
+      const wrap=document.getElementById('qzb'+i); if(!wrap) return;
+      const ops=wrap.querySelectorAll('.op'); const right=(QUIZ_BANK[uid]&&QUIZ_BANK[uid][i])?QUIZ_BANK[uid][i].a:-1;
+      ops.forEach(function(el,j){ if(j===right) el.classList.add('right'); else if(pk[i]===j) el.classList.add('wrong'); });
+    });
+    const n=document.getElementById('u-note');
+    if(n){ n.value=(actsOf(uid).note||''); n.addEventListener('input',()=>{ setAct(uid,'note',n.value); previewScore(uid,'u-score'); }); }
+  } else if(u.step==='demo'){
+    box.innerHTML=adminNote+'<div class="card"><h3>\uD83D\uDEE0 演示环节 · 在 WorkBuddy 里跑一遍</h3>'
+      + taskBox
+      + '<details open><summary>\uD83D\uDCCB 展开填写模板</summary><div class="tpl">'+esc(sub(u.template||''))+'</div></details>'
+      +'<div style="margin-top:10px"><h4 style="font-size:13.5px;margin-bottom:6px">提示词（可直接复制到 WorkBuddy 使用）</h4>'
+      +'<textarea id="p-text">'+esc(sub(u.demoScript.prompt))+'</textarea></div>'
+      +'<button class="btn" onclick="copyPrompt()">复制提示词</button>'
+      +'<button class="btn ghost" onclick="runWb(\''+uid+'\')">用模型跑一遍</button>'
+      +'<div id="wb-out" style="margin-top:10px"></div>'
+      +'<div style="margin-top:14px"><h4 style="font-size:13.5px;margin-bottom:6px">演示记录（这一项计入得分）</h4>'
+      +'<textarea id="demo-rec" placeholder="把上面模板的 4 小节贴进来：我用的提示词 / 哪里可用哪里不可用 / 我做了哪些人工修正 / 下次复用的固定句式"></textarea></div>'
+      +'<label style="display:block;font-size:13px;margin:8px 0"><input type="checkbox" id="demo-check"> 我已人工核对过模型结果，清楚哪一步必须由人接手</label>'
+      +'<div id="demo-score"></div>'
+      +'<button class="btn" onclick="submitTask(\''+uid+'\')">提交并结算本单元</button></div>';
+    const r=document.getElementById('demo-rec');
+    if(r){ r.addEventListener('input',()=>{ setAct(uid,'rec',r.value); previewScore(uid,'demo-score'); }); }
+    const c=document.getElementById('demo-check');
+    if(c){ c.addEventListener('change',()=>{ setAct(uid,'checked',c.checked?1:0); previewScore(uid,'demo-score'); }); }
+  } else if(u.step==='todo'){
+    box.innerHTML=adminNote+'<div class="card"><h3>\u270D 我要做 · 产出你的交付物</h3>'
+      + taskBox
+      + '<div class="brief">'+esc(sub(u.brief||''))+'</div>'
+      + '<details open><summary>\uD83D\uDCCB 填写模板（照着每一节填，别从零开始）</summary><div class="tpl">'+esc(sub(u.template||''))+'</div></details>'
+      + ((u.rubric&&u.rubric.length)?'<details><summary>\uD83C\uDFAF 评分要点</summary><ul class="rub">'+u.rubric.map(r=>'<li>'+esc(r)+'</li>').join('')+'</ul></details>':'')
+      +'<div style="margin-top:10px"><h4 style="font-size:13.5px;margin-bottom:6px">把你的产出粘贴进来</h4>'
+      +'<textarea id="work-text" style="min-height:150px" placeholder="按模板逐节写。评分会检查：结构是否完整、有没有具体数字/来源、有没有风险意识、有没有责任人与时间。"></textarea></div>'
+      +'<div id="work-out"></div>'
+      +'<button class="btn" onclick="gradeWork(\''+uid+'\')">提交并自动评分</button>'
+      +'<button class="btn ghost" onclick="previewScore(\''+uid+'\',\'work-out\')">先看看能得多少分</button></div>';
+    const t=document.getElementById('work-text');
+    if(t){ t.addEventListener('input',()=>{ setAct(uid,'work',t.value); previewScore(uid,'work-out'); }); }
+  } else if(u.step==='spar'){
+    box.innerHTML=adminNote+'<div class="card"><h3>\uD83E\uDD4A 陪练环节 · '+esc(sub(u.spar.role))+'</h3>'
+      + taskBox
+      + '<div class="brief">'+esc(sub(u.brief||''))+'</div>'
+      + '<details><summary>\uD83D\uDCCB 展开回答结构模板</summary><div class="tpl">'+esc(sub(u.template||''))+'</div></details>'
+      +'<div class="qs"><span style="font-size:12.5px;color:var(--mut);align-self:center">模拟对方追问：</span>'
+      + u.spar.mustAsk.map((q,i)=>'<button class="qbtn" onclick="askQ('+i+')">'+esc(sub(q).slice(0,16))+'\u2026</button>').join('')+'</div>'
+      +'<div class="chat" id="chat"></div>'
+      +'<textarea id="spar-text" placeholder="先给结论，再给依据，最后说取舍与边界。回车发送（Shift+回车换行）"></textarea>'
+      +'<button class="btn" onclick="sendSpar()">发送</button>'
+      +'<button class="btn ghost" onclick="askQ(-1)">让陪练先开题</button>'
+      +'<button class="btn ghost" onclick="openSparAI(\''+uid+'\')">\uD83E\uDD4A 开始真·AI 陪练（路线①）</button>'
+      +'<button class="btn ghost" onclick="submitTask(\''+uid+'\')">结束陪练并结算</button>'
+      +'<div id="spar-out"></div></div>';
+    addBubble('ai','（'+sub(u.spar.role)+'）'+sub(u.spar.mustAsk[0]));
+    bindEnter('spar-text',()=>sendSpar());
+  }
+}
+
+/* ---------- 问题 3：分数由行为算出来，点按钮不能凭空拿分 ---------- */
+function actsOf(uid){ return (prog.units[uid]&&prog.units[uid].acts)||{}; }
+function setAct(uid,k,v){
+  const st=prog.units[uid]||{}; const a=Object.assign({},st.acts||{});
+  a[k]=v; prog.units[uid]=Object.assign({},st,{acts:a}); saveProg();
+}
+const BOUNDARY_RE=/不确定|待确认|留给|由.{1,6}(判断|决定|确认)|需要.{0,4}确认|不能替|边界|存疑|风险|我会补|降级/;
+const EVID_RE=/[0-9０-９]|数据|口径|来源|条款|原文|看板|访谈|样本|比例|百分比|%|频次|制度|办法|规则/;
+const PLAN_RE=/责任人|负责人|时间|节点|下周|本周|月底|排期|截止|owner|上线|交付|deadline/i;
+
+function computeUnit(uid){
+  const f=findUnit(uid); if(!f) return {ok:false,score:0,detail:[],need:'单元不存在'};
+  const u=f.u, a=actsOf(uid), R=[]; let s=0, need='';
+  if(u.step==='understand'){
+    const b=bankOf(uid);
+    if(b){
+      const bc=bankCorrect(uid);
+      const pass=Math.ceil(b.length*0.8);
+      const qzScore=Math.round(60*bc.n/b.length);
+      s+=qzScore;
+      R.push({k:'练习答对 '+bc.n+'/'+bc.total+'（需 ≥'+pass+'）',ok:bc.n>=pass,hint:'答错的题看解析后重选，选对为止'});
+      if(bc.n<pass) need='练习题至少要答对 '+pass+' 题（当前 '+bc.n+' 题）';
+    } else {
+      const q=!!a.quiz;
+      s+=q?60:0;
+      R.push({k:'自检题答对',ok:q,hint:'答案落在「AI 补结构与措辞、判断与取舍留给人」这条线上'});
+      if(!q) need='先答对上面的自检题';
+    }
+    const nr=scoreNoteText(a.note||'');
+    s+=nr.score;
+    nr.detail.forEach(function(d){ R.push(d); });
+    if(!need && nr.score<20) need='收获要写具体：说清能用在你的哪个项目/指标上，并写出下一步要验证什么';
+  } else if(u.step==='demo'){
+    const ran=!!a.ran, rec=(a.rec||'').trim(), chk=!!a.checked;
+    /* 演示记录按质量判，不看字数：可用/不可用 + 人工修正 + 可复用句式，三要素 */
+    const usable=/(可用|能用|直接用|采纳|保留|没问题|符合预期|准确)/.test(rec);
+    const unusable=/(不可用|不能采信|不对|有误|编造|幻觉|偏差|失真|要改|需人工|不采纳|错误)/.test(rec);
+    const fixed=/(我改了|修正|调整|补充|人工核对|复核|替换|删掉|重写|改成)/.test(rec);
+    const reuse=/(以后|下次|复用|固定句式|模板化|沉淀|通用|以后都)/.test(rec);
+    const recScore=(usable?12:0)+(unusable?14:0)+(fixed?12:0)+(reuse?12:0);
+    R.push({k:'跑通一遍（复制提示词或用模型跑）',ok:ran,hint:'点「复制提示词」或「用模型跑一遍」都算'});
+    R.push({k:'指出哪部分可用',ok:usable,hint:'写明 AI 输出里哪些可以直接用'});
+    R.push({k:'指出哪部分不可用',ok:unusable,hint:'写明 AI 输出里哪些不能采信（幻觉/偏差/口径错）'});
+    R.push({k:'写了你的人工修正',ok:fixed,hint:'写明你改了什么、为什么改'});
+    R.push({k:'沉淀出可复用句式/模板',ok:reuse,hint:'写一句下次还能直接用的提示词或句式'});
+    R.push({k:'确认已人工核对结果',ok:chk,hint:'勾选下方复选框'});
+    s=(ran?30:0)+Math.min(50,recScore)+(chk?20:0);
+    if(!ran) need='先跑一遍（复制提示词或用模型跑）';
+    else if(recScore<38) need='演示记录要写清：哪部分可用、哪部分不可用、你做了什么人工修正、沉淀出什么可复用句式（当前 '+recScore+'/50）';
+    else if(!chk) need='勾选「我已人工核对过模型结果」';
+  } else if(u.step==='todo'){
+    const t=(a.work||'').trim();
+    if(!t){ R.push({k:'提交产出内容',ok:false,hint:'按模板逐节填写后提交'}); need='先按模板写出你的产出并提交'; }
+    else { const r=scoreWorkText(u,t); r.need=r.need||''; return r; }
+  } else if(u.step==='spar'){
+    const rounds=a.rounds||0, best=a.best||0, bd=!!a.boundary;
+    R.push({k:'完成 ≥3 轮真实对话',ok:rounds>=3,hint:'陪练至少追问满 3 轮'});
+    R.push({k:'≥2 轮给出了可追溯依据',ok:best>=2,hint:'回答里要出现数字/条款/口径/来源'});
+    R.push({k:'划出责任边界',ok:bd,hint:'说清哪部分你不下结论、交给谁'});
+    s=(rounds>=3?40:Math.min(39,rounds*13))+Math.min(35,best*18)+(bd?25:0);
+    if(rounds<3) need='陪练还要继续（已完成 '+rounds+' 轮，至少 3 轮）';
+    else if(best<2) need='至少 2 轮答案里要有具体依据（数字/条款/口径）';
+    else if(!bd) need='说清哪部分结论你不下、留给谁判断';
+  }
+  s=Math.max(0,Math.min(100,Math.round(s)));
+  return {ok:!need && s>=60, score:s, detail:R, need:need};
+}
+
+/* ===================== 真实评分引擎（v3）：按「评分标准」逐项判，不看字数 =====================
+   五个维度各占分：结构完整性 20 / 评分要点覆盖 24 / 有据可依 20 / 红线意识 18 / 可执行 18
+   另有三条反灌水惩罚：照抄模板、重复注水、过短。每项都给出「差在哪、怎么改」。 */
+const STOPWords=/^(我们|你们|他们|可以|应该|需要|必须|这个|那个|这些|那些|进行|通过|使用|如何|什么|以及|然后|如果|因为|所以|但是|一个|没有|就是|自己|对于|关于|并且|或者|可能|已经|还有|不会|只是|这样|那样|一下|一些|很多|非常|比较|目前|现在|未来|首先|其次|最后|综上|例如|比如|其中|内容|情况|方式|方法|结果|过程|目标|能力|系统|平台|团队|公司|部门|流程|场景|环节|部分|方面|相关|主要|重要|有效|直接|实际|基本|整体|具体|明确|完成|提供|实现|提升|优化|支持|管理|分析|设计|开发|评估|判断|说明|描述|列出|包含|基于|根据|结合|利用|帮助|确保|保证|满足|达到|避免|减少|增加|提高|降低|控制|监控|跟踪|反馈|沟通|协作|推进|落地|执行|实施|交付|上线|运营|维护|更新|调整|改进|完善|建立|构建|搭建|制定|编写|整理|汇总|输出|生成|展示|查看|选择|确认|审核|审批|验证|测试|检查|排查|处理|解决|应对|防范|预防|规避|工作|问题|方案|数据|用户|客户|产品|业务)$/;
+function cjkTerms(s){
+  const out=[]; const runs=(s||'').match(/[\u4e00-\u9fa5]{2,8}/g)||[];
+  runs.forEach(function(w){
+    for(let L=2;L<=4;L++){ for(let i=0;i+L<=w.length;i++){ const t=w.substr(i,L); if(!STOPWords.test(t)) out.push(t); } }
+  });
+  return Array.from(new Set(out));
+}
+/* 从本单元的 rubric / deliverable.rubric 取「评分标准」条目 */
+function rubricItemsOf(u){
+  let items=(u.rubric&&u.rubric.length)?u.rubric.slice():[];
+  const d=u.deliverable;
+  if(d&&d.rubric&&d.rubric.length) items=items.concat(d.rubric);
+  if(!items.length) items=['结构完整','有据可依','红线意识','可执行'];
+  return Array.from(new Set(items)).slice(0,6);
+}
+/* 量化数字：必须带单位/量纲，纯数字不算 */
+function qualifiedNumbers(t){
+  const re=/([0-9０-９]+(?:\.[0-9]+)?)\s*(%|％|个百分点|万|亿|千|元|笔|条|个|次|人|天|周|月|年|日|号|分钟|小时|版|条|款|份|轮|倍|Q[1-4]|季度)/g;
+  const m=(t||'').match(re)||[]; return Array.from(new Set(m)).length;
+}
+function hasSource(t){ return /(来源|口径|取自|来自|依据|条款|原文|看板|报表|访谈|样本|问卷|系统导出|统计区间|数据范围)/.test(t||''); }
+function hasRisk(t){ return /(风险|红线|合规|监管|泄露|出域|越权|隐私|敏感|误导|幻觉|偏差|失真|不可信|未授权|投诉|处罚)/.test(t||''); }
+function hasMitigation(t){ return /(规避|脱敏|审批|授权|复核|留痕|兜底|备份|限定|不输出|人工确认|降级|回退|加密|去标识|最小化|权限收|双人)/.test(t||''); }
+function hasOwner(t){ return /(责任人|负责人|owner|Owner|由[^，。；\n]{1,10}(负责|跟进|确认|拍板|决策)|牵头|归属|对接人)/.test(t||''); }
+function hasTime(t){ return /([0-9]+\s*(天|周|月|日|个工作日|季度)|下周|本周|月底|季末|Q[1-4]|截止|deadline|排期|里程碑|上线时间|交付时间|T\+[0-9])/.test(t||''); }
+function hasAcceptance(t){ return /(验收|验收标准|验收口径|判定标准|达标|通过标准|衡量指标|成功标准|OKR|KPI|指标口径)/.test(t||''); }
+/* 反灌水：与模板重合度、句子重复率 */
+function dupRatio(t){
+  const lines=(t||'').split(/\n/).map(x=>x.trim()).filter(x=>x.length>=8);
+  if(lines.length<2) return 0;
+  const uniq=new Set(lines); return 1-uniq.size/lines.length;
+}
+function templateOverlap(t,tpl){
+  if(!tpl) return 0;
+  const A=new Set(cjkTerms(tpl)); if(!A.size) return 0;
+  let hit=0; A.forEach(function(w){ if((t||'').indexOf(w)>=0) hit++; });
+  return hit/A.size;
+}
+function sectionCount(t){
+  return (t||'').split(/\n/).map(x=>x.trim())
+    .filter(x=>x.length>=10 && /^([■□•\-*·]|[一二三四五六七八九十]+[、.）)]|[0-9]+[、.）)]|#{1,4}\s|\*\*)/.test(x)).length;
+}
+function scoreWorkText(u,t){
+  t=(t||'').trim();
+  const R=[]; let total=0;
+  const tpl=sub(u.template||'');
+
+  /* ① 结构完整性 20 */
+  const secs=sectionCount(t);
+  const tplSecs=Math.max(3, sectionCount(tpl));
+  const secScore = secs>=tplSecs?20 : (secs>=Math.max(2,tplSecs-1)?14 : (secs>=2?9 : (secs>=1?4:0)));
+  total+=secScore;
+  R.push({k:'结构完整性',got:secScore,full:20,ok:secScore>=14,
+    hint: secs>=tplSecs ? ('模板 '+tplSecs+' 个小节都已填写') : ('模板有 '+tplSecs+' 个小节，当前只识别出 '+secs+' 节，缺的部分要补')});
+
+  /* ② 评分要点覆盖 24（逐条比对本单元 rubric） */
+  const items=rubricItemsOf(u);
+  let hitItems=0; const missNames=[];
+  items.forEach(function(it){
+    const terms=cjkTerms(it);
+    const need=Math.min(3, Math.max(1, Math.ceil(terms.length*0.18)));
+    let c=0; for(let i=0;i<terms.length && c<need;i++){ if(t.indexOf(terms[i])>=0) c++; }
+    if(c>=need) hitItems++; else missNames.push(it.slice(0,14));
+  });
+  const covScore=Math.round(24*hitItems/items.length);
+  total+=covScore;
+  R.push({k:'评分要点覆盖（'+hitItems+'/'+items.length+'）',got:covScore,full:24,ok:hitItems>=Math.ceil(items.length*0.6),
+    hint: hitItems>=items.length?('全部评分要点都有体现') : ('未体现：'+missNames.join('；'))});
+
+  /* ③ 有据可依 20 */
+  const qn=qualifiedNumbers(t), src=hasSource(t);
+  const evScore = (qn>=2?20 : (qn===1?12 : (src?13:0)));
+  total+=evScore;
+  R.push({k:'有据可依',got:evScore,full:20,ok:evScore>=12,
+    hint: qn>=2?('已给出 '+qn+' 处带单位的数据') : ('需要 ≥2 处「数字+单位」（如 通过率 62%、3 个工作日、样本 12000 笔），当前 '+qn+' 处')});
+
+  /* ④ 红线意识 18：必须同时有风险 + 规避动作 */
+  const rk=hasRisk(t), mt=hasMitigation(t);
+  const riskScore = (rk&&mt)?18 : (rk||mt)?9 : 0;
+  total+=riskScore;
+  R.push({k:'红线意识',got:riskScore,full:18,ok:riskScore===18,
+    hint: (rk&&mt)?('已指出风险并给出规避动作') : rk?('指出了风险，但没写规避动作（脱敏/审批/人工复核等）') : mt?('写了规避动作，但没说清风险点在哪') : ('需写明「风险点 + 规避动作」')});
+
+  /* ⑤ 可执行 18 */
+  const ow=hasOwner(t), tm=hasTime(t), ac=hasAcceptance(t);
+  const actScore = (ow&&tm&&ac)?18 : ((ow&&tm)||(ow&&ac)||(tm&&ac))?12 : (ow||tm||ac)?6 : 0;
+  total+=actScore;
+  R.push({k:'可执行',got:actScore,full:18,ok:actScore>=12,
+    hint: (ow&&tm&&ac)?('责任人/时间/验收标准齐全') : ('缺：'+[!ow?'责任人':null,!tm?'时间节点':null,!ac?'验收标准':null].filter(Boolean).join('、'))});
+
+  /* ---- 反灌水惩罚 ---- */
+  const pen=[];
+  const ov=templateOverlap(t,tpl);
+  if(ov>0.62 && t.length<900){ total-=25; pen.push('疑似直接照抄模板（重合度 '+Math.round(ov*100)+'%），请替换成你自己的内容'); }
+  const dr=dupRatio(t);
+  if(dr>0.3){ total-=15; pen.push('存在重复/注水段落（重复率 '+Math.round(dr*100)+'%）'); }
+  if(t.length<120){ total=Math.min(total,35); pen.push('内容过短（'+t.length+' 字），未达到一份交付物的基本篇幅'); }
+  total=Math.max(0,Math.min(100,Math.round(total)));
+
+  const detail=R.map(function(x){ return {k:x.k+'　'+x.got+'/'+x.full+' 分', ok:x.ok, hint:x.hint}; });
+  pen.forEach(function(p){ detail.push({k:'扣分项：'+p, ok:false, hint:''}); });
+
+  const weak=R.filter(function(x){return !x.ok;}).sort(function(a,b){return (a.full-a.got)-(b.full-b.got);}).slice(0,3);
+  let need='';
+  if(total<60){
+    need='得分 '+total+' 分，未达 60 分通关线。优先补强：'+weak.map(function(x){return x.k;}).join('、')
+        +'。\n例如：'+weak[0].hint;
+  }
+  return {ok:total>=60, score:total, detail:detail, need:need, dims:R};
+}
+
+function previewScore(uid,elId){
+  const el=document.getElementById(elId); if(!el) return;
+  const r=computeUnit(uid);
+  const det=r.detail.map(d=>'<li class="'+(d.ok?'ok':'')+'">'+esc(d.k)+(d.ok?'':' <span class="hint">（'+esc(d.hint||'')+'）</span>')+'</li>').join('');
+  el.innerHTML='<div class="kv" style="margin-top:10px"><b>预估得分：'+r.score+' 分</b>'
+   +'<div class="bar"><i style="width:'+r.score+'%"></i></div>'
+   +'<ul class="rub">'+det+'</ul>'
+   +(r.need?'<div style="font-size:12.6px;color:#be123c">还差：'+esc(r.need)+'</div>':'<div style="font-size:12.6px;color:#166534">已达通关线（60 分），可以结算。</div>')
+   +'</div>';
+}
+
+function submitTask(uid){
+  if(ADMIN){
+    const st=prog.units[uid]||{};
+    prog.units[uid]=Object.assign({},st,{taskDone:true,done:true,score:st.score||60,detail:[{k:'管理员预览模式：已标记完成',ok:true}],acts:st.acts||{}});
+    saveProg(); refreshProg(); renderSidebar();
+    advCheck(); return true;
+  }
+  const r=computeUnit(uid);
+  if(!r.ok){
+    alert('还不能结算：\n\n'+(r.need||'请先完成上方环节活动')+'\n\n当前预估 '+r.score+' 分，通关线 60 分。');
+    return false;
+  }
+  const st=prog.units[uid]||{};
+  const prev=st.score||0;
+  prog.units[uid]=Object.assign({},st,{taskDone:true,done:true,score:Math.max(prev,r.score),detail:r.detail,acts:st.acts||{}});
+  saveProg(); refreshProg(); renderSidebar();
+  advCheck(); return true;
+}
+function finishUnit(uid){ return submitTask(uid); } /* 兼容别名 */
+
+/* ---------- 单元练习：5 道场景选择题 ---------- */
+function bankOf(uid){ return (typeof QUIZ_BANK!=='undefined' && QUIZ_BANK[uid]) ? QUIZ_BANK[uid] : null; }
+function bankCorrect(uid){
+  const b=bankOf(uid), pk=(actsOf(uid).qzPick||{});
+  if(!b) return {n:0,total:0};
+  let n=0; b.forEach(function(it,i){ if(pk[i]===it.a) n++; });
+  return {n:n,total:b.length};
+}
+function pickBankQ(uid,i,j){
+  const a=Object.assign({},actsOf(uid).qzPick||{});
+  a[i]=j; setAct(uid,'qzPick',a);
+  const wrap=document.getElementById('qzb'+i); if(!wrap) return;
+  const ops=wrap.querySelectorAll('.op');
+  const right=bankOf(uid)[i].a;
+  ops.forEach(function(el,k){ el.classList.remove('right','wrong','sel'); if(k===right) el.classList.add('right'); else if(k===j) el.classList.add('wrong'); });
+  const tip=document.getElementById('qzb-tip'+i);
+  if(tip){ tip.style.display='block'; tip.textContent=(j===right?'✅ 正确。':'❌ 再想想。')+(bankOf(uid)[i].why||''); }
+  previewScore(uid,'u-score');
+}
+/* 收获笔记评分：不看字数，看是否具体、是否有下一步、是否分点 */
+function scoreNoteText(t){
+  t=(t||'').trim();
+  const R=[]; let s=0;
+  const concrete=/(我的|本部门|我们团队|手上|我负责|这个项目|这款产品|我们的客户|指标|流程|场景|客户群)/.test(t);
+  const next=/(待查|不确定|还需要|下一步|打算|准备|去验证|去确认|再补|要问)/.test(t);
+  const secs=(t.split(/\n/).filter(x=>x.trim().length>=6).length);
+  const conclusion=/(结论|记住|学到|明白了|关键|要点|也就是说)/.test(t);
+  s += concrete?15:0; s += next?15:0; s += secs>=2?10:(secs===1?5:0);
+  R.push({k:'落到具体工作（提到你的场景/项目/指标）',ok:concrete,hint:'写清这件事能用在你的哪个具体项目或指标上'});
+  R.push({k:'写出下一步或待确认项',ok:next,hint:'补一句「我还不确定/下一步要验证的是…」'});
+  R.push({k:'分点写（≥2 行）',ok:secs>=2,hint:'按 1) 2) 3) 分点写'});
+  if(t.length<40){ s=Math.min(s,10); R.push({k:'内容过短（'+t.length+' 字）',ok:false,hint:'至少写清一句结论 + 一句用法'}); }
+  return {score:Math.min(40,s),detail:R};
+}
+
+/* ---------- 判断题（理解环节） ---------- */
+function pickUnderstand(el,i){
+  const right=(i===1);
+  el.parentNode.querySelectorAll('.op').forEach(x=>x.classList.remove('right','wrong'));
+  el.classList.add(right?'right':'wrong');
+  const tip=document.getElementById('u-tip'); tip.style.display='block';
+  tip.innerHTML = right? '\u2705 正确。AI 的价值在补结构与措辞，判断和取舍是你的责任。'
+                       : '\u274C 再想想：AI 没有你的业务事实，也不承担后果，判断必须留在人这一侧。可再选一次。';
+  setAct(prog.cur,'quiz',right?1:0);
+  previewScore(prog.cur,'u-score');
+}
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function bindEnter(id,fn){ const el=document.getElementById(id); if(el) el.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); fn(); } }); }
+function copyPrompt(){
+  const t=document.getElementById('p-text'); if(!t) return;
+  t.select(); try{ document.execCommand('copy'); }catch(e){}
+  setAct(prog.cur,'ran',1);
+  alert('提示词已复制。打开 WorkBuddy 粘贴即可；也可点右侧按钮先用模型跑一遍看效果。');
+}
+
+/* ---------- 问题 7：演示接真实模型 ---------- */
+async function runWb(uid){
+  const f=findUnit(uid); if(!f) return;
+  const u=f.u, out=document.getElementById('wb-out');
+  const raw=sub(u.demoScript.prompt);
+  const first=(raw.split('\n')[0]||'').slice(0,120);
+  out.innerHTML='<div class="wb"><div class="me">'+esc(first)+'</div>'
+    +'<div class="ai" id="wb-live">'+(llmReady()?'正在调用模型\u2026':'正在用本地规则引擎生成（未接入模型）\u2026')+'</div></div>';
+  setAct(uid,'ran',1);
+  if(llmReady()){
+    try{
+      const txt=await llmChat([
+        {role:'system',content:'你是企业内训里的 WorkBuddy 助手。用户给你一段工作提示词，你要直接产出可用的工作结果：结构化、条目清晰、具体到照着做就能推进；凡是需要真实数据的地方用「【待填：××】」占位，不要编造数字。最后另起一行输出「\u26A0 需人工确认：」并列出 2\u20133 条必须由人核对或补全的点。'},
+        {role:'user',content:raw}
+      ],{temperature:0.5});
+      out.innerHTML='<div class="wb"><div class="me">'+esc(first)+'</div><div class="ai">'+esc(txt)+'</div>'
+        +'<div class="hl-line">以上由云端模型实时生成（与 WorkBuddy 使用同一段提示词、同类模型能力）。把同一段提示词粘到 WorkBuddy 里会得到等效结果。</div></div>'
+        +'<p style="font-size:12.5px;color:var(--mut);margin-top:8px">AI 只给骨架与措辞；数字口径、责任人与时间节点由你补齐——这正是本单元要练的「人把关」位置。</p>';
+      const rec=document.getElementById('demo-rec');
+      if(rec && rec.value.trim().length<30){
+        rec.value='1) 我用的提示词：\n'+first+'\n\n2) 可用/不可用：\n'+txt.split('\n').filter(x=>x.trim()).slice(0,3).join('\n')+'\n\n3) 我做了什么人工修正：\n\n4) 下次复用的固定句式：';
+        setAct(uid,'rec',rec.value); previewScore(uid,'demo-score');
+      }
+      return;
+    }catch(e){
+      out.innerHTML='<div class="wb"><div class="me">'+esc(first)+'</div><div class="ai" style="color:#ffb4b4">模型调用失败：'+esc(e.message)+'</div></div>';
+    }
+  }
+  /* 无模型时：本地结构化产出（明确标注来源，不假装是模型） */
+  out.innerHTML='<div class="wb"><div class="me">'+esc(first)+'</div>'
+    +'<div class="ai">【方法骨架】'+esc(sub(u.ppt.method))+'</div>'
+    +'<div class="ai">【同类案例】'+esc(sub(u.ppt.case))+'</div>'
+    +'<div class="ai">【演示要点】'+esc(sub(u.ppt.demo))+'</div>'
+    +'<div class="hl-line">\u26A0 需人工确认：以上是本地规则引擎按本单元课件拼装的骨架，不是模型实时生成。请复制上方提示词到 WorkBuddy 跑出真实结果，或点顶部「AI 未连接」查看接入方式。</div></div>';
+  const rec=document.getElementById('demo-rec');
+  if(rec && rec.value.trim().length<30){
+    rec.value='1) 我用的提示词：\n'+first+'\n\n2) 可用/不可用：\n（待补：用真实模型跑完后再填）\n\n3) 我做了什么人工修正：\n\n4) 下次复用的固定句式：';
+    setAct(uid,'rec',rec.value); previewScore(uid,'demo-score');
+  }
+}
+
+/* ---------- 我要做：按评分要点自动打分 ---------- */
+function gradeWork(uid){
+  const ta=document.getElementById('work-text'); const t=(ta?ta.value:'').trim();
+  const out=document.getElementById('work-out');
+  if(t.length<20){ out.innerHTML='<div class="kv" style="border-color:#fecdd3;color:#be123c">内容太短。请按模板的 ■ 小节逐节填写，至少写满四项要点再提交——评分需要真实内容。</div>'; return null; }
+  setAct(uid,'work',t);
+  const r=scoreWorkText(findUnit(uid).u,t);
+  out.innerHTML='<div class="kv" style="margin-bottom:0"><b>得分 '+r.score+' 分</b>（通关线 60）'
+    +'<div class="bar"><i style="width:'+r.score+'%"></i></div>'
+    +'<ul class="rub">'+r.detail.map(d=>'<li class="'+(d.ok?'ok':'')+'">'+esc(d.k)+(d.ok?'':' <span class="hint">（'+esc(d.hint||'')+'）</span>')+'</li>').join('')+'</ul>'
+    +(r.need?'<div style="font-size:12.8px;color:#be123c">'+esc(r.need)+'</div>':'<div style="font-size:12.8px;color:#166534">已达通关线，可以结算本单元。</div>')
+    +'</div>';
+  if(r.ok) finishUnit(uid);
+  else out.innerHTML+='<div style="font-size:12.6px;color:var(--mut);margin-top:6px">补强后再次提交即可。</div>';
+  return r;
+}
+
+/* ---------- 问题 6：陪练接真模型 + 本地追问引擎 ---------- */
+function addBubble(who,text){
+  const c=document.getElementById('chat'); if(!c) return;
+  const b=document.createElement('div'); b.className='bub '+(who==='me'?'me':(who==='sys'?'sys':'ai'));
+  b.textContent=text; c.appendChild(b);
+  if(b.scrollIntoView) b.scrollIntoView({block:'nearest'});
+}
+function askQ(i){
+  const f=findUnit(prog.cur); if(!f||!f.u.spar) return;
+  const u=f.u;
+  const q=(i<0)? u.spar.mustAsk[0] : u.spar.mustAsk[i];
+  const line='（'+sub(u.spar.role)+'）'+sub(q);
+  addBubble('ai',line);
+  sparHist.push({role:'assistant',content:line});
+}
+/* ===================== 内嵌 AI 陪练（不用新开 WorkBuddy） =====================
+   通道优先级：① 已接入模型（本地代理 / 直连 Key）→ 页面内直接多轮对话
+              ② 未接入 → 提示一键接入，或退回路线①复制指令去 WorkBuddy
+   对话全程记入本单元进度（轮次 / 有据回答 / 是否划边界），与陪练环节同一套计分。 */
+let SPAR_CHAT={uid:null,msgs:[],busy:false};
+function sparChatSystem(u){
+  if(u.spar&&u.spar.role) return sparSystem(u);
+  /* 非陪练单元：用「本单元讲解员」人设，围绕本单元内容答疑 */
+  return '你是企业内训《金融×PM》的学习陪练，当前单元是「'+sub(u.title)+'」。'
+   +'\n任务：'+sub(u.task||'')+''
+   +'\n要求：1) 每次只回答一个点，不超过 90 字，口语化，不要列表和标题；'
+   +'\n2) 优先结合金融场景举例（信贷/财富/保险/支付）；'
+   +'\n3) 学员回答空泛时，要求他给出具体数字、条款或口径；'
+   +'\n4) 涉及合规与数据安全的判断，明确提醒「这一步要由你和合规确认」，不要替他下结论；'
+   +'\n5) 不要编造监管条款，需要引用时用「贵行的数据分级办法」这类通称。'
+   +'\n只输出你要说的那一句话，不要任何前缀说明。';
+}
+function openSparChat(uid){
+  const f=findUnit(uid||prog.cur); if(!f) return;
+  const u=f.u;
+  SPAR_CHAT.uid=f.u.id;
+  SPAR_CHAT.msgs=[{role:'system',content:sparChatSystem(u)}];
+  const ready=(typeof llmReady==='function')&&llmReady();
+  const box=document.getElementById('spar-chat-box');
+  const firstQ=(u.spar&&u.spar.mustAsk&&u.spar.mustAsk.length)?sub(u.spar.mustAsk[0])
+              :('这一节讲的是「'+sub(u.title)+'」，你想先问哪一块？');
+  box.innerHTML=
+     '<div class="spar-hd"><div><h3>🤼 内嵌 AI 陪练</h3>'
+    +'<div class="sub">'+esc(f.m.id+' · '+sub(u.title))+'　|　扮演：'+esc(u.spar?sub(u.spar.role):'本单元陪练')+'</div></div>'
+    +'<button class="x" onclick="closeSparChat()">×</button></div>'
+    +'<div class="spar-status">模型状态：'+(ready?'<span class="on">已连接 · 页面内直接对话</span>':'<span class="off">未连接 · 当前为本地追问引擎</span>')
+      +(ready?'':' <button class="btn ghost" style="padding:2px 8px;font-size:11.5px" onclick="openLlm()">一键接入</button>'
+             +' <button class="btn ghost" style="padding:2px 8px;font-size:11.5px" onclick="openSparAI(\''+f.u.id+'\')">复制指令去 WorkBuddy</button>')
+    +'</div>'
+    +'<div class="spar-body" id="spar-chat-body">'
+      +'<div class="spar-msg ai"><div class="b">'+esc(firstQ)+'</div></div></div>'
+    +'<div class="spar-ft"><textarea id="spar-chat-input" placeholder="先给结论，再给依据，最后说边界。回车发送（Shift+回车换行）"></textarea>'
+      +'<button id="spar-chat-send" onclick="sparChatSend()">发送</button></div>';
+  SPAR_CHAT.msgs.push({role:'assistant',content:firstQ});
+  document.getElementById('spar-chat-modal').classList.add('on');
+  const ta=document.getElementById('spar-chat-input');
+  if(ta){
+    ta.addEventListener('keydown',function(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sparChatSend(); } });
+    setTimeout(function(){ try{ta.focus();}catch(e){} },80);
+  }
+}
+function closeSparChat(){ document.getElementById('spar-chat-modal').classList.remove('on'); }
+function sparChatBubble(who,text){
+  const b=document.getElementById('spar-chat-body'); if(!b) return;
+  const d=document.createElement('div'); d.className='spar-msg '+who;
+  d.innerHTML='<div class="b">'+esc(text)+'</div>';
+  b.appendChild(d); b.scrollTop=b.scrollHeight;
+}
+async function sparChatSend(){
+  if(SPAR_CHAT.busy) return;
+  const ta=document.getElementById('spar-chat-input'); if(!ta) return;
+  const t=ta.value.trim(); if(!t){ return; }
+  const uid=SPAR_CHAT.uid||prog.cur;
+  const f=findUnit(uid); if(!f) return;
+  const u=f.u;
+  ta.value='';
+  sparChatBubble('me',t);
+  SPAR_CHAT.msgs.push({role:'user',content:t});
+
+  /* 计入本单元进度：轮次 / 有据回答 / 责任边界 */
+  let tr=(parseInt(actsOf(uid).cRounds||0,10)||0)+1;
+  let bs=parseInt(actsOf(uid).best||0,10)||0;
+  let bd=actsOf(uid).boundary?true:false;
+  const evid=EVID_RE.test(t) && (/[0-9\uFF10-\uFF19]/.test(t) || /条款|原文|口径|来源|访谈|看板/.test(t));
+  if(evid) bs++;
+  if(BOUNDARY_RE.test(t)) bd=true;
+  setAct(uid,'cRounds',tr); setAct(uid,'best',bs); setAct(uid,'boundary',bd?1:0);
+
+  const btn=document.getElementById('spar-chat-send');
+  SPAR_CHAT.busy=true; if(btn){ btn.disabled=true; btn.textContent='…'; }
+  const body=document.getElementById('spar-chat-body');
+  const typing=document.createElement('div'); typing.className='spar-typing'; typing.textContent='陪练正在思考…';
+  if(body){ body.appendChild(typing); body.scrollTop=body.scrollHeight; }
+
+  let reply=null, src='';
+  if((typeof llmReady==='function')&&llmReady()){
+    try{
+      reply=await llmChat(SPAR_CHAT.msgs.slice(-13),{temperature:0.75,max_tokens:260});
+      src='model';
+    }catch(e){ reply=null; }
+  }
+  if(!reply){
+    try{ reply=localSparReply(u,t,tr-1); }catch(e){ reply='（本地追问引擎不可用）你可以把问题复制到 WorkBuddy 里继续问。'; }
+    src='local';
+  }
+  try{ typing.remove(); }catch(e){}
+  sparChatBubble('ai',(src==='local'?'【本地追问引擎】':'')+reply);
+  SPAR_CHAT.msgs.push({role:'assistant',content:reply});
+  SPAR_CHAT.busy=false; if(btn){ btn.disabled=false; btn.textContent='发送'; }
+  try{ ta.focus(); }catch(e){}
+}
+
+function sparSystem(u){
+  const m=u.spar||{};
+  return '你是一场企业内训里的角色扮演评审，此刻扮演「'+sub(m.role||'评审')+'」。'
+   +'你的立场：'+sub(m.persona||'只认依据与制度')+'。'
+   +'学员刚完成《'+sub(u.deliverable||'本单元产出')+'》，你是来挑它的漏洞的。'
+   +'\n硬性要求：'
+   +'\n1) 每次只说一段话、只问一个问题，全文不超过 70 字，口语化，像现场评审，禁止使用列表、编号和标题。'
+   +'\n2) 必须引用学员上一句话里的具体词汇或原话片段来追问，让他知道你真的听了。'
+   +'\n3) 若学员给出了可追溯依据（具体数字、文件条款、口径、访谈编号），先用一句话认可那一处，再往更狠的一层追问：这个前提不成立怎么办、边界在哪、口径对得上吗。'
+   +'\n4) 若学员只是表态、复述问题或说空话，直接点破，并要求他给出数据或条款。'
+   +'\n5) 你一定会问到这些方向：'+(m.mustAsk||[]).map(x=>sub(x)).join('；')+'。'
+   +'\n6) 不要编造不存在的制度条款，需要引用时用「贵行的数据分级办法」这类通称。'
+   +'\n只输出你要说的那一句话，不要有任何前缀说明。';
+}
+function anchorOf(t){
+  const s=t.replace(/\s+/g,'');
+  const re=/《[^》]{1,10}》|第[0-9０-９]+条|[0-9１-９]+(?:\.[0-9]+)?%|[0-9０-９]+(个|条|项|份|处|类)|不下结论|边界|口径|看板|访谈|PII|脱敏|原文第/g;
+  const m=s.match(re);
+  if(m && m[0]){
+    const i=s.indexOf(m[0]);
+    return s.slice(Math.max(0,i), i+m[0].length+8).slice(0,18);
+  }
+  return s.slice(0,14);
+}
+function localSparReply(u,t,rounds){
+  const role=sub(u.spar.role);
+  const anchor=anchorOf(t);
+  const hasNum=/[0-9０-９]/.test(t), hasEvid=EVID_RE.test(t), bd=BOUNDARY_RE.test(t);
+  const arr=u.spar.mustAsk||[];
+  const q=arr[rounds % Math.max(1,arr.length)] || '你的依据是什么？';
+  if(!hasEvid){
+    return '（'+role+'）你说「'+anchor+'\u2026」\u2014\u2014 我听到的是立场，不是依据。这条结论落在哪份文件、哪张看板、哪组数据上？说得出出处，我们才谈得下去。';
+  }
+  if(!hasNum){
+    return '（'+role+'）「'+anchor+'\u2026」方向对了，但你给的是说法不是数。具体到多少、覆盖哪些产品、口径怎么定义的？';
+  }
+  if(!bd){
+    return '（'+role+'）「'+anchor+'\u2026」这一处我暂时认。那我问下一层：如果这条依据本身不成立，你的结论要不要降级？哪部分你不敢下结论、要交给谁？';
+  }
+  return '（'+role+'）「'+anchor+'\u2026」有数、有出处、也划了边界，这条我认。最后再确认一件事：'+sub(q);
+}
+async function sendSpar(){
+  if(sparBusy) return;
+  const ta=document.getElementById('spar-text'); if(!ta) return;
+  const t=ta.value.trim();
+  if(!t){ alert('先写点内容再发送'); return; }
+  const f=findUnit(prog.cur); if(!f||!f.u.spar) return;
+  const u=f.u;
+  addBubble('me',t); ta.value='';
+  sparHist.push({role:'user',content:t});
+  flow.tries++;
+  const evid=EVID_RE.test(t) && (/[0-9０-９]/.test(t) || /条款|原文|口径|来源|访谈|看板/.test(t));
+  if(evid) flow.best++;
+  if(BOUNDARY_RE.test(t)) flow.boundary=true;
+  setAct(prog.cur,'rounds',flow.tries);
+  setAct(prog.cur,'best',flow.best);
+  setAct(prog.cur,'boundary',flow.boundary?1:0);
+
+  sparBusy=true; ta.disabled=true;
+  const btnText='\u2026'; let reply=null, src='';
+  if(llmReady()){
+    try{
+      const msgs=[{role:'system',content:sparSystem(u)}].concat(sparHist.slice(-12));
+      reply=await llmChat(msgs,{temperature:0.75,max_tokens:220});
+      src='model';
+    }catch(e){ reply=null; }
+  }
+  if(!reply){ reply=localSparReply(u,t,flow.tries-1); src='local'; }
+  sparBusy=false; ta.disabled=false; try{ ta.focus(); }catch(e){}
+  addBubble('ai',reply);
+  sparHist.push({role:'assistant',content:reply});
+
+  const st=document.createElement('div'); st.className='kv';
+  st.style.cssText='color:var(--mut);font-size:12.4px';
+  st.textContent='第 '+flow.tries+' 轮 · 有据回答 '+flow.best+' 次 · '+(flow.boundary?'已划边界':'尚未提到边界')+' · '+(src==='model'?'由云端模型实时生成':'本地追问引擎（未接入模型）');
+  const host=document.getElementById('spar-out');
+  if(host){ host.innerHTML=''; host.appendChild(st); }
+
+  const r=computeUnit(prog.cur);
+  if(r.ok){
+    setAct(prog.cur,'passed',1);
+    addBubble('sys','\u2705 陪练通过：'+flow.tries+' 轮、'+flow.best+' 次给出依据'+(flow.boundary?'、已划清责任边界':'')+'。');
+    finishUnit(prog.cur);
+  } else if(flow.tries>=3){
+    addBubble('sys','距离通关还差：'+r.need);
+  }
+}
+
+/* ===================== 模块测验（问题 4：能打开） ===================== */
+let qzState=null;
+function openQuiz(mid){
+  const qs=QUIZ[mid]; if(!qs) return;
+  qzState={mid:mid, idx:0, picked:new Array(qs.length).fill(null)};
+  renderQuiz();
+  document.getElementById('quiz-modal').classList.add('on');
+}
+function renderQuiz(){
+  const qs=QUIZ[qzState.mid], cur=qs[qzState.idx];
+  const box=document.getElementById('quiz-box');
+  const mi=COURSE.modules.findIndex(m=>m.id===qzState.mid);
+  box.innerHTML='<div class="mclose" onclick="closeQuiz()">\u2715</div>'
+    +'<h3>'+qzState.mid+' 模块测验</h3>'
+    +'<p>'+esc(COURSE.modules[mi].title)+' · 第 '+(qzState.idx+1)+' / '+qs.length+' 题</p>'
+    +'<div class="qz-item"><div class="q">'+sub(cur.q)+'</div>'
+    +cur.opts.map((o,i)=>'<div class="op" id="op'+i+'" onclick="pickQ('+i+')">'+esc(sub(o))+'</div>').join('')
+    +'<div class="tip" id="qz-tip"></div></div>'
+    +'<div class="acts"><button class="btn" onclick="nextQ()">'+(qzState.idx===qs.length-1?'提交并查看得分':'下一题')+'</button></div>';
+}
+function pickQ(i){
+  const cur=QUIZ[qzState.mid][qzState.idx], n=qzState.idx;
+  qzState.picked[n]=i; cur.picked=i;
+  document.querySelectorAll('#quiz-box .op').forEach(el=>el.classList.remove('right','wrong'));
+  document.getElementById('op'+i).classList.add(i===cur.a?'right':'wrong');
+  const tip=document.getElementById('qz-tip'); tip.style.display='block';
+  tip.innerHTML=(i===cur.a?'\u2705 正确。':'\u274C 正确答案：'+esc(sub(cur.opts[cur.a]))+'\u3000')+esc(sub(cur.tip));
+}
+function nextQ(){
+  const qs=QUIZ[qzState.mid];
+  if(qzState.picked[qzState.idx]===null){ alert('请先选择一个答案'); return; }
+  if(qzState.idx<qs.length-1){ qzState.idx++; renderQuiz(); return; }
+  const right=qzState.picked.filter((p,i)=>p===qs[i].a).length;
+  const pct=Math.round(right/qs.length*100);
+  prog.quizzes[qzState.mid]=pct>=60;
+  saveProg(); refreshProg(); renderSidebar();
+  const mods=COURSE.modules, mi=mods.findIndex(m=>m.id===qzState.mid);
+  const nextMid=mods[mi+1];
+  const box=document.getElementById('quiz-box');
+  box.innerHTML='<div class="mclose" onclick="closeQuiz()">\u2715</div>'
+    +'<h3>'+(pct>=60?'\uD83C\uDF89 模块通关':'\uD83D\uDCCC 再补一补')+'</h3>'
+    +'<p>得分 <b style="color:var(--blue-d);font-size:20px">'+right+' / '+qs.length+'</b>（'+pct+'%）· 你已完成「'+qzState.mid+' '+mods[mi].title.slice(0,12)+'」的学习闭环。</p>'
+    +'<div class="acts">'
+    +(nextMid?'<button class="btn ok" onclick="closeQuiz();openUnit(\''+nextMid.units[0].id+'\')">进入 '+nextMid.id+' '+nextMid.title.slice(0,8)+' \u2192</button>'
+             :'<button class="btn ok" onclick="closeQuiz();openUnit(\'M0U1\')">回到起点重学一轮</button>')
+    +'<button class="btn ghost" onclick="openQuiz(\''+qzState.mid+'\')">再练一遍本模块</button>'
+    +'</div>'
+    +(pct<60?'<p style="color:#be123c">未达 60%，建议先回看单元视频与课件再重测。</p>':'');
+}
+function closeQuiz(){ document.getElementById('quiz-modal').classList.remove('on'); }
+
+/* 点遮罩关闭弹窗 */
+['quiz-modal','llm-modal','lf-modal','spar-chat-modal'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el) el.addEventListener('click',ev=>{ if(ev.target===el) el.classList.remove('on'); });
+});
+
+/* ===================== 学习指引（本单元路径 + 下一步） ===================== */
+const STEP_ORDER=['understand','demo','todo','spar'];
+const STEP_HINT={
+  understand:'看视频讲解，完成「理解环节·自检」题，并写下可落地的收获（≥10 字）。',
+  demo:'复制提示词到 WorkBuddy 跑一遍（或用模型跑），记录演示结果并人工核对。',
+  todo:'按模板产出本单元交付物，提交后系统自动评分（≥60 分通关）。',
+  spar:'与 AI 陪练至少 3 轮对话，给出可追溯依据，并划清责任边界。'
+};
+function guideCard(uid,m,u,st){
+  const mi=COURSE.modules.indexOf(m);
+  const ui=m.units.indexOf(u);
+  const total=m.units.length;
+  const stepDone={}; STEP_ORDER.forEach(s=>stepDone[s]=false);
+  m.units.forEach(x=>{ const s=prog.units[x.id]; if(s&&s.done&&stepDone[x.step]!==undefined) stepDone[x.step]=true; });
+  const curDone=!!(st&&st.done);
+  const stepsHtml=STEP_ORDER.map(s=>{
+    const cls='g-step'+(s===u.step?' cur':'')+(stepDone[s]&&s!==u.step?' done':'');
+    const ico=(s===u.step)?'▶':(stepDone[s]?'✓':'');
+    return '<span class="'+cls+'">'+(ico?'<b style="margin-right:3px">'+ico+'</b>':'')+STEP_LABEL[s]+'</span>';
+  }).join('');
+  const hasDeliv=!!(u.deliverable&&u.deliverable.name);
+  const durMin=Math.round((u.vslides||[]).reduce((a,s)=>a+Math.max(2,sub(s.n).length*0.205),0)/60);
+  const path=[
+    '观看上方<b>视频讲解</b>（约 '+durMin+' 分钟）',
+    '完成下方<b>「看完就练」/ 本环节活动</b>：'+STEP_HINT[u.step],
+    '点<b>「提交并结算本单元」</b>，达到 60 分即通关',
+    hasDeliv? '本单元含交付物：复制模板 → 在 WorkBuddy 找 <b>真·AI 陪练</b> → 回来做 <b>AI 打分</b>（可选，作能力佐证）' : '本单元无独立交付物，通关即完成'
+  ];
+  const pathHtml=path.map((p,i)=>'<li'+(i===1?' class="lead"':'')+'>'+p+'</li>').join('');
+  const modDone=m.units.filter(x=>prog.units[x.id]&&prog.units[x.id].done).length;
+  let next;
+  if(curDone){
+    const delivTodo = hasDeliv ? '① 完成交付物评审（若还没做）→ ' : '';
+    next='✅ 本单元已通关。建议：'+delivTodo+'② 进入<b>下一单元</b> → ③ 本模块 8 单元全部通关后，在左侧栏点开 <b>📝 模块测验</b>。';
+  } else {
+    next='完成本单元活动、达到 60 分结算后，点底部<b>「下一单元」</b>继续。本模块已通关 <b>'+modDone+'/'+total+'</b> 单元，全部通关后左侧栏会出现 <b>📝 模块测验</b>入口。';
+  }
+  if(ui===total-1 && !prog.quizzes[m.id]){
+    next+=' <b>本单元是 '+m.id+' 的最后一节</b>，通关后别忘了做模块测验。';
+  }
+  return '<div class="guide"><h3>🧭 学习指引</h3>'
+    +'<div class="g-ctx">📍 你现在在 <b>'+m.id+' · '+m.title+'</b> · 第 '+(ui+1)+'/'+total+' 单元'
+    +(curDone?' · <span style="color:#166534;font-weight:700">本单元已通关</span>':'')
+    +'</div>'
+    +'<div class="g-steps">'+stepsHtml+'</div>'
+    +'<ul class="g-path">'+pathHtml+'</ul>'
+    +'<div class="g-next">➡️ '+next+'</div></div>';
+}
+function doneNext(uid){
+  const fu=findUnit(uid); if(!fu) return '';
+  const m=fu.m, u=fu.u;
+  const hasDeliv=!!(u.deliverable&&u.deliverable.name);
+  const modDone=m.units.filter(x=>prog.units[x.id]&&prog.units[x.id].done).length;
+  const parts=[];
+  if(hasDeliv && !(prog.scores&&prog.scores['u_'+uid]!=null)) parts.push('完成交付物评审（AI 打分）');
+  parts.push('进入下一单元');
+  if(modDone===m.units.length && !prog.quizzes[m.id]) parts.push('点开左侧 📝 模块测验');
+  if(!parts.length) return '';
+  return '<div class="g-next" style="margin:8px auto 2px;max-width:520px;text-align:left">➡️ 下一步：'+parts.map(function(p,i){return (i+1)+'. '+p;}).join('　')+'</div>';
+}
+
+/* ===================== 反馈（参考测评设计：FB_TYPE/FB_CAT/FB_SEV + 自动归类） ===================== */
+const FB_TYPE = {text:{n:'文字',i:'✍️'}, image:{n:'截图',i:'🖼️'}, audio:{n:'语音',i:'🎙️'}, video:{n:'录屏',i:'🎬'}};
+const FB_CAT  = {bug:{n:'功能缺陷',i:'🐞'}, feat:{n:'功能建议',i:'💡'}, ux:{n:'体验问题',i:'😣'}, other:{n:'其他',i:'💬'}};
+const FB_SEV  = {high:'高',mid:'中',low:'低'};
+function classifyFeedback(text){
+  text=(text||'')+'';
+  var s={bug:0,feat:0,ux:0};
+  ['报错','错误','崩','闪退','打不开','无法','不能','失效','白屏','卡死','异常','乱码','丢失','失败','不对','重复','bug','404','无反应','没反应','提示错误'].forEach(function(w){if(text.indexOf(w)>=0)s.bug++;});
+  ['希望','建议','增加','添加','支持','期待','想要','最好能','能否','能不能','希望有','上新','拓展','能不能加','应该提供','缺少','没有','需要','功能'].forEach(function(w){if(text.indexOf(w)>=0)s.feat++;});
+  ['太慢','太卡','卡顿','找不到','难找','复杂','繁琐','麻烦','看不懂','不清楚','不明显','丑','难用','体验','布局','样式','太小','太大','遮挡','误触','引导','提示不清','别扭','绕','步骤多','点不到'].forEach(function(w){if(text.indexOf(w)>=0)s.ux++;});
+  var best='other',bn=0;
+  ['bug','feat','ux'].forEach(function(c){if(s[c]>bn){bn=s[c];best=c;}});
+  return best;
+}
+let FB={type:'text',cats:[],sev:'mid',text:'',imgs:[],media:{},contact:''};
+let FB_CTX='';
+function openFb(){
+  const f=findUnit(prog.cur);
+  FB_CTX = f ? (f.m.id+' · '+f.m.title+' · 单元 '+f.u.id+'（'+STEP_LABEL[f.u.step]+'环节）') : '未知位置';
+  FB={type:'text',cats:[],sev:'mid',text:'',imgs:[],media:{},contact:''};
+  fbRenderInner();
+  document.getElementById('lf-modal').classList.add('on');
+}
+function closeFb(){ document.getElementById('lf-modal').classList.remove('on'); }
+function fbSetType(t){ fbSaveEditor(); FB.type=t; fbRenderInner(); }
+function fbSetCat(c){ fbSaveEditor(); const i=FB.cats.indexOf(c); if(i>=0)FB.cats.splice(i,1); else FB.cats.push(c); fbRenderInner(); }
+function fbSetSev(v){ fbSaveEditor(); FB.sev=v; fbRenderInner(); }
+function fbSaveEditor(){
+  const ta=document.getElementById('fb-text'); if(ta) FB.text=ta.value;
+  const ct=document.getElementById('fb-contact'); if(ct) FB.contact=ct.value;
+}
+/* ---- 图片灯箱：点任意截图放大，点背景/× 关闭 ---- */
+function fbZoom(src){
+  if(!src) return;
+  const m=document.createElement('div');
+  m.className='lb-mask';
+  m.innerHTML='<button class="lb-close">×</button><img src="'+src+'" alt="截图放大">';
+  m.onclick=function(e){ if(e.target===m||e.target.className==='lb-close'){ m.remove(); } };
+  document.body.appendChild(m);
+}
+function fbPreviewHtml(){
+  let h='';
+  (FB.imgs||[]).forEach(function(im,i){
+    if(!im.src){ h+='<span class="lf-file">🖼️ '+esc(im.name||('截图'+(i+1)))+'（原图过大，仅记录文件名）</span><button class="lf-cat" style="padding:2px 8px" onclick="fbDelImg('+i+')">✕</button>'; return; }
+    h+='<span class="lf-thumb-wrap"><img src="'+im.src+'" alt="截图'+(i+1)+'" onclick="fbZoom(this.src)" title="点击放大">'
+      +'<button class="lf-cat" style="padding:2px 8px;margin-top:4px;display:block" onclick="fbDelImg('+i+')">✕ 移除</button></span>';
+  });
+  const m=FB.media||{};
+  if(m.audio) h+='<span class="lf-file">🎙️ '+esc(m.audio.name)+'</span>';
+  if(m.video) h+='<span class="lf-file">🎬 '+esc(m.video.name)+'</span>';
+  return h;
+}
+function fbRenderInner(){
+  const box=document.getElementById('lf-box');
+  let html='<div class="lf-head"><span style="font-size:20px">🐞</span><h3>提交问题反馈 / 建议</h3><button class="lf-close" onclick="closeFb()">×</button></div>';
+  html+='<div class="lf-meta">📍 当前位置：'+esc(FB_CTX)+'<br>自动附带你的学习上下文，方便我们定位问题。提交后可「复制反馈」发给我们。</div>';
+  html+='<div class="lf-label">① 反馈类型（录入方式）</div><div class="lf-type-grid">';
+  Object.keys(FB_TYPE).forEach(function(k){ html+='<button class="lf-type'+(FB.type===k?' on':'')+'" onclick="fbSetType(\''+k+'\')"><span class="ti">'+FB_TYPE[k].i+'</span>'+FB_TYPE[k].n+'</button>'; });
+  html+='</div>';
+  html+='<div class="lf-label">② 问题分类（可多选；留空则由系统按描述自动识别）</div><div class="lf-cat-row">';
+  Object.keys(FB_CAT).forEach(function(k){ html+='<button class="lf-cat'+(FB.cats.indexOf(k)>=0?' on':'')+'" onclick="fbSetCat(\''+k+'\')">'+FB_CAT[k].i+' '+FB_CAT[k].n+'</button>'; });
+  html+='</div>';
+  html+='<div class="lf-label">③ 严重度</div><div class="lf-sev-row">';
+  Object.keys(FB_SEV).forEach(function(k){ html+='<button class="lf-sev'+(FB.sev===k?' on':'')+'" onclick="fbSetSev(\''+k+'\')">'+FB_SEV[k]+'</button>'; });
+  html+='</div>';
+  html+='<div class="lf-label">④ 描述（bug 请说明：什么操作 / 看到了什么 / 期望怎样）</div>';
+  html+='<textarea id="fb-text" class="score-ta" style="min-height:110px" placeholder="例如：播放 M3U2 视频后点「下一单元」没反应；或：希望加一个快捷键跳到下一单元…">'+esc(FB.text)+'</textarea>';
+  html+='<div class="lf-media-row"><button onclick="document.getElementById(\'lf-img\').click()">🖼️ 上传截图</button><button onclick="document.getElementById(\'lf-audio\').click()">🎙️ 上传语音</button><button onclick="document.getElementById(\'lf-vid\').click()">🎬 上传录屏</button>'
+      +'<input type="file" id="lf-img" accept="image/*" multiple hidden><input type="file" id="lf-audio" accept="audio/*" hidden><input type="file" id="lf-vid" accept="video/*" hidden></div>';
+  html+='<div class="lf-drop" id="lf-drop">📋 可直接按 Ctrl/⌘+V 粘贴截图，或把图片拖到这里（支持多张）</div>';
+  html+='<div class="lf-preview" id="lf-preview">'+fbPreviewHtml()+'</div>';
+  html+='<div class="lf-label">⑤ 联系方式（选填，方便我们回访）</div>';
+  html+='<input id="fb-contact" class="score-inp" style="width:100%" placeholder="微信 / 邮箱 / 电话，选填" value="'+esc(FB.contact)+'">';
+  const pend=fbOutbox().length;
+  html+='<div class="lf-foot"><button class="btn" onclick="submitFb()">提交反馈</button>'
+      +(pend?'<button class="btn ghost" onclick="fbRetryAll()">🔄 补推待发送（'+pend+'）</button>':'')
+      +'<button class="btn ghost" onclick="fbSelfTest()">🔧 云端自检</button><button class="btn ghost" onclick="fbExport()">导出我的反馈记录</button><button class="btn ghost" onclick="closeFb()">取消</button></div>';
+  html+='<div class="lf-note">反馈已接入云端：提交后自动同步到管理员后台（刚哥可见），同时本机也留存一份、并复制可发送文本。无需重复提交。</div>';
+  box.innerHTML=html;
+  const img=document.getElementById('lf-img'); if(img) img.onchange=function(e){ fbAddFiles(e.target.files,'image'); img.value=''; };
+  const au=document.getElementById('lf-audio'); if(au) au.onchange=function(e){ fbAddFile(e.target.files[0],'audio'); };
+  const vid=document.getElementById('lf-vid'); if(vid) vid.onchange=function(e){ fbAddFile(e.target.files[0],'video'); };
+  /* 粘贴截图：弹窗打开期间监听 paste */
+  if(!window._fbPasteBound){
+    window._fbPasteBound=true;
+    document.addEventListener('paste', function(e){
+      const modal=document.getElementById('lf-modal');
+      if(!modal || !modal.classList.contains('on')) return;
+      const it=(e.clipboardData&&e.clipboardData.items)||[];
+      const pics=[];
+      for(let i=0;i<it.length;i++){ if(it[i].type&&it[i].type.indexOf('image/')===0){ const f=it[i].getAsFile(); if(f) pics.push(f); } }
+      if(pics.length){
+        e.preventDefault();
+        fbAddFiles(pics,'image');
+        toast('已粘贴 '+pics.length+' 张截图');
+      }
+    });
+  }
+  /* 拖拽图片 */
+  const dz=document.getElementById('lf-drop');
+  if(dz){
+    dz.onclick=function(){ document.getElementById('lf-img').click(); };
+    dz.ondragover=function(e){ e.preventDefault(); dz.classList.add('over'); };
+    dz.ondragleave=function(){ dz.classList.remove('over'); };
+    dz.ondrop=function(e){
+      e.preventDefault(); dz.classList.remove('over');
+      const fs=(e.dataTransfer&&e.dataTransfer.files)||[];
+      const pics=[]; for(let i=0;i<fs.length;i++){ if(fs[i].type.indexOf('image/')===0) pics.push(fs[i]); }
+      if(pics.length){ fbAddFiles(pics,'image'); toast('已添加 '+pics.length+' 张截图'); }
+    };
+  }
+}
+function fbAddFiles(list,kind){
+  if(!list||!list.length) return;
+  const arr=Array.prototype.slice.call(list);
+  let n=arr.length;
+  arr.forEach(function(f){
+    const r=new FileReader();
+    r.onload=function(){
+      const src=r.result;
+      if(src.length>1500000){ FB.imgs.push({src:'',name:f.name,big:true}); toast('「'+f.name+'」较大，仅记录文件名，请单独发送原图'); }
+      else FB.imgs.push({src:src,name:f.name});
+      if(--n<=0) fbRenderInner();
+    };
+    r.readAsDataURL(f);
+  });
+}
+function fbAddFile(file,kind){
+  if(!file) return;
+  if(kind==='image'){
+    const r=new FileReader();
+    r.onload=function(){
+      const src=r.result;
+      if(src.length>1500000){ toast('截图较大（>'+(src.length/1e6).toFixed(1)+'MB），本机记录仅存文件名，请单独发送原图'); FB.imgs.push({src:'',name:file.name,big:true}); }
+      else FB.imgs.push({src:src,name:file.name});
+      fbRenderInner();
+    };
+    r.readAsDataURL(file);
+  } else {
+    FB.media[kind]={name:file.name,size:file.size};
+    fbRenderInner();
+    toast('已附'+(kind==='audio'?'语音':'录屏')+'：'+file.name);
+  }
+}
+function fbDelImg(i){ FB.imgs.splice(i,1); fbRenderInner(); }
+function fbReport(){
+  fbSaveEditor();
+  let cats=FB.cats.slice();
+  if(!cats.length) cats=[classifyFeedback(FB.text)];
+  const typeName=FB_TYPE[FB.type]?FB_TYPE[FB.type].n:FB.type;
+  const catNames=cats.map(function(c){return FB_CAT[c]?FB_CAT[c].i+' '+FB_CAT[c].n:c;}).join('、');
+  const att=[];
+  (FB.imgs||[]).forEach(function(im,i){ att.push('截图'+(i+1)+(im.big?'（'+im.name+'，请单独发送原图）':'（已附）')); });
+  if(FB.media.audio) att.push('语音：'+FB.media.audio.name);
+  if(FB.media.video) att.push('录屏：'+FB.media.video.name);
+  const now=new Date();
+  const pad=function(x){return (''+x).padStart(2,'0');};
+  const ts=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+pad(now.getHours())+':'+pad(now.getMinutes());
+  const L=[];
+  L.push('【金融×PM 课程 · 用户反馈】');
+  L.push('类型：'+typeName+'　|　分类：'+catNames+'　|　严重度：'+FB_SEV[FB.sev]);
+  L.push('位置：'+FB_CTX);
+  L.push('时间：'+ts);
+  L.push('描述：');
+  L.push((FB.text||'（未填写）').trim());
+  if(att.length) L.push('附件：'+att.join('、'));
+  if(FB.contact) L.push('联系方式：'+FB.contact);
+  return L.join('\n');
+}
+function submitFb(){
+  fbSaveEditor();
+  if(!FB.text.trim() && !FB.imgs.length && !(FB.media.audio||FB.media.video)){ toast('请先填写描述或附上截图/录音'); return; }
+  const report=fbReport();
+  let cats=FB.cats.length?FB.cats:[classifyFeedback(FB.text)];
+  let arr=[]; try{ arr=JSON.parse(localStorage.getItem('aidax_fin_feedback')||'[]'); }catch(e){ arr=[]; }
+  const id='f_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+  const doc={
+    id:id, ts:Date.now(), user:FB.contact||'课程学员', role:'learner',
+    company:'金融PM课程', type:FB.type, sev:FB.sev, cat:cats[0], cats:cats,
+    text:FB.text, images:FB.imgs, media:FB.media, ownerKey:finOwner(),
+    page:'金融PM课程', industry:'金融', status:'new', ctx:FB_CTX, contact:FB.contact
+  };
+  arr.push({ts:doc.ts,type:doc.type,cats:cats,sev:doc.sev,text:doc.text,ctx:doc.ctx,attach:(FB.imgs.length+(FB.media.audio?1:0)+(FB.media.video?1:0)),contact:doc.contact});
+  try{ localStorage.setItem('aidax_fin_feedback', JSON.stringify(arr)); }catch(e){ toast('本机存储已满，但反馈已尝试同步云端'); }
+  copyText(report);
+  if(typeof window.supabase!=='undefined' && navigator.onLine!==false){
+    fbEnqueue(doc);
+    pushFeedbackToCloud(doc, function(ok,err){ showFbDone(ok, arr.length, report, err); });
+  } else {
+    fbEnqueue(doc);
+    showFbDone(false, arr.length, report, '当前离线或 SDK 未加载');
+  }
+}
+function showFbDone(ok,n,report,err){
+  const box=document.getElementById('lf-box');
+  const pending=fbOutbox().length;
+  const msg = ok
+    ? '<p style="font-size:13px;color:#2e7d4f;margin:6px 0 4px">✅ 已同步到管理员后台，刚哥会在「反馈」面板收到这条反馈。</p>'
+    : '<p style="font-size:13px;color:var(--mut);margin:6px 0 4px">本机已保存（共 '+n+' 条）。已排队待补推（'+pending+' 条），联网后点「重试同步」即可送达；当前也已复制可发送文本。</p>'
+      + (err?'<div class="lf-report" style="margin-top:6px;max-height:90px;color:#be123c">失败原因：'+esc(err)+'</div>':'');
+  const extra = ok ? '' : '<button class="btn ghost" onclick="fbRetryAll()">🔄 重试同步</button><button class="btn ghost" onclick="fbSelfTest()">🔧 云端自检</button>';
+  box.innerHTML='<div class="lf-head"><span style="font-size:20px">✅</span><h3>已记录</h3><button class="lf-close" onclick="closeFb()">×</button></div>'
+    + msg
+    +'<div class="lf-report">'+esc(report)+'</div>'
+    +'<div class="lf-foot"><button class="btn" onclick="copyText(document.querySelector(\'.lf-report\').textContent)">再复制一次</button>'+extra+'<button class="btn ghost" onclick="fbExport()">导出全部记录</button><button class="btn ghost" onclick="closeFb()">关闭</button></div>';
+  toast(ok?'反馈已提交到管理员后台':'已记录（待补推），可点「重试同步」');
+}
+function fbRetryAll(){
+  const q=fbOutbox().length;
+  if(!q){ toast('没有待补推的反馈'); return; }
+  toast('正在补推 '+q+' 条…');
+  fbFlushOutbox(function(ok,total){
+    toast('补推完成：成功 '+ok+' / '+total+' 条');
+    if(ok===total) showFbDone(true,total,'');
+    else showFbDone(false,total,'', '仍有 '+(total-ok)+' 条未送达，可再试或复制文本发送');
+  });
+}
+function fbExport(){
+  let arr=[]; try{ arr=JSON.parse(localStorage.getItem('aidax_fin_feedback')||'[]'); }catch(e){ arr=[]; }
+  if(!arr.length){ toast('本机还没有反馈记录'); return; }
+  const blob=new Blob([JSON.stringify(arr,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='aidax_fin_feedback.json'; a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); },2000);
+  toast('已导出 '+arr.length+' 条反馈记录');
+}
+
+/* ===================== 云端反馈同步 v2（推送到管理员后台 feedback 表） =====================
+   v2 改动（修复「admin 后台收不到」）：
+   ① 鉴权方式改为官方推荐写法：createClient(url, ANON_KEY, {global.headers.Authorization: Bearer <jwt>})
+      —— anon key 仍作 apikey 头（网关放行），租户 JWT 走 Authorization（PostgREST 据此判 RLS）。
+      旧写法把 JWT 当第二个参数传入，等于把 JWT 同时塞进 apikey 头，网关可能直接拒。
+   ② 每一步的真实错误信息都落盘并可展示，便于定位（不再静默失败）。
+   ③ 失败进 outbox，下次打开页面 / 点「重试」自动补推，不丢反馈。 */
+window.AIDAX_CONFIG = window.AIDAX_CONFIG || { supabaseUrl:'https://nyqiwjwzbpnepamldqto.supabase.co', supabaseAnonKey:'sb_publishable_rnBBDPdiDI5vnc9IEaTP6g_1ZyxJjHI' };
+function finOwner(){
+  if(!window._finOwner){
+    var g=localStorage.getItem('aidax_fin_owner');
+    if(!g){ g='finpm:'+(Date.now().toString(36)+Math.random().toString(36).slice(2,7)); localStorage.setItem('aidax_fin_owner',g); }
+    window._finOwner=g;
+  }
+  return window._finOwner;
+}
+var _finSb=null;
+function finSb(){
+  if(_finSb===null) return null;
+  if(_finSb && typeof _finSb.from==='function') return _finSb;
+  var cfg=window.AIDAX_CONFIG;
+  if(!cfg||!cfg.supabaseUrl||typeof window.supabase==='undefined'){ _finSb=null; return null; }
+  try{ _finSb=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey); return _finSb; }
+  catch(e){ _finSb=null; return null; }
+}
+var _finJwt=null;
+function finJwt(){ return _finJwt || localStorage.getItem('aidax_fin_jwt') || null; }
+function finMintToken(cb){
+  var cfg=window.AIDAX_CONFIG; if(!cfg){ cb&&cb(false); return; }
+  fetch(cfg.supabaseUrl.replace(/\/$/,'')+'/rest/v1/rpc/mint_token',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':cfg.supabaseAnonKey,'Authorization':'Bearer '+cfg.supabaseAnonKey},
+    body:JSON.stringify({p_type:'guest',p_company:'金融PM课程',p_owner:finOwner()})
+  }).then(function(r){
+    return r.text().then(function(t){
+      let j=null; try{ j=JSON.parse(t); }catch(e){}
+      if(!j) return { __http:r.status, __raw:(t||'').slice(0,200) };
+      return j;
+    });
+  }).then(function(j){
+    if(j&&j.jwt){ _finJwt=j.jwt; localStorage.setItem('aidax_fin_jwt',j.jwt); fbDiag('mint ok'); cb&&cb(true,''); }
+    else {
+      var m = (j&&j.error) ? j.error : ((j&&j.__raw) ? ('HTTP '+j.__http+' '+j.__raw) : '无返回');
+      fbDiag('mint fail: '+m); cb&&cb(false,m);
+    }
+  }).catch(function(e){ fbDiag('mint 网络异常：'+(e.message||e)); cb&&cb(false,'网络异常：'+(e.message||e)); });
+}
+/* ---- 诊断日志：每一步的真实错误都记下来，可在反馈弹窗里查看/复制 ---- */
+var FB_DIAG=[];
+function fbDiag(s){
+  FB_DIAG.push(new Date().toLocaleTimeString()+' '+s);
+  if(FB_DIAG.length>12) FB_DIAG=FB_DIAG.slice(-12);
+  try{ localStorage.setItem('aidax_fin_fb_diag', FB_DIAG.join('\n')); }catch(e){}
+}
+function fbDiagText(){ try{ return localStorage.getItem('aidax_fin_fb_diag')||'（暂无记录）'; }catch(e){ return '（无法读取）'; } }
+
+/* ---- outbox：同步失败的反馈排队，下次自动补推 ---- */
+var FB_OUTBOX_KEY='aidax_fin_fb_outbox';
+function fbOutbox(){ try{ return JSON.parse(localStorage.getItem(FB_OUTBOX_KEY)||'[]'); }catch(e){ return []; } }
+function fbOutboxSave(a){ try{ localStorage.setItem(FB_OUTBOX_KEY, JSON.stringify(a)); }catch(e){} }
+function fbEnqueue(doc){ var a=fbOutbox(); if(a.some(function(x){return x.id===doc.id;})) return; a.push(doc); fbOutboxSave(a); }
+function fbDequeue(id){ var a=fbOutbox().filter(function(x){return x.id!==id;}); fbOutboxSave(a); }
+
+function finClient(jwt){
+  var cfg=window.AIDAX_CONFIG;
+  if(typeof window.supabase==='undefined'||!window.supabase.createClient){ throw new Error('supabase SDK 未加载'); }
+  return window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {
+    global: { headers: { Authorization: 'Bearer '+jwt } },
+    auth: { persistSession:false, autoRefreshToken:false }
+  });
+}
+function pushFeedbackToCloud(doc,cb){
+  finMintToken(function(ok,err){
+    if(!ok){ fbDiag('签发令牌失败：'+(err||'未知')); cb&&cb(false, '签发令牌失败：'+(err||'未知')); return; }
+    var c;
+    try{ c=finClient(finJwt()); }
+    catch(e){ fbDiag('建连失败：'+e.message); cb&&cb(false,'建连失败：'+e.message); return; }
+    c.from('feedback').insert({ id:doc.id, doc:doc, updated_at:new Date().toISOString() })
+      .then(function(res){
+        if(res.error){
+          var m=res.error.message||JSON.stringify(res.error);
+          fbDiag('写入失败：'+m); cb&&cb(false,'写入失败：'+m); return;
+        }
+        fbDiag('写入成功 id='+doc.id); fbDequeue(doc.id); cb&&cb(true,'');
+      })
+      .catch(function(e){ var m=(e&&e.message)||String(e); fbDiag('写入异常：'+m); cb&&cb(false,'写入异常：'+m); });
+  });
+}
+/* 补推队列里所有未送达的反馈 */
+function fbFlushOutbox(done){
+  var q=fbOutbox();
+  if(!q.length){ done&&done(0,0); return; }
+  if(typeof window.supabase==='undefined'){ done&&done(0,q.length); return; }
+  var ok=0, left=q.length;
+  q.forEach(function(doc){
+    pushFeedbackToCloud(doc,function(s){
+      if(s) ok++;
+      if(--left<=0) done&&done(ok,q.length);
+    });
+  });
+}
+/* 手动诊断：串起 mint → 建连 → 读表，把真实结果展示出来 */
+function fbSelfTest(){
+  var out=document.getElementById('lf-box');
+  out.innerHTML='<div class="lf-head"><span style="font-size:20px">🔧</span><h3>云端连通性自检</h3><button class="lf-close" onclick="closeFb()">×</button></div>'
+    +'<div id="selftest-out" class="lf-report" style="min-height:120px">正在检测…</div>'
+    +'<div class="lf-foot"><button class="btn" onclick="copyText(document.getElementById(\'selftest-out\').textContent)">复制结果</button><button class="btn ghost" onclick="openFb()">返回反馈</button></div>';
+  var o=document.getElementById('selftest-out'); var L=[];
+  function p(s){ L.push(s); o.textContent=L.join('\n'); }
+  var cfg=window.AIDAX_CONFIG;
+  p('① SDK：'+(typeof window.supabase!=='undefined' && window.supabase.createClient ? '已加载 ✅' : '未加载 ❌（vendor/supabase-js.umd.js 未生效）'));
+  p('② 配置：'+(cfg&&cfg.supabaseUrl?cfg.supabaseUrl:'缺失'));
+  FB_DIAG=[];
+  finMintToken(function(ok,err){
+    p('③ 签发令牌：'+(ok?'成功 ✅':'失败 ❌ '+(err||'')));
+    if(!ok){ p('\n诊断日志：\n'+fbDiagText()); return; }
+    try{
+      var c=finClient(finJwt());
+      p('④ 建连：成功 ✅');
+      c.from('feedback').select('id').limit(1).then(function(res){
+        p('⑤ 读表：'+(res.error?('失败 ❌ '+res.error.message):'成功 ✅（RLS 放行）'));
+        p('\n诊断日志：\n'+fbDiagText());
+      }).catch(function(e){ p('⑤ 读表异常：'+(e.message||e)); p('\n诊断日志：\n'+fbDiagText()); });
+    }catch(e){ p('④ 建连失败：'+e.message); p('\n诊断日志：\n'+fbDiagText()); }
+  });
+}
+
+/* ===================== 启动（问题 8：回到上次所在的单元与模块） ===================== */
+['cfg-industry','cfg-company','cfg-product'].forEach(id=>{
+  const k=id.slice(4); document.getElementById(id).value=CUSTOM[k];
+});
+applyAdminUI(); renderSidebar(); refreshProg();
+// 深链：?m=MX 直接进入该模块首单元（来自主站学习地图的模块点击）
+let _start = (prog.cur && findUnit(prog.cur)) ? prog.cur : 'M0U1';
+if (DEEP_MODULE) {
+  const dm = COURSE.modules.find(m=>m.id===DEEP_MODULE);
+  if (dm && dm.units.length) _start = dm.units[0].id;
+}
+openUnit(_start);
+paintLlm();
+llmProbe(true);
+/* 启动时补推上次未送达的反馈 */
+setTimeout(function(){ fbFlushOutbox(function(ok,total){ if(total&&ok<total) fbDiag('启动补推：'+ok+'/'+total); }); }, 1500);
+</script>
+</body>
+</html>
