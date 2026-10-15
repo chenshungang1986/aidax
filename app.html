@@ -1932,7 +1932,9 @@ function startAdaptiveQuiz() {
   S._quizAllDone = false;           // 全部维度定级完成
   S.quizScores = null;
   S._quizResult = null;
+  S._quizPending = {};              // v82：逐题暂存（显式提交前可改）
   ensureNextStep();                 // 生成第 1 题（首个维度起点题）
+  startPartTimer('adaptive');       // v82：第二部分限时计时
 }
 
 // ===== v41 自适应引擎：同维连答状态机 =====
@@ -2066,6 +2068,7 @@ function ensureQuizTiming(step) {
 function commitAnswer(step, answerIdx) {
   S._quizSelectedStep = S._quizSelectedStep || {};
   S._quizSelectedStep[step] = answerIdx;
+  if (S._quizPending) delete S._quizPending[step]; // v82：提交后清除该题暂存
   const t = S._quizPlan && S._quizPlan[step];
   if (!t) { render(); return; }
   // 改答本维第 1 题：作废已预生成、尚未作答的同维第 2 题（防重复出题）
@@ -2145,6 +2148,11 @@ function finishAdaptiveQuiz() {
   result.quality = calcQuizQuality(); // v34: 作答质量报告
   S.quizScores = result.dimScores;
   S._quizResult = result;
+  // v82：保留岗位测评作答快照，供结果页错题复盘（进入自评后 _quizPlan 会被清空）
+  S._quizSnap = {
+    plan: (S._quizPlan || []).map(p => ({ d: p.d, lv: p.lv, q: p.q })),
+    sel: Object.assign({}, S._quizSelectedStep || {})
+  };
   S._composite = computeComposite(); // v55: 综合分（基础素养30% + 岗位70%）
   // 三段式：②业务场景完成后，若 ③能力自评尚未做/未跳过，则进入自评；否则直接出结果
   if (!S._selfResult && !S._selfSkipped) {
@@ -7728,6 +7736,120 @@ function renderLoginV2(){
 }
 
 // ==================== RENDER ====================
+// ==================== 测评分段计时器（v82）====================
+// 三段式每部分独立倒计时：基础素养卷 / 岗位自适应卷 / 能力自评；可暂停（暂停时遮罩防偷看）；超时自动收卷。
+let PART_TIMER_ID = null;
+
+function currentQuizPart() {
+  if (S._basePhase === 'active') return 'base';
+  if (S._selfPhase === 'active') return 'self';
+  if (S._quizPlan && S._quizPlan.length && !S._quizAllDone &&
+      S._basePhase !== 'active' && S._basePhase !== 'intro' &&
+      S._selfPhase !== 'active' && S._selfPhase !== 'intro' && S._selfPhase !== 'done') return 'adaptive';
+  return null;
+}
+
+function estimatePartTime(part) {
+  if (part === 'base') return ((S._basePlan && S._basePlan.length) || 10) * 30000; // 10 题 × 30s ≈ 5 分钟
+  if (part === 'self') return Math.max(180000, ((S._selfPlan && S._selfPlan.length) || 12) * 15000); // 自报约 15s/题
+  return Math.max(8, (S._quizDims && S._quizDims.length) || 8) * 2 * 37500; // 维度×2题×37.5s ≈ 10 分钟
+}
+
+function clearPartTimer() {
+  if (PART_TIMER_ID) { clearInterval(PART_TIMER_ID); PART_TIMER_ID = null; }
+  S._timer = null;
+}
+
+function startPartTimer(part) {
+  clearPartTimer();
+  const total = estimatePartTime(part);
+  S._timer = { part: part, totalMs: total, leftMs: total, endTs: Date.now() + total, running: true, paused: false };
+  PART_TIMER_ID = setInterval(tickPartTimer, 250);
+}
+
+function tickPartTimer() {
+  const t = S._timer;
+  if (!t || t.paused || !t.running) return;
+  t.leftMs = t.endTs - Date.now();
+  if (t.leftMs <= 0) { t.leftMs = 0; onPartTimeout(t.part); return; }
+  renderTimerDom();
+}
+
+function renderTimerDom() {
+  const t = S._timer; if (!t) return;
+  const fill = document.getElementById('partTimerFill');
+  const txt = document.getElementById('partTimerText');
+  if (!fill || !txt) return;
+  const ratio = Math.max(0, Math.min(1, t.leftMs / t.totalMs));
+  fill.style.width = (ratio * 100) + '%';
+  const ms = Math.max(0, t.leftMs);
+  const mm = Math.floor(ms / 60000), ss = Math.floor((ms % 60000) / 1000);
+  txt.textContent = (mm > 0 ? mm + '分' : '') + ss + '秒';
+  fill.style.background = ratio < 0.2 ? 'linear-gradient(90deg,#ff3b30,#ff9500)' : 'linear-gradient(90deg,#0071e3,#42a5f5)';
+}
+
+function renderTimerBar() {
+  const t = S._timer;
+  if (!t) return '';
+  const ratio = Math.max(0, Math.min(1, t.leftMs / t.totalMs));
+  const ms = Math.max(0, t.leftMs);
+  const mm = Math.floor(ms / 60000), ss = Math.floor((ms % 60000) / 1000);
+  const timeStr = (mm > 0 ? mm + '分' : '') + ss + '秒';
+  const col = ratio < 0.2 ? 'linear-gradient(90deg,#ff3b30,#ff9500)' : 'linear-gradient(90deg,#0071e3,#42a5f5)';
+  const label = t.part === 'base' ? '第一部分 · 限时作答' : t.part === 'self' ? '第三部分 · 限时作答' : '第二部分 · 限时作答';
+  return `<div style="margin-bottom:14px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+      <span style="font-size:12px;font-weight:600;color:var(--text2);">⏱️ ${label}</span>
+      <span id="partTimerText" style="font-size:13px;font-weight:700;color:${ratio<0.2?'var(--red)':'var(--accent)'};margin-left:auto;">${timeStr}</span>
+      <button class="btn btn-sm btn-outline" onclick="if(typeof S!=='undefined'){S.togglePartTimer()}">${t.paused?'▶ 继续':'⏸ 暂停'}</button>
+    </div>
+    <div style="height:8px;background:var(--bg2);border-radius:6px;overflow:hidden;">
+      <div id="partTimerFill" style="height:100%;width:${ratio*100}%;background:${col};transition:width .25s linear;"></div>
+    </div>
+  </div>`;
+}
+
+function renderPauseOverlay() {
+  const t = S._timer;
+  if (!t || !t.paused) return '';
+  return `<div id="pauseOverlay" style="position:absolute;inset:0;background:rgba(255,255,255,.94);backdrop-filter:blur(3px);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:20;border-radius:12px;cursor:pointer;" onclick="if(typeof S!=='undefined'){S.togglePartTimer()}">
+    <div style="font-size:44px;">⏸️</div>
+    <div style="font-weight:700;font-size:18px;margin-top:8px;">测评已暂停</div>
+    <div style="font-size:13px;color:var(--text2);margin-top:6px;">计时已停止 · 点击任意位置继续</div>
+    <button class="btn btn-primary" style="margin-top:16px;" onclick="if(typeof S!=='undefined'){S.togglePartTimer()}">▶ 继续测评</button>
+  </div>`;
+}
+
+function pausePartTimer() {
+  const t = S._timer; if (!t || t.paused) return;
+  t.leftMs = t.endTs - Date.now();
+  t.paused = true; t.running = false;
+  if (PART_TIMER_ID) { clearInterval(PART_TIMER_ID); PART_TIMER_ID = null; }
+  render();
+}
+
+function resumePartTimer() {
+  const t = S._timer; if (!t || !t.paused) return;
+  t.endTs = Date.now() + t.leftMs;
+  t.paused = false; t.running = true;
+  if (!PART_TIMER_ID) PART_TIMER_ID = setInterval(tickPartTimer, 250);
+  render();
+}
+
+function onPartTimeout(part) {
+  clearPartTimer();
+  if (part === 'base') { if (typeof S.baseFinish === 'function') S.baseFinish(); }
+  else if (part === 'self') { if (typeof finishSelfQuiz === 'function') finishSelfQuiz(); if (typeof render === 'function') render(); }
+  else if (part === 'adaptive') { if (typeof S.finishQuiz === 'function') S.finishQuiz(); }
+}
+
+function syncPartTimer() {
+  const part = currentQuizPart();
+  if (!part) { clearPartTimer(); return; }
+  if (!S._timer || S._timer.part !== part) { startPartTimer(part); return; }
+  if (!S._timer.paused && !PART_TIMER_ID) PART_TIMER_ID = setInterval(tickPartTimer, 250);
+}
+
 function render() {
   // v74：进入学习/管理页时按账号可见范围收敛本地档案（每会话首次渲染执行一次）
   if (S.view !== 'login' && !S._scopeDone) { S._scopeDone = true; try { scopeLocalEmployees(); } catch(e){} }
@@ -7755,6 +7877,7 @@ function render() {
   }
   if (S.view !== 'login') recordAccess(S.view);
   bindEvents();
+  syncPartTimer();
 }
 
 // ---- HEADER ----
@@ -7884,6 +8007,7 @@ function buildBaseQuiz() {
   S._baseIdx = 0;
   S._baseAnswers = [];
   S._baseFeedback = null;
+  S._basePending = [];
 }
 
 function finishBaseQuiz() {
@@ -7961,7 +8085,8 @@ function renderBaseQuestion() {
     ? `<div style="font-size:13px;color:var(--accent);margin-bottom:12px;padding:10px 14px;background:var(--bg2);border-radius:8px;border-left:3px solid var(--accent);">${String(q.scenario).replace('场景：', '')}</div>`
     : '';
   let html = headerHtml(theme.icon + ' ' + theme.name + ' · AI 基础素养', '基础卷（计入综合分 · 30%）· ' + `第 ${idx + 1}/${total} 题`, true);
-  html += `<div class="card slide-up">
+  html += `<div class="card slide-up" style="position:relative;">
+    ${renderTimerBar()}
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
       <span class="tag tag-blue">${theme.name}</span>
       <span style="font-size:12px;color:var(--text2);">${levelNames[q.level] || '通用'} · 难度 ${['低', '中', '高'][q.level] || '中'}</span>
@@ -7971,38 +8096,48 @@ function renderBaseQuestion() {
     ${scenarioHtml}
     <div class="quiz-question">${q.q}</div>
     <div style="display:flex;flex-direction:column;">`;
+  // v83：选项仅暂存高亮，不判对错；本部分提交前可随时回看修改
+  const recorded = (S._baseAnswers && S._baseAnswers[idx]) ? S._baseAnswers[idx].chosen : undefined;
+  const pending = (S._basePending && S._basePending[idx] !== undefined) ? S._basePending[idx] : undefined;
+  const shown = (pending !== undefined) ? pending : recorded;
   q.opts.forEach((o, i) => {
-    let style = '';
-    if (fb) {
-      if (i === fb.correct) style = 'border-color:#30b158!important;background:rgba(48,177,88,.10)!important;color:var(--text1);';
-      else if (i === fb.chosen) style = 'border-color:#ff3b30!important;background:rgba(255,59,48,.07)!important;';
-      else style = 'opacity:.55;';
-    }
-    const mark = fb ? (i === fb.correct ? '　✅ 正确答案' : i === fb.chosen ? '　✗ 你的选择' : '') : '';
-    html += `<button class="quiz-option" data-action="answerQuiz" data-idx="${i}" ${fb ? 'disabled style="' + style + 'cursor:default;"' : 'style="' + style + '"'} onclick="if(typeof S!=='undefined'){S.answerQuiz(${i})}">${String.fromCharCode(65 + i)}. ${cleanOpt(o)}${mark}</button>`;
+    let cls = 'quiz-option';
+    if (shown === i) cls += ' selected';
+    html += `<button class="${cls}" data-action="selectBaseOption" data-idx="${i}" onclick="if(typeof S!=='undefined'){S.selectBaseOption(${i})}">${String.fromCharCode(65 + i)}. ${cleanOpt(o)}</button>`;
   });
   html += `</div>`;
-  if (fb) {
-    const verdict = fb.ok ? '答对了 ✓' : '答错了 ✗';
-    const vc = fb.ok ? '#30b158' : '#ff9500';
-    const bg = fb.ok ? 'rgba(48,177,88,.08)' : 'rgba(255,149,0,.09)';
-    html += `<div style="margin-top:14px;padding:12px 14px;border-radius:10px;background:${bg};border-left:3px solid ${vc};font-size:13px;line-height:1.8;animation:slideUp .25s ease;">
-      <div style="font-weight:600;color:${vc};margin-bottom:4px;">${verdict}${fb.ok ? '　理解正确' : '　正确答案已高亮'}</div>
-      <div style="color:var(--text2);">💡 ${q.explain || ''}</div>
-    </div>`;
+  if (shown !== undefined) {
+    html += `<div style="margin-top:12px;font-size:12.5px;color:var(--text2);">已选 <b style="color:var(--accent);">${String.fromCharCode(65 + shown)}</b> · 提交前可随时修改；对错与解析在本部分结束后统一展示</div>`;
   }
   const isLast = idx >= total - 1;
-  html += `<div class="flex-between mt-4">
-      <button class="btn btn-outline" data-action="goBack" onclick="if(typeof S!=='undefined'){S.goBack()}">← 退出</button>`;
-  if (fb) {
-    html += isLast
-      ? `<button class="btn btn-primary" data-action="baseFinish" onclick="if(typeof S!=='undefined'){S.baseFinish()}">查看基础素养结果 →</button>`
-      : `<button class="btn btn-primary" data-action="baseNext" onclick="if(typeof S!=='undefined'){S.baseNext()}">下一题 →</button>`;
-  } else {
-    html += `<span style="font-size:13px;color:var(--text2);">请选择答案后继续</span>`;
-  }
-  html += `</div></div>`;
+  const canSubmit = shown !== undefined;
+  html += `<div class="flex-between mt-4" style="align-items:center;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-outline" data-action="goBack" onclick="if(typeof S!=='undefined'){S.goBack()}">← 退出</button>
+        ${idx > 0 ? `<button class="btn btn-outline" data-action="basePrev" onclick="if(typeof S!=='undefined'){S.basePrev()}">← 上一题</button>` : ''}
+      </div>
+      <button class="btn btn-primary" data-action="submitBaseOption" ${canSubmit ? 'onclick="if(typeof S!==\'undefined\'){S.submitBaseOption()}"' : 'disabled'} style="${canSubmit ? '' : 'opacity:.5;cursor:not-allowed;'}">${isLast ? '提交本部分 · 查看结果 →' : '提交本题 →'}</button>
+    </div></div>`;
+  html += renderPauseOverlay();
   return html;
+}
+
+function renderBaseReviewCard() {
+  const wrong = (S._baseAnswers || []).map((a, i) => ({ a, i })).filter(x => x.a && !x.a.ok);
+  if (!wrong.length) return '';
+  let h = '<div style="text-align:left;margin-top:16px;"><p style="font-weight:700;font-size:14px;margin-bottom:10px;">📝 错题复盘（' + wrong.length + ' 题 · 含解析）</p>';
+  wrong.forEach(({ a, i }) => {
+    const p = (S._basePlan || [])[i]; if (!p || !p.q) return;
+    const q = p.q;
+    h += '<div style="margin-bottom:10px;padding:12px 14px;background:var(--bg2);border-radius:10px;border-left:3px solid var(--red);">'
+      + '<div style="font-size:13px;font-weight:600;margin-bottom:6px;">' + (i + 1) + '. ' + q.q + '</div>'
+      + '<div style="font-size:13px;color:var(--red);margin-bottom:4px;">✗ 你的选择：' + String.fromCharCode(65 + a.chosen) + '. ' + cleanOpt(q.opts[a.chosen]) + '</div>'
+      + '<div style="font-size:13px;color:var(--green);margin-bottom:6px;">✓ 正确答案：' + String.fromCharCode(65 + q.best) + '. ' + cleanOpt(q.opts[q.best]) + '</div>'
+      + '<div style="font-size:12px;color:var(--text2);line-height:1.7;">💡 ' + (q.explain || '') + '</div>'
+      + '</div>';
+  });
+  h += '</div>';
+  return h;
 }
 
 function renderBaseSummary() {
@@ -8029,6 +8164,7 @@ function renderBaseSummary() {
       ${pct >= 80 ? '🎉 基础扎实！可以自信进入岗位专业测评' : pct >= 60 ? '📖 基础尚可——后续课程中留意薄弱主题的补强' : '🌱 基础偏弱——建议优先安排 AI 通识类课程打底'}
     </div>
     <div style="text-align:left;margin-top:14px;">${themeRows}</div>
+    ${renderBaseReviewCard()}
     <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;">
       <button class="btn btn-outline" style="flex:1;min-width:160px;" data-action="baseRetake" onclick="if(typeof S!=='undefined'){S.baseRetake()}">↺ 重新作答基础卷</button>
       <button class="btn btn-primary" style="flex:1;min-width:200px;" data-action="baseGoAdaptive" onclick="if(typeof S!=='undefined'){S.baseGoAdaptive()}">进入岗位自适应测评 →</button>
@@ -8108,7 +8244,8 @@ function renderSelfQuestion() {
   }
 
   let html = headerHtml('🪞 能力自评 · ' + (q.multi ? '可多选' : '单选'), '第 ' + (idx + 1) + '/' + total + ' 题 · 不计入综合分', true);
-  html += `<div class="card slide-up">
+  html += `<div class="card slide-up" style="position:relative;">
+    ${renderTimerBar()}
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
       <span class="tag tag-blue">${q.multi ? '多选题' : '单选题'}</span>
       <span style="margin-left:auto;font-size:12px;color:var(--text2);">已答 ${ (S._selfAnswers||[]).filter(a=>!!a).length }/${total}</span>
@@ -8129,11 +8266,15 @@ function renderSelfQuestion() {
   });
 
   html += `</div>
-    <div class="flex-between mt-4">
-      <button class="btn btn-outline" onclick="if(typeof S!=='undefined'){S.goBack()}">← 退出</button>
-      <button class="btn btn-primary" onclick="if(typeof S!=='undefined'){S.selfNext()}">${isLast ? '查看自评画像 →' : '下一题 →'}</button>
+    <div class="flex-between mt-4" style="align-items:center;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-outline" onclick="if(typeof S!=='undefined'){S.goBack()}">← 退出</button>
+        ${idx > 0 ? `<button class="btn btn-outline" onclick="if(typeof S!=='undefined'){S.selfPrev()}">← 上一题</button>` : ''}
+      </div>
+      <button class="btn btn-primary" onclick="if(typeof S!=='undefined'){S.selfNext()}">${isLast ? '提交本部分 · 查看自评画像 →' : '下一题 →'}</button>
     </div>
   </div>`;
+  html += renderPauseOverlay();
   return html;
 }
 
@@ -8248,7 +8389,8 @@ function renderQuiz() {
   }
 
   let html = headerHtml(dimInfo.icon + ' ' + dimInfo.name + ' · ' + levelName, `能力维度 ${dimPos+1}/${totalDims}`, true);
-  html += `<div class="card slide-up">
+  html += `<div class="card slide-up" style="position:relative;">
+    ${renderTimerBar()}
     <div style="display:inline-block;background:linear-gradient(90deg,#0071e3,#42a5f5);color:#fff;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;margin-bottom:12px;">第二部分 · AI 业务场景应用（自适应测评）</div>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
       <span class="tag tag-blue">${dimInfo.short}</span>
@@ -8259,48 +8401,42 @@ function renderQuiz() {
     ${scenarioHtml}
     <div class="quiz-question">${q.q}</div>
     <div style="display:flex;flex-direction:column;">`;
-  const sel = stepAnswered ? S._quizSelectedStep[step] : undefined;
+  const committed = stepAnswered;
+  const pending = committed ? undefined : ((S._quizPending && S._quizPending[step] !== undefined) ? S._quizPending[step] : undefined);
   q.opts.forEach((o, i) => {
     let cls = 'quiz-option';
-    if (sel !== undefined && sel === i) cls += ' selected';
-    if (stepAnswered) {
+    if (committed) {
+      if (S._quizSelectedStep[step] === i) cls += ' selected';
       cls += ' locked';
       html += `<button class="${cls}" data-action="answerQuiz" data-idx="${i}" disabled style="cursor:default;">${String.fromCharCode(65+i)}. ${cleanOpt(o)}</button>`;
     } else {
-      html += `<button class="${cls}" data-action="answerQuiz" data-idx="${i}" onclick="if(typeof S!=='undefined'){S.answerQuiz(${i})}">${String.fromCharCode(65+i)}. ${cleanOpt(o)}</button>`;
+      if (pending === i) cls += ' selected';
+      html += `<button class="${cls}" data-action="selectQuizOption" data-idx="${i}" onclick="if(typeof S!==\'undefined\'){S.selectQuizOption(${i})}">${String.fromCharCode(65+i)}. ${cleanOpt(o)}</button>`;
     }
   });
   html += `</div>`;
 
-  // 作答反馈条：本题表现三态 + 下一题难度预告（让考生感知自适应）
+  // v83：不逐题判对错 —— 仅提示已记录，全部完成后在结果页统一展示
   if (stepAnswered) {
-    const evLog = (S._quizLog && S._quizLog[dimKey]) || [];
-    const evNow = evLog.filter(e => e.step === step);
-    const sc = evNow.length ? evNow[0].score : 0;
-    const verdict = sc >= 3 ? {t:'掌握 ✓', c:'var(--green)'} : sc === 2 ? {t:'边缘 △', c:'var(--amber)'} : {t:'未掌握 ✗', c:'var(--red)'};
-    let nextHint = '';
-    if (step + 1 < S._quizPlan.length && S._quizPlan[step+1].d === dimKey) {
-      nextHint = S._quizPlan[step+1].lv > t.lv
-        ? '<span style="color:var(--green);">答得不错，下一题将升测高阶 ⬆</span>'
-        : '<span style="color:var(--amber);">本难度的关键要素尚未掌握，下一题将降测初阶 ⬇</span>';
-    } else if (S._quizAllDone) {
-      nextHint = '<span style="color:var(--green);">该维已定级，可查看结果</span>';
-    }
     html += `<div style="font-size:13px;margin:12px 2px 0;color:var(--text2);display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-      <span>本题表现：<b style="color:${verdict.c};">${verdict.t}</b></span>${nextHint}<span style="margin-left:auto;color:var(--text3);font-size:11px;">🔒 作答后已锁定</span></div>`;
+      <span>✓ 本题已提交</span><span style="margin-left:auto;color:var(--text3);font-size:11px;">作答已记录 · 结果在本部分结束后统一展示</span></div>`;
   }
 
   const canBackToFirst = step > 0 && S._quizPlan[step-1].d === dimKey; // 本维第 2 题 → 可回退重答第 1 题
   const isLastPlan = step >= S._quizPlan.length - 1;
   const doneCount = Object.keys(S._quizDone).length;
+  const canSubmit = !committed && pending !== undefined;
   html += `<div class="flex-between mt-4">
       <button class="btn btn-outline" data-action="prevQuestion" ${canBackToFirst ? '' : 'disabled'} onclick="if(typeof S!=='undefined'){S.prevQuestion()}">↺ 重答本维第一题</button>
-      <span style="font-size:13px;color:${stepAnswered ? 'var(--text2)' : 'var(--red)'};">${doneCount}/${totalDims} 已完成${stepAnswered ? '' : '（请先选择答案）'}</span>
-      ${stepAnswered && isLastPlan && S._quizAllDone
-        ? '<button class="btn btn-primary" data-action="finishQuiz" onclick="if(typeof S!==\'undefined\'){S.finishQuiz()}">查看结果</button>'
-        : '<button class="btn btn-primary" data-action="nextQuestion"' + (stepAnswered ? '' : ' disabled') + ' onclick="if(typeof S!==\'undefined\'){S.nextQuestion()}">下一题 →</button>'}
+      <span style="font-size:13px;color:${committed ? 'var(--text2)' : 'var(--red)'};">${doneCount}/${totalDims} 已完成${committed ? '' : '（请先选择并提交答案）'}</span>
+      ${committed
+        ? (isLastPlan && S._quizAllDone
+            ? '<button class="btn btn-primary" data-action="finishQuiz" onclick="if(typeof S!==\'undefined\'){S.finishQuiz()}">查看结果</button>'
+            : '<button class="btn btn-primary" data-action="nextQuestion" onclick="if(typeof S!==\'undefined\'){S.nextQuestion()}">下一题 →</button>')
+        : '<button class="btn btn-primary" data-action="submitQuizOption" ' + (canSubmit ? 'onclick="if(typeof S!==\'undefined\'){S.submitQuizOption()}"' : 'disabled') + ' style="' + (canSubmit ? '' : 'opacity:.5;cursor:not-allowed;') + '">提交本题</button>'}
     </div>
   </div>`;
+  html += renderPauseOverlay();
   return html;
 }
 
@@ -8727,6 +8863,33 @@ function renderTargetProfileCard(result) {
   </div>`;
 }
 
+function renderAdaptiveReviewCard() {
+  const snap = S._quizSnap;
+  if (!snap || !snap.plan || !snap.plan.length) return '';
+  const wrong = [];
+  snap.plan.forEach((t, step) => {
+    const ans = snap.sel[step];
+    if (ans === undefined || !t || !t.q) return;
+    const q = t.q;
+    const ai = AI_DIMS[t.d];
+    if (ans !== q.best) wrong.push({ t: t, ans: ans, q: q, dim: ai ? ai.name : t.d });
+  });
+  if (!wrong.length) return '<div class="alert alert-success" style="margin-top:14px;">🎉 岗位测评全部答对，无错题。</div>';
+  let h = '<div class="card mt-3 slide-up"><p style="font-weight:700;font-size:14px;margin-bottom:4px;">🔍 第二部分 · 岗位测评错题复盘（' + wrong.length + ' 题 · 含解析）</p><p style="font-size:12px;color:var(--text2);margin-bottom:12px;">以下为岗位自适应测评中答错的题目，附你的选择与正确答案解析，建议结合薄弱维度课程重点复习。</p>';
+  wrong.forEach((w, i) => {
+    const q = w.q;
+    h += '<div style="margin-bottom:12px;padding:12px 14px;background:var(--bg2);border-radius:10px;border-left:3px solid var(--red);">'
+      + '<div style="font-size:12px;color:var(--text2);margin-bottom:4px;">' + w.dim + '</div>'
+      + '<div style="font-size:13px;font-weight:600;margin-bottom:6px;">' + (i + 1) + '. ' + q.q + '</div>'
+      + '<div style="font-size:13px;color:var(--red);margin-bottom:4px;">✗ 你的选择：' + String.fromCharCode(65 + w.ans) + '. ' + cleanOpt(q.opts[w.ans]) + '</div>'
+      + '<div style="font-size:13px;color:var(--green);margin-bottom:6px;">✓ 正确答案：' + String.fromCharCode(65 + q.best) + '. ' + cleanOpt(q.opts[q.best]) + '</div>'
+      + '<div style="font-size:12px;color:var(--text2);line-height:1.7;">💡 ' + (q.explain || '') + '</div>'
+      + '</div>';
+  });
+  h += '</div>';
+  return h;
+}
+
 function renderResults() {
   const role = ROLES[S.role];
   const result = S._quizResult;
@@ -8786,6 +8949,7 @@ function renderResults() {
     ${S._baseResult ? renderBaseResultCard() : (S._baseSkipped ? '<div class="alert alert-info" style="margin-top:14px;">ℹ️ 第一部分（AI 基础素养）为必答项，当前综合分已按岗位能力计算（基础卷权重 30% 待补）。</div>' : '')}<!-- v51: 基础素养独立板块 -->
 
     ${(S._selfResult || (S._selfAnswers && S._selfAnswers.filter(Boolean).length)) ? renderSelfResultCard() : (S._selfSkipped ? '<div class="alert alert-info" style="margin-top:14px;">ℹ️ 本次跳过了能力自评。重新测评时可在入口选择作答（约 2 分钟，独立结果、不计入综合分）。</div>' : '')}<!-- #193: 能力自评独立板块 -->
+    ${renderAdaptiveReviewCard()}<!-- v82: 岗位测评错题复盘 -->
 
     <div style="display:flex;gap:8px;margin-top:12px;"><!-- v35: 报告导出 -->
       <button class="btn btn-primary" style="flex:1;" data-action="exportReport">📄 导出测评报告</button>
@@ -11514,7 +11678,7 @@ S.startQuiz = function() { // 三段式：①AI基础素养 → ②AI业务场�
   }
   S.view = 'results'; render();
 };
-S.baseStart = function() { S._baseSkipped = false; buildBaseQuiz(); S._basePhase = 'active'; S.view = 'quiz'; render(); };
+S.baseStart = function() { S._baseSkipped = false; buildBaseQuiz(); S._basePhase = 'active'; S.view = 'quiz'; startPartTimer('base'); render(); };
 S.baseSkip = function() { if (typeof alert !== 'undefined') alert('第一部分（AI 基础素养）为必答项，计入综合分（30%），不可跳过，请先完成 10 题。'); };
 S.answerBase = function(i) {
   const plan = S._basePlan || [];
@@ -11535,13 +11699,13 @@ S.baseNext = function() {
   else { S.baseFinish(); }
 };
 S.baseFinish = function() { finishBaseQuiz(); render(); };
-S.baseRetake = function() { S._baseSkipped = false; buildBaseQuiz(); S._basePhase = 'active'; S.view = 'quiz'; render(); };
+S.baseRetake = function() { S._baseSkipped = false; buildBaseQuiz(); S._basePhase = 'active'; S.view = 'quiz'; startPartTimer('base'); render(); };
 S.baseGoAdaptive = function() {
   // 三段式：基础卷完成后直接进入 ②AI业务场景应用（自适应）；能力自评在自适应之后
   startAdaptiveQuiz(); S.view = 'quiz'; render();
 };
 // #193 能力自评动作
-S.selfStart = function() { S._selfSkipped = false; buildSelfQuiz(); S.view = 'quiz'; render(); };
+S.selfStart = function() { S._selfSkipped = false; buildSelfQuiz(); S.view = 'quiz'; startPartTimer('self'); render(); };
 S.selfSkip = function() {
   S._selfPhase = 'done'; S._selfResult = null; S._selfSkipped = true; S._selfPlan = [];
   // 三段式：自评在最后，跳过即出结果
@@ -11583,7 +11747,10 @@ S.selfNext = function() {
   if (idx < plan.length - 1) { S._selfIdx++; render(); }
   else { finishSelfQuiz(); render(); }
 };
-S.selfRetake = function() { S._selfSkipped = false; buildSelfQuiz(); S.view = 'quiz'; render(); };
+S.selfPrev = function() { // v83：回看并修改上一题（提交前均可改；selfSelOf 会自动恢复已选）
+  if ((S._selfIdx || 0) > 0) { S._selfIdx--; render(); }
+};
+S.selfRetake = function() { S._selfSkipped = false; buildSelfQuiz(); S.view = 'quiz'; startPartTimer('self'); render(); };
 S.selfGoResults = function() { S.view = 'results'; render(); };
 S.retakeQuiz = function() { // 三段式重测评：清空三段成绩，从第一部分重新开始
   showConfirm({
@@ -11593,17 +11760,62 @@ S.retakeQuiz = function() { // 三段式重测评：清空三段成绩，从第�
     cancelText: '再想想',
     danger: true,
     onOk: () => {
+      clearPartTimer();
       S._baseResult = null; S._baseSkipped = false; S._basePhase = null;
-      S.quizScores = null; S._quizResult = null; S._quizAllDone = false;
+      S.quizScores = null; S._quizResult = null; S._quizAllDone = false; S._quizSnap = null;
       S._selfResult = null; S._selfSkipped = false; S._selfPhase = null; S._selfAnswers = null;
+      S._basePending = []; S._quizPending = {};
       S.view = 'quiz';
       S.startQuiz();
     }
   });
 };
 S.answerQuiz = function(i) {
-  if (S._basePhase === 'active') { S.answerBase(i); return; }
+  if (S._basePhase === 'active') { S.selectBaseOption(i); return; }
   answerCurrentQuestion(i);
+};
+S.selectBaseOption = function(i) { // v83：仅暂存高亮，可在本部分提交前任意修改
+  const idx = S._baseIdx || 0;
+  if (!S._basePending) S._basePending = [];
+  S._basePending[idx] = i;
+  render();
+};
+S.submitBaseOption = function() { // v83：记录选择并前进（不判对错），末题即「提交本部分」
+  const idx = S._baseIdx || 0;
+  const plan = S._basePlan || [];
+  const p = plan[idx]; if (!p || !p.q) return;
+  const recorded = (S._baseAnswers && S._baseAnswers[idx]) ? S._baseAnswers[idx].chosen : undefined;
+  const pending = (S._basePending && S._basePending[idx] !== undefined) ? S._basePending[idx] : undefined;
+  const choice = (pending !== undefined) ? pending : recorded;
+  if (choice === undefined) return;
+  const q = p.q;
+  const ok = !!(q.scores && q.scores[choice] === 4);
+  if (!S._baseAnswers) S._baseAnswers = [];
+  S._baseAnswers[idx] = { theme: p.theme, chosen: choice, ok: ok };
+  if (S._basePending) S._basePending[idx] = undefined;
+  if (idx < plan.length - 1) { S._baseIdx = idx + 1; render(); }
+  else { S.baseFinish(); }
+};
+S.basePrev = function() { // v83：回看并修改上一题（本部分提交前均可改）
+  if ((S._baseIdx || 0) > 0) { S._baseIdx--; render(); }
+};
+S.selectQuizOption = function(i) {
+  const step = S.quizIdx;
+  if (S._quizSelectedStep && S._quizSelectedStep[step] !== undefined) return;
+  if (!S._quizPending) S._quizPending = {};
+  S._quizPending[step] = i;
+  render();
+};
+S.submitQuizOption = function() {
+  const step = S.quizIdx;
+  if (S._quizSelectedStep && S._quizSelectedStep[step] !== undefined) return;
+  const pending = S._quizPending && S._quizPending[step];
+  if (pending === undefined) return;
+  answerCurrentQuestion(pending);
+};
+S.togglePartTimer = function() {
+  const t = S._timer; if (!t) return;
+  if (t.paused) resumePartTimer(); else pausePartTimer();
 };
 S.prevQuestion = function() { // v41: 仅允许回退到本维第 1 题（撤销第 2 题，含已定级撤销）；同时解锁第 1 题以便重答
   if (!S._quizPlan || S.quizIdx <= 0) return;
@@ -11616,6 +11828,7 @@ S.prevQuestion = function() { // v41: 仅允许回退到本维第 1 题（撤销
   if (S._quizSelectedStep) { delete S._quizSelectedStep[step]; delete S._quizSelectedStep[step - 1]; }
   if (S._quizStartAt) { delete S._quizStartAt[step]; delete S._quizStartAt[step - 1]; }
   if (S._quizTiming) { delete S._quizTiming[step]; delete S._quizTiming[step - 1]; }
+  if (S._quizPending) { delete S._quizPending[step]; delete S._quizPending[step - 1]; }
   if (cur.d in S._quizDone) { delete S._quizDone[cur.d]; delete S.quizAnswers[cur.d]; }
   S._quizAllDone = false;
   S.quizIdx--;
