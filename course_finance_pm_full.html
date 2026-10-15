@@ -415,17 +415,23 @@ function llmReady(){ return LLM.state==='proxy' || LLM.state==='direct'; }
 /* ===================== 模型接入弹窗 ===================== */
 function openLlm(){
   const box=document.getElementById('llm-box');
+  const cmd='DEEPSEEK_KEY=sk-xxxx node tools/deepseek_proxy.cjs';
   box.innerHTML='<div class="mclose" onclick="closeLlm()">\u2715</div>'
    +'<h3>接入 DeepSeek 模型</h3>'
    +'<p style="text-align:left">接上模型后：陪练由真人式追问驱动、WorkBuddy 演示走真实模型生成、实操题自动点评。<b>未接入也能全程学习</b>，只是这几处走本地规则引擎。</p>'
-   +'<label>通道 A · 本地代理地址（推荐，Key 不进页面）</label>'
+   +'<div class="note" style="text-align:left;padding:10px 12px">'
+   +'<b>三步接入（推荐 · 通道 A 本地代理，Key 不进浏览器）</b>'
+   +'<div style="margin:8px 0 2px"><b>第 1 步</b> · 拿 Key：打开 <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener" style="color:var(--pri)">platform.deepseek.com → API Keys</a>，创建一个 <code>sk-</code> 开头的 Key（按量计费，本课程练习量级约几分钱）。</div>'
+   +'<div style="margin:6px 0 2px"><b>第 2 步</b> · 启动代理（二选一）：<br>'
+   +'　Mac：<b>双击课程文件夹里的「启动AI代理.command」</b>，首次粘贴 Key 回车，窗口保持开着；<br>'
+   +'　或终端执行：<code>'+cmd+'</code> <button class="btn ghost" style="padding:2px 10px;font-size:12px;margin-left:4px" onclick="copyText(\''+cmd.replace(/'/g,"\\'")+'\')">复制</button></div>'
+   +'<div style="margin:6px 0 0"><b>第 3 步</b> · 回到本弹窗点下方「保存并检测」，出现 ✓ 即接入成功（以后每次学习前先双击启动代理即可，Key 只需录一次）。</div>'
+   +'</div>'
+   +'<label>通道 A · 本地代理地址</label>'
    +'<input class="tin" id="llm-base" value="'+esc(LLM.base)+'">'
-   +'<div class="note" style="margin-top:8px">在项目根目录执行一次并保持窗口开着：<br>'
-   +'<code>DEEPSEEK_KEY=sk-xxxx node tools/deepseek_proxy.cjs</code><br>'
-   +'代理只监听 127.0.0.1:3000，Key 存在环境变量里，不会写进 HTML 或浏览器。</div>'
-   +'<label>通道 B · API Key 直连（备用；仅存本机 localStorage）</label>'
+   +'<label style="margin-top:10px">通道 B · API Key 直连（备用；仅存本机 localStorage）</label>'
    +'<input class="tin" id="llm-key" type="password" placeholder="sk-\u2026 留空则只用通道 A" value="'+esc(LLM.key)+'">'
-   +'<div class="note" style="margin-top:8px">DeepSeek 官方按量计费，本课程练习量级约几分钱；key 在 platform.deepseek.com 申请。直连时 Key 会出现在浏览器请求头里，建议只在个人电脑上临时使用。</div>'
+   +'<div class="note" style="margin-top:8px">不想启动代理时的备用通道：直接粘贴 Key 走直连（Key 会出现在浏览器请求头里，建议只在个人电脑临时使用）。Mac 上若用 Safari 直连失败，换 Chrome/Edge 再试。</div>'
    +'<div class="acts" style="margin-top:14px">'
    +'<button class="btn" onclick="saveLlmForm()">保存并检测</button>'
    +'<button class="btn ghost" onclick="closeLlm()">关闭</button></div>'
@@ -447,7 +453,15 @@ async function saveLlmForm(){
   } else if(st==='direct'){
     res.innerHTML='<span style="color:#166534">\u2713 直连 DeepSeek 成功。</span>';
   } else {
-    res.innerHTML='<span style="color:#be123c">\u2717 两条通道都不通。</span> 请确认已执行 <code>DEEPSEEK_KEY=sk-\u2026 node tools/deepseek_proxy.cjs</code>，或填入可用的 API Key。当前将使用本地规则引擎。';
+    let diag='';
+    try{ await fetch(LLM.base.replace(/\/$/,'')+'/ping',{cache:'no-store'}); }catch(e){
+      diag = (e&&e.message==='Failed to fetch')
+        ? '浏览器根本没连上 127.0.0.1:3000 → 代理大概率没启动：双击课程文件夹里的「启动AI代理.command」后再检测。'
+        : '探测失败：'+esc(e.message);
+    }
+    res.innerHTML='<span style="color:#be123c">\u2717 两条通道都不通。</span>'
+      +(diag?'<div style="margin-top:4px">诊断：'+diag+'</div>':'')
+      +'<div style="margin-top:4px">也可以走通道 B：直接粘贴 API Key（在 platform.deepseek.com 申请）。</div>';
   }
 }
 
