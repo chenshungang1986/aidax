@@ -7801,7 +7801,7 @@ function renderTimerBar() {
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
       <span style="font-size:12px;font-weight:600;color:var(--text2);">⏱️ ${label}</span>
       <span id="partTimerText" style="font-size:13px;font-weight:700;color:${ratio<0.2?'var(--red)':'var(--accent)'};margin-left:auto;">${timeStr}</span>
-      <button class="btn btn-sm btn-outline" onclick="if(typeof S!=='undefined'){S.togglePartTimer()}">${t.paused?'▶ 继续':'⏸ 暂停'}</button>
+      <button type="button" id="partTimerPauseBtn" class="btn btn-sm btn-outline" onclick="if(typeof S!=='undefined'){S.togglePartTimer()}">${t.paused?'▶ 继续':'⏸ 暂停'}</button>
     </div>
     <div style="height:8px;background:var(--bg2);border-radius:6px;overflow:hidden;">
       <div id="partTimerFill" style="height:100%;width:${ratio*100}%;background:${col};transition:width .25s linear;"></div>
@@ -7812,20 +7812,28 @@ function renderTimerBar() {
 function renderPauseOverlay() {
   const t = S._timer;
   if (!t || !t.paused) return '';
-  return `<div id="pauseOverlay" style="position:absolute;inset:0;background:rgba(255,255,255,.94);backdrop-filter:blur(3px);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:20;border-radius:12px;cursor:pointer;" onclick="if(typeof S!=='undefined'){S.togglePartTimer()}">
+  // v93 修复：遮罩与「继续测评」按钮原先都绑 togglePartTimer，点按钮时先 resume（按钮）、
+  // 再冒泡到遮罩又 pause（切换两次 = 净效果为零）→ 按钮看似失灵。
+  // 现统一改为幂等的 resumePartTimer（非暂停态直接 return），并让按钮 stopPropagation 双保险。
+  return `<div id="pauseOverlay" style="position:absolute;inset:0;background:rgba(255,255,255,.94);backdrop-filter:blur(3px);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:20;border-radius:12px;cursor:pointer;" onclick="if(typeof S!=='undefined'){S.resumePartTimer()}">
     <div style="font-size:44px;">⏸️</div>
     <div style="font-weight:700;font-size:18px;margin-top:8px;">测评已暂停</div>
-    <div style="font-size:13px;color:var(--text2);margin-top:6px;">计时已停止 · 点击任意位置继续</div>
-    <button class="btn btn-primary" style="margin-top:16px;" onclick="if(typeof S!=='undefined'){S.togglePartTimer()}">▶ 继续测评</button>
+    <div style="font-size:13px;color:var(--text2);margin-top:6px;">计时已停止 · 点击此区域任意位置继续</div>
+    <button type="button" id="pauseResumeBtn" class="btn btn-primary" style="margin-top:16px;" onclick="event.stopPropagation();if(typeof S!=='undefined'){S.resumePartTimer()}">▶ 继续测评</button>
   </div>`;
 }
 
 function pausePartTimer() {
+  pausePartTimerSilent();
+  if (S._timer && S._timer.paused) render();
+}
+
+// v93：静默暂停（不触发 render，供 render 内部调用，避免递归）
+function pausePartTimerSilent() {
   const t = S._timer; if (!t || t.paused) return;
   t.leftMs = t.endTs - Date.now();
   t.paused = true; t.running = false;
   if (PART_TIMER_ID) { clearInterval(PART_TIMER_ID); PART_TIMER_ID = null; }
-  render();
 }
 
 function resumePartTimer() {
@@ -7846,6 +7854,9 @@ function onPartTimeout(part) {
 function syncPartTimer() {
   const part = currentQuizPart();
   if (!part) { clearPartTimer(); return; }
+  // v93：离开测评页（如确认「返回将丢失当前测评进度」）时静默暂停，
+  // 避免倒计时在看不见的地方继续跑、到点后突然强制收卷。
+  if (S.view !== 'quiz') { pausePartTimerSilent(); return; }
   if (!S._timer || S._timer.part !== part) { startPartTimer(part); return; }
   if (!S._timer.paused && !PART_TIMER_ID) PART_TIMER_ID = setInterval(tickPartTimer, 250);
 }
@@ -11817,6 +11828,9 @@ S.togglePartTimer = function() {
   const t = S._timer; if (!t) return;
   if (t.paused) resumePartTimer(); else pausePartTimer();
 };
+// v93：幂等动作（供暂停遮罩使用，重复触发无副作用 —— 防冒泡导致「继续」被立刻反向切换）
+S.resumePartTimer = function() { if (S._timer && S._timer.paused) resumePartTimer(); };
+S.pausePartTimer = function() { if (S._timer && !S._timer.paused) pausePartTimer(); };
 S.prevQuestion = function() { // v41: 仅允许回退到本维第 1 题（撤销第 2 题，含已定级撤销）；同时解锁第 1 题以便重答
   if (!S._quizPlan || S.quizIdx <= 0) return;
   const cur = S._quizPlan[S.quizIdx];
