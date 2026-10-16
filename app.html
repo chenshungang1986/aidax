@@ -1933,6 +1933,7 @@ function startAdaptiveQuiz() {
   S.quizScores = null;
   S._quizResult = null;
   S._quizPending = {};              // v82：逐题暂存（显式提交前可改）
+  S._quizTentative = {};           // v94：每题第 1 次提交软暂存（第 2 次提交才定稿，给一次修改机会）
   ensureNextStep();                 // 生成第 1 题（首个维度起点题）
   startPartTimer('adaptive');       // v82：第二部分限时计时
 }
@@ -8413,7 +8414,8 @@ function renderQuiz() {
     <div class="quiz-question">${q.q}</div>
     <div style="display:flex;flex-direction:column;">`;
   const committed = stepAnswered;
-  const pending = committed ? undefined : ((S._quizPending && S._quizPending[step] !== undefined) ? S._quizPending[step] : undefined);
+  const tentative = !!(S._quizTentative && S._quizTentative[step] !== undefined); // v94：第 1 次提交后给一次修改机会（第 2 次提交才定稿）
+  const pending = committed ? undefined : ((S._quizPending && S._quizPending[step] !== undefined) ? S._quizPending[step] : (tentative ? S._quizTentative[step] : undefined));
   q.opts.forEach((o, i) => {
     let cls = 'quiz-option';
     if (committed) {
@@ -8428,9 +8430,12 @@ function renderQuiz() {
   html += `</div>`;
 
   // v83：不逐题判对错 —— 仅提示已记录，全部完成后在结果页统一展示
-  if (stepAnswered) {
+  if (committed) {
     html += `<div style="font-size:13px;margin:12px 2px 0;color:var(--text2);display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
       <span>✓ 本题已提交</span><span style="margin-left:auto;color:var(--text3);font-size:11px;">作答已记录 · 结果在本部分结束后统一展示</span></div>`;
+  } else if (tentative) {
+    html += `<div style="font-size:13px;margin:12px 2px 0;color:var(--text2);display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+      <span>✓ 已记录一次</span><span style="margin-left:auto;color:var(--amber);font-size:11px;">可再修改 1 次 · 再次提交即最终锁定</span></div>`;
   }
 
   const canBackToFirst = step > 0 && S._quizPlan[step-1].d === dimKey; // 本维第 2 题 → 可回退重答第 1 题
@@ -8444,7 +8449,7 @@ function renderQuiz() {
         ? (isLastPlan && S._quizAllDone
             ? '<button class="btn btn-primary" data-action="finishQuiz" onclick="if(typeof S!==\'undefined\'){S.finishQuiz()}">查看结果</button>'
             : '<button class="btn btn-primary" data-action="nextQuestion" onclick="if(typeof S!==\'undefined\'){S.nextQuestion()}">下一题 →</button>')
-        : '<button class="btn btn-primary" data-action="submitQuizOption" ' + (canSubmit ? 'onclick="if(typeof S!==\'undefined\'){S.submitQuizOption()}"' : 'disabled') + ' style="' + (canSubmit ? '' : 'opacity:.5;cursor:not-allowed;') + '">提交本题</button>'}
+        : '<button class="btn btn-primary" data-action="submitQuizOption" ' + (canSubmit ? 'onclick="if(typeof S!==\'undefined\'){S.submitQuizOption()}"' : 'disabled') + ' style="' + (canSubmit ? '' : 'opacity:.5;cursor:not-allowed;') + '">' + (tentative ? '再次提交（最终锁定）' : '提交本题') + '</button>'}
     </div>
   </div>`;
   html += renderPauseOverlay();
@@ -11775,7 +11780,7 @@ S.retakeQuiz = function() { // 三段式重测评：清空三段成绩，从第�
       S._baseResult = null; S._baseSkipped = false; S._basePhase = null;
       S.quizScores = null; S._quizResult = null; S._quizAllDone = false; S._quizSnap = null;
       S._selfResult = null; S._selfSkipped = false; S._selfPhase = null; S._selfAnswers = null;
-      S._basePending = []; S._quizPending = {};
+      S._basePending = []; S._quizPending = {}; S._quizTentative = {};
       S.view = 'quiz';
       S.startQuiz();
     }
@@ -11819,10 +11824,19 @@ S.selectQuizOption = function(i) {
 };
 S.submitQuizOption = function() {
   const step = S.quizIdx;
-  if (S._quizSelectedStep && S._quizSelectedStep[step] !== undefined) return;
-  const pending = S._quizPending && S._quizPending[step];
+  if (S._quizSelectedStep && S._quizSelectedStep[step] !== undefined) return; // 已最终锁定
+  const pending = (S._quizPending && S._quizPending[step] !== undefined) ? S._quizPending[step] : (S._quizTentative && S._quizTentative[step]);
   if (pending === undefined) return;
-  answerCurrentQuestion(pending);
+  // v94：每题给一次修改机会 —— 第 1 次提交只软暂存（暂不推进自适应引擎），第 2 次提交才真正定稿并推进。
+  // 「两次都错」则第 2 次提交走现有题目规则照常定级，无需特殊处理。
+  if (S._quizTentative && S._quizTentative[step] !== undefined) {
+    delete S._quizTentative[step];
+    answerCurrentQuestion(pending); // → commitAnswer → 引擎按最终答案推进
+  } else {
+    if (!S._quizTentative) S._quizTentative = {};
+    S._quizTentative[step] = pending;
+    render();
+  }
 };
 S.togglePartTimer = function() {
   const t = S._timer; if (!t) return;
@@ -11843,6 +11857,7 @@ S.prevQuestion = function() { // v41: 仅允许回退到本维第 1 题（撤销
   if (S._quizStartAt) { delete S._quizStartAt[step]; delete S._quizStartAt[step - 1]; }
   if (S._quizTiming) { delete S._quizTiming[step]; delete S._quizTiming[step - 1]; }
   if (S._quizPending) { delete S._quizPending[step]; delete S._quizPending[step - 1]; }
+  if (S._quizTentative) { delete S._quizTentative[step]; delete S._quizTentative[step - 1]; }
   if (cur.d in S._quizDone) { delete S._quizDone[cur.d]; delete S.quizAnswers[cur.d]; }
   S._quizAllDone = false;
   S.quizIdx--;
