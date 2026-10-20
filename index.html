@@ -349,6 +349,35 @@ img{max-width:100%;display:block}
   .footer-grid{grid-template-columns:1fr 1fr}
   .section-title{font-size:2rem}
 }
+
+/* ===== COURSES (v98) ===== */
+.courses{background:linear-gradient(180deg,#fff,#f8fafc)}
+.course-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.course-card{position:relative;display:flex;flex-direction:column;background:#fff;border:1px solid var(--c-border);border-radius:20px;padding:30px 28px;box-shadow:var(--shadow);transition:all .3s;overflow:hidden;text-decoration:none;color:inherit}
+.course-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-hover);border-color:var(--c-border-hover)}
+.course-card.featured{grid-column:1/-1;background:linear-gradient(120deg,#f5f3ff,#eef2ff 52%,#ecfeff);border-color:rgba(99,102,241,.2)}
+.cc-badge{position:absolute;top:24px;right:24px;padding:5px 14px;border-radius:50px;font-size:.72rem;font-weight:700;letter-spacing:.3px;background:linear-gradient(135deg,#6366f1,#7c3aed);color:#fff;box-shadow:0 4px 14px rgba(99,102,241,.28)}
+.cc-badge.ghost{background:#fff;color:var(--c-primary-dark);border:1px solid rgba(99,102,241,.2);box-shadow:none}
+.cc-head{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.cc-ico{width:54px;height:54px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#6366f1,#7c3aed);flex:0 0 auto;box-shadow:0 6px 18px rgba(99,102,241,.25)}
+.cc-ico svg{width:27px;height:27px;stroke:#fff;fill:none;stroke-width:1.6}
+.cc-head h3{font-size:1.24rem;font-weight:800;color:var(--c-text);letter-spacing:-.2px;line-height:1.2}
+.cc-head p{font-size:.85rem;color:var(--c-text3);margin-top:4px}
+.cc-desc{font-size:.95rem;line-height:1.78;color:var(--c-text2);margin-bottom:20px}
+.cc-meta{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.cc-meta span{display:inline-flex;align-items:baseline;gap:6px;padding:8px 14px;border-radius:12px;background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.1);font-size:.78rem;color:var(--c-text2)}
+.cc-meta b{font-size:1.08rem;font-weight:800;color:var(--c-primary-dark)}
+.cc-list{list-style:none;margin:0 0 22px;padding:0;display:flex;flex-direction:column;gap:10px}
+.cc-list li{position:relative;padding-left:24px;font-size:.9rem;line-height:1.6;color:var(--c-text2)}
+.cc-list li::before{content:"";position:absolute;left:0;top:6px;width:14px;height:14px;border-radius:50%;background:rgba(16,185,129,.12)}
+.cc-list li::after{content:"";position:absolute;left:4px;top:10px;width:6px;height:3px;border-left:2px solid #10b981;border-bottom:2px solid #10b981;transform:rotate(-45deg)}
+.cc-foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:18px;border-top:1px dashed var(--c-border)}
+.cc-cta{display:inline-flex;align-items:center;gap:8px;font-size:.92rem;font-weight:700;color:var(--c-primary-dark)}
+.cc-cta .arw{transition:transform .25s}
+.course-card:hover .cc-cta .arw{transform:translateX(5px)}
+.cc-note{font-size:.76rem;color:var(--c-text3)}
+.cc-soon{opacity:.72}
+@media(max-width:768px){.course-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body data-page-node-id="4G3nEzExFQVLdzRG8MC9GT">
@@ -386,6 +415,7 @@ img{max-width:100%;display:block}
     <ul class="nav-links" data-page-node-id="4G4UFL2GZO2Eu5POArdeUu">
       <li data-page-node-id="3e03UjiEJE6dCZVW0cOJIE"><a href="#pain" data-page-node-id="4YkMSrplmS0Of6qg2u7nP3">痛点</a></li>
       <li data-page-node-id="p1QhGG73pDuZhYzOdYSIS8"><a href="#solution" data-page-node-id="d48ghinHuJCDgwYVt6yoiv">方案</a></li>
+      <li data-page-node-id="courseNav01"><a href="#courses" data-page-node-id="courseNav02">课程</a></li>
       <li data-page-node-id="1STrt7I8Q9A7eekJGCO0KM"><a href="#model" data-page-node-id="MOMQ5pAWiGV0Ms5WYPLGM3">能力模型</a></li>
       <li data-page-node-id="ESNpe3nYxZFHaIlArSLhBb"><a href="#upgrade" data-page-node-id="Sc9J6DP6NYrtFpLBtaYlH2">六大升级</a></li>
       <li data-page-node-id="V5qQVMKfjfQgBKLJPbwgRX"><a href="#industries" data-page-node-id="6QbletVJu7XjHTyAC3O9kn">行业</a></li>
@@ -406,7 +436,7 @@ img{max-width:100%;display:block}
       <p class="hero-desc" data-page-node-id="nzEtJj3jBdLAaHiSvhAkRE">AI达学AIDAX为企业提供「AI基础素养 + 岗位自适应双测评 → 自评融入学习地图 → 全课程可学（必修/选修）→ WorkBuddy 场景实操 → 视频字幕高亮陪练 → 作业提示与得分点」的完整AI技能培训闭环，全面覆盖7大行业、8大岗位。</p>
       <div class="hero-btns" data-page-node-id="Xxu7u9H0qqnFMmHBOEXuzy">
         <button class="btn btn-primary" onclick="openLogin()" data-page-node-id="7OZ2ZAeKVzYIvOTurrWPym">免费开始测评 →</button>
-        <button class="btn btn-outline" onclick="openLogin()" data-page-node-id="f4WE32D69AOkI27d1EQOYF">查看行业方案</button>
+        <a class="btn btn-outline" href="#courses" data-page-node-id="f4WE32D69AOkI27d1EQOYF" style="text-decoration:none">看真实课程样例 →</a>
       </div>
       <div class="hero-stats" data-page-node-id="dSiUTmZQHLMGWp32FXOlAz">
         <div class="hero-stat" data-page-node-id="HOnvBp520Qj5ui3CVTpTru"><strong data-page-node-id="n0ElIz4pADEawKkCqwjqBC">100+</strong><span data-page-node-id="3NxYDyH6o5TGb4Dd5GA4dT">服务企业</span></div>
@@ -521,6 +551,66 @@ img{max-width:100%;display:block}
           <div class="sv-row" data-page-node-id="ehDYDozvYRlQWPxFDdRTCC"><span class="label" data-page-node-id="lNfXUKA09K9q5pVYjsU5WH">安全合规</span><div class="track" data-page-node-id="w5F2VPY8HqLVmvYwu5Qv55"><div class="fill" style="width:70%;background:linear-gradient(90deg,#6366f1,#f59e0b)" data-page-node-id="v0OkdRZtfrsCDBwIlwXK2c"></div></div><span class="pct" data-page-node-id="QiB7Dx0GEtOOt2O6ZWTXyy">70%</span></div>
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== COURSES ===== -->
+<section class="courses section" id="courses">
+  <div class="container">
+    <div class="section-tag">Courses</div>
+    <h2 class="section-title">真实课程，<span class="hl">先看再决定</span></h2>
+    <p class="section-sub">不用注册也能打开一节真课——看得见内容深度，再谈合作</p>
+    <div class="course-grid">
+
+      <a class="course-card featured" href="course_finance_pm_full.html">
+        <div class="cc-badge">旗舰 · 已上线</div>
+        <div class="cc-head">
+          <div class="cc-ico"><svg viewBox="0 0 24 24" stroke="#fff" fill="none" stroke-width="1.6"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 5-5"/></svg></div>
+          <div><h3>金融 × 产品经理</h3><p>银行 · 保险 · 证券</p></div>
+        </div>
+        <p class="cc-desc">面向金融行业产品经理，围绕信贷、财富、保险营销三大真实业务场景，从方法论到 WorkBuddy 实操演示，再到你亲手产出可带走的交付物。全课真人配音讲解，配视频字幕高亮与 AI 陪练。</p>
+        <div class="cc-meta">
+          <span><b>64</b>个学习单元</span>
+          <span><b>192</b>段真人配音</span>
+          <span><b>3</b>大业务场景</span>
+          <span><b>8</b>模块递进</span>
+        </div>
+        <ul class="cc-list">
+          <li>信贷审批 · 财富管理 · 保险营销 三大场景逐个做深</li>
+          <li>理解 → 演示 → 我要做 → AI 陪练，四步学习闭环</li>
+          <li>AI 扮演评审 / 客户 / 高管，产出可带走的真实交付物</li>
+        </ul>
+        <div class="cc-foot"><span class="cc-cta">免费试学 <span class="arw">→</span></span><span class="cc-note">打开即学，无需登录</span></div>
+      </a>
+
+      <a class="course-card" href="course_newbie_graduate.html">
+        <div class="cc-head">
+          <div class="cc-ico"><svg viewBox="0 0 24 24" stroke="#fff" fill="none" stroke-width="1.6"><path d="M12 3L3 9l9 6 9-6-9-6z"/><path d="M3 15l9 6 9-6"/></svg></div>
+          <div><h3>AI 新人入门</h3><p>行业新人 · 应届毕业生</p></div>
+        </div>
+        <p class="cc-desc">零基础起步，用最贴近日常办公的任务讲清 AI 怎么用、红线在哪，适合刚接触 AI 的新同事与应届生快速补齐基础素养。</p>
+        <ul class="cc-list">
+          <li>从「怎么写第一句提示词」开始，不假设任何基础</li>
+          <li>每条都给可复用模板，学完当天能用上自己的工作</li>
+        </ul>
+        <div class="cc-foot"><span class="cc-cta">开始学习 <span class="arw">→</span></span><span class="cc-note">浏览器打开即学</span></div>
+      </a>
+
+      <div class="course-card cc-soon">
+        <div class="cc-badge ghost">敬请期待</div>
+        <div class="cc-head">
+          <div class="cc-ico"><svg viewBox="0 0 24 24" stroke="#fff" fill="none" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+          <div><h3>更多岗位课程</h3><p>研发 · 运维 · 销售 · HR · 财务 · 采购 · 法务</p></div>
+        </div>
+        <p class="cc-desc">其余 7 大岗位 × 7 大行业的场景课程，正按同一套「理解 → 演示 → 我要做 → AI 陪练」链路生产中，可预约内测名额。</p>
+        <ul class="cc-list">
+          <li>沿用同一套四步学习结构，质量口径统一</li>
+          <li>支持按企业真实业务流程定制场景</li>
+        </ul>
+        <div class="cc-foot"><button class="btn btn-primary" style="padding:10px 22px" onclick="openLogin()">预约内测 →</button><span class="cc-note">需登录体验</span></div>
+      </div>
+
     </div>
   </div>
 </section>
@@ -743,7 +833,7 @@ img{max-width:100%;display:block}
         <p style="margin-top:12px;font-size:.85rem" data-page-node-id="vSAP4phcAfEKBowWd7HVwH">AI达学AIDAX为企业提供从能力诊断、个性化课程、场景化陪练到成果验证的完整AI技能培训闭环。</p>
       </div>
       <div data-page-node-id="Z5n9AWDaNGsFWCaGP8vB0j"><h3 data-page-node-id="uxWi9dqgJblI3MzjGeoyGH">产品</h3><a href="#model" data-page-node-id="zTGv2RbQLfyi1RCKtlXaGl">AI能力模型</a><a href="#upgrade" data-page-node-id="gHFCp7hCim8k8C7PpActua">六大升级</a><a href="#" data-page-node-id="B8biAjPGYCRCmAVaamVini">关卡陪练</a><a href="#enterprise" data-page-node-id="SB0vYShkvFXl9HJxeYAkey">企业版 / 管理后台</a></div>
-      <div data-page-node-id="QPew437z1kwkC4dZ4yeWhG"><h3 data-page-node-id="qJ3GqARpHk96FVoBTv0B7Q">资源</h3><a href="#" data-page-node-id="4YWrke2CRSP06Ub9fbSYWf">行业案例</a><a href="#" data-page-node-id="qq7Z6K55e0HF59UUKmJFLf">课程目录</a><a href="#" data-page-node-id="HwJAaC32FfubetCkKv6clU">帮助中心</a><a href="#" data-page-node-id="ONUIdD5Xe1cHoNKQEtxAgX">API文档</a></div>
+      <div data-page-node-id="QPew437z1kwkC4dZ4yeWhG"><h3 data-page-node-id="qJ3GqARpHk96FVoBTv0B7Q">资源</h3><a href="#" data-page-node-id="4YWrke2CRSP06Ub9fbSYWf">行业案例</a><a href="#courses" data-page-node-id="qq7Z6K55e0HF59UUKmJFLf">课程专区</a><a href="#" data-page-node-id="HwJAaC32FfubetCkKv6clU">帮助中心</a><a href="#" data-page-node-id="ONUIdD5Xe1cHoNKQEtxAgX">API文档</a></div>
       <div data-page-node-id="vCSQupZEpGbKxlEASBDDHA"><h3 data-page-node-id="s6FYNrhaJc9atIx30y4sss">联系</h3><a href="#" data-page-node-id="X5Aay3tOqZ9uodvqD6KSAI">预约演示</a><a href="#" data-page-node-id="y46ayhiSaeTjzma1r7smPv">企业合作</a><a href="#" data-page-node-id="CjbJtGt6qAH9ofmc6sN0Ah">人才招聘</a></div>
     </div>
     <div class="footer-bottom" data-page-node-id="tEZWSP9MDjHpj6zSqdgD1T">
@@ -794,10 +884,10 @@ img{max-width:100%;display:block}
 
 <script>
 // Login functions
-function openLogin(){window.location.href='app.html?v=97'} // 直接进入 app.html 统一登录页（无弹窗）
+function openLogin(){window.location.href='app.html?v=98'} // 直接进入 app.html 统一登录页（无弹窗）
 function closeLogin(){document.getElementById('loginOverlay').classList.remove('show')}
 // 登录统一在 app.html 完成（含公司名称 / 手机号验证码校验）
-function goApp(){window.location.replace('app.html?v=97')}
+function goApp(){window.location.replace('app.html?v=98')}
 
 // Customer service toggle
 function toggleCsPanel(){document.getElementById('csPanel').classList.toggle('show')}
