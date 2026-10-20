@@ -338,8 +338,8 @@ function refreshProg(){
   const xp=document.getElementById('prog-xp'); if(xp) xp.textContent=totalXP();
 }
 
-/* 占位符替换 */
-let CUSTOM={industry:'消费金融',company:'模拟银行 X',product:'闪电贷'};
+/* 占位符替换：默认词先取课程数据里的 customization（行业/机构/产品定制），不再写死金融默认值 */
+let CUSTOM=Object.assign({industry:'消费金融',company:'模拟银行 X',product:'闪电贷'},(typeof COURSE!=='undefined'&&COURSE.customization)||{});
 try{ const s=localStorage.getItem('aidax_newbie_grad_custom'); if(s) CUSTOM=Object.assign(CUSTOM,JSON.parse(s)); }catch(e){}
 function sub(t){ return (t||'').replace(/\{\{industry\}\}/g,CUSTOM.industry).replace(/\{\{company\}\}/g,CUSTOM.company).replace(/\{\{product\}\}/g,CUSTOM.product); }
 function applyCustom(){
