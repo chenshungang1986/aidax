@@ -1889,45 +1889,140 @@ function getQuizQuestions(roleId, industryId) {
   return byDim;
 }
 
-function startAdaptiveQuiz() {
-  const weights = getWeights(S.industry, S.role);
-  const byDim = getQuizQuestions(S.role, S.industry);
-  
-  // Fisher-Yates shuffle: randomize options on every question to prevent "always pick last" pattern
-  Object.keys(byDim).forEach(function(d) {
-    for (var lv = 0; lv <= 2; lv++) {
-      var q = byDim[d] && byDim[d][lv];
-      if (!q || !q.opts || !q.scores || q.opts.length < 2) continue;
-      var n = q.opts.length;
-      var indices = q.opts.map(function(_, i) { return i; });
-      // Fisher-Yates shuffle
-      for (var i = n - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var tmp = indices[i];
-        indices[i] = indices[j];
-        indices[j] = tmp;
-      }
-      q.opts = indices.map(function(i) { return q.opts[i]; });
-      q.scores = indices.map(function(i) { return q.scores[i]; });
-      if (q.best !== undefined) q.best = indices.indexOf(q.best);
+// ============================================================
+// A2+B 云端抽题 / 评分层（服务端化 · 防抄）
+// 主路径：draw-question（不返回 scores/best）/ score-answer（服务端算分）。
+// 兜底：云端异常时回退到内嵌题库（getQuizQuestions）本地算分，保证网站永不崩。
+// 简单请求：Content-Type:text/plain + token 入 body，规避 CORS 预检（与 verify_draw_fn 验证一致）。
+// ============================================================
+var CLOUD_QUIZ = (window.AIDAX_CLOUD_QUIZ !== false); // 默认走云端；?cloudquiz=0 或 window.AIDAX_CLOUD_QUIZ=false 可关
+
+function quizFnBase() {
+  var cfg = cloudConfig();
+  if (!cfg || !cfg.supabaseUrl) return '';
+  return cfg.supabaseUrl.replace(/\/$/, '').replace('.supabase.co', '.functions.supabase.co');
+}
+
+// 确保持有有效 mint_token 租户 JWT（复用已有 S.mintCloudToken）
+function getQuizToken(cb) {
+  cb = cb || function () {};
+  if (S._cloudJwt && (Date.now() - (S._cloudJwtAt || 0) < 50 * 60 * 1000)) { cb(S._cloudJwt); return; }
+  try {
+    var s = (typeof getSessionSafe === 'function') ? getSessionSafe() : null;
+    S.mintCloudToken({ type: (s && s.loginType) || 'guest', company: s ? s.company : '', phone: s ? s.phone : '', loginId: s ? s.loginId : '', password: '' }, function () { cb(S._cloudJwt || ''); });
+  } catch (e) { cb(''); }
+}
+
+function fetchCloud(fn, bodyObj, cb) {
+  cb = cb || function () {};
+  var url = quizFnBase() + '/' + fn;
+  if (!url) { cb(0, null); return; }
+  var payload = Object.assign({ token: S._cloudJwt || '' }, bodyObj);
+  fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) })
+    .then(function (r) { return r.json().then(function (j) { return { status: r.status, json: j }; }); })
+    .then(function (res) { cb(res.status, res.json); })
+    .catch(function () { cb(0, null); }); // 网络错误 → 走兜底
+}
+
+function cloudDrawQuestion(bank, dim, level, exclude, cb) {
+  cb = cb || function () {};
+  getQuizToken(function (tok) {
+    if (!tok) { cb(null); return; }
+    fetchCloud('draw-question', { bank: bank, dim: dim, level: level, exclude: exclude || [] }, function (st, j) {
+      if (st === 200 && j && j.question && j.drawToken) cb(j); else cb(null);
+    });
+  });
+}
+
+function cloudScoreAnswer(drawToken, choiceIdx, cb) {
+  cb = cb || function () {};
+  getQuizToken(function (tok) {
+    if (!tok) { cb(null); return; }
+    fetchCloud('score-answer', { drawToken: drawToken, choiceIdx: choiceIdx }, function (st, j) {
+      if (st === 200 && j && typeof j.score === 'number') cb(j.score); else cb(null);
+    });
+  });
+}
+
+// 兜底：从内嵌题库抽一道（含 scores/best），云端异常时用
+function localDrawQuestion(bank, dim, level, cb) {
+  cb = cb || function () {};
+  if (!S._localByDim) S._localByDim = getQuizQuestions(S.role, S.industry);
+  var q = S._localByDim[dim] && S._localByDim[dim][level];
+  if (!q || !q.opts) { cb(null); return; }
+  cb({ q: q.q, scenario: q.scenario, explain: q.explain, opts: q.opts, _scores: q.scores, _best: q.best });
+}
+function localScore(q, idx) {
+  if (q && q._scores && q._scores[idx] !== undefined) return q._scores[idx];
+  return idx;
+}
+
+// 懒加载某 plan 步骤的题目（云端优先，失败兜底）
+function loadQuizQuestion(step, done) {
+  done = done || function () {};
+  var t = S._quizPlan && S._quizPlan[step];
+  if (!t || t.q) { done(); return; }
+  S._quizAskedIds = S._quizAskedIds || [];
+  cloudDrawQuestion(t.bank, t.d, t.lv, S._quizAskedIds, function (cloud) {
+    if (cloud) {
+      t.q = {
+        id: cloud.question.id, bank: cloud.question.bank, dim: cloud.question.dim, level: cloud.question.level,
+        q: cloud.question.q, scenario: cloud.question.scenario, explain: cloud.question.explain,
+        opts: cloud.question.opts, drawToken: cloud.drawToken
+      };
+      if (cloud.question.id) S._quizAskedIds.push(cloud.question.id);
+      done();
+    } else {
+      localDrawQuestion(t.bank, t.d, t.lv, function (fq) {
+        if (fq) { t.q = fq; done(); }
+        else {
+          // 云端与本地都无此题 → 标记该 (dim,lv) 不可用，回退重开新维
+          if (S._quizAvail[t.d]) S._quizAvail[t.d][t.lv] = false;
+          S._quizPlan.pop();
+          ensureNextStep();
+          done();
+        }
+      });
     }
   });
-  
-  // v41 D4 修复：维度必须"至少有一个级别存在题目"才算可测（杜绝空维度提前结束测评）
+}
+
+// 解析 role/industry → 题库名（与 getQuizQuestions 内部映射一致）
+function quizBankFor(roleId, industryId) {
+  if (roleId === 'pm') {
+    var indMap = { mfg: 'MFG_PM_QUIZ', finance: 'FIN_PM_QUIZ', auto: 'AUTO_PM_QUIZ', cpg: 'CPG_PM_QUIZ', internet: 'INTERNET_PM_QUIZ', mega: 'MEGA_PM_QUIZ' };
+    return indMap[industryId] || 'MFG_PM_QUIZ';
+  }
+  var roleMap = { dev: 'DEV_QUIZ_V2', ops: 'OPS_QUIZ_V2', sales: 'SALES_QUIZ_V2', hr: 'HR_QUIZ_V2', fin: 'FIN_QUIZ_V2', po: 'PO_QUIZ_V2', legal: 'LEGAL_QUIZ_V2' };
+  return roleMap[roleId] || 'DEV_QUIZ_V2';
+}
+
+function startAdaptiveQuiz() {
+  const weights = getWeights(S.industry, S.role);
+  S._quizBank = quizBankFor(S.role, S.industry);
+  // 可用性：源自内嵌题库结构（与云端一致），用于分支判断 + 兜底来源
+  const byDim = getQuizQuestions(S.role, S.industry);
+  S._localByDim = byDim; // 兜底用（含 scores/best）
+  S._quizAvail = {};
+  const dims = ['prompt','tools','data','content','dev','workflow','security','strategy'];
+  dims.forEach(function (d) {
+    S._quizAvail[d] = { 0: !!(byDim[d] && byDim[d][0]), 1: !!(byDim[d] && byDim[d][1]), 2: !!(byDim[d] && byDim[d][2]) };
+  });
+
+  // v41 D4 修复：维度必须"至少有一个级别存在题目"才算可测
   const dimOrder = Object.entries(weights)
-    .filter(([k,w]) => w > 0 && dimHasAnyQuestion(byDim, k))
-    .sort((a,b) => b[1] - a[1])
+    .filter(([k, w]) => w > 0 && dimHasAnyQuestion(S._quizAvail, k))
+    .sort((a, b) => b[1] - a[1])
     .map(([k]) => k);
 
   // ===== v41 自适应引擎状态：同维连答 ≤2 题，按表现升降难度，证据链映射 0-4 =====
   S._quizDims = dimOrder;
-  S._quizByDim = byDim;
   S._quizWeights = weights;
   S.quizIdx = 0;                    // 语义：_quizPlan 题序列索引
   S.quizAnswers = {};               // {dimKey: 0-4 定级分}（最终定级，非单题原始分）
   S._quizDone = {};                 // {dimKey: grade} 已定级维度
   S._quizLog = {};                  // {dimKey: [{lv, score, dur, ansIdx, step}]} 证据链
-  S._quizPlan = [];                 // [{d, lv, q}] 动态题序列（题对象取自 _quizByDim）
+  S._quizPlan = [];                 // [{d, lv, bank, q:null}] 动态题序列（q 懒加载：云端抽题或本地兜底）
   S._quizSelectedStep = {};         // {step: ansIdx} 每题已选
   S._quizStartAt = {};              // {step: ts} 每题开始展示时间（防猜题按题独立）
   S._quizTiming = {};               // {step: durMs} 每题作答耗时
@@ -1935,19 +2030,20 @@ function startAdaptiveQuiz() {
   S.quizScores = null;
   S._quizResult = null;
   S._quizPending = {};              // v82：逐题暂存（显式提交前可改）
-  ensureNextStep();                 // 生成第 1 题（首个维度起点题）
+  S._quizAskedIds = [];             // 已抽题 id（云端 exclude 去重）
+  ensureNextStep();                 // 生成第 1 题 marker（q=null，render 时懒加载）
   startPartTimer('adaptive');       // v82：第二部分限时计时
 }
 
 // ===== v41 自适应引擎：同维连答状态机 =====
 
 // 该维是否有任一难度级别存在题目（D4 修复）
-function dimHasAnyQuestion(byDim, k) {
-  return !!(byDim[k] && (byDim[k][0] || byDim[k][1] || byDim[k][2]));
+function dimHasAnyQuestion(avail, k) {
+  return !!(avail[k] && (avail[k][0] || avail[k][1] || avail[k][2]));
 }
 
 function hasLevel(dim, lv) {
-  return !!(S._quizByDim && S._quizByDim[dim] && S._quizByDim[dim][lv]);
+  return !!(S._quizAvail && S._quizAvail[dim] && S._quizAvail[dim][lv]);
 }
 
 // 起点级别：优先 L1（中阶）；无 L1 则取该维最低有题级别（兜底：单证据定级）
@@ -1958,11 +2054,10 @@ function pickStartLevel(dim) {
   return -1;
 }
 
-// 追加一道题到计划末尾
+// 追加一道题到计划末尾（marker，q 之后懒加载）
 function pushPlanQuestion(dim, lv) {
-  const q = S._quizByDim[dim] && S._quizByDim[dim][lv];
-  if (!q) return false;
-  S._quizPlan.push({ d: dim, lv: lv, q: q });
+  if (!hasLevel(dim, lv)) return false;
+  S._quizPlan.push({ d: dim, lv: lv, bank: S._quizBank, q: null });
   return true;
 }
 
@@ -2067,6 +2162,7 @@ function ensureQuizTiming(step) {
 
 // 真正提交答案（防猜题确认通过后走这里）。
 // v41：写每题已选 + 追加该维证据链；证据收口后定级（quizAnswers[dim]=0-4），并推进计划生成下一题
+// A2+B：score 改由云端 score-answer 算（q.drawToken），云端异常时回退本地 scores。
 function commitAnswer(step, answerIdx) {
   S._quizSelectedStep = S._quizSelectedStep || {};
   S._quizSelectedStep[step] = answerIdx;
@@ -2085,20 +2181,31 @@ function commitAnswer(step, answerIdx) {
     }
   }
   const q = t.q;
-  const score = (q.scores && q.scores[answerIdx] !== undefined) ? q.scores[answerIdx] : answerIdx;
-  const start = (S._quizStartAt && S._quizStartAt[step]) || Date.now();
-  const dur = Date.now() - start;
-  S._quizTiming = S._quizTiming || {};
-  S._quizTiming[step] = dur;
-  // 证据：同 step 旧证据先剔除再追加（支持重答覆盖，保证每维 ≤2 条且级别唯一）
-  S._quizLog = S._quizLog || {};
-  if (!S._quizLog[t.d]) S._quizLog[t.d] = [];
-  S._quizLog[t.d] = S._quizLog[t.d].filter(e => e.step !== step);
-  S._quizLog[t.d].push({ lv: t.lv, score: score, dur: dur, ansIdx: answerIdx, step: step });
-  // 防御：该维此前已定级（理论仅回退后可达）→ 撤销定级重走流程
-  if (t.d in S._quizDone) { delete S._quizDone[t.d]; delete S.quizAnswers[t.d]; S._quizAllDone = false; }
-  ensureNextStep();   // 出第 2 题 / 定级开新维 / 置 _quizAllDone
-  render();
+  // 算分：云端优先，失败回退本地
+  function afterScore(score) {
+    const start = (S._quizStartAt && S._quizStartAt[step]) || Date.now();
+    const dur = Date.now() - start;
+    S._quizTiming = S._quizTiming || {};
+    S._quizTiming[step] = dur;
+    // 证据：同 step 旧证据先剔除再追加（支持重答覆盖，保证每维 ≤2 条且级别唯一）
+    S._quizLog = S._quizLog || {};
+    if (!S._quizLog[t.d]) S._quizLog[t.d] = [];
+    S._quizLog[t.d] = S._quizLog[t.d].filter(e => e.step !== step);
+    S._quizLog[t.d].push({ lv: t.lv, score: score, dur: dur, ansIdx: answerIdx, step: step });
+    // 防御：该维此前已定级（理论仅回退后可达）→ 撤销定级重走流程
+    if (t.d in S._quizDone) { delete S._quizDone[t.d]; delete S.quizAnswers[t.d]; S._quizAllDone = false; }
+    ensureNextStep();   // 出第 2 题 / 定级开新维 / 置 _quizAllDone
+    render();
+  }
+  if (q && q.drawToken && CLOUD_QUIZ) {
+    cloudScoreAnswer(q.drawToken, answerIdx, function (s) {
+      afterScore((s !== null) ? s : localScore(q, answerIdx));
+    });
+  } else if (q && q._scores) {
+    afterScore(localScore(q, answerIdx));
+  } else {
+    afterScore(answerIdx);
+  }
 }
 
 function answerCurrentQuestion(answerIdx) {
@@ -8398,8 +8505,10 @@ function renderQuiz() {
   const dimInfo = AI_DIMS[dimKey];
   const q = t.q;
   if (!q) {
-    finishAdaptiveQuiz();
-    return '';
+    // 懒加载本题（云端抽题，失败兜底本地）；加载中显示占位，完成后重渲染
+    loadQuizQuestion(step, function () { if (typeof render === 'function') render(); });
+    return headerHtml((dimInfo ? dimInfo.icon + ' ' + dimInfo.name : 'AI能力测评') + ' · 加载中', '正在抽题...', true) +
+      '<div class="card text-center"><p style="padding:40px;color:var(--text2)">⏳ 正在抽取本题...</p></div>';
   }
   // Inject industry context for non-PM roles to make questions industry-specific
   const indCtx = getIndustryContext(S.role, S.industry);
