@@ -7651,6 +7651,8 @@ function render() {
       var _role = getSessionSafe().role;
       if (_role !== 'admin' && _role !== 'ent') { S.view = 'role'; app.innerHTML = renderRoleSelection(); break; }
       if (S.adminTab === 'companies' && _role !== 'admin') S.adminTab = 'overview';
+      if (S.adminTab === 'quiz' && _role !== 'admin') S.adminTab = 'overview';
+      if (S.adminTab === 'report' && _role !== 'admin') S.adminTab = 'overview';
       app.innerHTML = renderAdmin(); break;
     }
     case 'map': app.innerHTML = renderLearningMap(); break;
@@ -11087,6 +11089,40 @@ S.seedDemoData = function(){
 S.adminSetTab = function(t){ S.adminTab = t; render(); };
 S.quizRefresh = function(){ S._quizStats = undefined; render(); };
 
+// ---- 企业能力档案报告（P1-2）----
+S.reportRefresh = function(){ S._repTenants = undefined; S._repData = {}; render(); };
+S.reportSetTenant = function(t){ S._repTenant = t; render(); };
+S.reportExport = function(){
+  var t = S._repTenant || '';
+  var d = S._repData && S._repData[t];
+  if (!d || !d.ok || !d.learners || !d.learners.length) { showToast('暂无可导出的学员数据'); return; }
+  var head = ['企业','学员','综合正确率(%)','答题数','正确数','覆盖维度数','最近测评']
+    .concat(RDIM_ORDER.map(function(k){ return QDIM_LABEL[k] + '(%)'; }));
+  var rows = [head.join(',')];
+  d.learners.forEach(function(x){
+    rows.push([t, (x.label||x.owner), x.composite, x.tests, x.correct, x.covered, (x.lastTest||'')]
+      .concat(RDIM_ORDER.map(function(k){ var v = x.dims[k]; return (typeof v === 'number' && v >= 0) ? v : ''; }))
+      .join(','));
+  });
+  // 追加一行企业均值，便于向企业汇报整体水位
+  var avg = []; RDIM_ORDER.forEach(function(k){
+    var s = 0, c = 0;
+    d.learners.forEach(function(x){ if (typeof x.dims[k] === 'number' && x.dims[k] >= 0) { s += x.dims[k]; c++; } });
+    avg.push(c ? Math.round(s / c * 10) / 10 : '');
+  });
+  var tt = 0, tc = 0;
+  d.learners.forEach(function(x){ tt += x.tests; tc += x.correct; });
+  rows.push([t, '【企业均值·' + d.learners.length + '人】', tt ? Math.round(tc / tt * 1000) / 10 : 0, tt, tc, '', ''].concat(avg).join(','));
+  var csv = '\ufeff' + rows.join('\r\n');
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'AI能力档案_' + t + '_' + (Date.now() + '').slice(-6) + '.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+  showToast('已导出 ' + d.learners.length + ' 名学员档案');
+};
+
 function renderAdmin() {
   S.adminTab = S.adminTab || 'overview';
   var session = JSON.parse(localStorage.getItem('ai_training_session') || '{}');
@@ -11094,6 +11130,7 @@ function renderAdmin() {
   var tabs = [['overview','总览'],['industry','行业分析'],['company','企业分析'],['feedback','反馈汇总'],['logs','访问日志'],['sales','销售方案']];
   if (isAdmin) tabs.push(['companies','企业管理']);
   if (isAdmin) tabs.push(['quiz','测评分析']);
+  if (isAdmin) tabs.push(['report','企业报告']);
   var html = headerHtml('管理员看板', isAdmin ? '平台管理员视角 · 团队AI学习全景' : '企业管理员视角 · 团队AI学习进度', true);
   html += '<div class="admin-tabs">';
   tabs.forEach(function(t){
@@ -11107,6 +11144,7 @@ function renderAdmin() {
   else if (S.adminTab === 'companies') html += renderAdminCompanies();
   else if (S.adminTab === 'sales') html += renderAdminSales();
   else if (S.adminTab === 'quiz') html += renderAdminQuiz();
+  else if (S.adminTab === 'report') html += renderAdminReport();
   else html += renderAdminOverview(isAdmin);
   return html;
 }
@@ -11551,6 +11589,158 @@ function renderAdminQuiz() {
   } else { html += '<p style="color:var(--text3)">暂无弱题数据</p>'; }
   html += '</div>';
 
+  html += '</div>';
+  return html;
+}
+
+// ==================== 企业能力档案报告（P1-2）====================
+// 交付形态：平台管理员选企业 → 逐学员 8 维能力档案 → 导出 CSV（向企业交付学习成果）。
+// 依赖 Edge Function quiz-stats 的 scope=enterprises / enterprise_learners。
+// 若 Edge Function 尚未部署新作用域（返回的是旧 platform 聚合），自动降级为企业级聚合视图并提示部署命令。
+var RDIM_ORDER = ['prompt','tools','data','content','dev','workflow','security','strategy'];
+
+// 8 维雷达图（企业整体画像）
+function reportRadar(dims) {
+  var n = RDIM_ORDER.length, cx = 110, cy = 108, R = 80;
+  function pt(i, r) { var a = -Math.PI / 2 + i * 2 * Math.PI / n; return [cx + Math.cos(a) * r, cy + Math.sin(a) * r]; }
+  var grid = '';
+  [0.25, 0.5, 0.75, 1].forEach(function (f) {
+    var p = RDIM_ORDER.map(function (_, i) { var q = pt(i, R * f); return q[0].toFixed(1) + ',' + q[1].toFixed(1); }).join(' ');
+    grid += '<polygon points="' + p + '" fill="none" stroke="var(--border,#e6eaf2)" stroke-width="1"/>';
+  });
+  var axes = RDIM_ORDER.map(function (_, i) {
+    var q = pt(i, R);
+    return '<line x1="' + cx + '" y1="' + cy + '" x2="' + q[0].toFixed(1) + '" y2="' + q[1].toFixed(1) + '" stroke="var(--border,#e6eaf2)" stroke-width="1"/>';
+  }).join('');
+  var poly = RDIM_ORDER.map(function (k, i) {
+    var v = dims[k]; var rate = (typeof v === 'number' && v >= 0) ? v : 0;
+    var q = pt(i, R * Math.max(0.04, rate / 100));
+    return q[0].toFixed(1) + ',' + q[1].toFixed(1);
+  }).join(' ');
+  var labels = RDIM_ORDER.map(function (k, i) {
+    var q = pt(i, R + 15);
+    return '<text x="' + q[0].toFixed(1) + '" y="' + (q[1] + 3).toFixed(1) + '" font-size="9.5" fill="var(--text2,#6b7686)" text-anchor="middle">' + QDIM_LABEL[k] + '</text>';
+  }).join('');
+  return '<svg viewBox="0 0 220 220" width="220" height="220">' + grid + axes
+    + '<polygon points="' + poly + '" fill="rgba(58,110,240,0.22)" stroke="#3a6ef0" stroke-width="2"/>' + labels + '</svg>';
+}
+
+function renderAdminReport() {
+  if (S._repTenants === undefined) {
+    S._repTenants = null;
+    fetchCloud('quiz-stats', { scope: 'enterprises' }, function (st, j) {
+      S._repTenants = (st === 200 && j && j.ok && Array.isArray(j.tenants)) ? j.tenants : [];
+      if (S.view === 'admin' && S.adminTab === 'report') render();
+    });
+  }
+  var t = S._repTenant || '';
+  var html = '<div class="card slide-up"><div class="section-title"><span class="st-ico">🏢</span>企业能力档案（向企业交付学习成果）</div>';
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">'
+    + '<span class="tag tag-blue">数据来源：quiz_score_log 逐学员聚合</span>'
+    + '<button class="btn btn-sm btn-outline" data-action="reportRefresh">🔄 刷新</button></div>';
+
+  if (S._repTenants === null) { html += '<p style="text-align:center;color:var(--text3);padding:30px">正在加载企业列表…</p></div>'; return html; }
+  if (!S._repTenants.length) {
+    html += '<p style="text-align:center;color:var(--text3);padding:30px">暂无企业级数据（tenant≠public）。<br>学员需以企业身份登录并被归属到企业后，才会产生企业维度数据。</p></div>';
+    return html;
+  }
+
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">';
+  S._repTenants.forEach(function (x) {
+    html += '<button class="btn btn-sm ' + (t === x.tenant ? 'btn-primary' : 'btn-outline') + '" data-action="reportSetTenant" data-tenant="' + escapeHtml(x.tenant) + '">'
+      + escapeHtml(x.tenant) + ' · ' + x.n + ' 答</button>';
+  });
+  html += '</div>';
+  if (!t) { html += '<p style="text-align:center;color:var(--text3);padding:26px">请在上方选择一个企业，查看其学员能力档案。</p></div>'; return html; }
+
+  if (!S._repData) S._repData = {};
+  if (S._repData[t] === undefined) {
+    S._repData[t] = null;
+    fetchCloud('quiz-stats', { scope: 'enterprise_learners', tenant: t }, function (st, j) {
+      if (st === 200 && j && j.ok && Array.isArray(j.learners)) S._repData[t] = { ok: true, learners: j.learners, empty: !!j.empty };
+      else if (st === 200 && j && j.ok) S._repData[t] = { legacy: true, agg: j }; // Edge Function 未部署新作用域 → 降级
+      else S._repData[t] = { error: (j && j.error) ? String(j.error) : ('HTTP ' + st) };
+      if (S.view === 'admin' && S.adminTab === 'report') render();
+    });
+  }
+  var d = S._repData[t];
+  if (!d) { html += '<p style="text-align:center;color:var(--text3);padding:30px">正在加载学员档案…</p></div>'; return html; }
+  if (d.error) {
+    html += '<p style="color:var(--red);padding:20px">加载失败：' + escapeHtml(d.error)
+      + '<br><span style="color:var(--text3)">排查：①已配置云端 ②当前为管理员账号 ③Edge Function quiz-stats 已部署 enterprise_learners 作用域</span></p></div>';
+    return html;
+  }
+
+  // ---- 降级视图：Edge Function 尚未部署 enterprise_learners ----
+  if (d.legacy) {
+    var ov = (d.agg && d.agg.overview) || null;
+    html += '<div style="background:rgba(224,164,0,0.10);border:1px solid rgba(224,164,0,0.35);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px;color:var(--text1)">'
+      + '⚠️ 云端 <b>quiz-stats</b> 尚未部署 <code>enterprise_learners</code> 作用域，暂无法按学员下钻（当前显示企业级聚合）。<br>'
+      + '<span style="color:var(--text3)">在有部署权限的环境执行：</span><br><code style="display:inline-block;margin-top:6px;background:var(--card2,#f5f7fb);padding:6px 8px;border-radius:6px">supabase functions deploy quiz-stats --project-ref &lt;ref&gt;</code></div>';
+    if (ov) {
+      html += '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px">'
+        + aqKpi('总答题数', ov.total) + aqKpi('整体正确率', ov.correctRate + '%', ov.correct + ' / ' + ov.total + ' 正确')
+        + aqKpi('覆盖题目', ov.distinctQ + ' 题') + aqKpi('数据区间', (ov.firstDate || '?') + '<br>~ ' + (ov.lastDate || '?')) + '</div>';
+      var avgDims = {};
+      (d.agg.byDim || []).forEach(function (x) { avgDims[x.dim] = x.correctRate; });
+      html += '<div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-top:16px">'
+        + reportRadar(avgDims)
+        + '<div style="flex:1;min-width:220px">' + (d.agg.byDim || []).map(function (x) { return aqBar((QDIM_LABEL[x.dim] || x.dim), x.correctRate, x.n + ' 答'); }).join('') + '</div></div>';
+    } else {
+      html += '<p style="text-align:center;color:var(--text3);padding:22px">该企业暂无作答数据。</p>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  if (d.empty || !d.learners.length) { html += '<p style="text-align:center;color:var(--text3);padding:30px">该企业暂无学员作答数据。</p></div>'; return html; }
+
+  // ---- 正式视图：逐学员 8 维档案 ----
+  var L = d.learners;
+  var totTests = 0, totCorrect = 0;
+  L.forEach(function (x) { totTests += x.tests; totCorrect += x.correct; });
+  var overall = totTests ? Math.round(totCorrect / totTests * 1000) / 10 : 0;
+  var avg = {};
+  RDIM_ORDER.forEach(function (k) {
+    var s = 0, c = 0;
+    L.forEach(function (x) { if (typeof x.dims[k] === 'number' && x.dims[k] >= 0) { s += x.dims[k]; c++; } });
+    avg[k] = c ? Math.round(s / c * 10) / 10 : -1;
+  });
+  var lastDate = L.map(function (x) { return x.lastTest || ''; }).sort().pop() || '';
+
+  html += '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px">'
+    + aqKpi('学员数', L.length + ' 人')
+    + aqKpi('总答题数', totTests)
+    + aqKpi('整体正确率', overall + '%', totCorrect + ' / ' + totTests + ' 正确')
+    + aqKpi('最近测评', lastDate ? escapeHtml(lastDate.slice(0, 16)) : '—')
+    + '</div>';
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0">'
+    + '<button class="btn btn-sm btn-primary" data-action="reportExport">⬇️ 导出 CSV（学员档案）</button>'
+    + '<span class="tag">每行一名学员 · 8 维正确率 · Excel 可直接打开</span></div>';
+
+  html += '<div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin:14px 0 18px">'
+    + reportRadar(avg)
+    + '<div style="flex:1;min-width:220px">' + RDIM_ORDER.map(function (k) {
+        return aqBar(QDIM_LABEL[k], avg[k] >= 0 ? avg[k] : 0, avg[k] >= 0 ? avg[k] + '%' : '无数据');
+      }).join('') + '</div></div>';
+
+  html += '<div style="overflow-x:auto"><table class="log-table"><thead><tr>'
+    + '<th>学员</th><th>综合</th><th>答题</th><th>正确率</th>'
+    + RDIM_ORDER.map(function (k) { return '<th>' + QDIM_LABEL[k] + '</th>'; }).join('')
+    + '<th>最近测评</th></tr></thead><tbody>';
+  L.forEach(function (x) {
+    html += '<tr><td style="white-space:normal;max-width:180px">' + escapeHtml(x.label || x.owner) + '</td>'
+      + '<td style="font-weight:700;color:' + aqRateColor(x.composite) + '">' + x.composite + '%</td>'
+      + '<td>' + x.tests + '</td>'
+      + '<td>' + x.correctRate + '%</td>'
+      + RDIM_ORDER.map(function (k) {
+          var v = x.dims[k];
+          if (typeof v !== 'number' || v < 0) return '<td style="color:var(--text3)">—</td>';
+          return '<td style="color:' + aqRateColor(v) + ';font-weight:600">' + v + '%</td>';
+        }).join('')
+      + '<td>' + escapeHtml((x.lastTest || '').slice(0, 16)) + '</td></tr>';
+  });
+  html += '</tbody></table></div>';
   html += '</div>';
   return html;
 }
@@ -12444,6 +12634,9 @@ function bindEvents() {
             case 'cloudSync': S.cloudSync(); break;
             case 'adminSetTab': S.adminSetTab(el.getAttribute('data-tab')); break;
             case 'quizRefresh': S.quizRefresh(); break;
+            case 'reportSetTenant': S.reportSetTenant(el.getAttribute('data-tenant')); break;
+            case 'reportRefresh': S.reportRefresh(); break;
+            case 'reportExport': S.reportExport(); break;
             case 'seedDemoData': S.seedDemoData(); break;
             case 'fbToggleSel': S.fbToggleSel(id); break;
             case 'fbAggregate': S.fbAggregate(); break;
