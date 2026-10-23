@@ -10893,6 +10893,7 @@ S.seedDemoData = function(){
 
 // ==================== 管理后台（#2 看板 / #3 分析 / #4 方案）====================
 S.adminSetTab = function(t){ S.adminTab = t; render(); };
+S.quizRefresh = function(){ S._quizStats = undefined; render(); };
 
 function renderAdmin() {
   S.adminTab = S.adminTab || 'overview';
@@ -10900,6 +10901,7 @@ function renderAdmin() {
   var isAdmin = session.role === 'admin';
   var tabs = [['overview','总览'],['industry','行业分析'],['company','企业分析'],['feedback','反馈汇总'],['logs','访问日志'],['sales','销售方案']];
   if (isAdmin) tabs.push(['companies','企业管理']);
+  if (isAdmin) tabs.push(['quiz','测评分析']);
   var html = headerHtml('管理员看板', isAdmin ? '平台管理员视角 · 团队AI学习全景' : '企业管理员视角 · 团队AI学习进度', true);
   html += '<div class="admin-tabs">';
   tabs.forEach(function(t){
@@ -10912,6 +10914,7 @@ function renderAdmin() {
   else if (S.adminTab === 'logs') html += renderAdminLogs();
   else if (S.adminTab === 'companies') html += renderAdminCompanies();
   else if (S.adminTab === 'sales') html += renderAdminSales();
+  else if (S.adminTab === 'quiz') html += renderAdminQuiz();
   else html += renderAdminOverview(isAdmin);
   return html;
 }
@@ -11243,6 +11246,120 @@ function renderAdminSales() {
     });
     html += `</div>`;
   }
+  return html;
+}
+
+// ==================== P2 · 测评分析面板（quiz-stats Edge Function 驱动）====================
+var QDIM_LABEL = {prompt:'提示词',tools:'工具',data:'数据',content:'内容',dev:'开发',workflow:'工作流',security:'安全',strategy:'策略'};
+function aqRateColor(r){ return r>=75?'#2e9e5b':(r>=50?'#e0a400':'#d94a3d'); }
+function aqLetter(i){ return String.fromCharCode(65+i); }
+function aqKpi(title, val, sub){
+  return '<div style="flex:1;min-width:130px;background:var(--card2,#f5f7fb);border:1px solid var(--border,#e6eaf2);border-radius:12px;padding:14px 16px">'
+    + '<div style="font-size:12px;color:var(--text3);margin-bottom:6px">'+title+'</div>'
+    + '<div style="font-size:22px;font-weight:700;color:var(--text1)">'+val+'</div>'
+    + (sub?'<div style="font-size:11.5px;color:var(--text3);margin-top:4px">'+sub+'</div>':'')+'</div>';
+}
+function aqBar(label, rate, sub){
+  return '<div style="display:flex;align-items:center;gap:10px;margin:7px 0">'
+    + '<span style="width:84px;flex:none;font-size:12.5px;color:var(--text2);text-align:right">'+label+'</span>'
+    + '<span style="flex:1;height:14px;background:var(--card2,#f5f7fb);border-radius:7px;overflow:hidden">'
+    + '<span style="display:block;height:100%;width:'+Math.max(2,rate)+'%;background:'+aqRateColor(rate)+';border-radius:7px"></span></span>'
+    + '<span style="width:96px;flex:none;font-size:12.5px;color:var(--text1);font-variant-numeric:tabular-nums">'+rate+'%'+(sub?' <span style="color:var(--text3);font-size:11px">'+sub+'</span>':'')+'</span></div>';
+}
+function renderAdminQuiz() {
+  if (S._quizStats === undefined) {
+    S._quizStats = null;
+    fetchCloud('quiz-stats', {}, function(st, j){
+      if (st === 200 && j && j.ok && !j.empty) S._quizStats = j;
+      else if (j && j.empty) S._quizStats = { empty: true };
+      else S._quizStats = { error: (j && j.error) ? String(j.error) : ('HTTP ' + st) };
+      if (S.view === 'admin' && S.adminTab === 'quiz') render();
+    });
+  }
+  var d = S._quizStats;
+  var html = '<div class="card slide-up"><div class="section-title"><span class="st-ico">📊</span>测评分析（平台级 · 全租户）</div>';
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px"><span class="tag tag-blue">数据来源：quiz_score_log 云端回流</span><button class="btn btn-sm btn-outline" data-action="quizRefresh">🔄 刷新</button></div>';
+  if (!d) { html += '<p style="text-align:center;color:var(--text3);padding:30px">正在从云端加载测评数据…</p></div>'; return html; }
+  if (d.error) { html += '<p style="color:var(--red);padding:20px">加载失败：'+escapeHtml(d.error)+'<br><span style="color:var(--text3)">排查：①已配置云端 ②当前为管理员账号 ③网络可达（Edge Function quiz-stats）</span></p></div>'; return html; }
+  if (d.empty) { html += '<p style="text-align:center;color:var(--text3);padding:30px">暂无测评数据（学员尚未完成测评作答）。</p></div>'; return html; }
+
+  var ov = d.overview;
+  html += '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px">'
+    + aqKpi('总答题数', ov.total)
+    + aqKpi('整体正确率', ov.correctRate + '%', ov.correct + ' / ' + ov.total + ' 正确')
+    + aqKpi('覆盖题目', ov.distinctQ + ' 题')
+    + aqKpi('数据区间', (ov.firstDate||'?') + '<br>~ ' + (ov.lastDate||'?'))
+    + '</div>';
+
+  // 维度掌握度
+  html += '<div class="mt-3" style="margin-top:18px"><div class="section-title" style="font-size:14px"><span class="st-ico">🧩</span>维度掌握度（8 维正确率）</div>';
+  (d.byDim||[]).forEach(function(x){ html += aqBar((QDIM_LABEL[x.dim]||x.dim), x.correctRate, x.n+' 答'); });
+  html += '</div>';
+
+  // 难度校准
+  html += '<div style="margin-top:18px"><div class="section-title" style="font-size:14px"><span class="st-ico">🎚️</span>难度校准（初 / 中 / 高阶正确率）</div>';
+  (d.byLevel||[]).forEach(function(x){ var lv = x.lvl==='L0'?'初阶':x.lvl==='L1'?'中阶':x.lvl==='L2'?'高阶':x.lvl; html += aqBar(lv, x.correctRate, x.n+' 答'); });
+  html += '</div>';
+
+  // 题库正确率
+  html += '<div style="margin-top:18px"><div class="section-title" style="font-size:14px"><span class="st-ico">📚</span>题库正确率（按 bank）</div>';
+  (d.byBank||[]).forEach(function(x){ html += aqBar(x.bank, x.correctRate, x.n+' 答'); });
+  html += '</div>';
+
+  // 每日趋势
+  html += '<div style="margin-top:18px"><div class="section-title" style="font-size:14px"><span class="st-ico">📈</span>每日趋势（答题量 / 正确率）</div>';
+  if ((d.byDay||[]).length) {
+    html += '<div style="display:flex;gap:8px;align-items:flex-end;overflow-x:auto;padding:6px 2px">';
+    (d.byDay||[]).forEach(function(x){
+      var h = Math.max(8, Math.round(x.n / Math.max.apply(null, d.byDay.map(function(y){return y.n;})) * 90));
+      html += '<div style="flex:none;width:54px;text-align:center">'
+        + '<div style="font-size:11px;color:var(--text1);font-weight:600">'+x.correctRate+'%</div>'
+        + '<div style="height:'+h+'px;background:'+aqRateColor(x.correctRate)+';border-radius:5px 5px 0 0;margin:3px 0"></div>'
+        + '<div style="font-size:10.5px;color:var(--text3)">'+x.n+'</div>'
+        + '<div style="font-size:10px;color:var(--text3)">'+x.date.slice(5)+'</div></div>';
+    });
+    html += '</div>';
+  } else { html += '<p style="color:var(--text3)">暂无数据</p>'; }
+  html += '</div>';
+
+  // 弱题 / 干扰项质量
+  html += '<div style="margin-top:18px"><div class="section-title" style="font-size:14px"><span class="st-ico">🔍</span>弱题 & 干扰项质量排行（正确率最低 15 题）</div>';
+  if ((d.weak||[]).length) {
+    d.weak.forEach(function(q){
+      var topWrong = q.topWrong;
+      var warn = (topWrong && q.n >= 3 && topWrong.cnt > q.n * 0.4)
+        ? '<span style="color:var(--red);font-size:11.5px">⚠ 干扰项「'+aqLetter(topWrong.opt)+'」过强（'+topWrong.cnt+'/'+q.n+'），建议复核题干与正确项</span>'
+        : '';
+      html += '<div style="border:1px solid var(--border,#e6eaf2);border-radius:10px;padding:10px 12px;margin:8px 0">';
+      html += '<div style="display:flex;gap:8px;align-items:baseline;flex-wrap:wrap">'
+        + '<span style="font-weight:600;color:var(--text1)">'+escapeHtml(q.q || '（题目未匹配 · 该题已不在题库，qid '+String(q.qid).slice(0,8)+'）')+'</span>'
+        + '<span class="tag tag-blue">'+(QDIM_LABEL[q.dim]||q.dim)+'</span>'
+        + '<span class="tag">'+(q.lvl===0?'初':q.lvl===1?'中':q.lvl===2?'高':q.lvl)+'阶</span>'
+        + '<span class="tag">'+escapeHtml(q.bank)+'</span>'
+        + '<span style="margin-left:auto;font-weight:700;color:'+aqRateColor(q.correctRate)+'">'+q.correctRate+'%</span>'
+        + '<span style="font-size:11.5px;color:var(--text3)">'+q.correct+'/'+q.n+'</span></div>';
+      // 选项分布
+      html += '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">';
+      (q.opts||[]).forEach(function(optText, i){
+        var cnt = (q.choiceDist && q.choiceDist[i]) || 0;
+        var pct = q.n ? Math.round(cnt / q.n * 100) : 0;
+        var isBest = (i === q.best);
+        var isWrong = (topWrong && i === topWrong.opt);
+        var col = isBest ? '#2e9e5b' : (isWrong ? '#d94a3d' : '#9aa6b8');
+        html += '<div style="flex:none;min-width:120px">'
+          + '<div style="font-size:11px;color:var(--text2);margin-bottom:3px">'+aqLetter(i)+'. '+escapeHtml(String(optText||'').slice(0,12))+(isBest?' ✓':'')+'</div>'
+          + '<div style="height:8px;background:var(--card2,#f5f7fb);border-radius:4px;overflow:hidden">'
+          + '<span style="display:block;height:100%;width:'+Math.max(2,pct)+'%;background:'+col+';border-radius:4px"></span></div>'
+          + '<div style="font-size:10.5px;color:var(--text3);margin-top:2px">'+cnt+' 次 · '+pct+'%</div></div>';
+      });
+      html += '</div>';
+      if (warn) html += '<div style="margin-top:6px">'+warn+'</div>';
+      html += '</div>';
+    });
+  } else { html += '<p style="color:var(--text3)">暂无弱题数据</p>'; }
+  html += '</div>';
+
+  html += '</div>';
   return html;
 }
 
@@ -12134,6 +12251,7 @@ function bindEvents() {
             case 'cloudConnect': S.cloudConnect(); break;
             case 'cloudSync': S.cloudSync(); break;
             case 'adminSetTab': S.adminSetTab(el.getAttribute('data-tab')); break;
+            case 'quizRefresh': S.quizRefresh(); break;
             case 'seedDemoData': S.seedDemoData(); break;
             case 'fbToggleSel': S.fbToggleSel(id); break;
             case 'fbAggregate': S.fbAggregate(); break;
