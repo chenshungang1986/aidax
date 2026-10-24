@@ -8695,6 +8695,33 @@ function renderAdaptiveReviewCard() {
   return h;
 }
 
+// ===== P1-1 报名 Agent 大赛入口 START =====
+// 在「结课/成果」类页面（测评结果页、全部课程完成）挂「报名 Agent 大赛」CTA，
+// 指向起点报名页（可经 AIDAX_CONFIG.contestSignupUrl 或 localStorage 'aidax_contest_url' 覆盖）。
+// 未配置 URL 时优雅降级：返回空串，绝不白屏 / 断链。
+function contestSignupUrl() {
+  try {
+    var c = (typeof window !== 'undefined' && window.AIDAX_CONFIG && window.AIDAX_CONFIG.contestSignupUrl) || '';
+    var ls = (typeof localStorage !== 'undefined') ? localStorage.getItem('aidax_contest_url') : null;
+    var u = (ls && String(ls).trim()) ? String(ls).trim() : (c && String(c).trim() ? String(c).trim() : '');
+    return u;
+  } catch (e) { return ''; }
+}
+function renderContestCTA(opts) {
+  opts = opts || {};
+  var url = contestSignupUrl();
+  if (!url) return '';  // 优雅降级：未配置则不显示
+  var title = opts.title || '用你学的 AI 技能，去实战一场';
+  var sub = opts.sub || '学完不是终点 —— 把能力变成作品，参加 Agent 大赛赢认证与曝光';
+  var btn = opts.btn || '🏆 报名 Agent 大赛 →';
+  return '<div class="card mt-3 slide-up" style="border:1px solid rgba(0,113,227,.25);background:linear-gradient(135deg,#f5f9ff,#eef4ff);">' +
+    '<div style="font-size:15px;font-weight:800;margin-bottom:4px;">🏆 ' + title + '</div>' +
+    '<p style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:12px;">' + sub + '</p>' +
+    '<a class="btn btn-primary" style="width:100%;text-decoration:none;display:block;text-align:center;" href="' + url + '" target="_blank" rel="noopener">' + btn + '</a>' +
+    '</div>';
+}
+// ===== P1-1 报名 Agent 大赛入口 END =====
+
 function renderResults() {
   const role = ROLES[S.role];
   const result = S._quizResult;
@@ -8840,8 +8867,15 @@ function renderResults() {
   });
   html += `<div style="display:flex;gap:8px;margin-top:16px;">
     <button class="btn btn-outline" style="flex:1;" data-action="goLearningMap">📍 查看学习地图</button>
-    <button class="btn btn-primary" style="flex:1;" data-action="goDashboard">开始学习 →</button>
+      <button class="btn btn-primary" style="flex:1;" data-action="goDashboard">开始学习 →</button>
   </div></div>`;
+
+  // P1-1：测评结果（学习成果）页挂「报名 Agent 大赛」入口（训→赛主路径）
+  html += renderContestCTA({
+    title: '用你学的 AI 技能，去实战一场',
+    sub: '学完不是终点 —— 把能力变成作品，参加 Agent 大赛赢认证与曝光',
+    btn: '🏆 报名 Agent 大赛 →'
+  });
 
   return html;
 }
@@ -9316,6 +9350,11 @@ function renderDashboard() {
       <p style="color:var(--text2);font-size:13px;margin-bottom:16px;">现在可以进行AI能力成果测验</p>
       <button class="btn btn-primary" data-action="startFinalQuiz">开始成果测验</button>
       ${S.finalScore!==null ? `<div class="alert alert-success mt-3">上次测验成绩：${S.finalScore}分</div>` : ''}
+      ${renderContestCTA({
+        title: '用你学的 AI 技能，去实战一场',
+        sub: '全部课程通关 —— 下一步把能力变成作品，参加 Agent 大赛赢认证与曝光',
+        btn: '🏆 报名 Agent 大赛 →'
+      })}
     </div>`;
   }
 
@@ -10265,7 +10304,7 @@ function renderFinalResults() {
 // 上层业务与 UI 代码零改动。
 // ---- 云端后端配置（Supabase）：留空/未连则自动降级为纯本地，上层零改动 ----
 // 优先级：localStorage('aidax_cloud') > window.AIDAX_CONFIG（代码内注入）。管理员可在后台「云端数据同步」面板填写并保存。
-window.AIDAX_CONFIG = window.AIDAX_CONFIG || { supabaseUrl: 'https://nyqiwjwzbpnepamldqto.supabase.co', supabaseAnonKey: 'sb_publishable_rnBBDPdiDI5vnc9IEaTP6g_1ZyxJjHI' };
+window.AIDAX_CONFIG = window.AIDAX_CONFIG || { supabaseUrl: 'https://nyqiwjwzbpnepamldqto.supabase.co', supabaseAnonKey: 'sb_publishable_rnBBDPdiDI5vnc9IEaTP6g_1ZyxJjHI', contestSignupUrl: 'https://aidax.cn/contest' }; // P1-1：结课/成果页「报名 Agent 大赛」入口目标（训→赛主路径）；最终指向起点报名页，可经 localStorage 'aidax_contest_url' 单点覆盖
 
 // ---- 云端同步 outbox：依赖/网络未就绪时缓存待同步操作，连接恢复后自动补推 ----
 function outboxPush(c, op, item){
