@@ -8247,6 +8247,7 @@ function render() {
     }
     case 'map': app.innerHTML = renderLearningMap(); break;
     case 'schedule': app.innerHTML = renderSchedule(); break;
+    case 'cases': app.innerHTML = renderCases(); break;
   }
   if (S.view !== 'login') recordAccess(S.view);
   bindEvents();
@@ -9803,6 +9804,7 @@ function renderDashboard() {
     <div style="display:flex;gap:8px;margin-top:12px;">
       <button class="btn btn-outline" style="flex:1;font-size:12px;" data-action="goLearningMap">📍 学习地图</button>
       <button class="btn btn-outline" style="flex:1;font-size:12px;" data-action="goSchedule">📅 学习计划</button>
+      <button class="btn btn-outline" style="flex:1;font-size:12px;" data-action="goCases">🏆 案例库</button>
     </div>
   </div>`;
 
@@ -10915,7 +10917,7 @@ const DB = {
   },
   hydrate: function(cb){
     var cl = sbClient(); if (!cl) { cb && cb(); return; }
-    var cols = ['access_log','feedback','requirements','sales_plans','sales_leads','companies','users'];
+    var cols = ['access_log','feedback','requirements','sales_plans','sales_leads','cases','companies','users'];
     var done = 0;
     cols.forEach(function(c){
       cl.from(c).select('*').then(function(res){
@@ -11827,6 +11829,7 @@ function renderAdmin() {
   var tabs = [['overview','总览'],['industry','行业分析'],['company','企业分析'],['feedback','反馈汇总'],['logs','访问日志'],['sales','销售方案']];
   tabs.push(['subscription','订阅/席位']); // 管理员与企业管理员均可见
   if (isAdmin) tabs.push(['leads','商机线索']); // 销售线索库：仅平台管理员
+  if (isAdmin) tabs.push(['cases','案例库']); // 大赛作品案例库：仅平台管理员
   if (isAdmin) tabs.push(['companies','企业管理']);
   if (isAdmin) tabs.push(['quiz','测评分析']);
   var html = headerHtml('管理员看板', isAdmin ? '平台管理员视角 · 团队AI学习全景' : '企业管理员视角 · 团队AI学习进度', true);
@@ -11844,6 +11847,7 @@ function renderAdmin() {
   else if (S.adminTab === 'quiz') html += renderAdminQuiz();
   else if (S.adminTab === 'subscription') html += renderAdminSubscription();
   else if (S.adminTab === 'leads') html += renderAdminLeads();
+  else if (S.adminTab === 'cases') html += renderAdminCases();
   else html += renderAdminOverview(isAdmin);
   return html;
 }
@@ -12262,6 +12266,238 @@ function renderAdminLeads(){
   }
   return html;
 }
+
+// ============ P2-1 大赛作品 → 案例库 ============
+// AIDAX 只做「案例沉淀 / 浏览 / 反哺课程」，不办赛（赛归起点课堂）。
+// 案例来自起点课堂 Agent 大赛等优质作品，管理员脱敏录入后学员可浏览学习。
+var AGENT_TYPES = { service:'智能客服', growth:'营销增长', data:'数据分析', content:'内容创作', dev:'代码开发', office:'办公协同', knowledge:'知识管理', other:'其他' };
+function allCoursesFlat(){
+  var out=[]; try{ for(var g in COURSES){ (COURSES[g]||[]).forEach(function(c){ out.push({id:c.id,title:c.title,group:g}); }); } }catch(e){}
+  return out;
+}
+function caseOpts(dict, keyName, cur){
+  var h='<option value="">—</option>';
+  Object.keys(dict).forEach(function(k){ h+='<option value="'+k+'"'+(cur===k?' selected':'')+'>'+(keyName?dict[k][keyName]:dict[k])+'</option>'; });
+  return h;
+}
+function caseSel(name, val, label, dict, keyName){
+  return '<div style="min-width:120px"><div style="font-size:11px;color:var(--text2);margin-bottom:3px">'+label+'</div>'
+    + '<select onchange="S.caseFilter(\''+name+'\', this.value)" style="padding:6px 8px;border:1px solid var(--border);border-radius:8px;font-size:12px;background:var(--bg);">'
+    + caseOpts(dict, keyName, val) + '</select></div>';
+}
+function caseField(id,label,val){
+  return '<div><div style="font-size:12px;color:var(--text2);margin-bottom:4px">'+label+'</div><input id="'+id+'" class="fb-editor" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:13px" value="'+escapeHtml(val||'')+'"></div>';
+}
+function caseArea(id,label,val){
+  return '<div style="margin-top:12px"><div style="font-size:12px;color:var(--text2);margin-bottom:4px">'+label+'</div><textarea id="'+id+'" class="fb-editor" style="width:100%;min-height:70px;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:13px">'+escapeHtml(val||'')+'</textarea></div>';
+}
+function caseStatusLabel(s){ return ({draft:'草稿',published:'已发布',archived:'已下架'}[s]||s); }
+
+function renderCases(){
+  var all = DB.all('cases').filter(function(c){ return c.status === 'published'; });
+  var q = (S._caseSearch||'').trim().toLowerCase();
+  var fInd = S._caseFInd||'all', fRole = S._caseFRole||'all', fType = S._caseFType||'all', fDim = S._caseFDim||'all';
+  var list = all.filter(function(c){
+    if (fInd!=='all' && c.industry!==fInd) return false;
+    if (fRole!=='all' && c.role!==fRole) return false;
+    if (fType!=='all' && c.agentType!==fType) return false;
+    if (fDim!=='all' && (c.dims||[]).indexOf(fDim) === -1) return false;
+    if (q) { var hay=(c.title+' '+(c.summary||'')+' '+(c.author||'')+' '+((c.tags||[]).join(' '))).toLowerCase(); if (hay.indexOf(q)===-1) return false; }
+    return true;
+  }).sort(function(a,b){ return b.ts - a.ts; });
+  var html = headerHtml('真实案例库', '来自 Agent 大赛的优质作品 · 反哺你的学习路径', true);
+  html += '<div class="card slide-up">';
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">';
+  html += '<input id="caseSearch" class="fb-editor" style="flex:1;min-width:180px;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:13px" placeholder="搜索标题 / 简介 / 作者 / 标签" value="'+escapeHtml(S._caseSearch||'')+'" oninput="S._caseSearch=this.value;render()">';
+  html += '<button class="btn btn-sm btn-outline" data-action="caseSearch">🔍 搜索</button>';
+  html += '</div>';
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">';
+  html += caseSel('industry', fInd, '行业', INDUSTRIES, 'name');
+  html += caseSel('role', fRole, '岗位', ROLES, 'name');
+  html += caseSel('type', fType, 'Agent类型', AGENT_TYPES, null);
+  html += caseSel('dim', fDim, '能力维度', QDIM_LABEL, null);
+  html += '</div>';
+  if (!list.length) {
+    html += '<p style="text-align:center;color:var(--text3);padding:30px">暂无匹配案例。管理员从大赛优质作品录入并发布后，这里会展示。</p>';
+  } else {
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">';
+    list.forEach(function(c){
+      html += '<div class="case-card" data-action="caseView" data-id="'+c.id+'" style="cursor:pointer;border:1px solid var(--border);border-radius:12px;padding:14px;background:var(--card2,#f5f7fb)">';
+      html += '<div style="font-weight:600;font-size:14px;margin-bottom:6px">'+escapeHtml(c.title||'未命名')+'</div>';
+      html += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">'
+        + (c.industry?('<span class="tag tag-blue" style="font-size:10px">'+((INDUSTRIES[c.industry]||{}).name||c.industry)+'</span>'):'')
+        + (c.role?('<span class="tag tag-purple" style="font-size:10px">'+((ROLES[c.role]||{}).name||c.role)+'</span>'):'')
+        + (c.agentType?('<span class="tag" style="font-size:10px">'+escapeHtml(c.agentType)+'</span>'):'')
+        + '</div>';
+      if (c.dims && c.dims.length) html += '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">'+c.dims.map(function(d){return '<span style="font-size:10px;color:var(--text3);background:var(--bg2);padding:1px 6px;border-radius:8px">'+((QDIM_LABEL[d]||d))+'</span>';}).join('')+'</div>';
+      html += '<div style="font-size:12px;color:var(--text2);line-height:1.6;max-height:48px;overflow:hidden">'+escapeHtml(c.summary||'')+'</div>';
+      html += '<div style="font-size:11px;color:var(--text3);margin-top:8px">来源：'+escapeHtml(c.source||'—')+'</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+  if (S._caseViewId) { var v = DB.get('cases', S._caseViewId); if (v) html += renderCaseDetail(v); }
+  return html;
+}
+
+function renderCaseDetail(c){
+  var html = '<div class="card mt-3 slide-up"><div class="section-title"><span class="st-ico">🏆</span>'+escapeHtml(c.title||'未命名')+'</div>';
+  html += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">';
+  html += (c.industry?('<span class="tag tag-blue">'+((INDUSTRIES[c.industry]||{}).name||c.industry)+'</span>'):'');
+  html += (c.role?('<span class="tag tag-purple">'+((ROLES[c.role]||{}).name||c.role)+'</span>'):'');
+  html += (c.agentType?('<span class="tag">'+escapeHtml(c.agentType)+'</span>'):'');
+  if (c.dims&&c.dims.length) html += c.dims.map(function(d){return '<span class="tag" style="background:var(--bg2)">'+((QDIM_LABEL[d]||d))+'</span>';}).join('');
+  html += '</div>';
+  html += '<div class="kv"><span class="k">来源</span><span class="v">'+escapeHtml(c.source||'—')+'</span></div>';
+  html += '<div class="kv"><span class="k">作者/团队</span><span class="v">'+escapeHtml(c.author||'匿名')+'</span></div>';
+  if (c.summary) html += '<div style="margin:10px 0"><div style="font-weight:600;font-size:13px;margin-bottom:6px">📌 简介</div><div style="font-size:13px;color:var(--text2);line-height:1.8">'+escapeHtml(c.summary)+'</div></div>';
+  if (c.pain) html += '<div style="margin:10px 0"><div style="font-weight:600;font-size:13px;margin-bottom:6px">🎯 解决的痛点</div><div style="font-size:13px;color:var(--text2);line-height:1.8;white-space:pre-wrap">'+escapeHtml(c.pain)+'</div></div>';
+  if (c.approach) html += '<div style="margin:10px 0"><div style="font-weight:600;font-size:13px;margin-bottom:6px">🛠 做法 / 架构</div><div style="font-size:13px;color:var(--text2);line-height:1.8;white-space:pre-wrap">'+escapeHtml(c.approach)+'</div></div>';
+  if (c.highlights&&c.highlights.length) html += '<div style="margin:10px 0"><div style="font-weight:600;font-size:13px;margin-bottom:6px">✨ 亮点</div><ul style="margin:0;padding-left:18px;font-size:13px;color:var(--text2);line-height:1.8">'+c.highlights.map(function(h){return '<li>'+escapeHtml(h)+'</li>';}).join('')+'</ul></div>';
+  if (c.assets) html += '<div style="margin:10px 0"><div style="font-weight:600;font-size:13px;margin-bottom:6px">📦 可复用资产（已脱敏）</div><div class="plan-box" style="white-space:pre-wrap;font-size:13px;line-height:1.8">'+escapeHtml(c.assets)+'</div></div>';
+  if (c.outcome) html += '<div style="margin:10px 0"><div style="font-weight:600;font-size:13px;margin-bottom:6px">📈 效果 / 收益</div><div style="font-size:13px;color:var(--text2);line-height:1.8;white-space:pre-wrap">'+escapeHtml(c.outcome)+'</div></div>';
+  if (c.relatedCourses&&c.relatedCourses.length) {
+    html += '<div style="margin:10px 0"><div style="font-weight:600;font-size:13px;margin-bottom:6px">📚 关联课程</div><div style="display:flex;gap:8px;flex-wrap:wrap">';
+    c.relatedCourses.forEach(function(rc){ html += '<button class="btn btn-sm btn-outline" data-action="openCourseById" data-cid="'+rc.id+'">📖 '+escapeHtml(rc.title)+'</button>'; });
+    html += '</div></div>';
+  }
+  if (c.tags&&c.tags.length) html += '<div style="margin:10px 0;font-size:11px;color:var(--text3)">标签：'+c.tags.map(function(t){return '#'+escapeHtml(t);}).join(' ')+'</div>';
+  html += '<div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-sm btn-outline" data-action="caseClose">返回列表</button></div>';
+  html += '</div>';
+  return html;
+}
+
+function renderCaseForm(c){
+  var id = c.id || '__new__';
+  var html = '<div class="card mt-3 slide-up" style="border-left:4px solid var(--blue)"><div class="section-title">'+(id==='__new__'?'➕ 新增案例':'✏️ 编辑案例')+'</div>';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">';
+  html += caseField('caseF_title','标题', c.title);
+  html += caseField('caseF_source','来源（如：起点课堂Agent大赛·第1届）', c.source);
+  html += caseField('caseF_author','作者/团队（脱敏）', c.author);
+  html += caseField('caseF_tags','标签（逗号分隔）', (c.tags||[]).join(','));
+  html += '<div><div style="font-size:12px;color:var(--text2);margin-bottom:4px">行业</div><select id="caseF_industry" class="fb-editor" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px">'+caseOpts(INDUSTRIES,'name',c.industry)+'</select></div>';
+  html += '<div><div style="font-size:12px;color:var(--text2);margin-bottom:4px">岗位</div><select id="caseF_role" class="fb-editor" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px">'+caseOpts(ROLES,'name',c.role)+'</select></div>';
+  html += '<div><div style="font-size:12px;color:var(--text2);margin-bottom:4px">Agent类型</div><select id="caseF_agentType" class="fb-editor" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px">'+caseOpts(AGENT_TYPES,null,c.agentType)+'</select></div>';
+  html += '<div><div style="font-size:12px;color:var(--text2);margin-bottom:4px">状态</div><select id="caseF_status" class="fb-editor" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px"><option value="draft"'+((c.status!=='published'&&c.status!=='archived')?' selected':'')+'>草稿</option><option value="published" '+(c.status==='published'?'selected':'')+'>已发布</option><option value="archived" '+(c.status==='archived'?'selected':'')+'>已下架</option></select></div>';
+  html += '</div>';
+  html += '<div style="margin-top:12px"><div style="font-size:12px;color:var(--text2);margin-bottom:6px">能力维度（8维，可多选）</div><div style="display:flex;gap:10px;flex-wrap:wrap">';
+  Object.keys(QDIM_LABEL).forEach(function(d){ var chk=(c.dims||[]).indexOf(d)>=0; html+='<label style="font-size:12px;display:flex;align-items:center;gap:4px"><input type="checkbox" '+(chk?'checked':'')+' data-dim="'+d+'">'+QDIM_LABEL[d]+'</label>'; });
+  html += '</div></div>';
+  html += caseArea('caseF_summary','一句话简介', c.summary);
+  html += caseArea('caseF_pain','解决的痛点', c.pain);
+  html += caseArea('caseF_approach','做法 / 架构', c.approach);
+  html += caseArea('caseF_highlights','亮点（每行一条）', (c.highlights||[]).join('\n'));
+  html += caseArea('caseF_assets','可复用资产（已脱敏的prompt/工作流/要点）', c.assets);
+  html += caseArea('caseF_outcome','效果 / 收益（脱敏数据）', c.outcome);
+  var flat = allCoursesFlat();
+  html += '<div style="margin-top:12px"><div style="font-size:12px;color:var(--text2);margin-bottom:6px">关联课程（可多选，学员可一键去学习）</div><select id="caseF_related" multiple class="fb-editor" style="width:100%;min-height:90px;padding:8px;border:1px solid var(--border);border-radius:8px">';
+  flat.forEach(function(c2){ var sel=(c.relatedCourses||[]).some(function(r){return r.id===c2.id;}); html+='<option value="'+c2.id+'"'+(sel?' selected':'')+'>'+escapeHtml(c2.title)+'</option>'; });
+  html += '</select></div>';
+  html += '<div style="display:flex;gap:8px;margin-top:14px"><button class="btn btn-sm btn-primary" data-action="caseSave" data-id="'+id+'">💾 保存</button><button class="btn btn-sm btn-outline" data-action="caseCancelEdit">取消</button></div>';
+  html += '</div>';
+  return html;
+}
+
+function renderAdminCases(){
+  var all = DB.all('cases').slice().sort(function(a,b){ return b.ts - a.ts; });
+  var f = S._caseAdminFilter || 'all';
+  var list = all.filter(function(c){ return f==='all' || c.status===f; });
+  var html = '<div class="card slide-up">';
+  html += '<div class="section-title"><span class="st-ico">🏆</span>案例库（大赛作品沉淀）</div>';
+  html += '<p style="font-size:12.5px;color:var(--text2);margin-bottom:14px">从「起点课堂 Agent 大赛」等来源的优质作品，脱敏后沉淀为可学习案例，反哺学员课程路径。管理员录入 / 发布 / 下架，学员在「案例库」浏览学习。</p>';
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">';
+  [['all','全部'],['published','已发布'],['draft','草稿'],['archived','已下架']].forEach(function(x){ html+='<button class="btn btn-sm '+(f===x[0]?'btn-primary':'btn-outline')+'" data-action="caseAdminFilter" data-st="'+x[0]+'">'+x[1]+'</button>'; });
+  html += '<span style="flex:1"></span>';
+  html += '<button class="btn btn-sm btn-primary" data-action="caseNew">＋ 新增案例</button>';
+  html += '<button class="btn btn-sm btn-outline" data-action="caseExportCsv">⬇️ CSV</button>';
+  html += '<button class="btn btn-sm btn-outline" data-action="caseExportJson">⬇️ JSON</button>';
+  html += '</div>';
+  if (S._caseEditId) html += renderCaseForm(DB.get('cases', S._caseEditId) || {});
+  if (!list.length && !S._caseEditId) {
+    html += '<p style="text-align:center;color:var(--text3);padding:24px">暂无案例。点击「新增案例」录入第一个大赛作品。</p>';
+  } else if (!S._caseEditId) {
+    html += '<div style="overflow-x:auto"><table class="log-table"><thead><tr><th>标题</th><th>来源</th><th>行业×岗位</th><th>Agent类型</th><th>状态</th><th>更新时间</th><th>操作</th></tr></thead><tbody>';
+    list.forEach(function(c){
+      var indn=(INDUSTRIES[c.industry]||{}).name||c.industry||'—';
+      var roln=(ROLES[c.role]||{}).name||c.role||'—';
+      var dot = c.status==='published' ? 'color:var(--green);font-weight:600' : 'color:var(--text3)';
+      html+='<tr><td>'+escapeHtml(c.title||'未命名')+'</td><td>'+escapeHtml(c.source||'—')+'</td><td>'+indn+' × '+roln+'</td><td>'+escapeHtml(c.agentType||'—')+'</td><td><span style="'+dot+'">●</span> '+caseStatusLabel(c.status)+'</td><td>'+fmtTs(c.updatedAt||c.ts)+'</td><td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-sm btn-outline" data-action="caseEdit" data-id="'+c.id+'">编辑</button>'+(c.status!=='published'?'<button class="btn btn-sm btn-outline" data-action="casePublish" data-id="'+c.id+'">发布</button>':'<button class="btn btn-sm btn-outline" data-action="caseArchive" data-id="'+c.id+'">下架</button>')+'<button class="btn btn-sm btn-outline" data-action="caseDelete" data-id="'+c.id+'">删除</button></div></td></tr>';
+    });
+    html+='</tbody></table></div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+// ---- 学员侧行为 ----
+S.goCases = function(){ S.view='cases'; S._caseViewId=null; render(); };
+S.caseView = function(id){ S._caseViewId=id; render(); };
+S.caseClose = function(){ S._caseViewId=null; render(); };
+S.caseSearch = function(){ render(); };
+S.caseFilter = function(f,v){
+  if (f==='industry') S._caseFInd=v; else if (f==='role') S._caseFRole=v; else if (f==='type') S._caseFType=v; else if (f==='dim') S._caseFDim=v;
+  render();
+};
+S.openCourseById = function(cid){
+  var cur = getRoleCourses();
+  for (var i=0;i<cur.length;i++){ if (cur[i].id===cid){ S.openCourse(i); return; } }
+  for (var g in COURSES){ var arr=COURSES[g]||[]; for (var j=0;j<arr.length;j++){ if (arr[j].id===cid){ S.role=g; S.courseIdx=j; S.courseTaskIdx=0; S.pptCurrentSlide=0; S.voicePlaying=false; S.view='course'; render(); return; } } }
+  showToast('未找到关联课程');
+};
+
+// ---- 管理端行为 ----
+S.caseNew = function(){ S._caseEditId='__new__'; if (S.view==='admin') render(); };
+S.caseEdit = function(id){ S._caseEditId=id; if (S.view==='admin') render(); };
+S.caseCancelEdit = function(){ S._caseEditId=null; if (S.view==='admin') render(); };
+S.caseAdminFilter = function(st){ S._caseAdminFilter=st; if (S.view==='admin') render(); };
+S.casePublish = function(id){ var c=DB.get('cases',id); if(c){ c.status='published'; c.updatedAt=Date.now(); DB.put('cases',c); showToast('已发布'); if(S.view==='admin')render(); } };
+S.caseArchive = function(id){ var c=DB.get('cases',id); if(c){ c.status='archived'; c.updatedAt=Date.now(); DB.put('cases',c); showToast('已下架'); if(S.view==='admin')render(); } };
+S.caseDelete = function(id){ if (typeof confirm==='function' && !confirm('确认删除该案例？此操作不可撤销。')) return; DB.del('cases',id); if(S._caseViewId===id)S._caseViewId=null; showToast('已删除'); render(); };
+S.caseSave = function(id){
+  var isNew = !id || id==='__new__';
+  var rec = isNew ? {id:uid('case_'), ts:Date.now()} : (DB.get('cases', id) || {id:id, ts:Date.now()});
+  var g = function(x){ var el=document.getElementById(x); return el?el.value:''; };
+  rec.title = g('caseF_title') || '未命名案例';
+  rec.source = g('caseF_source');
+  rec.author = g('caseF_author');
+  rec.tags = g('caseF_tags').split(',').map(function(s){return s.trim();}).filter(Boolean);
+  rec.industry = g('caseF_industry');
+  rec.role = g('caseF_role');
+  rec.agentType = g('caseF_agentType');
+  rec.status = g('caseF_status') || 'draft';
+  rec.summary = g('caseF_summary');
+  rec.pain = g('caseF_pain');
+  rec.approach = g('caseF_approach');
+  rec.highlights = g('caseF_highlights').split('\n').map(function(s){return s.trim();}).filter(Boolean);
+  rec.assets = g('caseF_assets');
+  rec.outcome = g('caseF_outcome');
+  rec.dims = []; var chks=document.querySelectorAll('input[data-dim]:checked'); for (var i=0;i<chks.length;i++) rec.dims.push(chks[i].getAttribute('data-dim'));
+  var rel=document.getElementById('caseF_related'); rec.relatedCourses=[]; if(rel){ for(var j=0;j<rel.options.length;j++){ if(rel.options[j].selected){ var rv=rel.options[j].value; if(rv) rec.relatedCourses.push({id:rv, title:rel.options[j].text}); } } }
+  rec.updatedAt = Date.now();
+  DB.put('cases', rec);
+  S._caseEditId = null;
+  showToast(isNew?'案例已新增':'案例已保存');
+  if (S.view==='admin') render();
+};
+S.caseExportCsv = function(){
+  var all = DB.all('cases');
+  var cols=['id','title','source','industry','role','agentType','dims','summary','pain','approach','highlights','assets','outcome','author','relatedCourses','status','tags','ts'];
+  var rows=[cols];
+  all.forEach(function(c){ rows.push(cols.map(function(k){ var v=c[k]; if(v&&typeof v==='object')v=JSON.stringify(v); return v==null?'':v; })); });
+  var csv='﻿'+rows.map(function(r){return r.map(csvCell).join(',');}).join('\r\n');
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='AIDAX_案例库_'+fmtTs(Date.now()).replace(/[-: ]/g,'')+'.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+  showToast('已导出 '+all.length+' 条案例 CSV');
+};
+S.caseExportJson = function(){
+  var all = DB.all('cases');
+  var blob=new Blob([JSON.stringify(all,null,2)],{type:'application/json'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='AIDAX_案例库_'+fmtTs(Date.now()).replace(/[-: ]/g,'')+'.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+  showToast('已导出 '+all.length+' 条案例 JSON');
+};
 
 // ==================== P2 · 测评分析面板（quiz-stats Edge Function 驱动）====================
 var QDIM_LABEL = {prompt:'提示词',tools:'工具',data:'数据',content:'内容',dev:'开发',workflow:'工作流',security:'安全',strategy:'策略'};
@@ -13305,6 +13541,19 @@ function bindEvents() {
             case 'toggleTaskAnswer': S.toggleTaskAnswer(el.getAttribute('data-cid'), parseInt(el.getAttribute('data-ti'))); break;
             case 'toggleFinalHint': S.toggleFinalHint(idx); break;
             case 'loadAndGoDashboard': S.loadEmployee(el.getAttribute('data-emp') || idx); S.goDashboard(); break;
+            case 'goCases': S.goCases(); break;
+            case 'caseView': S.caseView(id); break;
+            case 'caseClose': S.caseClose(); break;
+            case 'caseNew': S.caseNew(); break;
+            case 'caseEdit': S.caseEdit(id); break;
+            case 'caseSave': S.caseSave(el.getAttribute('data-id')); break;
+            case 'caseCancelEdit': S.caseCancelEdit(); break;
+            case 'casePublish': S.casePublish(id); break;
+            case 'caseArchive': S.caseArchive(id); break;
+            case 'caseDelete': S.caseDelete(id); break;
+            case 'caseAdminFilter': S.caseAdminFilter(el.getAttribute('data-st')); break;
+            case 'caseSearch': S.caseSearch(); break;
+            case 'openCourseById': S.openCourseById(el.getAttribute('data-cid')); break;
           }
           return;
         }
