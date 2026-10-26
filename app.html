@@ -10915,7 +10915,7 @@ const DB = {
   },
   hydrate: function(cb){
     var cl = sbClient(); if (!cl) { cb && cb(); return; }
-    var cols = ['access_log','feedback','requirements','sales_plans','companies','users'];
+    var cols = ['access_log','feedback','requirements','sales_plans','sales_leads','companies','users'];
     var done = 0;
     cols.forEach(function(c){
       cl.from(c).select('*').then(function(res){
@@ -11319,7 +11319,14 @@ function buildSalesPlan(o){
   t.push('- 访问与活跃：管理后台「总览」查看今日 / 累计访问与活跃学员');
   t.push('- 考试进度：按行业 / 按企业查看完成率与平均分');
   t.push('- 反馈闭环：学员提交的问题自动汇总为产品迭代需求');
-  return t.join('\n');
+  var meta = {
+    weakDims: weak.slice(),
+    weakDimNames: weakNames.slice(),
+    recommendedCourseIds: pick.map(function(c){ return c.id; }),
+    recommendedCourseTitles: pick.map(function(c){ return c.title || c.id; }),
+    hasData: !!g, size: o.size, weeks: wks
+  };
+  return { text: t.join('\n'), meta: meta };
 }
 
 function planToHtml(txt){
@@ -11622,9 +11629,28 @@ S.genSalesPlan = function(){
   var size = parseInt(document.getElementById('spSize').value) || 20;
   var weeks = parseInt(document.getElementById('spWeeks').value) || 4;
   S._spForm = {industry:ind, role:role, size:size, weeks:weeks};
-  S._spPlan = buildSalesPlan({industry:ind, role:role, size:size, weeks:weeks});
-  DB.put('sales_plans', {id:uid('p_'), ts:Date.now(), industry:ind, role:role, size:size, weeks:weeks, plan:S._spPlan});
-  showToast('方案已生成');
+  var res = buildSalesPlan({industry:ind, role:role, size:size, weeks:weeks});
+  S._spPlan = res.text;
+  var planId = uid('p_');
+  DB.put('sales_plans', {id:planId, ts:Date.now(), industry:ind, role:role, size:size, weeks:weeks, plan:res.text});
+  // P1-5：生成同时沉淀结构化商机线索进 CRM（AIDAX 自带轻量线索库；可导出交付起点课堂销售系统）
+  var estLicense = size * seatPriceYuan();
+  var sess = getSessionSafe();
+  var owner = (sess && (sess.name || sess.company)) || currentOwnerKey();
+  var leadId = uid('lead_');
+  DB.put('sales_leads', {
+    id: leadId, ts: Date.now(), planId: planId,
+    industry: ind, role: role, size: size, weeks: weeks,
+    weakDims: res.meta.weakDims, weakDimNames: res.meta.weakDimNames,
+    recommendedCourseIds: res.meta.recommendedCourseIds,
+    recommendedCourseTitles: res.meta.recommendedCourseTitles,
+    hasData: res.meta.hasData,
+    estSeats: size, estLicenseYuan: estLicense, amount: estLicense,
+    status: 'new', source: '陪跑方案生成器', owner: owner, note: '',
+    planText: res.text
+  });
+  S._spLeadId = leadId; S._spLeadEst = estLicense;
+  showToast('方案已生成，并已沉淀为商机线索（预估授权费 ¥' + estLicense + '）');
   if (S.view === 'admin') render();
 };
 S.copyPlan = function(){
@@ -11642,6 +11668,69 @@ S.downloadPlan = function(){
   a.download = 'AI陪跑方案_' + fmtTs(Date.now()).replace(/[-: ]/g,'') + '.txt';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+};
+
+// ---- P1-5 商机线索（陪跑方案生成器沉淀的结构化线索，进 AIDAX 自带线索库 / 可导出交付起点课堂销售系统）----
+S.goLeads = function(){ S.adminTab = 'leads'; S._leadViewId = null; render(); };
+S.leadView = function(id){ S._leadViewId = id; if (S.view === 'admin') render(); };
+S.leadClose = function(){ S._leadViewId = null; if (S.view === 'admin') render(); };
+S.leadFilter = function(st){ S._leadFilter = st; if (S.view === 'admin') render(); };
+S.leadSetStatus = function(id, st){
+  var l = DB.get('sales_leads', id); if (!l) return;
+  l.status = st; DB.put('sales_leads', l);
+  if (S.view === 'admin') render();
+};
+S.leadSetNote = function(id){
+  var l = DB.get('sales_leads', id); if (!l) return;
+  l.note = (document.getElementById('leadNote') || {}).value || '';
+  DB.put('sales_leads', l); showToast('备注已保存');
+  if (S.view === 'admin') render();
+};
+S.copyPlanText = function(id){
+  var l = DB.get('sales_leads', id); if (!l || !l.planText) return;
+  var ta = document.createElement('textarea'); ta.value = l.planText; document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); showToast('方案已复制'); } catch(e){ showToast('复制失败'); }
+  document.body.removeChild(ta);
+};
+S.downloadLeadPlan = function(id){
+  var l = DB.get('sales_leads', id); if (!l || !l.planText) return;
+  var blob = new Blob([l.planText], {type:'text/plain;charset=utf-8'});
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'AI陪跑方案_' + fmtTs(l.ts).replace(/[-: ]/g,'') + '.txt';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+};
+function csvCell(v){ v = v == null ? '' : String(v); return '"' + v.replace(/"/g,'""') + '"'; }
+S.leadExportCsv = function(){
+  var all = DB.all('sales_leads');
+  var rows = [['生成时间','行业','岗位','参训人数','周期(周)','短板维度','推荐课程数','预估席位','预估授权费(¥)','商机金额(¥)','状态','来源','负责人','备注']];
+  var ST = {new:'新建',contacted:'已联系',won:'已转化',lost:'已丢单'};
+  all.forEach(function(l){
+    rows.push([
+      fmtTs(l.ts),
+      (INDUSTRIES[l.industry] && INDUSTRIES[l.industry].name) || l.industry,
+      (ROLES[l.role] && ROLES[l.role].name) || l.role,
+      l.size, l.weeks, (l.weakDimNames||[]).join('、'), (l.recommendedCourseIds||[]).length,
+      l.estSeats, l.estLicenseYuan||0, l.amount||0,
+      ST[l.status]||l.status, l.source||'', l.owner||'', l.note||''
+    ]);
+  });
+  var csv = rows.map(function(r){ return r.map(csvCell).join(','); }).join('\r\n');
+  var blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'});
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'AIDAX_商机线索_' + fmtTs(Date.now()).replace(/[-: ]/g,'') + '.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+  showToast('已导出 ' + all.length + ' 条线索 CSV');
+};
+S.leadExportJson = function(){
+  var all = DB.all('sales_leads');
+  var blob = new Blob([JSON.stringify(all, null, 2)], {type:'application/json'});
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'AIDAX_商机线索_' + fmtTs(Date.now()).replace(/[-: ]/g,'') + '.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+  showToast('已导出 ' + all.length + ' 条线索 JSON');
 };
 
 // ---- 演示数据（便于本地验证分析看板）----
@@ -11737,6 +11826,7 @@ function renderAdmin() {
   var isAdmin = session.role === 'admin';
   var tabs = [['overview','总览'],['industry','行业分析'],['company','企业分析'],['feedback','反馈汇总'],['logs','访问日志'],['sales','销售方案']];
   tabs.push(['subscription','订阅/席位']); // 管理员与企业管理员均可见
+  if (isAdmin) tabs.push(['leads','商机线索']); // 销售线索库：仅平台管理员
   if (isAdmin) tabs.push(['companies','企业管理']);
   if (isAdmin) tabs.push(['quiz','测评分析']);
   var html = headerHtml('管理员看板', isAdmin ? '平台管理员视角 · 团队AI学习全景' : '企业管理员视角 · 团队AI学习进度', true);
@@ -11753,6 +11843,7 @@ function renderAdmin() {
   else if (S.adminTab === 'sales') html += renderAdminSales();
   else if (S.adminTab === 'quiz') html += renderAdminQuiz();
   else if (S.adminTab === 'subscription') html += renderAdminSubscription();
+  else if (S.adminTab === 'leads') html += renderAdminLeads();
   else html += renderAdminOverview(isAdmin);
   return html;
 }
@@ -12075,6 +12166,10 @@ function renderAdminSales() {
       <button class="btn btn-sm btn-outline" data-action="downloadPlan">下载 .txt</button>
     </div><div class="plan-box">${planToHtml(S._spPlan)}</div>`;
   }
+  if (S._spLeadId) {
+    html += `<div style="margin-top:10px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--card2,#f5f7fb);font-size:12.5px;color:var(--text2)">
+      ✅ 已同步生成 <b>结构化商机线索</b>（预估授权费 ¥${(S._spLeadEst||0).toLocaleString()}）｜ <button class="btn btn-sm btn-primary" data-action="goLeads" style="vertical-align:middle">前往「商机线索」跟进 →</button></div>`;
+  }
   html += `</div>`;
 
   if (plans.length) {
@@ -12083,6 +12178,87 @@ function renderAdminSales() {
       html += `<div class="kv"><span class="k">${fmtTs(p.ts)}</span><span class="v">${INDUSTRIES[p.industry]?INDUSTRIES[p.industry].name:p.industry} × ${ROLES[p.role]?ROLES[p.role].name:p.role} · ${p.size} 人 / ${p.weeks} 周</span></div>`;
     });
     html += `</div>`;
+  }
+  return html;
+}
+
+// ==================== P1-5 · 商机线索库（陪跑方案生成器沉淀的结构化线索）====================
+function renderAdminLeads(){
+  var all = DB.all('sales_leads').slice().sort(function(a,b){ return b.ts - a.ts; });
+  var f = S._leadFilter || 'all';
+  var list = all.filter(function(l){ return f === 'all' || l.status === f; });
+  var LEAD_ST = { new:'新建', contacted:'已联系', won:'已转化', lost:'已丢单' };
+  var ST_COLOR = { new:'#3b6fe0', contacted:'#e0a400', won:'#2e9e5b', lost:'#d94a3d' };
+  var totalEst = all.reduce(function(s,l){ return s + (l.estLicenseYuan||0); }, 0);
+  var wonList = all.filter(function(l){ return l.status === 'won'; });
+  var wonEst = wonList.reduce(function(s,l){ return s + (l.amount||0); }, 0);
+  var html = '<div class="card slide-up">';
+  html += '<div class="section-title"><span class="st-ico">💼</span>商机线索（陪跑方案生成器沉淀）</div>';
+  html += '<p style="font-size:12.5px;color:var(--text2);margin-bottom:14px">每次生成「培训陪跑方案」会自动沉淀一条结构化商机线索（行业 / 岗位 / 人数 / 周期 / 短板维度 / 推荐课程 / 预估授权费）。可在此跟进状态、记录备注，并导出 CSV / JSON 交付起点课堂销售系统。</p>';
+  html += '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px">'
+    + aqKpi('线索总数', all.length)
+    + aqKpi('预估授权费合计', '¥' + totalEst.toLocaleString())
+    + aqKpi('已转化金额', '¥' + wonEst.toLocaleString(), wonList.length + ' 单')
+    + '</div>';
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">';
+  var chips = [['all','全部'],['new','新建'],['contacted','已联系'],['won','已转化'],['lost','已丢单']];
+  chips.forEach(function(c){
+    html += '<button class="btn btn-sm ' + (f===c[0]?'btn-primary':'btn-outline') + '" data-action="leadFilter" data-st="'+c[0]+'">'+c[1]+'</button>';
+  });
+  html += '<span style="flex:1"></span>';
+  html += '<button class="btn btn-sm btn-outline" data-action="leadExportCsv">⬇️ 导出 CSV</button>';
+  html += '<button class="btn btn-sm btn-outline" data-action="leadExportJson">⬇️ 导出 JSON</button>';
+  html += '</div>';
+  if (!list.length) {
+    html += '<p style="text-align:center;color:var(--text3);padding:24px">暂无线索。前往「销售方案」生成陪跑方案即可自动沉淀。</p>';
+  } else {
+    html += '<div style="overflow-x:auto"><table class="log-table"><thead><tr>'
+      + '<th>生成时间</th><th>行业×岗位</th><th>人数/周期</th><th>短板维度</th><th>预估授权费</th><th>状态</th><th>操作</th></tr></thead><tbody>';
+    list.forEach(function(l){
+      var indn = (INDUSTRIES[l.industry] && INDUSTRIES[l.industry].name) || l.industry;
+      var roln = (ROLES[l.role] && ROLES[l.role].name) || l.role;
+      var wd = (l.weakDimNames||[]).join('、') || '—';
+      html += '<tr>'
+        + '<td>'+fmtTs(l.ts)+'</td>'
+        + '<td>'+indn+' × '+roln+'</td>'
+        + '<td>'+l.size+' 人 / '+l.weeks+' 周</td>'
+        + '<td style="max-width:200px;white-space:normal">'+wd+'</td>'
+        + '<td>¥'+(l.estLicenseYuan||0).toLocaleString()+'</td>'
+        + '<td><span style="color:'+(ST_COLOR[l.status]||'#888')+';font-weight:600">●</span> '+(LEAD_ST[l.status]||l.status)+'</td>'
+        + '<td><button class="btn btn-sm btn-outline" data-action="leadView" data-id="'+l.id+'">查看</button></td>'
+        + '</tr>';
+    });
+    html += '</tbody></table></div>';
+  }
+  html += '</div>';
+  if (S._leadViewId) {
+    var lv = DB.get('sales_leads', S._leadViewId);
+    if (lv) {
+      var indn2 = (INDUSTRIES[lv.industry] && INDUSTRIES[lv.industry].name) || lv.industry;
+      var roln2 = (ROLES[lv.role] && ROLES[lv.role].name) || lv.role;
+      html += '<div class="card mt-3 slide-up"><div class="section-title"><span class="st-ico">📋</span>线索详情</div>';
+      html += '<div class="kv"><span class="k">行业×岗位</span><span class="v">'+indn2+' × '+roln2+'</span></div>';
+      html += '<div class="kv"><span class="k">参训规模</span><span class="v">'+lv.size+' 人 / '+lv.weeks+' 周</span></div>';
+      html += '<div class="kv"><span class="k">短板维度</span><span class="v">'+((lv.weakDimNames||[]).join('、')||'—')+'</span></div>';
+      html += '<div class="kv"><span class="k">推荐课程</span><span class="v" style="white-space:normal">'+((lv.recommendedCourseTitles||[]).join('、')||'—')+'</span></div>';
+      html += '<div class="kv"><span class="k">预估席位授权费</span><span class="v">¥'+(lv.estLicenseYuan||0).toLocaleString()+'（'+lv.size+' 席 × ¥'+seatPriceYuan()+'/人/年）</span></div>';
+      html += '<div class="kv"><span class="k">商机金额</span><span class="v">¥'+(lv.amount||0).toLocaleString()+'</span></div>';
+      html += '<div class="kv"><span class="k">来源 / 负责人</span><span class="v">'+(lv.source||'')+' / '+(lv.owner||'')+'</span></div>';
+      html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0"><span style="font-size:12px;color:var(--text3);align-self:center">状态：</span>';
+      Object.keys(LEAD_ST).forEach(function(k){
+        html += '<button class="btn btn-sm '+(lv.status===k?'btn-primary':'btn-outline')+'" data-action="leadSetStatus" data-id="'+lv.id+'" data-st="'+k+'">'+LEAD_ST[k]+'</button>';
+      });
+      html += '</div>';
+      html += '<textarea id="leadNote" class="fb-editor" style="min-height:60px;width:100%;border:1px solid var(--border);border-radius:8px;padding:8px;font-size:13px" placeholder="跟进备注（如：已加企业微信 / 报价单已发 / 卡在合同审批）">'+(lv.note||'')+'</textarea>';
+      html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">'
+        + '<button class="btn btn-sm btn-primary" data-action="leadSetNote" data-id="'+lv.id+'">保存备注</button>'
+        + '<button class="btn btn-sm btn-outline" data-action="copyPlanText" data-id="'+lv.id+'">复制方案</button>'
+        + '<button class="btn btn-sm btn-outline" data-action="downloadLeadPlan" data-id="'+lv.id+'">下载方案 .txt</button>'
+        + '<button class="btn btn-sm btn-outline" data-action="leadClose">返回列表</button>'
+        + '</div>';
+      html += '<div class="plan-box" style="margin-top:12px;max-height:320px;overflow:auto">'+planToHtml(lv.planText||'')+'</div>';
+      html += '</div>';
+    }
   }
   return html;
 }
@@ -13113,6 +13289,16 @@ function bindEvents() {
             case 'genSalesPlan': S.genSalesPlan(); break;
             case 'copyPlan': S.copyPlan(); break;
             case 'downloadPlan': S.downloadPlan(); break;
+            case 'goLeads': S.goLeads(); break;
+            case 'leadView': S.leadView(id); break;
+            case 'leadClose': S.leadClose(); break;
+            case 'leadFilter': S.leadFilter(el.getAttribute('data-st')); break;
+            case 'leadSetStatus': S.leadSetStatus(id, el.getAttribute('data-st')); break;
+            case 'leadSetNote': S.leadSetNote(id); break;
+            case 'leadExportCsv': S.leadExportCsv(); break;
+            case 'leadExportJson': S.leadExportJson(); break;
+            case 'copyPlanText': S.copyPlanText(id); break;
+            case 'downloadLeadPlan': S.downloadLeadPlan(id); break;
             case 'goBack': S.goBack(); break;
             case 'logout': S.logout(); break;
             case 'toggleTaskHint': S.toggleTaskHint(el.getAttribute('data-cid'), parseInt(el.getAttribute('data-ti'))); break;
