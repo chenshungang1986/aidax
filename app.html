@@ -5974,8 +5974,12 @@ function getCoursePriority(course) {
     const dk = courseDimKey(course);
     if (dk && sd.has(dk)) selfBoost = 1.3;
   }
-  // Combine: base priority × industry urgency × prereq factor × self factor
-  return Math.round(basePriority * indBoost * prereqBoost * selfBoost * 100) / 100;
+  // 修复：compScore 取覆盖维度的 min，覆盖越多越容易命中弱维 → 8 维全覆的综合实战课永久排第一。
+  // 按覆盖数做归一化惩罚，让「综合课靠后、专项课靠前」符合学习顺序。
+  const covCount = (courseDimKeys(course) || []).length;
+  const covPenalty = covCount > 1 ? 1 / (1 + 0.18 * (covCount - 1)) : 1;
+  // Combine: base priority × industry urgency × prereq factor × self factor × coverage
+  return Math.round(basePriority * indBoost * prereqBoost * selfBoost * covPenalty * 100) / 100;
 }
 
 // Check if all prerequisites for a course are met
@@ -6015,6 +6019,16 @@ function courseDimKey(course) {
   if (!role) return null;
   const skillIdx = getPrimarySkillIdx(course);
   return (role.dimKeys && role.dimKeys[skillIdx]) || null;
+}
+
+// 课程真实投入分钟数：64 单元课的 dur 形如「8 单元」，不能直接 parseInt
+// 折算口径：每单元 8min 视频 + 4min 练习/陪练（与课程包 video.dur 一致）
+function courseMinutes(course) {
+  const d = String((course && course.dur) || '');
+  const mUnit = d.match(/(\d+)\s*单元/);
+  if (mUnit) return parseInt(mUnit[1], 10) * 12;
+  const n = parseInt(d, 10);
+  return isNaN(n) ? 30 : n + 10;
 }
 function isSelfRelated(course) {
   const sd = selfDimKeys();
@@ -10136,7 +10150,9 @@ function renderLearningMap() {
       const tpMap = getTargetProfile(S.industry, S.role);
       let targetGap = false;
       if (tpMap && cDims && cDims.length) {
-        targetGap = cDims.some(dk => tpMap[dk] && (result && result.dimScores && result.dimScores[dk] != null ? result.dimScores[dk] : 0) < tpMap[dk].target);
+        // 修复：此处原引用未声明的 result（仅局部作用域缺失），有目标画像的行业进入学习地图必抛 ReferenceError
+        const _dm = (S._quizResult && S._quizResult.dimScores) || (S.quizScores || {});
+        targetGap = cDims.some(dk => tpMap[dk] && ((_dm[dk] != null ? _dm[dk] : 0) < tpMap[dk].target));
       }
 
       let nodeCls = 'map-node';
@@ -10224,11 +10240,11 @@ function renderSchedule() {
   let html = headerHtml('学习时间计划', role.icon + ' ' + role.name, true);
 
   // Summary card
-  const totalMinutes = ordered.reduce((sum, c) => {
-    const m = parseInt(c.dur) || 30;
-    return sum + m + 10; // +10min for task practice
-  }, 0);
-  const weeks = Math.ceil(ordered.length / 2);
+  // 修复：64 单元课的 dur 是「8 单元」而非分钟数，parseInt("8 单元")=8 会把 8.5h 的课算成 2h。
+  // 统一按「每单元 8min 视频 + 4min 练习/陪练」折算真实投入。
+  const totalMinutes = ordered.reduce((sum, c) => sum + courseMinutes(c), 0);
+  // 周计划容量：按每周 2 门 + 约 180 分钟上限取较大者，避免「2h 学完 64 单元」这种失真承诺
+  const weeks = Math.max(Math.ceil(ordered.length / 2), Math.ceil(totalMinutes / 180));
 
   html += `<div class="card slide-up">
     <div class="schedule-header">
@@ -10273,7 +10289,7 @@ function renderSchedule() {
         : (compScore > 0 ? Math.round(compScore/4*100) : (scores ? Math.round((scores[getPrimarySkillIdx(c)]||0)/4*100) : 50));
       const priorityCls = skillPct < 40 ? 'priority-high' : skillPct < 70 ? 'priority-mid' : 'priority-low';
       const day = weekDays[ci] || weekDays[0];
-      const dur = parseInt(c.dur) || 30;
+      const dur = courseMinutes(c);
       const tagCls = c.type==='video' ? 'tag-blue' : 'tag-purple';
 
       const prereqUnmet = c.requires && c.requires.length && c.requires.some(rid => !S.courseProgress[rid]?.done);
@@ -10281,7 +10297,7 @@ function renderSchedule() {
         <div class="schedule-day">${day}</div>
         <div class="schedule-course">
           <div class="schedule-course-name">${c.title}</div>
-          <div class="schedule-course-dur">${c.dur} + 约10分钟关卡练习 · <span class="tag ${tagCls}" style="font-size:10px;padding:1px 6px;">${c.type==='video'?'视频':'图文'}</span>${prereqUnmet?' · <span style="color:var(--amber);font-size:11px;">建议先学前置</span>':''}</div>
+          <div class="schedule-course-dur">${c.dur} · 约 ${dur} 分钟（含演示/练习/陪练） · <span class="tag ${tagCls}" style="font-size:10px;padding:1px 6px;">${c.type==='video'?'视频':'图文'}</span>${prereqUnmet?' · <span style="color:var(--amber);font-size:11px;">建议先学前置</span>':''}</div>
         </div>
       </div>`;
     });
