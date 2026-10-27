@@ -1988,6 +1988,28 @@ function fetchCloud(fn, bodyObj, cb) {
     .catch(function () { cb(0, null); }); // 网络错误 → 走兜底
 }
 
+// P2-2：拉取全平台常模（Postgres RPC quiz_norms，SECURITY DEFINER 读 quiz_results 聚合；仅 authenticated 可调用）
+function fetchNorms(cb) {
+  cb = cb || function () {};
+  try {
+    var cfg = cloudConfig();
+    if (!cfg || !cfg.supabaseUrl) { cb(0, null); return; }
+    var url = cfg.supabaseUrl.replace(/\/$/, '') + '/rest/v1/rpc/quiz_norms';
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': cfg.supabaseAnonKey,
+        'Authorization': 'Bearer ' + (S._cloudJwt || cfg.supabaseAnonKey)
+      },
+      body: '{}'
+    })
+      .then(function (r) { return r.json().then(function (j) { return { status: r.status, json: j }; }); })
+      .then(function (res) { cb(res.status, res.json); })
+      .catch(function () { cb(0, null); });
+  } catch (e) { cb(0, null); }
+}
+
 function cloudDrawQuestion(bank, dim, level, exclude, cb) {
   cb = cb || function () {};
   getQuizToken(function (tok) {
@@ -2093,6 +2115,7 @@ function startAdaptiveQuiz() {
   S._quizAllDone = false;           // 全部维度定级完成
   S.quizScores = null;
   S._quizResult = null;
+  S._quizSessionId = uid('q_');     // P2-2：本次测评会话 id（落 quiz_results 主键，幂等 upsert）
   S._quizPending = {};              // v82：逐题暂存（显式提交前可改）
   S._quizAskedIds = [];             // 已抽题 id（云端 exclude 去重）
   ensureNextStep();                 // 生成第 1 题 marker（q=null，render 时懒加载）
@@ -2327,6 +2350,7 @@ function finishAdaptiveQuiz() {
     sel: Object.assign({}, S._quizSelectedStep || {})
   };
   S._composite = computeComposite(); // v55: 综合分（基础素养30% + 岗位70%）
+  S.saveQuizResult();                // P2-2：落「逐学员测评结果」→ 供常模/前后测ROI 计算
   // 三段式：②业务场景完成后，若 ③能力自评尚未做/未跳过，则进入自评；否则直接出结果
   if (!S._selfResult && !S._selfSkipped) {
     S._quizPlan = []; // 清空，避免分发器误渲染自适应
@@ -2338,6 +2362,55 @@ function finishAdaptiveQuiz() {
   S.view = 'results';
   render();
   if (typeof initRadarChart === 'function') setTimeout(initRadarChart, 100);
+}
+
+// P2-2：测评完成 → 落「逐学员测评结果」（localStorage + Supabase 异步镜像，复用 DB.put 管道）
+// 这是「测评常模 / 前后测ROI」的数据底座：云端此前只有逐题日志，没有逐学员最终定级。
+S.saveQuizResult = function () {
+  try {
+    var sess = (typeof getSessionSafe === 'function') ? getSessionSafe() : (S.session || {});
+    var tenant = (sess && (sess.companyId || sess.company)) || '';
+    var rec = {
+      id: S._quizSessionId || uid('q_'),
+      ts: Date.now(),
+      owner: (typeof currentOwnerKey === 'function') ? currentOwnerKey() : '',
+      ownerKey: (typeof currentOwnerKey === 'function') ? currentOwnerKey() : '', // RLS 隔离键（aidax_visible 匹配）
+      tenant: tenant,
+      company: tenant, // RLS 隔离键（aidax_visible 匹配 company）
+      industry: S.industry || '',
+      role: S.role || '',
+      // 8 维最终定级（0-4）；缺失维补 0，保证 8 维齐全
+      dims: (function () {
+        var d = {};
+        for (var k in AI_DIMS) d[k] = (S.quizAnswers && typeof S.quizAnswers[k] === 'number') ? S.quizAnswers[k] : 0;
+        return d;
+      })(),
+      composite: (S._composite && typeof S._composite.overall === 'number') ? S._composite.overall : 0, // 0-100 综合（基础30%+岗位70%）
+      adaptive: (S._quizResult && typeof S._quizResult.overall === 'number') ? S._quizResult.overall : 0, // 0-100 岗位8维加权
+      base: (S._baseResult && typeof S._baseResult.pct === 'number') ? S._baseResult.pct : 0,           // 0-100 基础素养
+      phase: S._quizPhase || 'post'
+    };
+    DB.put('quiz_results', rec);
+  } catch (e) { /* 落库失败不影响测评结果展示（fail-safe） */ }
+};
+
+// P2-2：常模百分位——给定 0..maxLevel 的分桶计数，求某取值的相对百分位（高于多少比例的人）
+function pctRankFromBuckets(buckets, value) {
+  if (!buckets || !buckets.length) return null;
+  var total = buckets.reduce(function (a, b) { return a + (b || 0); }, 0);
+  if (!total) return null;
+  var below = 0, at = 0;
+  for (var i = 0; i < buckets.length; i++) {
+    var c = buckets[i] || 0;
+    if (i < value) below += c; else if (i === value) at = c;
+  }
+  return Math.round((below + at / 2) / total * 100);
+}
+// 连续分（0-100）→ 分桶（10 桶，每桶 10 分）→ 百分位
+function pctRankFromHistogram(hist, score) {
+  if (!hist || !hist.length) return null;
+  var bin = Math.max(0, Math.min(hist.length - 1, Math.floor((score || 0) / (100 / hist.length))));
+  return pctRankFromBuckets(hist, bin);
 }
 
 function calculateAdaptiveScores() {
@@ -9268,9 +9341,53 @@ function renderAdaptiveReviewCard() {
   return h;
 }
 
+// P2-2：测评常模卡片——展示学员相对全平台常模的位置（百分位）
+function renderNormsCard(dimDisplay, comp) {
+  const n = S._norms;
+  if (!n) {
+    return '<div class="card mt-3" style="text-align:center;color:var(--text2);font-size:13px;padding:18px;">📊 正在加载全平台能力常模…</div>';
+  }
+  if (!n.count || n.count < 5) {
+    return '<div class="card mt-3" style="text-align:center;color:var(--text2);font-size:13px;padding:18px;">📊 常模数据收集中（需至少 5 名学员完成测评后开放对比）。当前平台已有 <b>' + (n.count || 0) + '</b> 份有效测评结果。</div>';
+  }
+  const compPct = pctRankFromHistogram(n.compositeHist, comp.overall);
+  let html = '<div class="card mt-3 slide-up"><p style="font-weight:600;font-size:14px;margin-bottom:4px;">📊 你在全国学员中的位置</p>';
+  html += '<div style="font-size:13px;color:var(--text2);margin-bottom:12px;">基于全平台 <b>' + (n.count || 0) + '</b> 份有效测评的常模对比（参与越多越准）。</div>';
+  if (compPct !== null) {
+    const cc = compPct >= 70 ? 'var(--green)' : compPct >= 40 ? 'var(--amber)' : 'var(--red)';
+    html += '<div style="display:flex;align-items:center;gap:14px;background:#f7f9ff;border-radius:12px;padding:14px;margin-bottom:14px;">'
+      + '<div style="font-size:34px;font-weight:800;color:' + cc + ';">' + compPct + '%</div>'
+      + '<div style="font-size:13px;color:var(--text2);">你的 AI 综合能力指数超过 <b style="color:' + cc + ';">' + compPct + '%</b> 的学员<br><span style="font-size:12px;">（综合分 ' + comp.overall + '/100）</span></div></div>';
+  }
+  const rows = dimDisplay.map(function (d) {
+    return { name: d.name, icon: d.icon, score: d.score, pct: pctRankFromBuckets(n.dims[d.key], d.score) };
+  }).sort(function (a, b) { return (a.pct === null ? 999 : a.pct) - (b.pct === null ? 999 : b.pct); });
+  html += '<div style="display:flex;flex-direction:column;gap:8px;">';
+  rows.forEach(function (r) {
+    if (r.pct === null) return;
+    const barCls = r.pct >= 70 ? 'strong' : r.pct >= 40 ? 'ok' : 'weak';
+    html += '<div style="display:flex;align-items:center;gap:10px;">'
+      + '<span style="width:88px;font-size:13px;color:var(--text1);">' + r.icon + ' ' + r.name + '</span>'
+      + '<div class="gap-bar" style="flex:1;"><div class="gap-bar-fill ' + barCls + '" style="width:' + r.pct + '%"></div></div>'
+      + '<span style="width:96px;text-align:right;font-size:12px;color:var(--text2);">高于 ' + r.pct + '% 学员</span></div>';
+  });
+  html += '</div>';
+  html += '<div style="font-size:12px;color:var(--text3);margin-top:10px;">📌 常模随时间与学员规模动态更新；维度等级 0–4（4=精通）。</div>';
+  html += '</div>';
+  return html;
+}
+
 function renderResults() {
   const role = ROLES[S.role];
   const result = S._quizResult;
+
+  // P2-2：拉取全平台常模（聚合数据，任意已认证角色可读）；仅拉一次，回写后局部重渲染
+  if (!S._normsLoaded && S._cloudJwt) {
+    S._normsLoaded = true;
+    fetchNorms(function (st, j) {
+      if (st === 200 && j && j.ok) { S._norms = j; render(); }
+    });
+  }
 
   // Build dimension display data (8 AI_DIMS)
   let overall, dimDisplay;
@@ -9323,6 +9440,8 @@ function renderResults() {
     </div>
 
     ${renderQuizQualityCard(result)}<!-- v34: 作答质量卡片 -->
+
+    ${renderNormsCard(dimDisplay, comp)}<!-- P2-2: 测评常模（你在全国学员中的位置） -->
 
     ${S._baseResult ? renderBaseResultCard() : (S._baseSkipped ? '<div class="alert alert-info" style="margin-top:14px;">ℹ️ 第一部分（AI 基础素养）为必答项，当前综合分已按岗位能力计算（基础卷权重 30% 待补）。</div>' : '')}<!-- v51: 基础素养独立板块 -->
 
@@ -10917,7 +11036,7 @@ const DB = {
   },
   hydrate: function(cb){
     var cl = sbClient(); if (!cl) { cb && cb(); return; }
-    var cols = ['access_log','feedback','requirements','sales_plans','sales_leads','cases','companies','users'];
+    var cols = ['access_log','feedback','requirements','sales_plans','sales_leads','cases','quiz_results','companies','users'];
     var done = 0;
     cols.forEach(function(c){
       cl.from(c).select('*').then(function(res){
@@ -12910,7 +13029,7 @@ S.retakeQuiz = function() { // 三段式重测评：清空三段成绩，从第�
     onOk: () => {
       clearPartTimer();
       S._baseResult = null; S._baseSkipped = false; S._basePhase = null;
-      S.quizScores = null; S._quizResult = null; S._quizAllDone = false; S._quizSnap = null;
+      S.quizScores = null; S._quizResult = null; S._quizAllDone = false; S._quizSnap = null; S._quizSessionId = null;
       S._selfResult = null; S._selfSkipped = false; S._selfPhase = null; S._selfAnswers = null;
       S._basePending = []; S._quizPending = {};
       S.view = 'quiz';
