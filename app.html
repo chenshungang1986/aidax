@@ -10184,40 +10184,128 @@ function initRadarChart() {
 }
 
 // ---- LEARNING MAP ----
+// S2：课程真实学习阶段（按能力依赖分层，而非平均切三段）
+//   0 = 导论层（M0，建立 AI 边界与合规底线，所有学习的前置）
+//   1 = 单维能力层（M1-M6，按维度突破）
+//   2 = 跨维综合层（M7，整合多维度完成真实全案）
+function courseStage(c) {
+  const dks = courseDimKeys(c) || [];
+  if (/_m0$/.test(c.id)) return 0;
+  if (dks.length >= 5) return 2;
+  return 1;
+}
+function isIntroCourse(c) { return /_m0$/.test(c.id); }
+// 已达标判定：覆盖维度全部达到行业目标（无目标画像则最弱维≥70%）。
+// 未测评（无分数）一律判"未达标"，避免把整张地图清空。
+function courseAllMet(c) {
+  const tp = getTargetProfile(S.industry, S.role);
+  const result = S._quizResult;
+  const scores = (result && result.dimScores) || S.quizScores || null;
+  if (!scores) return false;
+  const dks = courseDimKeys(c) || [];
+  if (tp) {
+    if (!dks.length) return false; // 无覆盖维度无法判定，保守不放行
+    return dks.every(function (dk) {
+      const t = tp[dk] && tp[dk].target;
+      if (t == null) return true;
+      const v = scores[dk] != null ? scores[dk] : 0;
+      return v >= t;
+    });
+  }
+  return getCourseDimPct(c) >= 70;
+}
+
+// 单个课程节点（导论/能力/综合三阶段通用渲染）
+function mapNodeHtml(c, opts) {
+  opts = opts || {};
+  const role = ROLES[S.role];
+  const isDone = S.courseProgress[c.id]?.done;
+  const prereqUnmet = c.requires && c.requires.length && c.requires.some(function (rid) { return !S.courseProgress[rid]?.done; });
+  const isCurrent = !!opts.isCurrent;
+  const selfRel = isSelfRelated(c);
+  const cDims = courseDimKeys(c);
+  var skillName, skillPct;
+  if (cDims && cDims.length) {
+    skillName = cDims.map(function (dk) { return (AI_DIMS[dk] && (AI_DIMS[dk].shortCn || AI_DIMS[dk].short)) || dk; }).join('·');
+    skillPct = getCourseDimPct(c);
+  } else {
+    const skillIdx = getPrimarySkillIdx(c);
+    skillName = role.skills[skillIdx] || '';
+    skillPct = S.quizScores ? Math.round((S.quizScores[skillIdx] || 0) / 4 * 100) : 0;
+  }
+  const urgency = skillPct < 40 ? '🔴 急需' : skillPct < 70 ? '🟡 建议' : '🟢 进阶';
+  const tpMap = getTargetProfile(S.industry, S.role);
+  let targetGap = false;
+  if (tpMap && cDims && cDims.length) {
+    const _dm = (S._quizResult && S._quizResult.dimScores) || (S.quizScores || {});
+    targetGap = cDims.some(function (dk) { return tpMap[dk] && ((_dm[dk] != null ? _dm[dk] : 0) < tpMap[dk].target); });
+  }
+  var nodeCls = 'map-node';
+  if (selfRel) nodeCls += ' self-related';
+  var iconContent = c.type === 'video' ? '🎬' : '📖';
+  var badgeText = '', badgeCls = '';
+  if (isDone) { nodeCls += ' done'; iconContent = '✓'; badgeText = '已完成'; badgeCls = 'done-badge'; }
+  else if (isCurrent) { nodeCls += ' current'; badgeText = '进行中'; badgeCls = 'current-badge'; }
+  else if (prereqUnmet) { nodeCls += ' suggested'; badgeText = '建议先学前置'; badgeCls = 'suggested-badge'; }
+  else { badgeText = '待学习'; badgeCls = 'pending-badge'; }
+  const clickHandler = 'data-action="openCourse" data-idx="' + c.origIdx + '" style="cursor:pointer"';
+  return '<div class="' + nodeCls + '" ' + clickHandler + '>' +
+    '<div class="map-node-icon">' + iconContent + '</div>' +
+    '<div class="map-node-body">' +
+      '<div class="map-node-title">' + c.title + '</div>' +
+      '<div class="map-node-meta">' + c.dur + ' · ' + (c.type === 'video' ? '视频课程' : '图文课程') + '</div>' +
+      '<span class="map-skill-tag">' + skillName + ' ' + urgency + '</span>' +
+      '<div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">' + courseTierBadge(c) + (targetGap ? '<span class="map-node-badge gap-badge">🎯未达行业目标</span>' : '') + (selfRel ? '<span class="map-node-badge self-badge">🪞自评相关</span>' : '') + '</div>' +
+    '</div>' +
+    '<span class="map-node-badge ' + badgeCls + '">' + badgeText + '</span>' +
+  '</div>';
+}
+
 function renderLearningMap() {
   const role = ROLES[S.role];
   const courses = getRoleCourses();
 
-  // Sort courses by intelligent priority (skill gap × industry weight × prerequisites)
-  const ordered = courses.map((c, idx) => {
-    const priority = getCoursePriority(c);
-    return {...c, origIdx: idx, priority};
-  }).sort((a,b) => b.priority - a.priority);
+  // S2：富化每门课 —— 优先级 / 真实阶段 / 是否达标 / 是否导论
+  const enriched = courses.map((c, idx) => ({
+    ...c, origIdx: idx,
+    priority: getCoursePriority(c),
+    stage: courseStage(c),
+    allMet: courseAllMet(c),
+    intro: isIntroCourse(c)
+  }));
 
-  // Compute total progress
-  const total = courses.length;
-  const done = courses.filter(c => S.courseProgress[c.id]?.done).length;
-  const progress = Math.round(done/total*100);
+  // 全量路径：所有课程，按 导论→单维能力→跨维综合 真实顺序（不再平均切三段）
+  const fullPath = enriched.slice().sort((a, b) => a.stage - b.stage || a.origIdx - b.origIdx);
 
-  // Find current course (first non-done, prereqs-met)
+  // 我的路径：剔除「已达标」维度课程（M0 永远保留并置顶，作为导论前置）
+  const myPath = enriched.filter(c => c.intro || !c.allMet).sort((a, b) => {
+    if (a.intro !== b.intro) return a.intro ? -1 : 1;   // M0 置顶（导论前置）
+    if (a.stage !== b.stage) return a.stage - b.stage;
+    return b.priority - a.priority;
+  });
+  const metList = enriched.filter(c => !c.intro && c.allMet);
+
   let currentIdx = -1;
-  for (let i=0; i<ordered.length; i++) {
-    if (!S.courseProgress[ordered[i].id]?.done && prereqsMet(ordered[i])) { currentIdx = i; break; }
+  for (let i = 0; i < myPath.length; i++) {
+    if (!S.courseProgress[myPath[i].id]?.done && prereqsMet(myPath[i])) { currentIdx = i; break; }
   }
-  // If no prereqs-met course, fall back to first non-done
-  if (currentIdx === -1) {
-    currentIdx = ordered.findIndex(c => !S.courseProgress[c.id]?.done);
-  }
+  if (currentIdx === -1) currentIdx = myPath.findIndex(c => !S.courseProgress[c.id]?.done);
+
+  const total = courses.length;
+  const doneAll = courses.filter(c => S.courseProgress[c.id]?.done).length;
+  const progressAll = Math.round(doneAll / total * 100);
+  const myDone = myPath.filter(c => S.courseProgress[c.id]?.done).length;
+  const myProgress = myPath.length ? Math.round(myDone / myPath.length * 100) : 100;
 
   let html = headerHtml('个人学习地图', role.icon + ' ' + role.name, true);
 
-  // Map header card
+  // 顶部进度卡（我的路径口径）
   html += `<div class="card slide-up">
     <div class="map-header">
       <h2>📍 你的AI能力成长路线图</h2>
-      <p style="font-size:13px;color:var(--text2);">共 ${total} 门课程 · 已完成 ${done} 门 · 整体进度 ${progress}%</p>
+      <p style="font-size:13px;color:var(--text2);">我的路径 ${myPath.length} 门（已达标免修 ${metList.length} 门）· 已完成 ${myDone} 门 · 进度 ${myProgress}%</p>
     </div>
-    <div class="progress-bar"><div class="progress-fill ${progress>=80?'high':progress>=40?'mid':'low'}" style="width:${progress}%"></div></div>
+    <div class="progress-bar"><div class="progress-fill ${myProgress>=80?'high':myProgress>=40?'mid':'low'}" style="width:${myProgress}%"></div></div>
     <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;">
       <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);"><div style="width:10px;height:10px;border-radius:50%;background:var(--green);"></div>已完成</div>
       <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);"><div style="width:10px;height:10px;border-radius:50%;background:var(--blue);"></div>进行中</div>
@@ -10229,103 +10317,75 @@ function renderLearningMap() {
   const selfMapCard = renderSelfMapCard();
   if (selfMapCard) html += selfMapCard;
 
-  // Stage grouping: Phase 1 (基础夯实, 前1/3), Phase 2 (能力提升, 中1/3), Phase 3 (综合应用, 后1/3)
-  const stageCount = Math.ceil(total/3);
-  const stages = [
-    { label: '阶段一：AI基础夯实', icon: '🌱', courses: ordered.slice(0, stageCount) },
-    { label: '阶段二：能力深化提升', icon: '⚡', courses: ordered.slice(stageCount, stageCount*2) },
-    { label: '阶段三：综合实战应用', icon: '🚀', courses: ordered.slice(stageCount*2) }
-  ].filter(s => s.courses.length > 0);
+  // S2：真实学习阶段元信息（导论层 / 单维能力层 / 跨维综合层）
+  const stageMeta = [
+    { s: 0, icon: '🌱', t: '导论与底线' },
+    { s: 1, icon: '⚡', t: '单维能力深化' },
+    { s: 2, icon: '🚀', t: '跨维综合实战' }
+  ];
 
-  html += `<div class="card mt-3 slide-up">`;
-  stages.forEach((stage, stageIdx) => {
-    html += `<div class="map-stage">
-      <div class="map-stage-title">${stage.icon} ${stage.label}</div>`;
+  // ---- 全量路径 card ----
+  html += `<div class="card mt-3 slide-up"><div class="map-stage-title">🗺️ 全量学习路径（${total} 门 · 完整能力地图）</div>`;
+  stageMeta.forEach((sm) => {
+    const grp = fullPath.filter(c => c.stage === sm.s);
+    if (!grp.length) return;
+    html += `<div style="margin:10px 0 4px;font-size:13px;font-weight:600;color:var(--text2);">${sm.icon} ${sm.t}</div>`;
+    grp.forEach((c, i) => {
+      html += mapNodeHtml(c, { isCurrent: false });
+      if (i < grp.length - 1) html += `<div class="map-connector"></div>`;
+    });
+  });
+  html += `</div>`;
 
-    stage.courses.forEach((c, nodeIdx) => {
-      const globalIdx = stageIdx * stageCount + nodeIdx;
-      const isDone = S.courseProgress[c.id]?.done;
-      const prereqUnmet = c.requires && c.requires.length && c.requires.some(rid => !S.courseProgress[rid]?.done);
-      const isCurrent = !isDone && globalIdx === currentIdx;
-      const selfRel = isSelfRelated(c);
-      // 新体系课程（自带 dims，如金融PM 8 模块）：标签展示其覆盖的能力维度，紧急度取覆盖维度中最弱的一项
-      const cDims = courseDimKeys(c);
-      let skillName, skillPct;
-      if (cDims && cDims.length) {
-        skillName = cDims.map(dk => (AI_DIMS[dk] && (AI_DIMS[dk].shortCn || AI_DIMS[dk].short)) || dk).join('·');
-        skillPct = getCourseDimPct(c);
-      } else {
-        const skillIdx = getPrimarySkillIdx(c);
-        skillName = role.skills[skillIdx] || '';
-        skillPct = S.quizScores ? Math.round((S.quizScores[skillIdx]||0)/4*100) : 0;
+  // ---- 我的路径 card ----
+  html += `<div class="card mt-3 slide-up"><div class="map-stage-title">🎯 我的专属路径（按测评结果筛选）</div>`;
+  if (!myPath.length) {
+    html += `<p style="font-size:13px;color:var(--text2);">🎉 你已达标全部维度，去参加成果测验吧！</p>`;
+  } else {
+    let lastStage = -1;
+    myPath.forEach((c, i) => {
+      if (c.stage !== lastStage) {
+        if (i > 0) html += `<div style="text-align:center;margin:8px 0;color:var(--text3);">↓</div>`;
+        const sm = stageMeta.find(x => x.s === c.stage);
+        html += `<div style="margin:8px 0 4px;font-size:12px;font-weight:600;color:var(--text3);">${sm ? sm.icon + ' ' + sm.t : ''}</div>`;
+        lastStage = c.stage;
       }
-      const urgency = skillPct < 40 ? '🔴 急需' : skillPct < 70 ? '🟡 建议' : '🟢 进阶';
+      html += mapNodeHtml(c, { isCurrent: i === currentIdx });
+      if (i < myPath.length - 1) html += `<div class="map-connector"></div>`;
+    });
+  }
+  html += `</div>`;
 
-      // P4: 课程覆盖维度中若有「实测 < 行业目标」者，标记「未达行业目标」
-      const tpMap = getTargetProfile(S.industry, S.role);
-      let targetGap = false;
-      if (tpMap && cDims && cDims.length) {
-        // 修复：此处原引用未声明的 result（仅局部作用域缺失），有目标画像的行业进入学习地图必抛 ReferenceError
-        const _dm = (S._quizResult && S._quizResult.dimScores) || (S.quizScores || {});
-        targetGap = cDims.some(dk => tpMap[dk] && ((_dm[dk] != null ? _dm[dk] : 0) < tpMap[dk].target));
-      }
-
-      let nodeCls = 'map-node';
-      if (selfRel) nodeCls += ' self-related';
-      let iconContent = c.type==='video'?'🎬':'📖';
-      let badgeText = '', badgeCls = '';
-
-      if (isDone) {
-        nodeCls += ' done'; iconContent = '✓';
-        badgeText = '已完成'; badgeCls = 'done-badge';
-      } else if (isCurrent) {
-        nodeCls += ' current';
-        badgeText = '进行中'; badgeCls = 'current-badge';
-      } else if (prereqUnmet) {
-        nodeCls += ' suggested';
-        badgeText = '建议先学前置'; badgeCls = 'suggested-badge';
-      } else {
-        badgeText = '待学习'; badgeCls = 'pending-badge';
-      }
-
-      // v55: 解除硬锁——所有课程均可点击学习，前置仅作软提示
-      const clickHandler = `data-action="openCourse" data-idx="${c.origIdx}" style="cursor:pointer"`;
-
-      html += `<div class="${nodeCls}" ${clickHandler}>
-        <div class="map-node-icon">${iconContent}</div>
+  // ---- 已达标·免修 card ----
+  html += `<div class="card mt-3 slide-up" style="border-style:dashed;">
+    <div class="map-stage-title">✅ 已达标·免修（可复核）</div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:8px;">以下维度你已达成行业目标，对应课程可免修；如需复习仍可点击学习。</p>`;
+  if (!metList.length) {
+    html += `<p style="font-size:13px;color:var(--text2);">暂无已达标课程——继续加油！</p>`;
+  } else {
+    metList.forEach((c) => {
+      html += `<div class="map-node done" data-action="openCourse" data-idx="${c.origIdx}" style="cursor:pointer;opacity:.85;">
+        <div class="map-node-icon" style="background:var(--green);color:#fff;">✓</div>
         <div class="map-node-body">
           <div class="map-node-title">${c.title}</div>
-          <div class="map-node-meta">${c.dur} · ${c.type==='video'?'视频课程':'图文课程'}</div>
-          <span class="map-skill-tag">${skillName} ${urgency}</span>
-          <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">${courseTierBadge(c)}${targetGap?'<span class="map-node-badge gap-badge">🎯未达行业目标</span>':''}${selfRel?'<span class="map-node-badge self-badge">🪞自评相关</span>':''}</div>
+          <div class="map-node-meta">${c.dur} · 已达标免修</div>
         </div>
-        <span class="map-node-badge ${badgeCls}">${badgeText}</span>
+        <span class="map-node-badge done-badge">免修</span>
       </div>`;
-
-      // Add connector line between nodes (not after last in stage)
-      const isLastInStage = nodeIdx === stage.courses.length - 1;
-      if (!isLastInStage) {
-        html += `<div class="map-connector${isDone?' done-conn':''}"></div>`;
-      }
     });
+  }
+  html += `</div>`;
 
-    // Connector between stages
-    if (stageIdx < stages.length - 1) {
-      html += `<div style="text-align:center;margin:10px 0;font-size:18px;color:var(--text3);">↓</div>`;
-    }
-    html += `</div>`;
-  });
-
-  // Final goal node
-  const allDone = done === total;
-  html += `<div class="map-connector${allDone?' done-conn':''}"></div>
-    <div class="map-node${allDone?' done':''}" ${allDone?'data-action="startFinalQuiz" style="cursor:pointer"':''} style="border-style:dashed;background:${allDone?'var(--green-bg)':'var(--bg)'};">
-      <div class="map-node-icon" style="background:${allDone?'var(--green)':'var(--border)'};color:${allDone?'#fff':'var(--text3)'};">🏆</div>
+  // 最终成果节点
+  const allMyDone = myPath.length > 0 && myPath.every(c => S.courseProgress[c.id]?.done);
+  html += `<div class="map-connector${allMyDone?' done-conn':''}"></div>
+    <div class="map-node${allMyDone?' done':''}" ${allMyDone?'data-action="startFinalQuiz" style="cursor:pointer"':''} style="border-style:dashed;background:${allMyDone?'var(--green-bg)':'var(--bg)'};">
+      <div class="map-node-icon" style="background:${allMyDone?'var(--green)':'var(--border)'};color:${allMyDone?'#fff':'var(--text3)'};">🏆</div>
       <div class="map-node-body">
         <div class="map-node-title">AI能力成果测验</div>
-        <div class="map-node-meta">完成所有课程后解锁 · 综合能力考核</div>
+        <div class="map-node-meta">完成我的路径后解锁 · 综合能力考核</div>
       </div>
-      <span class="map-node-badge ${allDone?'done-badge':'locked-badge'}">${allDone?'可参加':'待解锁'}</span>
+      <span class="map-node-badge ${allMyDone?'done-badge':'locked-badge'}">${allMyDone?'可参加':'待解锁'}</span>
     </div>
   </div>`;
 
@@ -10343,11 +10403,18 @@ function renderSchedule() {
   const courses = getRoleCourses();
   const scores = S.quizScores;
 
+  // S2：已达标维度课程在个人计划里跳过（仅覆盖已达标维度的课程不进计划），
+  // 导论(M0)始终保留且排在最前；总时长随之下降。
   const ordered = courses.map((c, idx) => {
     const priority = getCoursePriority(c);
     const isDone = S.courseProgress[c.id]?.done;
-    return {...c, origIdx: idx, priority, isDone};
-  }).sort((a,b) => b.priority - a.priority).filter(c => !c.isDone);
+    const intro = isIntroCourse(c);
+    const allMet = courseAllMet(c);
+    return {...c, origIdx: idx, priority, isDone, intro, allMet};
+  }).sort((a, b) => {
+    if (a.intro !== b.intro) return a.intro ? -1 : 1; // 导论优先
+    return b.priority - a.priority;
+  }).filter(c => !c.isDone && (c.intro || !c.allMet));
 
   const total = courses.length;
   const done = courses.filter(c => S.courseProgress[c.id]?.done).length;
