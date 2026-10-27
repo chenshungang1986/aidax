@@ -2049,6 +2049,9 @@ function loadQuizQuestion(step, done) {
   var t = S._quizPlan && S._quizPlan[step];
   if (!t || t.q) { done(); return; }
   S._quizAskedIds = S._quizAskedIds || [];
+  // P3-1：企业开启「自建题参与测评」时优先命中企业题库（自带 scores/best，走本地算分）
+  var _cq = (typeof cbPickForQuiz === 'function') ? cbPickForQuiz(t.d, t.lv) : null;
+  if (_cq) { t.q = _cq; S._cbUsed = (S._cbUsed || 0) + 1; done(); return; }
   cloudDrawQuestion(t.bank, t.d, t.lv, S._quizAskedIds, function (cloud) {
     if (cloud) {
       t.q = {
@@ -2116,6 +2119,7 @@ function startAdaptiveQuiz() {
   S.quizScores = null;
   S._quizResult = null;
   S._quizSessionId = uid('q_');     // P2-2：本次测评会话 id（落 quiz_results 主键，幂等 upsert）
+  S._cbUsed = 0;                    // P3-1：本次测评命中企业自建题的题数（0 = 全平台题库）
   S._quizPending = {};              // v82：逐题暂存（显式提交前可改）
   S._quizAskedIds = [];             // 已抽题 id（云端 exclude 去重）
   ensureNextStep();                 // 生成第 1 题 marker（q=null，render 时懒加载）
@@ -7709,7 +7713,9 @@ S.saveQuizResult = function () {
       // P2-3：前后测归属（期次来自管理端激活配置；无激活期次则记空，不参与 ROI 报告）
       cycleId: cyc ? cyc.id : '',
       phase: S._quizPhase || (cyc ? cyc.phase : 'post'),
-      learnerName: (sess && (sess.name || sess.user)) || ''                                            // 明细表可读名
+      learnerName: (sess && (sess.name || sess.user)) || '',                                            // 明细表可读名
+      // P3-1：本次测评命中企业自建题数量（>0 说明该结果含企业自有题，与平台常模口径需区分）
+      customUsed: S._cbUsed || 0
     };
     DB.put('quiz_results', rec);
   } catch (e) { /* 落库失败不影响测评结果展示（fail-safe） */ }
@@ -11253,7 +11259,7 @@ const DB = {
   },
   hydrate: function(cb){
     var cl = sbClient(); if (!cl) { cb && cb(); return; }
-    var cols = ['access_log','feedback','requirements','sales_plans','sales_leads','cases','quiz_results','quiz_cycles','companies','users'];
+    var cols = ['access_log','feedback','requirements','sales_plans','sales_leads','cases','quiz_results','quiz_cycles','custom_banks','companies','users'];
     var done = 0;
     cols.forEach(function(c){
       cl.from(c).select('*').then(function(res){
@@ -12167,6 +12173,7 @@ function renderAdmin() {
   tabs.push(['report','企业报告']); // 管理员与企业管理员均可见：向企业交付学习成果（按企业下钻）
   if (isAdmin) tabs.push(['leads','商机线索']); // 销售线索库：仅平台管理员
   if (isAdmin) tabs.push(['cases','案例库']); // 大赛作品案例库：仅平台管理员
+  tabs.push(['bank','企业题库']); // 管理员与企业管理员均可见：企业导入自有题目（默认不参与测评）
   tabs.push(['roi','ROI 报告']); // 管理员与企业管理员均可见：企业自助查看本企业前后测 ROI（期次写操作仍限平台管理员）
   if (isAdmin) tabs.push(['companies','企业管理']);
   if (isAdmin) tabs.push(['quiz','测评分析']);
@@ -12186,6 +12193,7 @@ function renderAdmin() {
   else if (S.adminTab === 'subscription') html += renderAdminSubscription();
   else if (S.adminTab === 'leads') html += renderAdminLeads();
   else if (S.adminTab === 'cases') html += renderAdminCases();
+  else if (S.adminTab === 'bank') html += renderAdminBank();
   else if (S.adminTab === 'roi') html += renderAdminRoi();
   else if (S.adminTab === 'report') html += renderAdminReport();
   else html += renderAdminOverview(isAdmin);
@@ -13522,6 +13530,305 @@ S.roiExportHtml = function(){
   showToast('已导出可打印 ROI 报告');
 };
 
+// ==================== P3-1 · 企业自上传题库（custom_banks）====================
+// 定位：企业把自己岗位的真实题目导入，供本企业学员测评时补充。
+// 风险控制（关键）：默认「不参与测评」，只入库可浏览；企业自己开启后，抽题时才优先命中，
+//   且测评结果标 customUsed 计数，保证与平台常模 / ROI 的口径可区分（避免自出简单题刷高分）。
+var CB_DIMS = ['prompt','tools','data','content','dev','workflow','security','strategy'];
+var CB_DIM_LABEL = { prompt:'提示词', tools:'工具', data:'数据', content:'内容', dev:'开发', workflow:'工作流', security:'安全', strategy:'战略' };
+var CB_LV_LABEL = { 0:'初阶', 1:'中阶', 2:'高阶' };
+
+function cbSession(){ try { return JSON.parse(localStorage.getItem('ai_training_session') || '{}') || {}; } catch(e){ return {}; } }
+function cbIsAdmin(){ return cbSession().role === 'admin'; }
+function cbMyCompany(){ var s = cbSession(); return s.company || s.companyId || ''; }
+function cbAll(){ return DB.all('custom_banks') || []; }
+function cbScoped(){
+  if (cbIsAdmin()) return cbAll();
+  var s = cbSession(), co = s.company || '', coId = s.companyId || '';
+  if (!co && !coId) return [];
+  return cbAll().filter(function(x){
+    if (!x) return false;
+    // company 与 companyId 双轨匹配：历史数据可能只写了其中一个
+    if (co && (x.company === co || x.companyId === co)) return true;
+    if (coId && (x.companyId === coId || x.company === coId)) return true;
+    return false;
+  });
+}
+// 该企业是否允许自建题参与测评（默认关；按企业各自记住）
+function cbQuizOnKey(co){ return 'aidax_cb_quiz_' + (co || '__none__'); }
+function cbQuizEnabled(){
+  try { return localStorage.getItem(cbQuizOnKey(cbMyCompany() || (cbIsAdmin() ? '__admin__' : ''))) === '1'; } catch(e){ return false; }
+}
+// 抽题命中：仅在该企业开启「参与测评」时生效
+function cbPickForQuiz(dim, level){
+  try {
+    if (!cbQuizEnabled()) return null;
+    var co = cbMyCompany();
+    var pool = cbScoped().filter(function(x){
+      return x && x.status === 'active' && x.dim === dim && Number(x.level) === Number(level);
+    });
+    if (!pool.length) return null;
+    var x = pool[Math.floor(Math.random() * pool.length)];
+    var opts = Array.isArray(x.opts) ? x.opts.slice() : [];
+    if (opts.length !== 5) return null;
+    var best = (typeof x.best === 'number') ? x.best : 0;
+    var scores = Array.isArray(x.scores) && x.scores.length === 5 ? x.scores.slice() : (function(){ var s=[0,0,0,0,0]; s[best]=4; return s; })();
+    return {
+      id: x.id, bank: 'CUSTOM', dim: dim, level: Number(level), custom: true,
+      q: x.q, scenario: x.scenario || '', explain: x.explain || '',
+      opts: opts, _scores: scores, _best: best
+    };
+  } catch(e) { return null; }
+}
+
+// 简易 CSV 切分（支持双引号包裹与 "" 转义）
+function cbParseCsv(text){
+  var rows = [], row = [], cur = '', q = false;
+  for (var i = 0; i < text.length; i++) {
+    var c = text[i], n = text[i+1];
+    if (q) {
+      if (c === '"' && n === '"') { cur += '"'; i++; }
+      else if (c === '"') q = false;
+      else cur += c;
+    } else {
+      if (c === '"') q = true;
+      else if (c === ',') { row.push(cur); cur = ''; }
+      else if (c === '\n') { row.push(cur); rows.push(row); row = []; cur = ''; }
+      else if (c !== '\r') cur += c;
+    }
+  }
+  if (cur.length || row.length) { row.push(cur); rows.push(row); }
+  return rows.filter(function(r){ return r.some(function(x){ return String(x).trim() !== ''; }); });
+}
+
+// 解析导入文本（JSON 优先，其次 CSV）→ {items, errors}
+function cbParseInput(text){
+  text = String(text || '').trim();
+  if (!text) return { items: [], errors: ['内容为空'] };
+  if (text[0] === '[' || text[0] === '{') {
+    var raw;
+    try { raw = JSON.parse(text); } catch(e) { return { items: [], errors: ['JSON 解析失败：' + e.message] }; }
+    var arr = Array.isArray(raw) ? raw : (Array.isArray(raw.questions) ? raw.questions : null);
+    if (!arr) return { items: [], errors: ['JSON 需为数组，或 {questions:[...]} 结构'] };
+    return cbValidate(arr);
+  }
+  var rows = cbParseCsv(text);
+  if (!rows.length) return { items: [], errors: ['CSV 无可读行'] };
+  var head = rows[0].map(function(h){ return String(h).trim(); });
+  var need = ['dim','level','q','A','B','C','D','E','best'];
+  var miss = need.filter(function(k){ return head.indexOf(k) < 0; });
+  if (miss.length) return { items: [], errors: ['CSV 表头缺列：' + miss.join(',')] };
+  var objs = rows.slice(1).map(function(r){
+    var o = {};
+    head.forEach(function(h, i){ o[h] = r[i] === undefined ? '' : String(r[i]).trim(); });
+    return {
+      dim: o.dim, level: o.level, q: o.q, scenario: o.scenario || '', explain: o.explain || '',
+      opts: [o.A, o.B, o.C, o.D, o.E], best: o.best
+    };
+  });
+  return cbValidate(objs);
+}
+
+function cbBestIndex(v){
+  if (typeof v === 'number' && v >= 0 && v <= 4) return v;
+  var s = String(v == null ? '' : v).trim().toUpperCase();
+  if (/^[A-E]$/.test(s)) return s.charCodeAt(0) - 65;
+  if (/^[0-4]$/.test(s)) return parseInt(s, 10);
+  return -1;
+}
+
+// 校验并规整为可入库记录（不含企业/归属字段，由调用方补齐）
+function cbValidate(arr){
+  var items = [], errors = [];
+  arr.forEach(function(o, idx){
+    var no = idx + 1;
+    var dim = String(o.dim || '').trim();
+    var lv = parseInt(o.level, 10);
+    var q = String(o.q || '').trim();
+    var opts = (o.opts || []).map(function(x){ return String(x == null ? '' : x).trim(); });
+    var best = cbBestIndex(o.best);
+    if (CB_DIMS.indexOf(dim) < 0) { errors.push('第' + no + '行 dim 非法（应为 ' + CB_DIMS.join('/') + '）'); return; }
+    if (!(lv >= 0 && lv <= 2)) { errors.push('第' + no + '行 level 需为 0/1/2'); return; }
+    if (!q) { errors.push('第' + no + '行题干为空'); return; }
+    if (opts.length !== 5 || opts.some(function(x){ return !x; })) { errors.push('第' + no + '行需 5 个非空选项'); return; }
+    if (best < 0) { errors.push('第' + no + '行 best 需为 A-E 或 0-4'); return; }
+    if (new Set(opts).size !== 5) { errors.push('第' + no + '行存在重复选项'); return; }
+    var scores = (Array.isArray(o.scores) && o.scores.length === 5) ? o.scores.map(Number) : (function(){ var s=[0,0,0,0,0]; s[best]=4; return s; })();
+    items.push({
+      dim: dim, level: lv, difficulty: String(o.difficulty || CB_LV_LABEL[lv] || '').trim(),
+      scenario: String(o.scenario || '').trim(), q: q, opts: opts,
+      scores: scores, best: best, explain: String(o.explain || '').trim()
+    });
+  });
+  return { items: items, errors: errors };
+}
+
+function renderAdminBank(){
+  var isAdmin = cbIsAdmin();
+  var co = cbMyCompany();
+  var list = cbScoped();
+  var active = list.filter(function(x){ return x.status === 'active'; });
+  var on = cbQuizEnabled();
+  var h = '<div class="card slide-up">';
+  h += '<div class="section-title"><span class="st-ico">📥</span>企业题库' + (isAdmin ? '（平台视角 · 全部企业）' : '（' + escapeHtml(co || '本企业') + '）') + '</div>';
+  h += '<p style="font-size:12.5px;color:var(--text2);margin-bottom:12px">把本企业岗位的真实题目导入，学员测评时可命中补充。'
+     + '<b>默认不参与测评</b>：先入库核对，确认后再打开开关，避免自出简单题把分数刷高、与平台常模失去可比性。</p>';
+
+  // 状态条
+  h += '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 12px;background:var(--card2,#f5f7fb);border:1px solid var(--border);border-radius:10px;margin-bottom:14px">';
+  h += '<span style="font-size:12.5px;color:var(--text2)">已入库：</span><b>' + list.length + '</b><span style="font-size:12px;color:var(--text3)">题（启用 ' + active.length + '）</span>';
+  h += '<span style="flex:1"></span>';
+  h += '<span style="font-size:12.5px;color:var(--text2)">参与本企业测评：</span>';
+  h += '<button class="btn btn-sm ' + (on ? 'btn-primary' : 'btn-outline') + '" data-action="bankToggleQuiz">' + (on ? '已开启' : '已关闭') + '</button>';
+  h += '<button class="btn btn-sm btn-outline" data-action="bankTemplate">下载模板</button>';
+  h += '<button class="btn btn-sm btn-outline" data-action="bankExport">导出 JSON</button>';
+  h += '</div>';
+
+  // 导入区
+  h += '<div style="border:1px dashed var(--border);border-radius:10px;padding:12px;margin-bottom:14px">';
+  h += '<div style="font-size:12.5px;font-weight:600;margin-bottom:6px">导入题目</div>';
+  h += '<p style="font-size:12px;color:var(--text3);margin-bottom:8px">支持 JSON（数组或 {questions:[…]}）与 CSV（表头：dim,level,scenario,q,A,B,C,D,E,best,explain）。best 可写 A–E 或 0–4。</p>';
+  h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">';
+  h += '<input type="file" id="cbFile" accept=".json,.csv,.txt" style="display:none" onchange="S.bankPickFile(event)">';
+  h += '<button class="btn btn-sm btn-outline" data-action="bankPick">选择文件…</button>';
+  h += '<button class="btn btn-sm btn-primary" data-action="bankImportText">导入下方文本</button>';
+  h += '</div>';
+  h += '<textarea id="cbText" placeholder=\'粘贴 JSON 或 CSV…\n例：[{"dim":"prompt","level":0,"q":"题干","opts":["A","B","C","D","E"],"best":"B","explain":"解析"}]\' style="width:100%;min-height:96px;padding:9px;border:1px solid var(--border);border-radius:8px;font-size:12.5px;background:var(--bg);font-family:ui-monospace,Menlo,monospace"></textarea>';
+  if (S._cbMsg) h += '<div style="margin-top:8px;font-size:12.5px;color:' + (S._cbMsgBad ? '#c0392b' : '#2e9e5b') + '">' + escapeHtml(S._cbMsg) + '</div>';
+  h += '</div>';
+
+  // 列表
+  if (!list.length) {
+    h += '<p style="text-align:center;color:var(--text3);padding:22px">还没有自定义题。先「下载模板」按格式填好再导入。</p>';
+    h += '</div>';
+    return h;
+  }
+  var sorted = list.slice().sort(function(a, b){
+    var da = CB_DIMS.indexOf(a.dim), db2 = CB_DIMS.indexOf(b.dim);
+    if (da !== db2) return da - db2;
+    if (Number(a.level) !== Number(b.level)) return Number(a.level) - Number(b.level);
+    return (a.ts || 0) - (b.ts || 0);
+  });
+  h += '<div style="overflow-x:auto"><table class="log-table"><thead><tr>'
+     + '<th>维度</th><th>级别</th>' + (isAdmin ? '<th>企业</th>' : '') + '<th>题干</th><th>正确项</th><th>状态</th><th>操作</th></tr></thead><tbody>';
+  sorted.forEach(function(x){
+    var bi = (typeof x.best === 'number') ? x.best : 0;
+    var bestText = (x.opts && x.opts[bi] ? String(x.opts[bi]).slice(0, 24) : '—');
+    h += '<tr>'
+      + '<td>' + escapeHtml(CB_DIM_LABEL[x.dim] || x.dim) + '</td>'
+      + '<td>L' + escapeHtml(String(x.level)) + '</td>'
+      + (isAdmin ? '<td>' + escapeHtml(x.company || '—') + '</td>' : '')
+      + '<td style="max-width:320px">' + escapeHtml(String(x.q || '').slice(0, 60)) + '</td>'
+      + '<td style="max-width:200px;color:var(--text3)">' + escapeHtml(bestText) + '</td>'
+      + '<td>' + (x.status === 'active' ? '<span style="color:#2e9e5b;font-weight:600">启用</span>' : '<span style="color:var(--text3)">停用</span>') + '</td>'
+      + '<td style="white-space:nowrap">'
+      +   '<button class="btn btn-sm btn-outline" data-action="bankToggle" data-id="' + x.id + '">' + (x.status === 'active' ? '停用' : '启用') + '</button> '
+      +   '<button class="btn btn-sm btn-outline" data-action="bankDelete" data-id="' + x.id + '">删除</button>'
+      + '</td></tr>';
+  });
+  h += '</tbody></table></div>';
+  h += '</div>';
+  return h;
+}
+
+S.bankPick = function(){
+  var el = document.getElementById('cbFile');
+  if (el) el.click();
+};
+S.bankPickFile = function(ev){
+  var f = ev && ev.target && ev.target.files && ev.target.files[0];
+  if (!f) return;
+  var fr = new FileReader();
+  fr.onload = function(){
+    var t = document.getElementById('cbText');
+    if (t) t.value = String(fr.result || '');
+    S._cbMsg = '已读入 ' + f.name + '，点「导入下方文本」开始校验入库';
+    S._cbMsgBad = false;
+    render();
+  };
+  fr.readAsText(f);
+};
+S.bankToggleQuiz = function(){
+  var co = cbMyCompany() || (cbIsAdmin() ? '__admin__' : '');
+  var on = cbQuizEnabled();
+  try { localStorage.setItem(cbQuizOnKey(co), on ? '0' : '1'); } catch(e){}
+  showToast(on ? '已关闭：自建题不再参与测评' : '已开启：测评将优先命中本企业题');
+  render();
+};
+S.bankImportText = function(){
+  var el = document.getElementById('cbText');
+  var res = cbParseInput(el ? el.value : '');
+  if (!res.items.length) {
+    S._cbMsg = (res.errors.length ? res.errors.slice(0, 4).join('；') : '没有可入库的题目');
+    S._cbMsgBad = true;
+    render();
+    return;
+  }
+  var sess = cbSession();
+  var co = cbMyCompany() || sess.companyId || '';
+  var coId = sess.companyId || '';
+  var owner = (typeof currentOwnerKey === 'function') ? currentOwnerKey() : '';
+  var ts = Date.now();
+  res.items.forEach(function(it, i){
+    DB.put('custom_banks', {
+      id: uid('cb_'), ts: ts + i,
+      company: co, companyId: coId, ownerKey: owner,
+      dim: it.dim, level: it.level, difficulty: it.difficulty,
+      scenario: it.scenario, q: it.q, opts: it.opts, scores: it.scores, best: it.best, explain: it.explain,
+      status: 'active', source: '企业自上传'
+    });
+  });
+  S._cbMsg = '成功导入 ' + res.items.length + ' 题' + (res.errors.length ? '；另有 ' + res.errors.length + ' 行被跳过（' + res.errors.slice(0, 3).join('；') + '）' : '');
+  S._cbMsgBad = res.errors.length > 0;
+  var t = document.getElementById('cbText');
+  if (t) t.value = '';
+  showToast('已导入 ' + res.items.length + ' 题');
+  render();
+};
+S.bankToggle = function(id){
+  var x = DB.get('custom_banks', id);
+  if (!x) return;
+  if (!cbIsAdmin() && cbMyCompany() && x.company !== cbMyCompany() && x.companyId !== cbMyCompany()) { showToast('无权操作其他企业的题'); return; }
+  x.status = x.status === 'active' ? 'off' : 'active';
+  DB.put('custom_banks', x);
+  showToast(x.status === 'active' ? '已启用' : '已停用');
+  render();
+};
+S.bankDelete = function(id){
+  var x = DB.get('custom_banks', id);
+  if (!x) return;
+  if (!cbIsAdmin() && cbMyCompany() && x.company !== cbMyCompany() && x.companyId !== cbMyCompany()) { showToast('无权删除其他企业的题'); return; }
+  DB.del('custom_banks', id);
+  showToast('已删除');
+  render();
+};
+S.bankTemplate = function(){
+  var head = 'dim,level,scenario,q,A,B,C,D,E,best,explain';
+  var sample = 'prompt,0,场景：给新品写一页纸卖点,提示词怎么写最省返工？,'
+    + '先定受众与三段结构再让AI填,直接让AI自由发挥,只贴参数让AI自己挑,参考竞品话术套用,先写长文再压缩,A,先定结构输出可直接复用';
+  var csv = head + '\n' + sample + '\n';
+  var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'AIDAX_企业题库导入模板.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+  showToast('模板已下载');
+};
+S.bankExport = function(){
+  var list = cbScoped().map(function(x){
+    return { dim: x.dim, level: x.level, difficulty: x.difficulty, scenario: x.scenario, q: x.q,
+             opts: x.opts, best: x.best, explain: x.explain, status: x.status, company: x.company || '' };
+  });
+  var blob = new Blob([JSON.stringify({ questions: list }, null, 1)], { type: 'application/json' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'AIDAX_企业题库_' + fmtTs(Date.now()).replace(/[-: ]/g, '') + '.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+  showToast('已导出 ' + list.length + ' 题');
+};
+
 // ==================== P2 · 测评分析面板（quiz-stats Edge Function 驱动）====================
 var QDIM_LABEL = {prompt:'提示词',tools:'工具',data:'数据',content:'内容',dev:'开发',workflow:'工作流',security:'安全',strategy:'策略'};
 function aqRateColor(r){ return r>=75?'#2e9e5b':(r>=50?'#e0a400':'#d94a3d'); }
@@ -14779,6 +15086,14 @@ function bindEvents() {
             case 'roiDelete': S.roiDelete(id); break;
             case 'roiExportCsv': S.roiExportCsv(); break;
             case 'roiExportHtml': S.roiExportHtml(); break;
+            case 'bankPick': S.bankPick(); break;
+            case 'bankPickFile': S.bankPickFile(event); break;
+            case 'bankImportText': S.bankImportText(); break;
+            case 'bankToggle': S.bankToggle(el.getAttribute('data-id')); break;
+            case 'bankDelete': S.bankDelete(el.getAttribute('data-id')); break;
+            case 'bankTemplate': S.bankTemplate(); break;
+            case 'bankExport': S.bankExport(); break;
+            case 'bankToggleQuiz': S.bankToggleQuiz(); break;
             case 'roiBatchSelect': S.roiBatchSelect(el.value); break;
             case 'roiBatchRefresh': S.roiBatchRefresh(); break;
             case 'roiBatchExportCsv': S.roiBatchExportCsv(); break;
