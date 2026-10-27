@@ -12769,6 +12769,9 @@ function renderRoiEditForm(){
     + '<select id="roiCo" style="width:100%;padding:7px 9px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--bg)">' + coOpts + '</select></div>';
   h += '</div>';
   h += '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">';
+  h += roiField('roiBatch', '对比批次（可选）', c.batch, '如：2026Q4 制造行业训战营（同名即同批次，可跨企业横向对比）');
+  h += '</div>';
+  h += '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">';
   h += roiField('roiSeat', '席位单价(元/人/年)', c.seatPrice == null ? 399 : c.seatPrice);
   h += roiField('roiRate', '时薪(元/小时)', c.hourlyRate == null ? 80 : c.hourlyRate);
   h += roiField('roiHours', '月工时(小时)', c.hoursPerMonth == null ? 160 : c.hoursPerMonth);
@@ -12857,6 +12860,197 @@ function renderRoiReport(cyc){
   return h;
 }
 
+// ==================== P2-4 批次横向对比（同批次多企业）====================
+// 服务端 roi_batch 已按 claims 鉴权：admin 返回批次内全部企业行；
+// 企业号只返回自己那一行 + 排名 + 参与企业数——别家企业的名称与数值根本不会下发到浏览器。
+function roiBatches(){
+  var m = {}, order = [];
+  roiCyclesScoped().forEach(function(c){
+    var b = String((c && c.batch) || '').trim();
+    if (!b) return;
+    if (!m[b]) { m[b] = []; order.push(b); }
+    m[b].push(c);
+  });
+  return order.map(function(b){ return { batch: b, cycles: m[b] }; });
+}
+function fetchRoiBatch(batch, cb){
+  cb = cb || function(){};
+  try {
+    var cfg = cloudConfig();
+    if (!cfg || !cfg.supabaseUrl || !batch) { cb(0, null); return; }
+    var url = cfg.supabaseUrl.replace(/\/$/, '') + '/rest/v1/rpc/roi_batch';
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': cfg.supabaseAnonKey,
+        'Authorization': 'Bearer ' + (S._cloudJwt || cfg.supabaseAnonKey)
+      },
+      body: JSON.stringify({ p_batch: batch })
+    })
+      .then(function(r){ return r.json().then(function(j){ return { status: r.status, json: j }; }); })
+      .then(function(res){ cb(res.status, res.json); })
+      .catch(function(){ cb(0, null); });
+  } catch(e){ cb(0, null); }
+}
+// 单行折算：复用与单期次报告完全相同的口径（roiCalc）
+function roiBatchRowCalc(r){
+  return roiCalc({ paired: r.paired || 0, summary: { deltaAvg: r.deltaAvg || 0 } }, r.params || {});
+}
+function roiBatchSorted(rows){
+  return (rows || []).slice().sort(function(a, b){ return Number(b.deltaAvg || 0) - Number(a.deltaAvg || 0); });
+}
+
+function renderRoiBatchCompare(){
+  var list = roiBatches();
+  if (!list.length) return '';   // 没有任何期次填了批次 → 整块不出现，不干扰原视图
+  var isAdmin = roiIsAdmin();
+
+  var sel = S._roiBatch, found = false;
+  for (var i = 0; i < list.length; i++) { if (list[i].batch === sel) { found = true; break; } }
+  if (!found) sel = list[0].batch;
+  S._roiBatch = sel;
+
+  var scope = isAdmin ? 'admin' : 'ent';
+  var ck = S._roiBatchCache;
+  if (!ck || ck.batch !== sel || ck.scope !== scope) {
+    S._roiBatchCache = { batch: sel, scope: scope, status: 'loading', data: null };
+    fetchRoiBatch(sel, function(st, j){
+      if (S._roiBatch !== sel) return;  // 期间切换了批次，丢弃过期响应
+      S._roiBatchCache = { batch: sel, scope: scope, status: (st === 200 && j && j.ok) ? 'ok' : 'err', data: j, code: st };
+      if (S.view === 'admin' && S.adminTab === 'roi') render();
+    });
+  }
+
+  var h = '<div style="margin-top:24px;padding-top:18px;border-top:1px dashed var(--border)">';
+  h += '<div class="section-title" style="font-size:14px"><span class="st-ico">📊</span>批次横向对比</div>';
+  h += '<p style="font-size:12px;color:var(--text2);margin-bottom:10px">同一「对比批次」下的多家企业期次并排对比（按平均提升排序）。'
+    + (isAdmin ? '平台管理员可见全部企业列。' : '企业账号仅可查看本企业那一列，其他企业数据不对企业开放。') + '</p>';
+
+  h += '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">';
+  h += '<span style="font-size:12.5px;color:var(--text2)">对比批次：</span>';
+  h += '<select onchange="S.roiBatchSelect(this.value)" style="padding:6px 9px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--bg)">';
+  list.forEach(function(x){
+    h += '<option value="' + escapeHtml(x.batch) + '"' + (x.batch === sel ? ' selected' : '') + '>'
+      + escapeHtml(x.batch) + '（' + x.cycles.length + ' 家）</option>';
+  });
+  h += '</select>';
+  h += '<span style="flex:1"></span>';
+  h += '<button class="btn btn-sm btn-outline" data-action="roiBatchExportCsv">⬇️ 对比 CSV</button>';
+  h += '<button class="btn btn-sm btn-outline" data-action="roiBatchRefresh">↻ 刷新</button>';
+  h += '</div>';
+
+  var st = S._roiBatchCache || {};
+  if (st.status === 'loading') {
+    h += '<p style="text-align:center;color:var(--text3);padding:18px">正在汇总批次数据…</p></div>';
+    return h;
+  }
+  if (st.status === 'err') {
+    var msg = (st.data && st.data.error) ? st.data.error : ('HTTP ' + (st.code || '?'));
+    var hint = msg === 'forbidden'
+      ? '当前账号不在该批次内（需平台为其建好带批次的期次）。'
+      : (msg === 'batch not found' ? '该批次云端无数据（可能只存在本地，或期次未同步到云端）。' : '请确认云端可连通。');
+    h += '<p style="text-align:center;color:#d94a3d;padding:18px">对比加载失败：' + escapeHtml(msg)
+      + '<br><span style="font-size:12px;color:var(--text3)">' + hint + '</span></p></div>';
+    return h;
+  }
+
+  var d = st.data || {};
+  var rows = roiBatchSorted(d.rows);
+
+  if (!isAdmin && d.myRank) {
+    h += '<div style="padding:10px 12px;background:var(--card2,#f5f7fb);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;font-size:13px">'
+      + '本企业在同批次 <b>' + (d.totalCompanies || 0) + '</b> 家企业中，平均提升排名 <b style="color:#3b6fe0">第 ' + d.myRank + '</b>。'
+      + '<span style="color:var(--text3);font-size:11.5px">（排名口径：后测均分 − 前测均分）</span></div>';
+  }
+
+  h += '<div style="overflow-x:auto"><table class="log-table"><thead><tr>'
+    + '<th>排名</th><th>企业</th><th>阶段</th><th>配对人数</th><th>前测均分</th><th>后测均分</th><th>平均提升</th><th>达线率</th><th>年化节省</th><th>ROI</th>'
+    + '</tr></thead><tbody>';
+
+  var lastDelta = null, lastRank = 0;
+  rows.forEach(function(r, idx){
+    var dl = Number(r.deltaAvg || 0);
+    // 同分并列（小数比较留容差）
+    var rank = (lastDelta !== null && Math.abs(dl - lastDelta) < 0.0001) ? lastRank : (idx + 1);
+    lastDelta = dl; lastRank = rank;
+    var rankText = isAdmin ? ('第 ' + rank) : ('第 ' + (d.myRank || rank));
+    var col = dl > 0 ? '#2e9e5b' : (dl < 0 ? '#d94a3d' : '#8a93a5');
+    var calc = roiBatchRowCalc(r);
+    var passCell = (r.paired ? (r.prePassRate + '% → ' + r.postPassRate + '%') : '—');
+    h += '<tr>'
+      + '<td style="font-weight:600">' + rankText + '</td>'
+      + '<td>' + escapeHtml(r.company || '平台通用') + '</td>'
+      + '<td><span style="color:' + (ROI_PHASE_COLOR[r.phase] || '#888') + ';font-weight:600">●</span> ' + (ROI_PHASE[r.phase] || r.phase || '—') + '</td>'
+      + '<td>' + (r.paired || 0) + '</td>'
+      + '<td>' + (r.paired ? r.preAvg : '—') + '</td>'
+      + '<td>' + (r.paired ? r.postAvg : '—') + '</td>'
+      + '<td style="color:' + col + ';font-weight:600">' + (r.paired ? ((dl > 0 ? '+' : '') + dl) : '—') + '</td>'
+      + '<td>' + passCell + '</td>'
+      + '<td>' + (r.paired ? roiMoney(calc.moneyYear) : '—') + '</td>'
+      + '<td>' + (r.paired && calc.cost > 0 ? calc.roi.toFixed(2) + 'x' : '—') + '</td>'
+      + '</tr>';
+  });
+
+  if (!isAdmin && (d.othersCount || 0) > 0) {
+    h += '<tr style="background:var(--card2,#f7f9fc)"><td>—</td>'
+      + '<td colspan="9" style="color:var(--text3);font-size:12.5px">其他 ' + d.othersCount
+      + ' 家企业（同批次共 ' + (d.totalCompanies || 0) + ' 家）· 数据仅平台可见</td></tr>';
+  }
+  h += '</tbody></table></div>';
+
+  if (rows.some(function(r){ return !r.paired; })) {
+    h += '<p style="font-size:11.5px;color:var(--text3);margin-top:10px">提示：标「—」的企业尚未完成「前测 + 后测」配对，提升与 ROI 待两次测评齐全后自动出数。</p>';
+  }
+  h += '<p style="font-size:11.5px;color:var(--text3);margin-top:6px">折算口径与单期次报告一致：人效提升 = 平均提升 ÷ 100 × 弹性系数，年化节省 = 人数 × 月工时 × 12 × 人效提升 × 时薪；ROI = 年化节省 ÷ 席位成本。</p>';
+  h += '</div>';
+  return h;
+}
+
+S.roiBatchSelect = function(b){ S._roiBatch = b; S._roiBatchCache = null; render(); };
+S.roiBatchRefresh = function(){ S._roiBatchCache = null; render(); };
+S.roiBatchExportCsv = function(){
+  var ck = S._roiBatchCache;
+  if (!ck || ck.status !== 'ok' || !ck.data) { alert('暂无可导出的对比数据'); return; }
+  var d = ck.data, isAdmin = roiIsAdmin();
+  var rows = roiBatchSorted(d.rows);
+  var out = [];
+  out.push(['对比批次', ck.batch]);
+  out.push(['参与企业数', d.totalCompanies || 0, '导出范围', isAdmin ? '全部企业' : '仅本企业']);
+  if (!isAdmin && d.myRank) out.push(['本企业排名', '第 ' + d.myRank + ' / ' + (d.totalCompanies || 0)]);
+  out.push([]);
+  out.push(['排名', '企业', '阶段', '配对人数', '前测均分', '后测均分', '平均提升', '前测达线率(%)', '后测达线率(%)', '年化节省(元)', 'ROI倍数', '席位成本(元)']);
+  var lastDelta = null, lastRank = 0;
+  rows.forEach(function(r, idx){
+    var dl = Number(r.deltaAvg || 0);
+    var rank = (lastDelta !== null && Math.abs(dl - lastDelta) < 0.0001) ? lastRank : (idx + 1);
+    lastDelta = dl; lastRank = rank;
+    var calc = roiBatchRowCalc(r);
+    out.push([
+      isAdmin ? rank : (d.myRank || ''),
+      r.company || '平台通用',
+      ROI_PHASE[r.phase] || r.phase || '',
+      r.paired || 0,
+      r.paired ? r.preAvg : '',
+      r.paired ? r.postAvg : '',
+      r.paired ? dl : '',
+      r.paired ? r.prePassRate : '',
+      r.paired ? r.postPassRate : '',
+      r.paired ? Math.round(calc.moneyYear) : '',
+      r.paired && calc.cost > 0 ? calc.roi.toFixed(2) : '',
+      r.paired ? calc.cost : ''
+    ]);
+  });
+  var csv = '\ufeff' + out.map(function(r){ return r.map(csvCell).join(','); }).join('\r\n');
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'AIDAX_ROI批次对比_' + String(ck.batch || 'batch').replace(/[\\/:*?"<>|]/g, '') + '_' + fmtTs(Date.now()).replace(/[-: ]/g, '') + '.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+  showToast('已导出批次对比 CSV（' + rows.length + ' 家）');
+};
+
 function renderAdminRoi(){
   var isAdmin = roiIsAdmin();
   var list = roiCyclesScoped();
@@ -12938,6 +13132,7 @@ function renderAdminRoi(){
   }
 
   html += renderRoiReport(cyc);
+  html += renderRoiBatchCompare();
   html += '</div>';
 
   if (isAdmin && S._roiEditId !== undefined && S._roiEditId !== null) html += renderRoiEditForm();
@@ -12967,6 +13162,8 @@ S.roiSave = function(id){
     name: name,
     companyId: coId,
     company: coName,
+    // P2-4：对比批次——同名即同批次，用于多企业横向对比（空=不参与对比）
+    batch: String(((document.getElementById('roiBatch') || {}).value) || '').trim(),
     phase: old.phase || 'pre',                 // 新期次默认从「前测中」开始
     active: old.active === undefined ? true : old.active,
     seatPrice: roiNum((document.getElementById('roiSeat') || {}).value, 399),
@@ -14390,6 +14587,9 @@ function bindEvents() {
             case 'roiDelete': S.roiDelete(id); break;
             case 'roiExportCsv': S.roiExportCsv(); break;
             case 'roiExportHtml': S.roiExportHtml(); break;
+            case 'roiBatchSelect': S.roiBatchSelect(el.value); break;
+            case 'roiBatchRefresh': S.roiBatchRefresh(); break;
+            case 'roiBatchExportCsv': S.roiBatchExportCsv(); break;
           }
           return;
         }
