@@ -12308,6 +12308,10 @@ S.genSalesPlan = function(){
   var estLicense = size * seatPriceYuan();
   var sess = getSessionSafe();
   var owner = (sess && (sess.name || sess.company)) || currentOwnerKey();
+  // S1-1：线索 doc 必须带隔离键（company / ownerKey），与 JWT claims 对齐——
+  // 否则新的写谓词 aidax_writable 会把学习者写入的线索拒掉（旧谓词靠空 company 误放）。
+  var leadCompany = (sess && (sess.companyId || sess.company)) || '';
+  var leadOwnerKey = currentOwnerKey();
   var leadId = uid('lead_');
   DB.put('sales_leads', {
     id: leadId, ts: Date.now(), planId: planId,
@@ -12318,6 +12322,7 @@ S.genSalesPlan = function(){
     hasData: res.meta.hasData,
     estSeats: size, estLicenseYuan: estLicense, amount: estLicense,
     status: 'new', source: '陪跑方案生成器', owner: owner, note: '',
+    company: leadCompany, ownerKey: leadOwnerKey,
     planText: res.text
   });
   S._spLeadId = leadId; S._spLeadEst = estLicense;
