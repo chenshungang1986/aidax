@@ -11975,7 +11975,7 @@ function renderAdmin() {
   tabs.push(['report','企业报告']); // 管理员与企业管理员均可见：向企业交付学习成果（按企业下钻）
   if (isAdmin) tabs.push(['leads','商机线索']); // 销售线索库：仅平台管理员
   if (isAdmin) tabs.push(['cases','案例库']); // 大赛作品案例库：仅平台管理员
-  if (isAdmin) tabs.push(['roi','ROI 报告']);  // 前后测 ROI 报告（续费证据）：仅平台管理员
+  tabs.push(['roi','ROI 报告']); // 管理员与企业管理员均可见：企业自助查看本企业前后测 ROI（期次写操作仍限平台管理员）
   if (isAdmin) tabs.push(['companies','企业管理']);
   if (isAdmin) tabs.push(['quiz','测评分析']);
   var html = headerHtml('管理员看板', isAdmin ? '平台管理员视角 · 团队AI学习全景' : '企业管理员视角 · 团队AI学习进度', true);
@@ -12655,6 +12655,30 @@ var ROI_PHASE_COLOR = { pre:'#e0a400', post:'#2e9e5b', closed:'#8a93a5' };
 
 function roiCycles(){ return DB.all('quiz_cycles').slice().sort(function(a,b){ return (b.ts||0)-(a.ts||0); }); }
 function roiActiveCycle(){ var l = roiCycles().filter(function(c){ return c && c.active; }); return l.length ? l[0] : null; }
+
+// ---- 数据作用域（企业自助看 ROI）----
+// 平台管理员看全部期次；企业管理员只看本企业期次。
+// 本地 localStorage 与账号无关，同一浏览器先登管理员再登企业号会残留别家期次，
+// 云端 RLS 已按 company 过滤，前端必须再兜一层，避免 UI 层面泄露他企数据。
+function roiSession(){ try { return JSON.parse(localStorage.getItem('ai_training_session') || '{}') || {}; } catch(e){ return {}; } }
+function roiIsAdmin(){ return roiSession().role === 'admin'; }
+function roiMyCompany(){ var s = roiSession(); return { id: s.companyId || '', name: s.company || '' }; }
+function roiCycleMine(c){
+  if (!c) return false;
+  if (roiIsAdmin()) return true;
+  var me = roiMyCompany();
+  if (me.id && c.companyId) return c.companyId === me.id;
+  if (me.name && c.company) return c.company === me.name;
+  return false; // 平台通用期次（无企业归属）不对企业号开放
+}
+function roiCyclesScoped(){ return roiCycles().filter(roiCycleMine); }
+function roiActiveCycleScoped(){ var l = roiCyclesScoped().filter(function(c){ return c && c.active; }); return l.length ? l[0] : null; }
+// 写操作统一守卫：期次的新建/编辑/激活/切阶段/删除仅平台管理员
+function roiRequireAdmin(){
+  if (roiIsAdmin()) return true;
+  showToast('期次由平台管理员维护，企业账号为只读查看');
+  return false;
+}
 function roiNum(v, d){ var n = parseFloat(v); return isFinite(n) ? n : d; }
 function roiMoney(n){ return '¥' + Math.round(n || 0).toLocaleString(); }
 
@@ -12728,6 +12752,7 @@ function roiField(id, label, val, ph, w){
 }
 
 function renderRoiEditForm(){
+  if (!roiIsAdmin()) return ''; // 企业号只读，绝不渲染期次编辑表单
   var id = S._roiEditId || '';
   var c = id ? DB.get('quiz_cycles', id) : (S._roiDraft || {});
   c = c || {};
@@ -12761,13 +12786,17 @@ function renderRoiReport(cyc){
   var st = S._roi || {};
   var h = '';
   if (!cyc) {
-    h += '<p style="text-align:center;color:var(--text3);padding:24px">还没有期次。先「新建期次」，把学员测评归属到「前测/后测」，报告才会出数。</p>';
+    h += '<p style="text-align:center;color:var(--text3);padding:24px">'
+      + (roiIsAdmin()
+          ? '还没有期次。先「新建期次」，把学员测评归属到「前测/后测」，报告才会出数。'
+          : '本企业暂无 ROI 期次。平台运营为贵司开通「前测 → 培训 → 后测」期次后，这里会自动出现报告。')
+      + '</p>';
     return h;
   }
   h += '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:4px 0 12px">';
   h += '<span style="font-size:12.5px;color:var(--text2)">查看期次：</span>';
   h += '<select onchange="S.roiSelectCycle(this.value)" style="padding:6px 9px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--bg)">';
-  roiCycles().forEach(function(c){
+  roiCyclesScoped().forEach(function(c){
     h += '<option value="' + c.id + '"' + (c.id === cyc.id ? ' selected' : '') + '>' + escapeHtml(c.name || c.id) + '</option>';
   });
   h += '</select>';
@@ -12829,12 +12858,26 @@ function renderRoiReport(cyc){
 }
 
 function renderAdminRoi(){
-  var list = roiCycles();
-  var selId = S._roiCycleId || (roiActiveCycle() ? roiActiveCycle().id : ((list[0] && list[0].id) || ''));
+  var isAdmin = roiIsAdmin();
+  var list = roiCyclesScoped();
+  var act0 = roiActiveCycleScoped();
+  var selId = S._roiCycleId || (act0 ? act0.id : ((list[0] && list[0].id) || ''));
   var cyc = null;
   for (var i = 0; i < list.length; i++) { if (list[i].id === selId) { cyc = list[i]; break; } }
   if (!cyc && list.length) cyc = list[0];
   S._roiCycleId = cyc ? cyc.id : '';
+  // 作用域切换（管理员 ↔ 企业号）时清掉可能越权的报告缓存
+  if (S._roi && S._roi.cycleId !== S._roiCycleId) S._roi = null;
+
+  // 企业号首次进入且本地无期次：主动拉一次云端（期次由平台运营在别处创建）
+  if (!list.length && !isAdmin && !S._roiHydrated) {
+    S._roiHydrated = true;
+    try {
+      DB.hydrate(function(){
+        if (S.view === 'admin' && S.adminTab === 'roi') render();
+      });
+    } catch(e){}
+  }
 
   if (cyc && (!S._roi || S._roi.cycleId !== cyc.id)) {
     S._roi = { cycleId: cyc.id, status: 'loading', data: null };
@@ -12845,30 +12888,36 @@ function renderAdminRoi(){
   }
 
   var html = '<div class="card slide-up">';
-  html += '<div class="section-title"><span class="st-ico">📈</span>前后测 ROI 报告（续费证据）</div>';
-  html += '<p style="font-size:12.5px;color:var(--text2);margin-bottom:12px">把「培训前测 → 培训后测」的能力提升，折算成企业听得懂的三件事：<b>提升幅度</b>、<b>达线率</b>、<b>年化节省与 ROI 倍数</b>。学员在所属企业下做测评会自动归入当前期次的对应阶段。</p>';
+  html += '<div class="section-title"><span class="st-ico">📈</span>' + (isAdmin ? '前后测 ROI 报告（续费证据）' : '本企业培训 ROI 报告') + '</div>';
+  html += '<p style="font-size:12.5px;color:var(--text2);margin-bottom:12px">把「培训前测 → 培训后测」的能力提升，折算成企业听得懂的三件事：<b>提升幅度</b>、<b>达线率</b>、<b>年化节省与 ROI 倍数</b>。学员在所属企业下做测评会自动归入当前期次的对应阶段。'
+    + (isAdmin ? '' : ' 你可随时导出明细 CSV 或可打印报告，用于内部复盘与续约评估。') + '</p>';
 
-  // 当前期次状态条
-  var act = roiActiveCycle();
+  // 当前期次状态条（企业号只读：看不到切换阶段与新建入口）
+  var act = act0;
   html += '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 12px;background:var(--card2,#f5f7fb);border:1px solid var(--border);border-radius:10px;margin-bottom:14px">';
   html += '<span style="font-size:12.5px;color:var(--text2)">当前生效期次：</span>';
   if (act) {
     html += '<b style="font-size:13px">' + escapeHtml(act.name || act.id) + '</b>';
     html += '<span style="font-size:12px;color:' + (ROI_PHASE_COLOR[act.phase] || '#888') + ';font-weight:600">● ' + (ROI_PHASE[act.phase] || act.phase) + '</span>';
-    html += '<span style="flex:1"></span><span style="font-size:11.5px;color:var(--text3)">切换阶段：</span>';
-    ['pre', 'post', 'closed'].forEach(function(p){
-      html += '<button class="btn btn-sm ' + (act.phase === p ? 'btn-primary' : 'btn-outline') + '" data-action="roiSetPhase" data-id="' + act.id + '" data-st="' + p + '">' + ROI_PHASE[p] + '</button>';
-    });
+    if (isAdmin) {
+      html += '<span style="flex:1"></span><span style="font-size:11.5px;color:var(--text3)">切换阶段：</span>';
+      ['pre', 'post', 'closed'].forEach(function(p){
+        html += '<button class="btn btn-sm ' + (act.phase === p ? 'btn-primary' : 'btn-outline') + '" data-action="roiSetPhase" data-id="' + act.id + '" data-st="' + p + '">' + ROI_PHASE[p] + '</button>';
+      });
+    } else {
+      html += '<span style="flex:1"></span><span style="font-size:11.5px;color:var(--text3)">阶段由平台运营统一切换，如需调整（如开始后测）请联系统营。</span>';
+    }
   } else {
-    html += '<span style="color:var(--text3);font-size:12.5px">未激活（学员测评暂不计入任何期次）</span>';
+    html += '<span style="color:var(--text3);font-size:12.5px">' + (isAdmin ? '未激活（学员测评暂不计入任何期次）' : '本企业暂未开训（平台运营开通期次后自动显示报告）') + '</span>';
   }
-  html += '<button class="btn btn-sm btn-outline" data-action="roiNew">＋ 新建期次</button>';
+  if (isAdmin) html += '<button class="btn btn-sm btn-outline" data-action="roiNew">＋ 新建期次</button>';
   html += '</div>';
 
   // 期次列表
   if (list.length) {
     html += '<div style="overflow-x:auto"><table class="log-table"><thead><tr>'
-      + '<th>期次名称</th><th>所属企业</th><th>阶段</th><th>席位/时薪</th><th>状态</th><th>操作</th></tr></thead><tbody>';
+      + '<th>期次名称</th><th>所属企业</th><th>阶段</th><th>席位/时薪</th><th>状态</th>'
+      + (isAdmin ? '<th>操作</th>' : '') + '</tr></thead><tbody>';
     list.forEach(function(c){
       html += '<tr>'
         + '<td>' + escapeHtml(c.name || c.id) + '</td>'
@@ -12876,11 +12925,14 @@ function renderAdminRoi(){
         + '<td><span style="color:' + (ROI_PHASE_COLOR[c.phase] || '#888') + ';font-weight:600">●</span> ' + (ROI_PHASE[c.phase] || c.phase || '—') + '</td>'
         + '<td>¥' + roiNum(c.seatPrice, 399) + ' / ¥' + roiNum(c.hourlyRate, 80) + '</td>'
         + '<td>' + (c.active ? '<span style="color:#2e9e5b;font-weight:600">生效中</span>' : '<span style="color:var(--text3)">未激活</span>') + '</td>'
-        + '<td style="white-space:nowrap">'
-        +   '<button class="btn btn-sm btn-outline" data-action="roiEdit" data-id="' + c.id + '">编辑</button> '
-        +   (c.active ? '' : '<button class="btn btn-sm btn-outline" data-action="roiActivate" data-id="' + c.id + '">激活</button> ')
-        +   '<button class="btn btn-sm btn-outline" data-action="roiDelete" data-id="' + c.id + '">删除</button>'
-        + '</td></tr>';
+        + (isAdmin
+            ? '<td style="white-space:nowrap">'
+              +   '<button class="btn btn-sm btn-outline" data-action="roiEdit" data-id="' + c.id + '">编辑</button> '
+              +   (c.active ? '' : '<button class="btn btn-sm btn-outline" data-action="roiActivate" data-id="' + c.id + '">激活</button> ')
+              +   '<button class="btn btn-sm btn-outline" data-action="roiDelete" data-id="' + c.id + '">删除</button>'
+              + '</td>'
+            : '')
+        + '</tr>';
     });
     html += '</tbody></table></div>';
   }
@@ -12888,17 +12940,21 @@ function renderAdminRoi(){
   html += renderRoiReport(cyc);
   html += '</div>';
 
-  if (S._roiEditId !== undefined && S._roiEditId !== null) html += renderRoiEditForm();
+  if (isAdmin && S._roiEditId !== undefined && S._roiEditId !== null) html += renderRoiEditForm();
   return html;
 }
 
-// ---- 期次 CRUD ----
-S.roiSelectCycle = function(id){ S._roiCycleId = id; S._roi = null; render(); };
+// ---- 期次 CRUD（写操作限平台管理员；企业号为只读）----
+S.roiSelectCycle = function(id){
+  if (!roiCycleMine(DB.get('quiz_cycles', id))) { showToast('无权查看该期次'); return; }
+  S._roiCycleId = id; S._roi = null; render();
+};
 S.roiRefresh = function(){ S._roi = null; render(); };
-S.roiNew = function(){ S._roiEditId = ''; render(); };
-S.roiEdit = function(id){ S._roiEditId = id; render(); };
+S.roiNew = function(){ if (!roiRequireAdmin()) return; S._roiEditId = ''; render(); };
+S.roiEdit = function(id){ if (!roiRequireAdmin()) return; S._roiEditId = id; render(); };
 S.roiCancelEdit = function(){ S._roiEditId = null; render(); };
 S.roiSave = function(id){
+  if (!roiRequireAdmin()) return;
   var name = ((document.getElementById('roiName') || {}).value || '').trim();
   if (!name) { alert('请填写期次名称'); return; }
   var coId = (document.getElementById('roiCo') || {}).value || '';
@@ -12929,6 +12985,7 @@ S.roiSave = function(id){
   if (S.view === 'admin') render();
 };
 S.roiActivate = function(id){
+  if (!roiRequireAdmin()) return;
   roiCycles().forEach(function(c){ if (c && c.id !== id && c.active) { c.active = false; DB.put('quiz_cycles', c); } });
   var c = DB.get('quiz_cycles', id);
   if (c) { c.active = true; DB.put('quiz_cycles', c); }
@@ -12937,6 +12994,7 @@ S.roiActivate = function(id){
   render();
 };
 S.roiSetPhase = function(id, phase){
+  if (!roiRequireAdmin()) return;
   var c = DB.get('quiz_cycles', id);
   if (!c) return;
   c.phase = phase; c.active = true;
@@ -12947,6 +13005,7 @@ S.roiSetPhase = function(id, phase){
   render();
 };
 S.roiDelete = function(id){
+  if (!roiRequireAdmin()) return;
   var c = DB.get('quiz_cycles', id);
   if (!c) return;
   if (!confirm('删除期次「' + (c.name || id) + '」？已产生的测评记录不会被删除，但会失去期次归属（不再进入本报告）。')) return;
