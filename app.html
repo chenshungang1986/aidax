@@ -965,31 +965,31 @@ const TARGET_PROFILES = {
   finance_pm: {
     prompt:   {target:3, why:'金融 PM 每天用 AI 写 PRD/需求/监管沟通，需体系化提示词'},
     tools:    {target:2, why:'需了解 fintech AI 工具生态、能选型，但不必深度工程化'},
-    data:     {target:4, why:'金融数据是核心，需专家级用 AI 做风控/量化/经营分析'},
+    data:     {target:3, why:'金融数据是核心，需能独立用 AI 做风控/量化/经营分析并复核结论'},
     content:  {target:3, why:'监管报送、产品方案、对外材料均由 AI 辅助起草'},
     dev:      {target:2, why:'能与工程师对齐 AI 能力边界、读懂技术方案，不深度编码'},
-    workflow: {target:4, why:'需把 AI 嵌入信贷/财富/保险的产品与运营工作流'},
-    security: {target:4, why:'金融合规红线，AI 使用必须合规可控、不可逾越'},
+    workflow: {target:3, why:'需把 AI 嵌入信贷/财富/保险的产品与运营工作流'},
+    security: {target:3, why:'金融合规红线，AI 使用必须合规可控、不可逾越'},
     strategy: {target:3, why:'能规划金融产品 AI 路线图、评估投入产出'}
   },
   retail_pm: {
     prompt:   {target:3, why:'零售 PM 用 AI 写洞察/PRD/竞品分析，需体系化提示词'},
     tools:    {target:3, why:'需熟练 AI 工具生态（评论分析/看板/NL2SQL），能选型并落地'},
-    data:     {target:4, why:'零售数据是核心，需专家级用 AI 做 GMV 拆解/漏斗/复购归因'},
+    data:     {target:3, why:'零售数据是核心，需能独立用 AI 做 GMV 拆解/漏斗/复购归因并复核结论'},
     content:  {target:3, why:'营销文案、PRD、活动方案均由 AI 辅助起草'},
     dev:      {target:2, why:'能与工程师对齐 AI 能力边界、读懂技术方案，不深度编码'},
-    workflow: {target:4, why:'需把 AI 嵌入选品/营销/履约/用户运营工作流'},
-    security: {target:4, why:'个保法红线，用户数据不出域、AI 使用必须合规可控'},
+    workflow: {target:3, why:'需把 AI 嵌入选品/营销/履约/用户运营工作流'},
+    security: {target:3, why:'个保法红线，用户数据不出域、AI 使用必须合规可控'},
     strategy: {target:3, why:'能规划零售产品 AI 路线图、评估投入产出'}
   },
   auto_pm: {
     prompt:   {target:3, why:'汽车 PM 写需求/标定文档/供应商沟通高频用 AI，需体系化提示词'},
     tools:    {target:3, why:'需熟悉智驾与座舱 AI 工具链、能评估选型，但不深度做算法'},
-    data:     {target:4, why:'车端与用户数据是核心，需专家级用 AI 做路测分析/故障归因/用户行为'},
+    data:     {target:3, why:'车端与用户数据是核心，需能独立用 AI 做路测分析/故障归因/用户行为分析'},
     content:  {target:3, why:'产品方案、标定报告、对外材料均由 AI 辅助起草'},
     dev:      {target:3, why:'需读懂算法与嵌入式方案、能对齐 AI 能力边界与算力约束'},
-    workflow: {target:4, why:'需把 AI 嵌入需求—标定—路测—OTA 的产品工作流'},
-    security: {target:4, why:'车规与数据合规红线（功能安全、数据出境），AI 使用必须可控'},
+    workflow: {target:3, why:'需把 AI 嵌入需求—标定—路测—OTA 的产品工作流'},
+    security: {target:3, why:'车规与数据合规红线（功能安全、数据出境），AI 使用必须可控'},
     strategy: {target:3, why:'能规划车型 AI 功能路线图、评估投入产出与量产节奏'}
   },
   newbie_graduate: {
@@ -1918,19 +1918,54 @@ function aidaxDecodeQuestion(q) {
   return q; // 已是明文（理论上不会发生）
 }
 
+// v126：题库对象查表（延迟求值，规避常量声明顺序 / TDZ 问题）。
+// 单一真源 = quizBankFor()（role+industry → 题库名），此处只负责「题库名 → 对象」。
+function quizBankObjOf(name) {
+  var t = {
+    MFG_PM_QUIZ:      (typeof MFG_PM_QUIZ !== 'undefined') ? MFG_PM_QUIZ : null,
+    FIN_PM_QUIZ:      (typeof FIN_PM_QUIZ !== 'undefined') ? FIN_PM_QUIZ : null,
+    AUTO_PM_QUIZ:     (typeof AUTO_PM_QUIZ !== 'undefined') ? AUTO_PM_QUIZ : null,
+    CPG_PM_QUIZ:      (typeof CPG_PM_QUIZ !== 'undefined') ? CPG_PM_QUIZ : null,
+    INTERNET_PM_QUIZ: (typeof INTERNET_PM_QUIZ !== 'undefined') ? INTERNET_PM_QUIZ : null,
+    MEGA_PM_QUIZ:     (typeof MEGA_PM_QUIZ !== 'undefined') ? MEGA_PM_QUIZ : null,
+    RETAIL_PM_QUIZ:   (typeof RETAIL_PM_QUIZ !== 'undefined') ? RETAIL_PM_QUIZ : null,
+    DEV_QUIZ_V2:      (typeof DEV_QUIZ_V2 !== 'undefined') ? DEV_QUIZ_V2 : null,
+    OPS_QUIZ_V2:      (typeof OPS_QUIZ_V2 !== 'undefined') ? OPS_QUIZ_V2 : null,
+    SALES_QUIZ_V2:    (typeof SALES_QUIZ_V2 !== 'undefined') ? SALES_QUIZ_V2 : null,
+    HR_QUIZ_V2:       (typeof HR_QUIZ_V2 !== 'undefined') ? HR_QUIZ_V2 : null,
+    FIN_QUIZ_V2:      (typeof FIN_QUIZ_V2 !== 'undefined') ? FIN_QUIZ_V2 : null,
+    PO_QUIZ_V2:       (typeof PO_QUIZ_V2 !== 'undefined') ? PO_QUIZ_V2 : null,
+    LEGAL_QUIZ_V2:    (typeof LEGAL_QUIZ_V2 !== 'undefined') ? LEGAL_QUIZ_V2 : null,
+    NEWBIE_QUIZ:      (typeof NEWBIE_QUIZ !== 'undefined') ? NEWBIE_QUIZ : null
+  };
+  return t[name] || null;
+}
+
+// v126：全池视图 {dim: {0:[题],1:[题],2:[题]}}（已解码）。
+// 用途：同维 3 题信度改造，需要「同维同级」下的另一道题做稳定性验证。
+// 注意：getQuizQuestions 仍返回「每级一道」的旧结构，其它调用方零影响。
+function getQuizPools(roleId, industryId) {
+  var obj = quizBankObjOf(quizBankFor(roleId, industryId));
+  var pools = {};
+  var dims = ['prompt','tools','data','content','dev','workflow','security','strategy'];
+  dims.forEach(function (d) { pools[d] = { 0: [], 1: [], 2: [] }; });
+  if (!obj) return pools;
+  dims.forEach(function (d) {
+    var arr = obj[d];
+    if (!arr || !arr.length) return;
+    arr.forEach(function (q) {
+      if (!q) return;
+      var lv = q.level || 0;
+      if (lv < 0 || lv > 2) return;
+      pools[d][lv].push(aidaxDecodeQuestion(q));
+    });
+  });
+  return pools;
+}
+
 function getQuizQuestions(roleId, industryId) {
-  // Map industry+role to the right quiz data
-  var quizObj = null;
-  
-  if (roleId === 'pm') {
-    // PM routes to industry-specific quiz
-    var indMap = { mfg: MFG_PM_QUIZ, finance: FIN_PM_QUIZ, auto: AUTO_PM_QUIZ, cpg: CPG_PM_QUIZ, internet: INTERNET_PM_QUIZ, mega: MEGA_PM_QUIZ, retail: RETAIL_PM_QUIZ };
-    quizObj = indMap[industryId] || MFG_PM_QUIZ;
-  } else {
-    // Non-PM routes to role-specific V2 quiz
-    var roleMap = { dev: DEV_QUIZ_V2, ops: OPS_QUIZ_V2, sales: SALES_QUIZ_V2, hr: HR_QUIZ_V2, fin: FIN_QUIZ_V2, po: PO_QUIZ_V2, legal: LEGAL_QUIZ_V2, graduate: NEWBIE_QUIZ };
-    quizObj = roleMap[roleId] || DEV_QUIZ_V2;
-  }
+  // 题库映射统一走 quizBankFor → quizBankObjOf（v126：去掉重复的 indMap/roleMap 双份映射）
+  var quizObj = quizBankObjOf(quizBankFor(roleId, industryId));
   
   // Flatten dim-based quiz to byDim format, picking ONE random question per level
   var byDim = {};
@@ -2040,12 +2075,33 @@ function cloudScoreAnswer(drawToken, choiceIdx, cb) {
   });
 }
 
-// 兜底：从内嵌题库抽一道（含 scores/best），云端异常时用
+// v126：本地已问题标记（同维同级多题必须去重，否则「稳定性验证」会抽出同一道题）
+function quizAskedKey(dim, lv, q) {
+  var stem = (q && q.q) ? String(q.q) : '';
+  return dim + '|' + lv + '|' + stem.slice(0, 40);
+}
+function markQuizAskedLocal(dim, lv, q) {
+  if (!q) return;
+  S._quizAskedLocal = S._quizAskedLocal || {};
+  S._quizAskedLocal[quizAskedKey(dim, lv, q)] = 1;
+}
+
+// 兜底：从内嵌题库全池抽一道（含 scores/best），云端异常时用；优先抽未问过的题
 function localDrawQuestion(bank, dim, level, cb) {
   cb = cb || function () {};
-  if (!S._localByDim) S._localByDim = getQuizQuestions(S.role, S.industry);
-  var q = S._localByDim[dim] && S._localByDim[dim][level];
+  var pool = (S._quizPools && S._quizPools[dim] && S._quizPools[dim][level]) || null;
+  if (!pool || !pool.length) {
+    // 兼容旧路径（无池信息时退回每级单题）
+    if (!S._localByDim) S._localByDim = getQuizQuestions(S.role, S.industry);
+    pool = (S._localByDim[dim] && S._localByDim[dim][level]) ? [S._localByDim[dim][level]] : [];
+  }
+  if (!pool.length) { cb(null); return; }
+  var asked = S._quizAskedLocal || {};
+  var fresh = pool.filter(function (q) { return !asked[quizAskedKey(dim, level, q)]; });
+  var src = fresh.length ? fresh : pool;   // 全问过（题量不足）→ 允许重复，保证流程不中断
+  var q = src[Math.floor(Math.random() * src.length)];
   if (!q || !q.opts) { cb(null); return; }
+  markQuizAskedLocal(dim, level, q);
   cb({ q: q.q, scenario: q.scenario, explain: q.explain, opts: q.opts, _scores: q.scores, _best: q.best });
 }
 function localScore(q, idx) {
@@ -2070,6 +2126,7 @@ function loadQuizQuestion(step, done) {
         opts: cloud.question.opts, drawToken: cloud.drawToken
       };
       if (cloud.question.id) S._quizAskedIds.push(cloud.question.id);
+      markQuizAskedLocal(t.d, t.lv, cloud.question); // v126：云端题也记入本地去重表（防云端/兜底混用时重题）
       done();
     } else {
       localDrawQuestion(t.bank, t.d, t.lv, function (fq) {
@@ -2102,6 +2159,8 @@ function startAdaptiveQuiz() {
   // 可用性：源自内嵌题库结构（与云端一致），用于分支判断 + 兜底来源
   const byDim = getQuizQuestions(S.role, S.industry);
   S._localByDim = byDim; // 兜底用（含 scores/best）
+  S._quizPools = getQuizPools(S.role, S.industry); // v126：全池（同维同级多题，供稳定性验证）
+  S._quizAskedLocal = {};                          // v126：本地已问题去重表
   S._quizAvail = {};
   const dims = ['prompt','tools','data','content','dev','workflow','security','strategy'];
   dims.forEach(function (d) {
@@ -2114,7 +2173,7 @@ function startAdaptiveQuiz() {
     .sort((a, b) => b[1] - a[1])
     .map(([k]) => k);
 
-  // ===== v41 自适应引擎状态：同维连答 ≤2 题，按表现升降难度，证据链映射 0-4 =====
+  // ===== 自适应引擎状态：同维连答 ≤3 题（v126 起），按表现升降难度，证据链映射 0-4 =====
   S._quizDims = dimOrder;
   S._quizWeights = weights;
   S.quizIdx = 0;                    // 语义：_quizPlan 题序列索引
@@ -2162,18 +2221,57 @@ function pushPlanQuestion(dim, lv) {
   return true;
 }
 
-// 定级决策表：证据链(≤2 条跨级) → 0-4（见 design/adaptive_engine.md §3.3）
+// v126：该维该级是否还有「未问过」的题（同维同级多题才能做稳定性验证）
+// 无池信息时返回 true（假定云端还有题，退化到旧路径也没问题）
+function hasUnusedQuestion(dim, lv) {
+  if (!hasLevel(dim, lv)) return false;
+  var pool = (S._quizPools && S._quizPools[dim] && S._quizPools[dim][lv]) || null;
+  if (!pool || !pool.length) return true;
+  var asked = S._quizAskedLocal || {};
+  var used = pool.filter(function (q) { return asked[quizAskedKey(dim, lv, q)]; }).length;
+  return used < pool.length;
+}
+
+// 定级决策表：证据链(≤3 条) → 0-4（v126 同维 3 题信度改造）
+// 量表语义：0 初阶也不会 / 1 初阶部分 / 2 初阶稳（入门）/ 3 中阶稳 / 4 高阶稳（专家）
+//   升测路径：L1 PASS → ① 另一道 L1 验证稳定性 → 双对才升 L2；② 无同级题则直接升 L2
+//   降测路径：L1 未 PASS → L0；若 L1 明显不会而 L0 通过 → 再补一道 L0 验证（防蒙对）
 function gradeDimFromEvidence(ev) {
   if (!ev || !ev.length) return 0;
-  const E = ev.map(x => ({ lv: x.lv, r: x.score >= 3 ? 'P' : x.score === 2 ? 'M' : 'F' }));
-  if (E.length >= 2) {
-    const a = E[0], b = E[1];              // a 起点(L1/L0)，b 相邻级(L2/L0)
-    if (a.r === 'P') return b.r === 'P' ? 4 : 3;   // 升测：L2 PASS→4，否则 3
-    return b.lv === 0 ? (b.r === 'P' ? 2 : b.r === 'M' ? 1 : 0) : 0;  // 降测 L0
+  const R = s => (s >= 3 ? 'P' : s === 2 ? 'M' : 'F');
+  const e = ev.map(x => ({ lv: x.lv, r: R(x.score) }));
+  const at = lv => e.filter(x => x.lv === lv);
+  const L0 = at(0), L1 = at(1), L2 = at(2);
+
+  if (L1.length) {
+    const a = L1[0];
+    if (a.r === 'P') {
+      if (L2.length) return L2[0].r === 'P' ? 4 : 3;          // 高阶对→满级；高阶不稳→中阶稳
+      if (L1.length >= 2) {
+        if (L1[1].r === 'P') return 3;                        // 双对→3（缺高阶题封顶）
+        // 一稳一不稳（首题疑似蒙对）→ 用初阶证据区分「入门」与「未达」
+        if (L0.length) return L0[0].r === 'P' ? 2 : 1;
+        return 2;
+      }
+      return 3;                                                // 单证据（无同级第二题）
+    }
+    // L1 未 PASS → 走降测证据
+    if (L0.length) {
+      const z = L0[0];
+      if (z.r === 'P') return (L0.length >= 2 && L0[1].r !== 'P') ? 1 : 2;  // 初阶双对=2；不稳=1
+      if (z.r === 'M') return 1;
+      return 0;
+    }
+    return a.r === 'M' ? 1 : 0;                                // 缺初阶题 → 保守下限
   }
-  const x = E[0];                          // 单证据（目标级无题 / 起点兜底级）
-  if (x.r === 'P') return x.lv === 2 ? 4 : x.lv === 1 ? 3 : 2;   // L0 PASS→2（缺题封顶）
-  return x.lv === 0 ? 0 : (x.r === 'M' ? 1 : 0);                 // 保守下限
+  if (L0.length) {
+    const z = L0[0];
+    if (z.r === 'P') return (L0.length >= 2 && L0[1].r !== 'P') ? 1 : 2;
+    if (z.r === 'M') return 1;
+    return 0;
+  }
+  if (L2.length) return L2[0].r === 'P' ? 4 : 3;
+  return 0;
 }
 
 function finalizeDim(dim) {
@@ -2182,9 +2280,10 @@ function finalizeDim(dim) {
   S._quizDone[dim] = grade;
 }
 
-// 计划推进状态机（commitAnswer 后调用）：
-// 本维第 1 题已答 → PASS 升测 L2 / MID·FAIL 降测 L0（无目标级题则单证据定级）；
-// 第 2 题已答 → 定级收口；随后自动开下一未测维；全部定级 → _quizAllDone
+// 计划推进状态机（commitAnswer 后调用）—— v126 同维最多 3 题：
+//   L1 PASS   → 另一道 L1（稳定性验证）→ 双对升 L2；无同级题则直接升 L2
+//   L1 未PASS → L0；若 L1 明显不会(FAIL)而 L0 通过 → 再补一道 L0 验证（防蒙对）
+// 证据收口后定级；全部维度定级 → _quizAllDone
 function ensureNextStep() {
   if (!S._quizPlan) S._quizPlan = [];
   const last = S._quizPlan.length ? S._quizPlan[S._quizPlan.length - 1] : null;
@@ -2193,18 +2292,34 @@ function ensureNextStep() {
   // 该维已定级（收口完成）→ 直接开新维
   if (dim && (dim in S._quizDone)) dim = null;
 
-  // 本维第 1 题已答、尚未收口 → 决定是否出第 2 题
   if (dim) {
     const ev = S._quizLog[dim] || [];
+    const e0 = ev[0];
     if (ev.length === 1) {
-      const first = ev[0];
-      let nextLv = -1;
-      if (first.score >= 3 && first.lv < 2 && hasLevel(dim, 2)) nextLv = 2;        // PASS → 升测高阶
-      else if (first.score < 3 && first.lv > 0 && hasLevel(dim, 0)) nextLv = 0;    // MID/FAIL → 降测初阶
-      if (nextLv >= 0) { pushPlanQuestion(dim, nextLv); return; }
-      finalizeDim(dim);                                                             // 目标级无题 → 单证据定级
-    } else if (ev.length >= 2) {
-      finalizeDim(dim);                                                             // 两题证据齐 → 定级收口
+      if (e0.score >= 3) {
+        // PASS → 优先补一道同维同级题验证稳定性，避免「蒙对一题就跳高阶」
+        if (hasUnusedQuestion(dim, 1)) { pushPlanQuestion(dim, 1); return; }
+        if (hasLevel(dim, 2)) { pushPlanQuestion(dim, 2); return; }   // 无同级第二题 → 旧路径直升高阶
+      } else {
+        if (hasLevel(dim, 0)) { pushPlanQuestion(dim, 0); return; }   // MID/FAIL → 降测初阶
+      }
+      finalizeDim(dim);
+    } else if (ev.length === 2) {
+      const l1 = ev.filter(x => x.lv === 1), l0 = ev.filter(x => x.lv === 0);
+      const l1pass = l1.filter(x => x.score >= 3).length;
+      if (l1.length === 2) {
+        if (l1pass === 2) {
+          if (hasLevel(dim, 2)) { pushPlanQuestion(dim, 2); return; }   // 双对 → 升测高阶
+        } else if (l1pass === 1) {
+          if (hasLevel(dim, 0)) { pushPlanQuestion(dim, 0); return; }   // 一稳一不稳 → 回落初阶验证（防蒙对）
+        }
+      } else if (l1.length === 1 && l0.length === 1) {
+        const l0Weak = l1[0].score < 2 && l0[0].score >= 3;             // L1 明显不会但初阶通过
+        if (l0Weak && hasUnusedQuestion(dim, 0)) { pushPlanQuestion(dim, 0); return; }
+      }
+      finalizeDim(dim);
+    } else {
+      finalizeDim(dim);                                                 // 三题证据齐 → 定级收口
     }
   }
 
@@ -2288,7 +2403,7 @@ function commitAnswer(step, answerIdx) {
     const dur = Date.now() - start;
     S._quizTiming = S._quizTiming || {};
     S._quizTiming[step] = dur;
-    // 证据：同 step 旧证据先剔除再追加（支持重答覆盖，保证每维 ≤2 条且级别唯一）
+    // 证据：同 step 旧证据先剔除再追加（支持重答覆盖，保证每维 ≤3 条）
     S._quizLog = S._quizLog || {};
     if (!S._quizLog[t.d]) S._quizLog[t.d] = [];
     S._quizLog[t.d] = S._quizLog[t.d].filter(e => e.step !== step);
@@ -8620,7 +8735,7 @@ function currentQuizPart() {
 function estimatePartTime(part) {
   if (part === 'base') return ((S._basePlan && S._basePlan.length) || 10) * 30000; // 10 题 × 30s ≈ 5 分钟
   if (part === 'self') return Math.max(180000, ((S._selfPlan && S._selfPlan.length) || 12) * 15000); // 自报约 15s/题
-  return Math.max(8, (S._quizDims && S._quizDims.length) || 8) * 2 * 37500; // 维度×2题×37.5s ≈ 10 分钟
+  return Math.max(8, (S._quizDims && S._quizDims.length) || 8) * 3 * 35000; // v126：每维最多 3 题 × 35s ≈ 14 分钟
 }
 
 function clearPartTimer() {
@@ -9278,7 +9393,7 @@ function renderQuiz() {
     <div style="display:inline-block;background:linear-gradient(90deg,#0071e3,#42a5f5);color:#fff;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;margin-bottom:12px;">第二部分 · AI 业务场景应用（自适应测评）</div>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
       <span class="tag tag-blue">${dimInfo.short}</span>
-      <span style="font-size:12px;color:var(--text2);">${levelName} · 难度 ${['低','中','高'][t.lv] || '中'} · 本维第 ${qNoInDim}/2 题</span>
+      <span style="font-size:12px;color:var(--text2);">${levelName} · 难度 ${['低','中','高'][t.lv] || '中'} · 本维第 ${qNoInDim} 题${qNoInDim === 1 ? '（按你的作答动态加题，最多 3 题）' : ''}</span>
       <span style="margin-left:auto;font-size:12px;font-weight:600;color:${Object.keys(S._quizDone).length === totalDims ? 'var(--green)' : 'var(--text2)'};">已定级 ${Object.keys(S._quizDone).length}/${totalDims} 维</span>
     </div>
     <div class="quiz-progress">${dots}</div>
@@ -9311,7 +9426,7 @@ function renderQuiz() {
   const doneCount = Object.keys(S._quizDone).length;
   const canSubmit = !committed && pending !== undefined;
   html += `<div class="flex-between mt-4">
-      <button class="btn btn-outline" data-action="prevQuestion" ${canBackToFirst ? '' : 'disabled'} onclick="if(typeof S!=='undefined'){S.prevQuestion()}">↺ 重答本维第一题</button>
+      <button class="btn btn-outline" data-action="prevQuestion" ${canBackToFirst ? '' : 'disabled'} onclick="if(typeof S!=='undefined'){S.prevQuestion()}">↺ 重答上一题</button>
       <span style="font-size:13px;color:${committed ? 'var(--text2)' : 'var(--red)'};">${doneCount}/${totalDims} 已完成${committed ? '' : '（请先选择并提交答案）'}</span>
       ${committed
         ? (isLastPlan && S._quizAllDone
@@ -14508,14 +14623,14 @@ S.togglePartTimer = function() {
 // v93：幂等动作（供暂停遮罩使用，重复触发无副作用 —— 防冒泡导致「继续」被立刻反向切换）
 S.resumePartTimer = function() { if (S._timer && S._timer.paused) resumePartTimer(); };
 S.pausePartTimer = function() { if (S._timer && !S._timer.paused) pausePartTimer(); };
-S.prevQuestion = function() { // v41: 仅允许回退到本维第 1 题（撤销第 2 题，含已定级撤销）；同时解锁第 1 题以便重答
+S.prevQuestion = function() { // v41: 回退一步（撤销上一题），v126: 同步清掉该维后续证据，避免旧证据参与定级
   if (!S._quizPlan || S.quizIdx <= 0) return;
   const cur = S._quizPlan[S.quizIdx];
   const prev = S._quizPlan[S.quizIdx - 1];
   if (!cur || !prev || cur.d !== prev.d) return;
   const step = S.quizIdx;
   S._quizPlan.pop();
-  if (S._quizLog && S._quizLog[cur.d]) S._quizLog[cur.d] = S._quizLog[cur.d].filter(e => e.step !== step);
+  if (S._quizLog && S._quizLog[cur.d]) S._quizLog[cur.d] = S._quizLog[cur.d].filter(e => e.step < step - 1);
   if (S._quizSelectedStep) { delete S._quizSelectedStep[step]; delete S._quizSelectedStep[step - 1]; }
   if (S._quizStartAt) { delete S._quizStartAt[step]; delete S._quizStartAt[step - 1]; }
   if (S._quizTiming) { delete S._quizTiming[step]; delete S._quizTiming[step - 1]; }
