@@ -2364,12 +2364,34 @@ function finishAdaptiveQuiz() {
   if (typeof initRadarChart === 'function') setTimeout(initRadarChart, 100);
 }
 
+// P2-3：当前学员应归属的期次（企业/平台激活中，且阶段未结束）。
+// 由管理端在「ROI 报告」里设定：active + phase(pre/post)。学员测评落库时自动带上期次与阶段，
+// 无需学员感知，也不需要额外打标动作（云端 hydrate 后本地镜像即可用；离线时读上次缓存）。
+function currentCycleForMe() {
+  try {
+    var sess = getSessionSafe();
+    var co = (sess && (sess.companyId || sess.company)) || '';
+    var list = DB.all('quiz_cycles').filter(function (c) {
+      return c && c.active && c.phase && c.phase !== 'closed';
+    });
+    if (!list.length) return null;
+    var mine = list.filter(function (c) {
+      if (!c.company && !c.companyId) return true;                 // 平台通用期次
+      return !!co && (c.companyId === co || c.company === co);     // 企业期次须与本人企业匹配
+    });
+    if (!mine.length) return null;
+    mine.sort(function (a, b) { return (b.ts || 0) - (a.ts || 0); });
+    return mine[0];
+  } catch (e) { return null; }
+}
+
 // P2-2：测评完成 → 落「逐学员测评结果」（localStorage + Supabase 异步镜像，复用 DB.put 管道）
 // 这是「测评常模 / 前后测ROI」的数据底座：云端此前只有逐题日志，没有逐学员最终定级。
 S.saveQuizResult = function () {
   try {
     var sess = (typeof getSessionSafe === 'function') ? getSessionSafe() : (S.session || {});
     var tenant = (sess && (sess.companyId || sess.company)) || '';
+    var cyc = (typeof currentCycleForMe === 'function') ? currentCycleForMe() : null;
     var rec = {
       id: S._quizSessionId || uid('q_'),
       ts: Date.now(),
@@ -2388,7 +2410,10 @@ S.saveQuizResult = function () {
       composite: (S._composite && typeof S._composite.overall === 'number') ? S._composite.overall : 0, // 0-100 综合（基础30%+岗位70%）
       adaptive: (S._quizResult && typeof S._quizResult.overall === 'number') ? S._quizResult.overall : 0, // 0-100 岗位8维加权
       base: (S._baseResult && typeof S._baseResult.pct === 'number') ? S._baseResult.pct : 0,           // 0-100 基础素养
-      phase: S._quizPhase || 'post'
+      // P2-3：前后测归属（期次来自管理端激活配置；无激活期次则记空，不参与 ROI 报告）
+      cycleId: cyc ? cyc.id : '',
+      phase: S._quizPhase || (cyc ? cyc.phase : 'post'),
+      learnerName: (sess && (sess.name || sess.user)) || ''                                            // 明细表可读名
     };
     DB.put('quiz_results', rec);
   } catch (e) { /* 落库失败不影响测评结果展示（fail-safe） */ }
@@ -11036,7 +11061,7 @@ const DB = {
   },
   hydrate: function(cb){
     var cl = sbClient(); if (!cl) { cb && cb(); return; }
-    var cols = ['access_log','feedback','requirements','sales_plans','sales_leads','cases','quiz_results','companies','users'];
+    var cols = ['access_log','feedback','requirements','sales_plans','sales_leads','cases','quiz_results','quiz_cycles','companies','users'];
     var done = 0;
     cols.forEach(function(c){
       cl.from(c).select('*').then(function(res){
@@ -11950,6 +11975,7 @@ function renderAdmin() {
   tabs.push(['report','企业报告']); // 管理员与企业管理员均可见：向企业交付学习成果（按企业下钻）
   if (isAdmin) tabs.push(['leads','商机线索']); // 销售线索库：仅平台管理员
   if (isAdmin) tabs.push(['cases','案例库']); // 大赛作品案例库：仅平台管理员
+  if (isAdmin) tabs.push(['roi','ROI 报告']);  // 前后测 ROI 报告（续费证据）：仅平台管理员
   if (isAdmin) tabs.push(['companies','企业管理']);
   if (isAdmin) tabs.push(['quiz','测评分析']);
   var html = headerHtml('管理员看板', isAdmin ? '平台管理员视角 · 团队AI学习全景' : '企业管理员视角 · 团队AI学习进度', true);
@@ -11968,6 +11994,7 @@ function renderAdmin() {
   else if (S.adminTab === 'subscription') html += renderAdminSubscription();
   else if (S.adminTab === 'leads') html += renderAdminLeads();
   else if (S.adminTab === 'cases') html += renderAdminCases();
+  else if (S.adminTab === 'roi') html += renderAdminRoi();
   else if (S.adminTab === 'report') html += renderAdminReport();
   else html += renderAdminOverview(isAdmin);
   return html;
@@ -12618,6 +12645,433 @@ S.caseExportJson = function(){
   var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='AIDAX_案例库_'+fmtTs(Date.now()).replace(/[-: ]/g,'')+'.json';
   document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
   showToast('已导出 '+all.length+' 条案例 JSON');
+};
+
+// ==================== P2-3 前后测 ROI 报告 ====================
+// 目的：把「培训前测 → 培训后测」的能力提升，折算成能交给企业/续费的证据（提升幅度 · 达线率 · 年化节省 · ROI 倍数）。
+// 数据源：quiz_results（P2-2 已落逐学员 8 维等级 + 综合分），学员测评时按管理端设定的「期次 + 阶段」自动归属。
+var ROI_PHASE = { pre:'前测中', post:'后测中', closed:'已结束' };
+var ROI_PHASE_COLOR = { pre:'#e0a400', post:'#2e9e5b', closed:'#8a93a5' };
+
+function roiCycles(){ return DB.all('quiz_cycles').slice().sort(function(a,b){ return (b.ts||0)-(a.ts||0); }); }
+function roiActiveCycle(){ var l = roiCycles().filter(function(c){ return c && c.active; }); return l.length ? l[0] : null; }
+function roiNum(v, d){ var n = parseFloat(v); return isFinite(n) ? n : d; }
+function roiMoney(n){ return '¥' + Math.round(n || 0).toLocaleString(); }
+
+// ROI 折算模型（参数都在期次里可改 → 口径透明、可对企业解释）
+//   入参：rep = roi_report 返回的整份报告（paired 在根层、均分在 summary）
+//   人效提升   = 综合分提升(/100) × 弹性系数        （综合分 +10 分 ≈ 人效 +5%，默认弹性 0.5）
+//   年化省工时 = 人数 × 月工时 × 12 × 人效提升
+//   年化金额   = 省工时 × 时薪；ROI 倍数 = 年化金额 / 席位授权成本
+function roiCalc(rep, c){
+  var sum = (rep && rep.summary) || rep || {};
+  var n = (rep && rep.paired) || 0;
+  var seat = roiNum(c && c.seatPrice, 399);
+  var rate = roiNum(c && c.hourlyRate, 80);
+  var hpm  = roiNum(c && c.hoursPerMonth, 160);
+  var k    = roiNum(c && c.elasticity, 0.5);
+  var dlt  = (sum && sum.deltaAvg) || 0;
+  var gainPct = Math.max(0, dlt) / 100 * k;
+  var hoursYear = n * hpm * 12 * gainPct;
+  var moneyYear = hoursYear * rate;
+  var cost = n * seat;
+  return { paired:n, seat:seat, rate:rate, hpm:hpm, k:k, delta:dlt,
+    gainPct:gainPct, hoursYear:hoursYear, moneyYear:moneyYear, cost:cost,
+    roi: cost > 0 ? moneyYear / cost : 0 };
+}
+
+// 调 Postgres RPC roi_report（SECURITY DEFINER；RPC 内按 JWT claims 做 admin/ent 鉴权）
+function fetchRoi(cycleId, cb){
+  cb = cb || function(){};
+  try {
+    var cfg = cloudConfig();
+    if (!cfg || !cfg.supabaseUrl || !cycleId) { cb(0, null); return; }
+    var url = cfg.supabaseUrl.replace(/\/$/, '') + '/rest/v1/rpc/roi_report';
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': cfg.supabaseAnonKey,
+        'Authorization': 'Bearer ' + (S._cloudJwt || cfg.supabaseAnonKey)
+      },
+      body: JSON.stringify({ p_cycle: cycleId })
+    })
+      .then(function(r){ return r.json().then(function(j){ return { status:r.status, json:j }; }); })
+      .then(function(res){ cb(res.status, res.json); })
+      .catch(function(){ cb(0, null); });
+  } catch(e){ cb(0, null); }
+}
+
+// 8 维前后对比条（灰=前测，蓝=后测；级别 0-4 折算百分比）
+function roiDimRow(label, preLv, postLv){
+  var prePct = Math.max(2, Math.round((preLv || 0) / 4 * 100));
+  var postPct = Math.max(2, Math.round((postLv || 0) / 4 * 100));
+  var d = Math.round(((postLv || 0) - (preLv || 0)) * 100) / 100;
+  var dc = d > 0 ? '#2e9e5b' : (d < 0 ? '#d94a3d' : '#8a93a5');
+  return '<div style="display:flex;align-items:center;gap:10px;margin:7px 0">'
+    + '<span style="width:88px;flex:none;font-size:12.5px;color:var(--text2);text-align:right">' + label + '</span>'
+    + '<span style="flex:1">'
+    +   '<span style="display:block;height:8px;background:#eef1f6;border-radius:4px;overflow:hidden;margin-bottom:3px"><span style="display:block;height:100%;width:' + prePct + '%;background:#b9c3d4"></span></span>'
+    +   '<span style="display:block;height:8px;background:#eef1f6;border-radius:4px;overflow:hidden"><span style="display:block;height:100%;width:' + postPct + '%;background:#3b6fe0"></span></span>'
+    + '</span>'
+    + '<span style="width:118px;flex:none;font-size:12px;color:var(--text1);font-variant-numeric:tabular-nums">'
+    +   (preLv || 0) + ' → ' + (postLv || 0)
+    +   ' <b style="color:' + dc + '">' + (d > 0 ? '+' : '') + d + '</b></span>'
+    + '</div>';
+}
+
+function roiField(id, label, val, ph, w){
+  return '<div style="' + (w ? 'width:' + w + ';' : 'flex:1;min-width:120px;') + '">'
+    + '<div style="font-size:11.5px;color:var(--text2);margin-bottom:4px">' + label + '</div>'
+    + '<input id="' + id + '" class="fb-editor" style="width:100%;padding:7px 9px;border:1px solid var(--border);border-radius:8px;font-size:13px" value="' + escapeHtml(val == null ? '' : String(val)) + '"' + (ph ? ' placeholder="' + ph + '"' : '') + '>'
+    + '</div>';
+}
+
+function renderRoiEditForm(){
+  var id = S._roiEditId || '';
+  var c = id ? DB.get('quiz_cycles', id) : (S._roiDraft || {});
+  c = c || {};
+  var cos = DB.all('companies').filter(function(x){ return x && x.active; });
+  var coOpts = '<option value="">平台通用（不限企业）</option>';
+  cos.forEach(function(x){
+    coOpts += '<option value="' + x.id + '"' + (c.companyId === x.id ? ' selected' : '') + '>' + escapeHtml(x.name || x.id) + '</option>';
+  });
+  var h = '<div class="card mt-3 slide-up"><div class="section-title"><span class="st-ico">🗂️</span>' + (id ? '编辑期次' : '新建期次') + '</div>';
+  h += '<p style="font-size:12px;color:var(--text2);margin-bottom:12px">一个期次 = 一批学员的「前测 → 培训 → 后测」。设定后，学员在该企业下做测评会自动记录为期次的对应阶段，无需学员手动选择。</p>';
+  h += '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">';
+  h += roiField('roiName', '期次名称', c.name, '如：某头部家电制造集团 · 2026Q4 AI训战营');
+  h += '<div style="width:200px"><div style="font-size:11.5px;color:var(--text2);margin-bottom:4px">所属企业</div>'
+    + '<select id="roiCo" style="width:100%;padding:7px 9px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--bg)">' + coOpts + '</select></div>';
+  h += '</div>';
+  h += '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">';
+  h += roiField('roiSeat', '席位单价(元/人/年)', c.seatPrice == null ? 399 : c.seatPrice);
+  h += roiField('roiRate', '时薪(元/小时)', c.hourlyRate == null ? 80 : c.hourlyRate);
+  h += roiField('roiHours', '月工时(小时)', c.hoursPerMonth == null ? 160 : c.hoursPerMonth);
+  h += roiField('roiElastic', '效率弹性系数', c.elasticity == null ? 0.5 : c.elasticity);
+  h += '</div>';
+  h += '<p style="font-size:11.5px;color:var(--text3);margin-bottom:12px">折算口径：人效提升 = 综合分提升 ÷ 100 × 弹性系数（默认 0.5，即综合分 +10 分≈人效 +5%）；年化节省 = 人数 × 月工时 × 12 × 人效提升 × 时薪；ROI 倍数 = 年化节省 ÷ 席位成本。参数可按企业真实口径调整。</p>';
+  h += '<div style="display:flex;gap:8px;flex-wrap:wrap">'
+    + '<button class="btn btn-sm btn-primary" data-action="roiSave" data-id="' + (id || '') + '">保存期次</button>'
+    + '<button class="btn btn-sm btn-outline" data-action="roiCancelEdit">取消</button></div>';
+  h += '</div>';
+  return h;
+}
+
+function renderRoiReport(cyc){
+  var st = S._roi || {};
+  var h = '';
+  if (!cyc) {
+    h += '<p style="text-align:center;color:var(--text3);padding:24px">还没有期次。先「新建期次」，把学员测评归属到「前测/后测」，报告才会出数。</p>';
+    return h;
+  }
+  h += '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:4px 0 12px">';
+  h += '<span style="font-size:12.5px;color:var(--text2)">查看期次：</span>';
+  h += '<select onchange="S.roiSelectCycle(this.value)" style="padding:6px 9px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--bg)">';
+  roiCycles().forEach(function(c){
+    h += '<option value="' + c.id + '"' + (c.id === cyc.id ? ' selected' : '') + '>' + escapeHtml(c.name || c.id) + '</option>';
+  });
+  h += '</select>';
+  h += '<span style="flex:1"></span>';
+  h += '<button class="btn btn-sm btn-outline" data-action="roiExportCsv" data-id="' + cyc.id + '">⬇️ 明细 CSV</button>';
+  h += '<button class="btn btn-sm btn-outline" data-action="roiExportHtml" data-id="' + cyc.id + '">🖨️ 导出报告(可打印)</button>';
+  h += '<button class="btn btn-sm btn-outline" data-action="roiRefresh">↻ 刷新</button>';
+  h += '</div>';
+
+  if (st.status === 'loading') return h + '<p style="text-align:center;color:var(--text3);padding:20px">正在汇总前后测数据…</p>';
+  if (st.status === 'err') {
+    var msg = (st.data && st.data.error) ? st.data.error : ('HTTP ' + (st.code || '?'));
+    var hint = msg === 'forbidden' ? '当前账号无权查看该期次（需平台管理员，或该企业自己的企业号）。'
+      : (msg === 'cycle not found' ? '期次在云端不存在（可能只存在本地）。' : '请确认已登录管理员账号且云端可连通。');
+    return h + '<p style="text-align:center;color:#d94a3d;padding:20px">汇总失败：' + escapeHtml(msg) + '<br><span style="font-size:12px;color:var(--text3)">' + hint + '</span></p>';
+  }
+
+  var d = st.data || {};
+  var sum = d.summary || {};
+  var calc = roiCalc(d, cyc);
+  if (!d.paired) {
+    h += '<p style="text-align:center;color:var(--text3);padding:20px">本期次暂无「前测+后测都完成」的配对学员。'
+      + '<br><span style="font-size:12px">当前：仅前测 ' + (d.preOnly || 0) + ' 人 / 仅后测 ' + (d.postOnly || 0) + ' 人。等同一批学员做完两次测评即可出报告。</span></p>';
+  } else {
+    h += '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px">'
+      + aqKpi('配对学员', d.paired + ' 人', '仅前测 ' + (d.preOnly || 0) + ' / 仅后测 ' + (d.postOnly || 0))
+      + aqKpi('综合分 前→后', sum.preAvg + ' → ' + sum.postAvg, '平均提升 <b style="color:#2e9e5b">+' + sum.deltaAvg + '</b> 分')
+      + aqKpi('达线率（≥' + sum.passLine + '）', sum.postPassRate + '%', '前测 ' + sum.prePassRate + '% → 后测 ' + sum.postPassRate + '%')
+      + aqKpi('年化节省', roiMoney(calc.moneyYear), Math.round(calc.hoursYear).toLocaleString() + ' 小时 / 年（人效 +' + (calc.gainPct * 100).toFixed(1) + '%）')
+      + aqKpi('ROI 倍数', calc.roi.toFixed(2) + 'x', '成本 ' + roiMoney(calc.cost) + '（' + calc.paired + ' 席 × ¥' + calc.seat + '）')
+      + '</div>';
+
+    h += '<div style="font-size:13px;font-weight:600;margin:6px 0 8px">8 维能力：前测（灰）vs 后测（蓝）</div>';
+    var dims = sum.dims || {};
+    Object.keys(AI_DIMS).forEach(function(k){
+      var o = dims[k] || {};
+      h += roiDimRow(AI_DIMS[k].shortCn, o.pre, o.post);
+    });
+
+    h += '<div style="margin-top:16px;font-size:13px;font-weight:600;margin-bottom:8px">学员明细（' + (d.learners || []).length + ' 人）</div>';
+    h += '<div style="overflow-x:auto"><table class="log-table"><thead><tr>'
+      + '<th>学员</th><th>行业×岗位</th><th>前测综合</th><th>后测综合</th><th>提升</th><th>前测时间</th><th>后测时间</th></tr></thead><tbody>';
+    (d.learners || []).forEach(function(l){
+      var indn = (INDUSTRIES[l.industry] && INDUSTRIES[l.industry].name) || l.industry || '—';
+      var roln = (ROLES[l.role] && ROLES[l.role].name) || l.role || '—';
+      var dv = Number(l.delta || 0);
+      var col = dv > 0 ? '#2e9e5b' : (dv < 0 ? '#d94a3d' : '#8a93a5');
+      h += '<tr><td>' + escapeHtml(l.name || l.owner || '—') + '</td>'
+        + '<td>' + indn + ' × ' + roln + '</td>'
+        + '<td>' + l.pre + '</td><td>' + l.post + '</td>'
+        + '<td style="color:' + col + ';font-weight:600">' + (dv > 0 ? '+' : '') + dv + '</td>'
+        + '<td>' + (l.preTs ? fmtTs(Number(l.preTs)) : '—') + '</td>'
+        + '<td>' + (l.postTs ? fmtTs(Number(l.postTs)) : '—') + '</td></tr>';
+    });
+    h += '</tbody></table></div>';
+    h += '<p style="font-size:11.5px;color:var(--text3);margin-top:10px">配对规则：同一学员「前测取最早一次、后测取最新一次」，避免重复刷分抬高成绩。汇总时间：' + escapeHtml(d.updatedAt || '') + '</p>';
+  }
+  return h;
+}
+
+function renderAdminRoi(){
+  var list = roiCycles();
+  var selId = S._roiCycleId || (roiActiveCycle() ? roiActiveCycle().id : ((list[0] && list[0].id) || ''));
+  var cyc = null;
+  for (var i = 0; i < list.length; i++) { if (list[i].id === selId) { cyc = list[i]; break; } }
+  if (!cyc && list.length) cyc = list[0];
+  S._roiCycleId = cyc ? cyc.id : '';
+
+  if (cyc && (!S._roi || S._roi.cycleId !== cyc.id)) {
+    S._roi = { cycleId: cyc.id, status: 'loading', data: null };
+    fetchRoi(cyc.id, function(st, j){
+      S._roi = { cycleId: cyc.id, status: (st === 200 && j && j.ok) ? 'ok' : 'err', data: j, code: st };
+      if (S.view === 'admin' && S.adminTab === 'roi') render();
+    });
+  }
+
+  var html = '<div class="card slide-up">';
+  html += '<div class="section-title"><span class="st-ico">📈</span>前后测 ROI 报告（续费证据）</div>';
+  html += '<p style="font-size:12.5px;color:var(--text2);margin-bottom:12px">把「培训前测 → 培训后测」的能力提升，折算成企业听得懂的三件事：<b>提升幅度</b>、<b>达线率</b>、<b>年化节省与 ROI 倍数</b>。学员在所属企业下做测评会自动归入当前期次的对应阶段。</p>';
+
+  // 当前期次状态条
+  var act = roiActiveCycle();
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 12px;background:var(--card2,#f5f7fb);border:1px solid var(--border);border-radius:10px;margin-bottom:14px">';
+  html += '<span style="font-size:12.5px;color:var(--text2)">当前生效期次：</span>';
+  if (act) {
+    html += '<b style="font-size:13px">' + escapeHtml(act.name || act.id) + '</b>';
+    html += '<span style="font-size:12px;color:' + (ROI_PHASE_COLOR[act.phase] || '#888') + ';font-weight:600">● ' + (ROI_PHASE[act.phase] || act.phase) + '</span>';
+    html += '<span style="flex:1"></span><span style="font-size:11.5px;color:var(--text3)">切换阶段：</span>';
+    ['pre', 'post', 'closed'].forEach(function(p){
+      html += '<button class="btn btn-sm ' + (act.phase === p ? 'btn-primary' : 'btn-outline') + '" data-action="roiSetPhase" data-id="' + act.id + '" data-st="' + p + '">' + ROI_PHASE[p] + '</button>';
+    });
+  } else {
+    html += '<span style="color:var(--text3);font-size:12.5px">未激活（学员测评暂不计入任何期次）</span>';
+  }
+  html += '<button class="btn btn-sm btn-outline" data-action="roiNew">＋ 新建期次</button>';
+  html += '</div>';
+
+  // 期次列表
+  if (list.length) {
+    html += '<div style="overflow-x:auto"><table class="log-table"><thead><tr>'
+      + '<th>期次名称</th><th>所属企业</th><th>阶段</th><th>席位/时薪</th><th>状态</th><th>操作</th></tr></thead><tbody>';
+    list.forEach(function(c){
+      html += '<tr>'
+        + '<td>' + escapeHtml(c.name || c.id) + '</td>'
+        + '<td>' + escapeHtml(c.company || '平台通用') + '</td>'
+        + '<td><span style="color:' + (ROI_PHASE_COLOR[c.phase] || '#888') + ';font-weight:600">●</span> ' + (ROI_PHASE[c.phase] || c.phase || '—') + '</td>'
+        + '<td>¥' + roiNum(c.seatPrice, 399) + ' / ¥' + roiNum(c.hourlyRate, 80) + '</td>'
+        + '<td>' + (c.active ? '<span style="color:#2e9e5b;font-weight:600">生效中</span>' : '<span style="color:var(--text3)">未激活</span>') + '</td>'
+        + '<td style="white-space:nowrap">'
+        +   '<button class="btn btn-sm btn-outline" data-action="roiEdit" data-id="' + c.id + '">编辑</button> '
+        +   (c.active ? '' : '<button class="btn btn-sm btn-outline" data-action="roiActivate" data-id="' + c.id + '">激活</button> ')
+        +   '<button class="btn btn-sm btn-outline" data-action="roiDelete" data-id="' + c.id + '">删除</button>'
+        + '</td></tr>';
+    });
+    html += '</tbody></table></div>';
+  }
+
+  html += renderRoiReport(cyc);
+  html += '</div>';
+
+  if (S._roiEditId !== undefined && S._roiEditId !== null) html += renderRoiEditForm();
+  return html;
+}
+
+// ---- 期次 CRUD ----
+S.roiSelectCycle = function(id){ S._roiCycleId = id; S._roi = null; render(); };
+S.roiRefresh = function(){ S._roi = null; render(); };
+S.roiNew = function(){ S._roiEditId = ''; render(); };
+S.roiEdit = function(id){ S._roiEditId = id; render(); };
+S.roiCancelEdit = function(){ S._roiEditId = null; render(); };
+S.roiSave = function(id){
+  var name = ((document.getElementById('roiName') || {}).value || '').trim();
+  if (!name) { alert('请填写期次名称'); return; }
+  var coId = (document.getElementById('roiCo') || {}).value || '';
+  var coName = '';
+  if (coId) { var co = DB.get('companies', coId); coName = (co && co.name) || coId; }
+  var old = id ? (DB.get('quiz_cycles', id) || {}) : {};
+  var rec = {
+    id: id || uid('cyc_'),
+    ts: old.ts || Date.now(),
+    name: name,
+    companyId: coId,
+    company: coName,
+    phase: old.phase || 'pre',                 // 新期次默认从「前测中」开始
+    active: old.active === undefined ? true : old.active,
+    seatPrice: roiNum((document.getElementById('roiSeat') || {}).value, 399),
+    hourlyRate: roiNum((document.getElementById('roiRate') || {}).value, 80),
+    hoursPerMonth: roiNum((document.getElementById('roiHours') || {}).value, 160),
+    elasticity: roiNum((document.getElementById('roiElastic') || {}).value, 0.5),
+    ownerKey: (typeof currentOwnerKey === 'function') ? currentOwnerKey() : '',
+    companyKey: coName || 'platform'
+  };
+  // RLS 需要 company 或 ownerKey 之一匹配；平台通用期次靠 ownerKey=admin 可见
+  DB.put('quiz_cycles', rec);
+  S._roiEditId = null;
+  S._roiCycleId = rec.id;
+  S._roi = null;
+  showToast(id ? '期次已保存' : '期次已创建（默认「前测中」）');
+  if (S.view === 'admin') render();
+};
+S.roiActivate = function(id){
+  roiCycles().forEach(function(c){ if (c && c.id !== id && c.active) { c.active = false; DB.put('quiz_cycles', c); } });
+  var c = DB.get('quiz_cycles', id);
+  if (c) { c.active = true; DB.put('quiz_cycles', c); }
+  S._roiCycleId = id; S._roi = null;
+  showToast('已激活期次，学员测评将计入该期次');
+  render();
+};
+S.roiSetPhase = function(id, phase){
+  var c = DB.get('quiz_cycles', id);
+  if (!c) return;
+  c.phase = phase; c.active = true;
+  roiCycles().forEach(function(x){ if (x && x.id !== id && x.active) { x.active = false; DB.put('quiz_cycles', x); } });
+  DB.put('quiz_cycles', c);
+  S._roiCycleId = id; S._roi = null;
+  showToast('阶段已切换为「' + (ROI_PHASE[phase] || phase) + '」');
+  render();
+};
+S.roiDelete = function(id){
+  var c = DB.get('quiz_cycles', id);
+  if (!c) return;
+  if (!confirm('删除期次「' + (c.name || id) + '」？已产生的测评记录不会被删除，但会失去期次归属（不再进入本报告）。')) return;
+  DB.del('quiz_cycles', id);
+  if (S._roiCycleId === id) { S._roiCycleId = ''; S._roi = null; }
+  showToast('期次已删除');
+  render();
+};
+
+// ---- 导出 ----
+function roiCurrentData(){
+  var d = (S._roi && S._roi.data) || null;
+  return (d && d.ok) ? d : null;
+}
+S.roiExportCsv = function(){
+  var d = roiCurrentData();
+  if (!d) { alert('暂无可导出的报告数据'); return; }
+  var cyc = DB.get('quiz_cycles', d.cycle) || {};
+  var calc = roiCalc(d, cyc);
+  var rows = [];
+  rows.push(['期次', cyc.name || d.cycleName || d.cycle]);
+  rows.push(['所属企业', cyc.company || '平台通用']);
+  rows.push(['配对学员', d.paired, '仅前测', d.preOnly || 0, '仅后测', d.postOnly || 0]);
+  rows.push(['前测均分', d.summary.preAvg, '后测均分', d.summary.postAvg, '平均提升', d.summary.deltaAvg]);
+  rows.push(['前测达线率(%)', d.summary.prePassRate, '后测达线率(%)', d.summary.postPassRate, '达线分', d.summary.passLine]);
+  rows.push(['人效提升(%)', (calc.gainPct * 100).toFixed(1), '年化省工时', Math.round(calc.hoursYear), '年化节省(元)', Math.round(calc.moneyYear), '席位成本(元)', calc.cost, 'ROI倍数', calc.roi.toFixed(2)]);
+  rows.push([]);
+  var dimKeys = Object.keys(AI_DIMS);
+  var head = ['学员', '归属', '行业', '岗位', '前测综合', '后测综合', '提升', '前测时间', '后测时间'];
+  dimKeys.forEach(function(k){ head.push('前测-' + AI_DIMS[k].shortCn); });
+  dimKeys.forEach(function(k){ head.push('后测-' + AI_DIMS[k].shortCn); });
+  rows.push(head);
+  (d.learners || []).forEach(function(l){
+    var indn = (INDUSTRIES[l.industry] && INDUSTRIES[l.industry].name) || l.industry || '';
+    var roln = (ROLES[l.role] && ROLES[l.role].name) || l.role || '';
+    var r = [l.name || '', l.owner || '', indn, roln, l.pre, l.post, l.delta,
+      l.preTs ? fmtTs(Number(l.preTs)) : '', l.postTs ? fmtTs(Number(l.postTs)) : ''];
+    dimKeys.forEach(function(k){ r.push((l.preDims && l.preDims[k]) || 0); });
+    dimKeys.forEach(function(k){ r.push((l.postDims && l.postDims[k]) || 0); });
+    rows.push(r);
+  });
+  var csv = '﻿' + rows.map(function(r){ return r.map(csvCell).join(','); }).join('\r\n');
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'AIDAX_ROI_' + (cyc.name || 'report').replace(/[\\/:*?"<>|]/g, '') + '_' + fmtTs(Date.now()).replace(/[-: ]/g, '') + '.csv';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+  showToast('已导出 ROI 明细 CSV');
+};
+
+// 导出可直接发给企业 / 打印成 PDF 的独立 HTML 报告
+S.roiExportHtml = function(){
+  var d = roiCurrentData();
+  if (!d) { alert('暂无可导出的报告数据'); return; }
+  var cyc = DB.get('quiz_cycles', d.cycle) || {};
+  var sum = d.summary || {};
+  var calc = roiCalc(d, cyc);
+  var dimKeys = Object.keys(AI_DIMS);
+  var e = escapeHtml;
+  var h = '<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8">'
+    + '<title>AI 能力训战 ROI 报告 · ' + e(cyc.name || d.cycleName || '') + '</title>'
+    + '<style>body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;max-width:860px;margin:32px auto;padding:0 20px;color:#1c2430;line-height:1.6}'
+    + 'h1{font-size:22px;margin:0 0 6px}h2{font-size:15px;margin:26px 0 10px;padding-left:9px;border-left:3px solid #3b6fe0}'
+    + '.sub{color:#6b7688;font-size:12.5px;margin-bottom:22px}'
+    + '.kpis{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}'
+    + '.kpi{flex:1;min-width:120px;border:1px solid #e3e8f0;border-radius:10px;padding:12px 14px;background:#f7f9fc}'
+    + '.kpi .t{font-size:11.5px;color:#6b7688}.kpi .v{font-size:19px;font-weight:700;margin-top:4px}.kpi .s{font-size:11px;color:#8a93a5;margin-top:3px}'
+    + 'table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}'
+    + 'th,td{border-bottom:1px solid #eaedf3;padding:7px 8px;text-align:left}th{background:#f5f7fb;font-weight:600;font-size:12px}'
+    + '.up{color:#2e9e5b;font-weight:600}.down{color:#d94a3d;font-weight:600}'
+    + 'footer{margin-top:28px;font-size:11.5px;color:#8a93a5;border-top:1px solid #eaedf3;padding-top:12px}'
+    + '@media print{body{margin:0;padding:0}.noprint{display:none}}</style></head><body>';
+  h += '<h1>AI 能力训战 · 前后测 ROI 报告</h1>';
+  h += '<div class="sub">' + e(cyc.name || d.cycleName || d.cycle) + '　|　' + e(cyc.company || '平台通用')
+    + '　|　生成时间 ' + new Date().toLocaleString('zh-CN') + '　|　AIDAX · AI达学</div>';
+
+  h += '<h2>核心结论</h2><div class="kpis">'
+    + '<div class="kpi"><div class="t">配对学员</div><div class="v">' + d.paired + ' 人</div><div class="s">仅前测 ' + (d.preOnly || 0) + ' / 仅后测 ' + (d.postOnly || 0) + '</div></div>'
+    + '<div class="kpi"><div class="t">综合能力分</div><div class="v">' + sum.preAvg + ' → ' + sum.postAvg + '</div><div class="s">平均提升 +' + sum.deltaAvg + ' 分</div></div>'
+    + '<div class="kpi"><div class="t">达线率（≥' + sum.passLine + '）</div><div class="v">' + sum.prePassRate + '% → ' + sum.postPassRate + '%</div><div class="s">后测达线 ' + sum.postPassRate + '%</div></div>'
+    + '<div class="kpi"><div class="t">年化节省</div><div class="v">' + roiMoney(calc.moneyYear) + '</div><div class="s">' + Math.round(calc.hoursYear).toLocaleString() + ' 工时/年</div></div>'
+    + '<div class="kpi"><div class="t">ROI 倍数</div><div class="v">' + calc.roi.toFixed(2) + 'x</div><div class="s">成本 ' + roiMoney(calc.cost) + '</div></div>'
+    + '</div>';
+
+  h += '<h2>8 维能力变化（等级 0-4）</h2><table><thead><tr><th>能力维度</th><th>前测</th><th>后测</th><th>提升</th></tr></thead><tbody>';
+  dimKeys.forEach(function(k){
+    var o = (sum.dims || {})[k] || {};
+    var dv = Number(o.delta || 0);
+    h += '<tr><td>' + e(AI_DIMS[k].name) + '</td><td>' + (o.pre || 0) + '</td><td>' + (o.post || 0) + '</td>'
+      + '<td class="' + (dv > 0 ? 'up' : (dv < 0 ? 'down' : '')) + '">' + (dv > 0 ? '+' : '') + dv + '</td></tr>';
+  });
+  h += '</tbody></table>';
+
+  h += '<h2>学员明细</h2><table><thead><tr><th>学员</th><th>行业×岗位</th><th>前测</th><th>后测</th><th>提升</th></tr></thead><tbody>';
+  (d.learners || []).forEach(function(l){
+    var indn = (INDUSTRIES[l.industry] && INDUSTRIES[l.industry].name) || l.industry || '—';
+    var roln = (ROLES[l.role] && ROLES[l.role].name) || l.role || '—';
+    var dv = Number(l.delta || 0);
+    h += '<tr><td>' + e(l.name || l.owner || '—') + '</td><td>' + e(indn + ' × ' + roln) + '</td><td>' + l.pre + '</td><td>' + l.post + '</td>'
+      + '<td class="' + (dv > 0 ? 'up' : (dv < 0 ? 'down' : '')) + '">' + (dv > 0 ? '+' : '') + dv + '</td></tr>';
+  });
+  h += '</tbody></table>';
+
+  h += '<h2>折算口径</h2><table><tbody>'
+    + '<tr><td>人效提升</td><td>综合分提升 ÷ 100 × 弹性系数 ' + calc.k + ' = ' + (calc.gainPct * 100).toFixed(1) + '%</td></tr>'
+    + '<tr><td>年化节省工时</td><td>' + calc.paired + ' 人 × ' + calc.hpm + ' 小时/月 × 12 × ' + (calc.gainPct * 100).toFixed(1) + '% = ' + Math.round(calc.hoursYear).toLocaleString() + ' 小时</td></tr>'
+    + '<tr><td>年化节省金额</td><td>' + Math.round(calc.hoursYear).toLocaleString() + ' 小时 × ¥' + calc.rate + '/小时 = ' + roiMoney(calc.moneyYear) + '</td></tr>'
+    + '<tr><td>席位投资</td><td>' + calc.paired + ' 席 × ¥' + calc.seat + '/人/年 = ' + roiMoney(calc.cost) + '</td></tr>'
+    + '<tr><td>ROI 倍数</td><td>' + roiMoney(calc.moneyYear) + ' ÷ ' + roiMoney(calc.cost) + ' = ' + calc.roi.toFixed(2) + ' 倍</td></tr>'
+    + '</tbody></table>';
+
+  h += '<footer>口径说明：前测取该学员最早一次、后测取最新一次，避免重复刷分；达线指综合分 ≥ ' + sum.passLine + '。'
+    + '折算参数（席位单价 ¥' + calc.seat + '、时薪 ¥' + calc.rate + '、月工时 ' + calc.hpm + ' 小时、弹性系数 ' + calc.k + '）可在系统内按期次调整。'
+    + '汇总时间 ' + e(d.updatedAt || '') + '。</footer>';
+  h += '<p class="noprint" style="text-align:center;margin-top:22px"><button onclick="window.print()" style="padding:9px 20px;border:0;border-radius:8px;background:#3b6fe0;color:#fff;font-size:13px;cursor:pointer">打印 / 另存为 PDF</button></p>';
+  h += '</body></html>';
+
+  var blob = new Blob([h], { type: 'text/html;charset=utf-8' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'AIDAX_ROI报告_' + (cyc.name || 'report').replace(/[\\/:*?"<>|]/g, '') + '_' + fmtTs(Date.now()).replace(/[-: ]/g, '') + '.html';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+  showToast('已导出可打印 ROI 报告');
 };
 
 // ==================== P2 · 测评分析面板（quiz-stats Edge Function 驱动）====================
@@ -13866,6 +14320,17 @@ function bindEvents() {
             case 'caseAdminFilter': S.caseAdminFilter(el.getAttribute('data-st')); break;
             case 'caseSearch': S.caseSearch(); break;
             case 'openCourseById': S.openCourseById(el.getAttribute('data-cid')); break;
+            case 'roiSelectCycle': S.roiSelectCycle(el.value); break;
+            case 'roiRefresh': S.roiRefresh(); break;
+            case 'roiNew': S.roiNew(); break;
+            case 'roiEdit': S.roiEdit(id); break;
+            case 'roiCancelEdit': S.roiCancelEdit(); break;
+            case 'roiSave': S.roiSave(el.getAttribute('data-id')); break;
+            case 'roiActivate': S.roiActivate(id); break;
+            case 'roiSetPhase': S.roiSetPhase(id, el.getAttribute('data-st')); break;
+            case 'roiDelete': S.roiDelete(id); break;
+            case 'roiExportCsv': S.roiExportCsv(); break;
+            case 'roiExportHtml': S.roiExportHtml(); break;
           }
           return;
         }
