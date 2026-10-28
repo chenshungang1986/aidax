@@ -1939,6 +1939,7 @@ function quizBankObjOf(name) {
     INTERNET_PM_QUIZ: (typeof INTERNET_PM_QUIZ !== 'undefined') ? INTERNET_PM_QUIZ : null,
     MEGA_PM_QUIZ:     (typeof MEGA_PM_QUIZ !== 'undefined') ? MEGA_PM_QUIZ : null,
     RETAIL_PM_QUIZ:   (typeof RETAIL_PM_QUIZ !== 'undefined') ? RETAIL_PM_QUIZ : null,
+    ELEC_PM_QUIZ:     (typeof ELEC_PM_QUIZ !== 'undefined') ? ELEC_PM_QUIZ : null,
     DEV_QUIZ_V2:      (typeof DEV_QUIZ_V2 !== 'undefined') ? DEV_QUIZ_V2 : null,
     OPS_QUIZ_V2:      (typeof OPS_QUIZ_V2 !== 'undefined') ? OPS_QUIZ_V2 : null,
     SALES_QUIZ_V2:    (typeof SALES_QUIZ_V2 !== 'undefined') ? SALES_QUIZ_V2 : null,
@@ -1975,7 +1976,14 @@ function getQuizPools(roleId, industryId) {
 
 function getQuizQuestions(roleId, industryId) {
   // 题库映射统一走 quizBankFor → quizBankObjOf（v126：去掉重复的 indMap/roleMap 双份映射）
-  var quizObj = quizBankObjOf(quizBankFor(roleId, industryId));
+  var _bankName = quizBankFor(roleId, industryId);
+  var quizObj = quizBankObjOf(_bankName);
+  // v130 兜底：登记表漏项时不再静默返回空题目（此前 elec 抽不到题的根因）
+  if (!quizObj) {
+    if (typeof console !== 'undefined' && console.warn) console.warn('[quiz] 题库未登记，回退制造库:', _bankName);
+    if (typeof S !== 'undefined') S._quizBankFallback = _bankName;
+    quizObj = (typeof MFG_PM_QUIZ !== 'undefined') ? MFG_PM_QUIZ : null;
+  }
   
   // Flatten dim-based quiz to byDim format, picking ONE random question per level
   var byDim = {};
