@@ -277,7 +277,24 @@
   .lf-note{font-size:11.8px;color:var(--mut);margin-top:10px;line-height:1.6}
   .lf-report{white-space:pre-wrap;font-size:12.4px;background:#0e1530;color:#d7e3ff;border-radius:10px;padding:12px 14px;max-height:230px;overflow:auto;margin-top:10px;font-family:ui-monospace,Consolas,monospace;line-height:1.6}
   @media(max-width:560px){.lf-type-grid{grid-template-columns:repeat(2,1fr)}}
-  @media(max-width:860px){.layout{flex-direction:column}.sidebar{width:100%;max-height:36vh;border-right:none;border-bottom:1px solid var(--line)}}
+  @media(max-width:860px){
+    /* 手机 / 平板竖屏：课程目录默认收起，点顶部「目录」展开。
+       以前是常驻 36vh，一进单元要先滚三百多像素才看得到视频。 */
+    .layout{flex-direction:column}
+    .sidebar{width:100%;max-height:0;overflow:hidden;padding:0 12px;border-right:none;border-bottom:1px solid var(--line);transition:max-height .2s ease}
+    .sidebar.open{max-height:56vh;overflow-y:auto;padding:10px 12px}
+    .main{padding:10px 10px 84px;max-width:none}
+    .card{padding:12px;border-radius:12px}
+    .vwrap{margin:0 -12px}
+    header{padding:9px 12px;gap:9px}
+    header h1{font-size:15px}
+    .hp{max-width:110px}
+    .sb-btn{display:inline-flex}
+    .cp-title{font-size:17px}
+    .stepper{gap:5px}
+  }
+  /* 手机端目录按钮：桌面不显示 */
+  .sb-btn{display:none;flex:none;align-items:center;height:30px;padding:0 9px;border-radius:9px;border:1px solid var(--line);background:#fff;color:#41527a;font-size:12.5px;font-weight:600;cursor:pointer}
   /* ===== 多邻国式分步通关 ===== */
   .stepper{display:flex;gap:6px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
   .stepper .st{display:flex;align-items:center;gap:6px;font-size:13px;padding:6px 13px;border-radius:999px;border:1.5px solid var(--line);background:#fff;color:var(--mut);font-weight:600;white-space:nowrap}
@@ -312,6 +329,7 @@
 <header>
   <h1>零售电商 × 产品经理 AI 实战<span>体验版：M0 导论 + M3 PRD · 16 单元 · 每单元 3–4 分钟</span></h1>
   <div class="hp" title="学习进度"><i id="prog-bar"></i></div>
+  <button class="sb-btn" onclick="toggleSb()" title="课程目录">☰ 目录</button>
   <button class="gear" onclick="openCfg()" title="设置">⚙</button>
 </header>
 <div id="admin-banner" class="admin-banner" style="display:none">🔓 管理员预览模式已开启：可直接观看全部 <span id="admin-units">64</span> 单元视频，练习 / 陪练 / 测验均为可选，无需完成即可标记已观看。</div>
@@ -705,9 +723,17 @@ function flatUnits(){ const a=[]; COURSE.modules.forEach(m=>m.units.forEach(u=>a
 function nextUnit(uid){ const a=flatUnits(), i=a.findIndex(x=>x.id===uid); return i>=0&&i+1<a.length?a[i+1]:null; }
 function prevUnit(uid){ const a=flatUnits(), i=a.findIndex(x=>x.id===uid); return i>0?a[i-1]:null; }
 
+function toggleSb(){
+  const sb=document.querySelector('.sidebar'); if(sb) sb.classList.toggle('open');
+}
+function closeSb(){
+  const sb=document.querySelector('.sidebar'); if(sb) sb.classList.remove('open');
+}
 function openUnit(uid){
   prog.cur=uid; saveProg(); renderUnit(uid); renderSidebar();
   const mn=document.getElementById('main'); if(mn) mn.scrollTop=0;
+  /* 手机上选完单元就把目录收起来：目录是为了选单元，不是用来一直占屏幕的 */
+  if(window.innerWidth<=860) closeSb();
 }
 
 function renderUnit(uid){
