@@ -750,6 +750,9 @@ function renderUnit(uid){
   mn.innerHTML='<div class="stepper" id="stepper"></div><div class="cp" id="cp"></div>';
   if(mn) mn.scrollTop=0;
   renderCheckpoint();
+  /* 进单元就把第一段配音拉进来（用户看「学完你能做到」的几秒正好用来缓冲） */
+  const _aud=(typeof AUDIO!=='undefined'&&AUDIO[uid])||[];
+  if(_aud[0]) prefetchAud(_aud[0]);
 }
 
 /* ===== 多邻国式分步通关 ===== */
@@ -1330,6 +1333,12 @@ function makePlayer(uid, slides, aud){
     seek.querySelector('.knob').style.left=(frac*100)+'%';
     timeEl.textContent=fmt(gt)+' / '+fmt(total());
   }
+  /* 配音预取：手机上点播放到出声要等 CDN 拉一段（1–2 秒），很像「点了没反应」。
+     这里只把字节拉进浏览器 HTTP 缓存，不新建音频实例，不参与播放。 */
+  function prefetchAud(u){
+    if(!u) return;
+    try{ if(window.fetch) fetch(u,{mode:'no-cors',cache:'force-cache'}).catch(function(){}); }catch(e){}
+  }
   /* 音频可能挂在 CDN 上（页面在 aidax.cn、音频走加速）。个别网络会挡住 CDN，
      这时先把同一份文件换成站点内的相对路径再试一次，别直接退化成机器音。 */
   function localOf(u){
@@ -1435,7 +1444,7 @@ function makePlayer(uid, slides, aud){
     if(aud&&aud[i]){
       mode='audio';
       const a=ensureAudio();
-      if(audioIdx!==i){ audioIdx=i; pendingAt=off; a.dataset.full=aud[i]; a.dataset.fb=''; a.src=aud[i]; }
+      if(audioIdx!==i){ audioIdx=i; pendingAt=off; a.dataset.full=aud[i]; a.dataset.fb=''; a.src=aud[i]; prefetchAud(aud[i+1]); }
       else if(off>0.03){
         if(a.readyState>=1){ try{ a.currentTime=off; }catch(e){} pendingAt=null; }
         else pendingAt=off;
@@ -1499,7 +1508,7 @@ function makePlayer(uid, slides, aud){
     if(aud&&aud[idx]){
       mode='audio';
       const a=ensureAudio();
-      if(audioIdx!==idx){ audioIdx=idx; a.dataset.full=aud[idx]; a.dataset.fb=''; a.src=aud[idx]; pendingAt=off; }
+      if(audioIdx!==idx){ audioIdx=idx; a.dataset.full=aud[idx]; a.dataset.fb=''; a.src=aud[idx]; pendingAt=off; prefetchAud(aud[idx+1]); }
       else if(a.readyState>=1){ try{ a.currentTime=off; }catch(e){} pendingAt=null; }
       else pendingAt=off;
       try{ a.playbackRate=rate; }catch(e){}
