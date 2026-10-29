@@ -723,6 +723,14 @@ function renderSidebar(){
 /* ===================== 单元主页 ===================== */
 let CUR=null;   /* 当前单元播放器句柄，切换单元时先 stop */
 let CHECK=null; /* 多邻国式分步通关状态：{uid, idx, steps} */
+/* 配音预取：手机上点播放到出声要等 CDN 拉一段（1–2 秒），很像「点了没反应」。
+   只把字节拉进浏览器 HTTP 缓存，不新建音频实例、不参与播放。
+   注意必须放在全局作用域：renderUnit（进单元预热第一段）在播放器外面也要用它。 */
+function prefetchAud(u){
+  if(!u) return;
+  try{ if(window.fetch) fetch(u,{mode:'no-cors',cache:'force-cache'}).catch(function(){}); }catch(e){}
+}
+
 function findUnit(uid){ for(const m of COURSE.modules){ const u=m.units.find(x=>x.id===uid); if(u) return {m,u}; } return null; }
 function flatUnits(){ const a=[]; COURSE.modules.forEach(m=>m.units.forEach(u=>a.push(u))); return a; }
 function nextUnit(uid){ const a=flatUnits(), i=a.findIndex(x=>x.id===uid); return i>=0&&i+1<a.length?a[i+1]:null; }
@@ -1332,12 +1340,6 @@ function makePlayer(uid, slides, aud){
     seek.querySelector('.fill').style.width=(frac*100)+'%';
     seek.querySelector('.knob').style.left=(frac*100)+'%';
     timeEl.textContent=fmt(gt)+' / '+fmt(total());
-  }
-  /* 配音预取：手机上点播放到出声要等 CDN 拉一段（1–2 秒），很像「点了没反应」。
-     这里只把字节拉进浏览器 HTTP 缓存，不新建音频实例，不参与播放。 */
-  function prefetchAud(u){
-    if(!u) return;
-    try{ if(window.fetch) fetch(u,{mode:'no-cors',cache:'force-cache'}).catch(function(){}); }catch(e){}
   }
   /* 音频可能挂在 CDN 上（页面在 aidax.cn、音频走加速）。个别网络会挡住 CDN，
      这时先把同一份文件换成站点内的相对路径再试一次，别直接退化成机器音。 */
