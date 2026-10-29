@@ -277,7 +277,9 @@
   .lf-note{font-size:11.8px;color:var(--mut);margin-top:10px;line-height:1.6}
   .lf-report{white-space:pre-wrap;font-size:12.4px;background:#0e1530;color:#d7e3ff;border-radius:10px;padding:12px 14px;max-height:230px;overflow:auto;margin-top:10px;font-family:ui-monospace,Consolas,monospace;line-height:1.6}
   @media(max-width:560px){.lf-type-grid{grid-template-columns:repeat(2,1fr)}}
-  @media(max-width:860px){
+    /* 手机端目录按钮：桌面不显示（此规则必须在下面的 @media 之前） */
+  .sb-btn{display:none;flex:none;align-items:center;height:30px;padding:0 9px;border-radius:9px;border:1px solid var(--line);background:#fff;color:#41527a;font-size:12.5px;font-weight:600;cursor:pointer}
+@media(max-width:860px){
     /* 手机 / 平板竖屏：课程目录默认收起，点顶部「目录」展开。
        以前是常驻 36vh，一进单元要先滚三百多像素才看得到视频。 */
     .layout{flex-direction:column}
@@ -291,10 +293,13 @@
     .hp{max-width:110px}
     .sb-btn{display:inline-flex}
     .cp-title{font-size:17px}
+    .vbar{gap:6px;margin-top:7px}
+    .play{padding:7px 12px;font-size:12.5px}
+    .time{font-size:10.5px}
+    .pbtn{padding:6px 9px;font-size:11.5px}
+    .seek{min-width:52px}
     .stepper{gap:5px}
   }
-  /* 手机端目录按钮：桌面不显示 */
-  .sb-btn{display:none;flex:none;align-items:center;height:30px;padding:0 9px;border-radius:9px;border:1px solid var(--line);background:#fff;color:#41527a;font-size:12.5px;font-weight:600;cursor:pointer}
   /* ===== 多邻国式分步通关 ===== */
   .stepper{display:flex;gap:6px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
   .stepper .st{display:flex;align-items:center;gap:6px;font-size:13px;padding:6px 13px;border-radius:999px;border:1.5px solid var(--line);background:#fff;color:var(--mut);font-weight:600;white-space:nowrap}
