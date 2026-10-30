@@ -193,6 +193,11 @@
   .deliv .dsec{display:flex;align-items:center;gap:8px;margin:10px 0 4px;font-size:12.8px}
   .deliv .dtxt{white-space:pre-wrap;font-family:inherit;font-size:12.6px;line-height:1.75;background:#f6f8fd;border:1px solid var(--line);border-radius:9px;padding:10px 12px;max-height:210px;overflow:auto;color:#26324f}
   .deliv .dmore{margin-top:9px;font-size:12.4px}
+  /* 交付物摘要条（并进「做任务」页，不再单独占一屏） */
+  .dstrip{border:1px solid #e2e8f5;border-left:4px solid #2f6bff;background:#f8faff;border-radius:10px;padding:9px 12px;margin:10px 0}
+  .dstrip .ds-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13.4px}
+  .dstrip .ds-a{font-size:12.5px;color:var(--mut);margin-top:4px;line-height:1.55}
+  .dstrip .ds-r{font-size:12.2px;color:#41527a;margin-top:4px}
   .lnk{color:#1d4ed8;cursor:pointer;text-decoration:none;border-bottom:1px dashed #9bb8f5}
   .lnk:hover{color:var(--blue-d)}
   .h3lnk{margin-left:auto;font-size:12.4px;font-weight:600;color:#1d4ed8;cursor:pointer;white-space:nowrap}
@@ -765,21 +770,20 @@ function renderUnit(uid){
 
 /* ===== 多邻国式分步通关 ===== */
 function buildSteps(u){
-  const s=[{key:'watch',icon:'\uD83D\uDCFA',title:'看视频'},
-           {key:'task',icon:'\uD83D\uDCDD',title:'做任务'}];
-  if(u.deliverable&&u.deliverable.name) s.push({key:'deliv',icon:'\uD83D\uDCE6',title:'交付物'});
-  s.push({key:'settle',icon:'\uD83C\uDFC1',title:'结算'});
-  return s;
+  /* 三步制：看视频 → 做任务 → 结算。
+     以前凡是有 deliverable 的单元都多插一步「交付物与陪练」，结果**理解型单元**
+     （纯方法论、课上根本没有 AI 工具演示）也会弹「▶ 开始实战（复制陪练指令）」，
+     点进去是一个没有靶子的空壳陪练——学员练两次就不信陪练了。
+     现在：理解/演示环节做完自检与记录直接结算；产出与陪练只在「我要做 / 陪练」环节里。 */
+  return [{key:'watch',icon:'\uD83D\uDCFA',title:'看视频'},
+          {key:'task',icon:'\uD83D\uDCDD',title:'做任务'},
+          {key:'settle',icon:'\uD83C\uDFC1',title:'结算'}];
 }
 function resumeIdx(uid){
   const st=prog.units[uid]||{};
-  const u=findUnit(uid).u;
-  const steps=buildSteps(u);
   if(!st.watched) return 0;
   if(!st.taskDone) return 1;
-  const di=steps.findIndex(s=>s.key==='deliv');
-  if(di>=0 && !st.delivSeen) return di;
-  return steps.length-1;
+  return 2;
 }
 function renderStepper(){
   const el=document.getElementById('stepper'); if(!el||!CHECK) return;
@@ -838,11 +842,12 @@ function renderCheckpoint(){
       +'<div id="act-area"></div>';
     renderActivity(u,uid);
   } else if(step.key==='deliv'){
+    /* 已取消独立的「交付物与陪练」步骤：产出/陪练都留在「做任务」里，避免理解型单元被迫做空壳陪练。
+       这里保留兜底，防止旧进度里残留的 deliv 序号把页面渲染成空白。 */
     cp.className='cp';
-    cp.innerHTML='<div class="cp-head"><div class="cp-title">\uD83D\uDCE6 交付物与陪练</div>'
-      +'<div class="cp-sub">把这一份做出来，就能带走用。</div></div>'
-      +delivCard(u)
-      +'<div style="margin-top:14px;text-align:right"><span class="lnk" onclick="setDelivSeen(\''+uid+'\')">做完了，去结算 ›</span></div>';
+    cp.innerHTML='<div class="cp-head"><div class="cp-title">\uD83D\uDCE6 交付物</div></div>'
+      + delivStrip(u)
+      +'<div class="cp-actions"><button class="btn" onclick="setDelivSeen(\''+uid+'\')">继续 →</button></div>';
   } else {
     cp.className='cp centered settle';
     const st=prog.units[uid]||{};
@@ -856,8 +861,9 @@ function renderCheckpoint(){
       +'<div class="cp-actions">'
       +(nx?'<button class="btn ok" onclick="openUnit(\''+nx.id+'\')">继续下一个单元 →</button>':'<button class="btn ok" onclick="openUnit(\'M0U1\')">回到起点重学</button>')
       +'</div>'
-      +'<div style="margin-top:10px;font-size:12.6px"><span class="lnk" onclick="openScore(\''+uid+'\')">请 AI 评审官给这份产出打分 ›</span>'
-      +'　<span class="lnk" onclick="replayUnit(\''+uid+'\')">再练一遍本单元 ›</span></div>';
+      +'<div style="margin-top:10px;font-size:12.6px">'
+      +((u.step==='todo'||u.step==='spar')?'<span class="lnk" onclick="openScore(\''+uid+'\')">请 AI 评审官给这份产出打分 ›</span>　':'')
+      +'<span class="lnk" onclick="replayUnit(\''+uid+'\')">再练一遍本单元 ›</span></div>';
   }
   renderStepper();
 }
@@ -896,30 +902,19 @@ function artTexts(u){
   var ex=(d&&d.exemplarText)||(u&&u.practice&&u.practice.exemplar)||(u&&u.exemplar)||'';
   return {tpl:tpl, ex:ex};
 }
-function delivCard(u){
-  const d=u.deliverable;
-  if(!d||typeof d!=='object') return '';
-  const uid=u.id;
-  const A=artTexts(u);
-  /* 这一页刻意只留一个动作：开始实战。
-     模板 / 范例 / 评分维度都是「参考资料」，收进 details 让想看的人展开，
-     不再和主按钮抢注意力——学员只需知道「交什么」和「点哪个」。 */
+/* 交付物摘要条：只回答「交什么、按什么验收、评审看哪三条」。
+   独立「交付物与陪练」步骤取消后，这三行信息并进「做任务」页顶部，不再单独占一屏。 */
+function delivStrip(u){
+  const d=u&&u.deliverable;
+  if(!d||typeof d!=='object'||!d.name) return '';
   const rub=(d.rubric&&d.rubric.length)? d.rubric.join(' \u00B7 ') : '';
-  const refs=(A.tpl||A.ex)? ('<details class="dref"><summary>\uD83D\uDCCB 参考资料：模板'+(A.ex?' + 合格范例':'')+'（点开照填）</summary>'
-      +(A.tpl?('<div class="dsec"><b>模板</b><span class="lnk" onclick="copyArt(\'tpl\',\''+uid+'\')">复制全文</span></div><pre class="dtxt">'+esc(A.tpl)+'</pre>'):'')
-      +(A.ex?('<div class="dsec"><b>合格范例</b><span class="lnk" onclick="copyArt(\'ex\',\''+uid+'\')">复制全文</span></div><pre class="dtxt">'+esc(A.ex)+'</pre>'):'')
-      +'</details>') : '';
   const bcls=(d.type==='agent')?'agent':(d.type==='workflow')?'workflow':(d.type==='kb')?'kb':'skill';
-  return '<div class="card deliv">'
-    +'<div class="dhead"><span class="dname">'+esc(d.name)+'</span>'+(d.type?('<span class="badge '+bcls+'">'+esc(d.type)+'</span>'):'')+'</div>'
-    +'<div class="dacc">交这个：'+esc(d.acceptance||'')+'</div>'
-    +(rub?('<div class="drub">评审看三条：'+esc(rub)+'</div>'):'')
-    +refs
-    +'<div class="dacts"><button class="btn big" onclick="startPractice(\''+uid+'\')">\u25B6 开始实战（复制陪练指令）</button></div>'
+  return '<div class="dstrip">'
+    +'<div class="ds-h"><b>交这个：'+esc(d.name)+'</b>'+(d.type?('<span class="badge '+bcls+'">'+esc(d.type)+'</span>'):'')+'</div>'
+    +(d.acceptance?('<div class="ds-a">验收：'+esc(d.acceptance)+'</div>'):'')
+    +(rub?('<div class="ds-r">评审看：'+esc(rub)+'</div>'):'')
     +'</div>';
 }
-/* 「开始实战」= 复制陪练指令 + 唤起 WorkBuddy：一步进实战，不再弹窗让学员读一大段提示词 */
-function startPractice(uid){ openSparAI(uid,true); }
 function openArt(kind,uid){
   const f=findUnit(uid); if(!f) return;
   const d=f.u.deliverable; if(!d) return;
@@ -1636,6 +1631,7 @@ function renderActivity(u,uid){
   } else if(u.step==='todo'){
     box.innerHTML=adminNote+'<div class="card"><h3>\u270D 我要做 · 产出你的交付物</h3>'
       + taskBox
+      + delivStrip(u)
       + '<div class="brief">'+esc(sub(u.brief||''))+'</div>'
       + '<details open><summary>\uD83D\uDCCB 填写模板（照着每一节填，别从零开始）</summary><div class="tpl">'+esc(sub(u.template||''))+'</div></details>'
       + ((u.rubric&&u.rubric.length)?'<details><summary>\uD83C\uDFAF 评分要点</summary><ul class="rub">'+u.rubric.map(r=>'<li>'+esc(r)+'</li>').join('')+'</ul></details>':'')
@@ -1670,47 +1666,52 @@ function setAct(uid,k,v){
   const st=prog.units[uid]||{}; const a=Object.assign({},st.acts||{});
   a[k]=v; prog.units[uid]=Object.assign({},st,{acts:a}); saveProg();
 }
+/* 通用「按编号小节拆分」：1) 2) 3) / 1、/ （1）/ 一： 都认，剥掉小节标题与占位提示。
+   返回 {parts:{1:'正文',...}, hit:命中的编号行数}。hit=0 表示学员没按编号写，调用方自行兜底。 */
+function cleanSignals(b){
+  return (b||'')
+    .replace(/[（(]\s*(待补|在这里|写|填|直接)[^）)]*[）)]/g,'')   /* 占位提示不算作答 */
+    .replace(/[。．]{3,}|…+/g,'')
+    .replace(/[ \t\u3000]+/g,' ')
+    .trim();
+}
+function splitSections(text, maxN){
+  const parts={}; let cur=0, hit=0;
+  (text||'').replace(/\r/g,'').split('\n').forEach(function(ln){
+    const m=ln.match(/^\s*[（(]?\s*([1-9１-９])\s*[)）.、．:：]/);
+    if(m){
+      let n=parseInt(m[1].replace(/[１-９]/,function(c){ return String(c.charCodeAt(0)-0xFEE0); }),10);
+      hit++;
+      if(maxN && n>maxN) n=0;
+      cur=n;
+      let rest=ln.replace(/^\s*[（(]?\s*[1-9１-９]\s*[)）.、．:：]\s*/,'');
+      const c=rest.search(/[：:]/);
+      if(c>=0 && c<=24) rest=rest.slice(c+1);        /* 去掉小节标题本身 */
+      if(cur) parts[cur]=((parts[cur]||'')+(rest||'')+'\n');
+      return;
+    }
+    if(cur) parts[cur]=((parts[cur]||'')+ln+'\n');
+  });
+  Object.keys(parts).forEach(function(k){ parts[k]=cleanSignals(parts[k]); });
+  return {parts:parts, hit:hit};
+}
+
 /* ---------- 演示记录拆小节：只认「标题冒号之后」你亲手写的内容 ----------
    背景（bug）：自动填的模板骨架里有「2) 可用/不可用：」「3) 我做了什么人工修正：」
    「4) 下次复用的固定句式：」——标题本身就带着 可用 / 不可用 / 修正 / 复用 这些关键词，
    于是「一字没写、点一下跑一遍」也能拿满 80 分。所以判定前必须先把标题剥掉。 */
 function splitDemoRec(rec){
-  function mk(){ return {text:'',noNeg:'',filled:false}; }
+  const S=splitSections(rec,4);
+  function mk(b){ b=b||''; return {text:b,noNeg:b.replace(/不(?:可|能)用|无法用|不采纳|不能采信/g,''),filled:b.replace(/[\s，。、；：:;,.!?—\-（）()]/g,'').length>=8}; }
   const out={1:mk(),2:mk(),3:mk(),4:mk()};
-  const t=(rec||'').replace(/\r/g,'');
-  let cur=0, hit=0;
-  t.split('\n').forEach(function(ln){
-    const m=ln.match(/^\s*[（(]?\s*([1-4])\s*[)）.、．:：]/);
-    if(m){
-      cur=parseInt(m[1],10); hit++;
-      let rest=ln.replace(/^\s*[（(]?\s*[1-4]\s*[)）.、．:：]\s*/,'');
-      const c=rest.search(/[：:]/);
-      if(c>=0 && c<=24) rest=rest.slice(c+1);       /* 去掉小节标题本身 */
-      if(out[cur]) out[cur].text+=(rest||'')+'\n';
-      return;
-    }
-    if(cur && out[cur]) out[cur].text+=ln+'\n';
-  });
-  const clean=function(b){
-    return (b||'')
-      .replace(/[（(]\s*(待补|在这里|写|填|直接)[^）)]*[）)]/g,'')  /* 占位提示不算作答 */
-      .replace(/[。．]{3,}|…+/g,'')
-      .replace(/[ \t\u3000]+/g,' ')
-      .trim();
-  };
-  Object.keys(out).forEach(function(k){ out[k].text=clean(out[k].text); });
+  Object.keys(out).forEach(function(k){ out[k]=mk(S.parts[k]); });
   /* 用户可能不按 1)2)3)4) 编号写：整段当一份记录判，但仍然剥掉行首标题 */
-  if(!hit){
-    const whole=clean(t.split('\n').map(function(ln){
-      return ln.replace(/^\s*[（(]?\s*[1-4]\s*[)）.、．:：]\s*/,'').replace(/^[^：:]{0,24}[：:]\s*/,'');
+  if(!S.hit){
+    const whole=cleanSignals((rec||'').split('\n').map(function(ln){
+      return ln.replace(/^\s*[（(]?\s*[1-9１-９]\s*[)）.、．:：]\s*/,'').replace(/^[^：:]{0,24}[：:]\s*/,'');
     }).join('\n'));
-    Object.keys(out).forEach(function(k){ out[k].text=whole; });
+    Object.keys(out).forEach(function(k){ out[k]=mk(whole); });
   }
-  Object.keys(out).forEach(function(k){
-    const b=out[k].text;
-    out[k].noNeg=b.replace(/不(?:可|能)用|无法用|不采纳|不能采信/g,'');
-    out[k].filled=b.replace(/[\s，。、；：:;,.!?—\-（）()]/g,'').length>=8;
-  });
   return out;
 }
 
@@ -1746,7 +1747,8 @@ function computeUnit(uid){
     s+=nr.score;
     nr.detail.forEach(function(d){ R.push(d); });
     if(!nt) block.push('写下本单元收获（一句结论 + 能用在你的哪件事上）');
-    else if(nr.score<20) advice.push('收获可以更具体：说清能用在你的哪个项目/指标上，以及下一步要验证什么（当前 '+nr.score+'/40 分）');
+    else if(nr.filled<2) block.push('收获按三问写满两问以上：① 记住的结论 ② 能用在哪件事 ③ 还不确定什么（当前 '+nr.filled+' 问达标）');
+    else if(nr.score<28) advice.push('收获还能再补：三问各写满 10 字就给满 40 分（当前 '+nr.score+'/40 分）');
 
   } else if(u.step==='demo'){
     const ran=!!a.ran, chk=!!a.checked;
@@ -2052,19 +2054,32 @@ function submitBank(uid){
   previewScore(uid,'u-score');
 }
 /* 收获笔记评分：不看字数，看是否具体、是否有下一步、是否分点 */
+/* 收获撰写：按模板的三问判，不再靠关键词暗号。
+   旧逻辑要同时命中「我的项目 / 下一步要验证」这类词才给分，写得再好也可能只 5 分——
+   学员只会觉得评分在瞎给，也说不清怎么改。现在按「哪几问写了、写没写满 10 字」给分，
+   面板上直接显示每问得几分，改哪儿一目了然。 */
 function scoreNoteText(t){
   t=(t||'').trim();
   const R=[]; let s=0;
-  const concrete=/(我的|本部门|我们团队|手上|我负责|这个项目|这款产品|我们的客户|指标|流程|场景|客户群)/.test(t);
-  const next=/(待查|不确定|还需要|下一步|打算|准备|去验证|去确认|再补|要问)/.test(t);
-  const secs=(t.split(/\n/).filter(x=>x.trim().length>=6).length);
-  const conclusion=/(结论|记住|学到|明白了|关键|要点|也就是说)/.test(t);
-  s += concrete?15:0; s += next?15:0; s += secs>=2?10:(secs===1?5:0);
-  R.push({k:'落到具体工作（提到你的场景/项目/指标）',ok:concrete,hint:'写清这件事能用在你的哪个具体项目或指标上'});
-  R.push({k:'写出下一步或待确认项',ok:next,hint:'补一句「我还不确定/下一步要验证的是…」'});
-  R.push({k:'分点写（≥2 行）',ok:secs>=2,hint:'按 1) 2) 3) 分点写'});
-  if(t.length<40){ s=Math.min(s,10); R.push({k:'内容过短（'+t.length+' 字）',ok:false,hint:'至少写清一句结论 + 一句用法'}); }
-  return {score:Math.min(40,s),detail:R};
+  const Q=[['① 记住的一个结论',12],['② 能用在手上的哪件事',16],['③ 还不确定、要再查什么',12]];
+  const S=splitSections(t,3);
+  let filled=0;
+  if(S.hit){
+    Q.forEach(function(q,i){
+      const n=(S.parts[i+1]||'').replace(/\s/g,'').length, ok=n>=10;
+      if(ok) filled++;
+      s+=ok?q[1]:0;
+      R.push({k:q[0]+'　'+(ok?q[1]:0)+'/'+q[1]+' 分',ok:ok,
+        hint: ok? '' : ('这一问还没写满 10 个字（当前 '+n+' 字）')});
+    });
+  } else {
+    const n=t.replace(/\s/g,'').length;
+    const got = n>=90?40 : n>=60?32 : n>=30?20 : 8;
+    s=got; filled = n>=30?3:0;
+    R.push({k:'收获内容　'+got+'/40 分',ok:n>=30,
+      hint: n>=30? '' : '按 1) 结论 2) 用在哪 3) 还不确定什么 三问写，每问至少 10 字'});
+  }
+  return {score:Math.min(40,s), detail:R, filled:filled};
 }
 
 /* ---------- 判断题（理解环节） ---------- */
@@ -2436,7 +2451,7 @@ function closeQuiz(){ document.getElementById('quiz-modal').classList.remove('on
 /* ===================== 学习指引（本单元路径 + 下一步） ===================== */
 const STEP_ORDER=['understand','demo','todo','spar'];
 const STEP_HINT={
-  understand:'看视频讲解，完成「理解环节·自检」题，并写下可落地的收获（≥10 字）。',
+  understand:'看视频讲解 → 做 3 道自检题 → 按三问写收获（① 结论 ② 用在哪件事 ③ 还不确定什么，每问 ≥10 字）。本环节只验理解，不做陪练。',
   demo:'复制提示词到 WorkBuddy 跑一遍（或用模型跑），记录演示结果并人工核对。',
   todo:'按模板产出本单元交付物，提交后系统自动评分（≥60 分通关）。',
   spar:'与 AI 陪练至少 3 轮对话，给出可追溯依据，并划清责任边界。'
