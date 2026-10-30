@@ -166,6 +166,14 @@
   .shstep.lock{opacity:.45;pointer-events:none}
   .shref{border:1px solid #bbf7d0;background:#f0fdf4;border-radius:10px;padding:11px 13px;margin-top:14px}
   .shref>.hd{font-size:13px;font-weight:700;color:#166534;margin-bottom:6px}
+  /* 陪练材料卡：把上一节产出带进这一关 */
+  .matbox{border:1px solid #dbe4f5;background:#f6f9ff;border-radius:10px;padding:10px 12px;margin:12px 0}
+  .matbox .mhd{font-size:13px;font-weight:700;color:#1d4ed8}
+  .matbox .mname{font-size:12.8px;color:var(--txt);margin-top:4px;font-weight:600}
+  .matbox .mhint{font-size:12.4px;color:var(--mut);margin-top:4px;line-height:1.6}
+  .matbox .mact{display:flex;gap:14px;flex-wrap:wrap;margin-top:7px;font-size:12.5px}
+  .matbox details{margin-top:7px}
+  .matbox textarea{min-height:96px;margin-top:6px}
   /* 标准答案：逐格对答 + 模型输出该改哪几处 */
   .ansrow{border:1px solid #e6e9f0;border-radius:9px;padding:8px 10px;margin-bottom:7px;background:#fff}
   .ansrow.bad{border-color:#fecdd3;background:#fff7f8}
@@ -959,6 +967,15 @@ function artTexts(u){
   var ex=(d&&d.exemplarText)||(u&&u.practice&&u.practice.exemplar)||(u&&u.exemplar)||'';
   return {tpl:tpl, ex:ex};
 }
+/* 模板里常自带一整套「参考样式」（8 项工作 + 耗时 + 红线 + 责任人，够得上一份完整答案）。
+   把它当模板摆出来，学员就会整段贴回输入框。这里把它拆出来单列为范例：
+   骨架负责「照着填」，范例负责「照着看颗粒度」，两件事不混在一屏。 */
+function splitTplSample(tpl){
+  const s=sub(tpl||'');
+  const m=s.match(/^[ \t]*(?:■[ \t]*)?(参考样式|参考范例|参考答案|示例|样例|范例)[ \t]*[（(:：]/m);
+  if(!m || m.index<0) return {skel:s, sample:''};
+  return {skel:s.slice(0,m.index).trim(), sample:s.slice(m.index).trim()};
+}
 /* 交付物摘要条：只回答「交什么、按什么验收、评审看哪三条」。
    独立「交付物与陪练」步骤取消后，这三行信息并进「做任务」页顶部，不再单独占一屏。 */
 function delivStrip(u){
@@ -1687,23 +1704,26 @@ function renderActivity(u,uid){
     /* 回到这个单元时按已有记录把分数面板重算一遍，别让学员以为分数丢了 */
     if(actsOf(uid).ran||actsOf(uid).rec) previewScore(uid,'demo-score');
   } else if(u.step==='todo'){
+    const TP=splitTplSample(u.template);
+    const exTxt=(artTexts(u).ex||'').trim() || TP.sample;
     box.innerHTML=adminNote+'<div class="card"><h3>\u270D 我要做 · 产出你的交付物</h3>'
       + taskBox
       + delivStrip(u)
       + '<div class="brief">'+esc(sub(u.brief||''))+'</div>'
-      + '<details open><summary>\uD83D\uDCCB 填写模板（照着每一节填，别从零开始）</summary><div class="tpl">'+esc(sub(u.template||''))+'</div></details>'
+      + '<details open><summary>\uD83D\uDCCB 填写模板（照着每一节填，别从零开始）</summary><div class="tpl">'+esc(TP.skel)+'</div></details>'
       + ((u.rubric&&u.rubric.length)?'<details><summary>\uD83C\uDFAF 评分要点</summary><ul class="rub">'+u.rubric.map(r=>'<li>'+esc(r)+'</li>').join('')+'</ul></details>':'')
-      + (artTexts(u).ex?('<details><summary>\uD83D\uDC1B 看一份合格范例（照这个颗粒度写，别照抄内容）</summary><div class="tpl">'+esc(artTexts(u).ex)+'</div></details>'):'')
+      + (exTxt?('<details><summary>\uD83D\uDC1B 看一份合格范例（照这个颗粒度写，别照抄内容）</summary><div class="tpl">'+esc(exTxt)+'</div></details>'):'')
       +'<div style="margin-top:10px"><h4 style="font-size:13.5px;margin-bottom:6px">把你的产出粘贴进来</h4>'
-      +'<textarea id="work-text" style="min-height:150px" placeholder="按模板逐节写。评分会检查：结构是否完整、有没有具体数字/来源、有没有风险意识、有没有责任人与时间。"></textarea></div>'
+      +'<textarea id="work-text" style="min-height:150px" placeholder="按模板逐节写。只统计你自己写的内容：模板原文、范例原文贴回来都不加分。评分看结构、数字/来源、风险意识、责任人与时间。"></textarea></div>'
       +'<div id="work-out"></div>'
       +'<button class="btn" onclick="gradeWork(\''+uid+'\')">提交并自动评分</button></div>';
     const t=document.getElementById('work-text');
-    if(t){ t.addEventListener('input',()=>{ setAct(uid,'work',t.value); previewScore(uid,'work-out'); }); }
+    if(t){ t.value=(actsOf(uid).work||''); t.addEventListener('input',()=>{ setAct(uid,'work',t.value); previewScore(uid,'work-out'); }); }
   } else if(u.step==='spar'){
     box.innerHTML=adminNote+'<div class="card"><h3>\uD83E\uDD4A 陪练环节 · '+esc(sub(u.spar.role))+'</h3>'
       + taskBox
       + '<div class="brief">'+esc(sub(u.brief||''))+'</div>'
+      + '<div id="mat-host">'+matBoxHtml(uid)+'</div>'
       + '<details><summary>\uD83D\uDCCB 展开回答结构模板</summary><div class="tpl">'+esc(sub(u.template||''))+'</div></details>'
       + (artTexts(u).ex?('<details><summary>\uD83D\uDC1B 看一段合格回答（照这个结构答，别背内容）</summary><div class="tpl">'+esc(artTexts(u).ex)+'</div></details>'):'')
       +'<div class="qs"><span style="font-size:12.5px;color:var(--mut)">换个追问：</span>'
@@ -1713,7 +1733,7 @@ function renderActivity(u,uid){
       +'<button class="btn" onclick="sendSpar()">发送</button>'
       +'<div style="margin-top:8px;text-align:right"><span class="lnk" onclick="submitTask(\''+uid+'\',this)">结束陪练并结算 ›</span></div>'
       +'<div id="spar-out"></div></div>';
-    addBubble('ai','（'+sub(u.spar.role)+'）'+sub(u.spar.mustAsk[0]));
+    addBubble('ai', matFirstQ(u));
     bindEnter('spar-text',()=>sendSpar());
   }
 }
@@ -1914,12 +1934,12 @@ function computeUnit(uid){
       if(!q) block.push('先答对上面的自检题');
     }
     const nt=(a.note||'').trim();
-    const nr=scoreNoteText(nt);
+    const nr=scoreNoteText(nt,u);
     s+=nr.score;
     nr.detail.forEach(function(d){ R.push(d); });
     if(!nt) block.push('写下本单元收获（一句结论 + 能用在你的哪件事上）');
-    else if(nr.filled<2) block.push('收获按三问写满两问以上：① 记住的结论 ② 能用在哪件事 ③ 还不确定什么（当前 '+nr.filled+' 问达标）');
-    else if(nr.score<28) advice.push('收获还能再补：三问各写满 10 字就给满 40 分（当前 '+nr.score+'/40 分）');
+    else if(nr.filled<2) block.push('收获按三问写满两问以上：① 记住的结论 ② 能用在哪件事 ③ 还不确定什么（当前 '+nr.filled+' 问说到点子上）');
+    else if(nr.score<28) advice.push('收获还能再补：每问要写到具体对象（哪份数据、哪件事、哪个口径），不是凑字数（当前 '+nr.score+'/40 分）');
 
   } else if(u.step==='demo'){
     if(shOf(u)){ const r=scoreSheet(u,a); return r; }
@@ -2022,26 +2042,84 @@ function sectionCount(t){
   return (t||'').split(/\n/).map(x=>x.trim())
     .filter(x=>x.length>=10 && /^([■□•\-*·]|[一二三四五六七八九十]+[、.）)]|[0-9]+[、.）)]|#{1,4}\s|\*\*)/.test(x)).length;
 }
+/* ---------- 只算「你自己写的那部分」：模板骨架与模板自带样例逐行剔除 ----------
+   背景（bug）：M0U3 的模板里自带一整套「参考样式」（8 项工作、耗时、红线、责任人齐全），
+   学员把模板原样粘回输入框 = 结构 20 + 有据 20 + 红线 18 + 可执行 18 = 92 分。
+   模板骨架不是产出，所以先按行剔掉与模板完全相同的行，只用剩下的内容判分。 */
+function normLineOf(s){
+  return String(s==null?'':s).replace(/[\s\u3000]+/g,'')
+    .replace(/^[■□◆●○▪•·\-\*]+/,'')
+    .replace(/[（(]\s*[）)]/g,'')
+    .replace(/[_＿—－~～]{2,}/g,'')
+    .replace(/[。，,、；;：:]+$/,'')
+    .toLowerCase();
+}
+function tplLineSet(tpl){
+  const S=new Set();
+  String(tpl||'').split('\n').forEach(function(ln){
+    const n=normLineOf(ln);
+    if(n.length>=4) S.add(n);
+  });
+  return S;
+}
+/* 保留「和模板任何一行都不完全相同」的行：这些才是学员自己敲的 */
+function ownLinesOf(text,S){
+  return String(text||'').split('\n').filter(function(ln){
+    const k=normLineOf(ln);
+    return k.length>0 && !S.has(k);
+  });
+}
+function blocksOf(t){
+  const out=[]; let cur={head:'',lines:[]};
+  String(t||'').split('\n').forEach(function(ln){
+    const isHead=/^\s*([■□◆●○▪•·\-\*]|[一二三四五六七八九十]+[、.）)]|[0-9]+[、.）)]|#{1,4}\s|\*\*|【)/.test(ln);
+    if(isHead){
+      if(cur.head||cur.lines.join('').trim()){ out.push(cur); cur={head:ln,lines:[]}; }
+      else cur.head=ln;
+      return;
+    }
+    cur.lines.push(ln);
+  });
+  out.push(cur);
+  return out.filter(function(b){ return (b.head+b.lines.join('')).trim().length>0; });
+}
+function ownOf(u,t){
+  const tpl=sub(u.template||'');
+  const S=tplLineSet(tpl);
+  const own=ownLinesOf(t,S).join('\n');
+  const blocks=blocksOf(t);
+  let filled=0;
+  blocks.forEach(function(b){
+    const txt=[b.head].concat(b.lines).join('\n');
+    if(ownLinesOf(txt,S).join('').replace(/\s/g,'').length>=10) filled++;
+  });
+  const len=function(s){ return String(s||'').replace(/\s/g,'').length; };
+  return {tpl:tpl,set:S,own:own,ownLen:len(own),tLen:len(t),blocks:blocks,filled:filled};
+}
 function scoreWorkText(u,t){
   t=(t||'').trim();
   const R=[]; let total=0;
-  const tpl=sub(u.template||'');
+  const O=ownOf(u,t), own=O.own, tpl=O.tpl;
+  const ownLen=O.ownLen, nb=O.blocks.length, filled=O.filled;
 
-  /* ① 结构完整性 20 */
-  const secs=sectionCount(t);
-  const tplSecs=Math.max(3, sectionCount(tpl));
-  const secScore = secs>=tplSecs?20 : (secs>=Math.max(2,tplSecs-1)?14 : (secs>=2?9 : (secs>=1?4:0)));
+  /* ① 结构完整性 20：按「有你自己内容的段落」估算，模板自带的段落不算 */
+  const ratio = nb? filled/nb : 0;
+  const secScore = (nb<2) ? (filled>0?6:0)
+    : ratio>=0.8?20 : ratio>=0.6?15 : ratio>=0.4?9 : (filled>0?4:0);
   total+=secScore;
   R.push({k:'结构完整性',got:secScore,full:20,ok:secScore>=14,
-    hint: secs>=tplSecs ? ('模板 '+tplSecs+' 个小节都已填写') : ('模板有 '+tplSecs+' 个小节，当前只识别出 '+secs+' 节，缺的部分要补')});
+    hint: (nb<2)
+      ? ('整篇看起来只有一段，按模板的 '+Math.max(3,blocksOf(tpl).length)+' 个小节分开写')
+      : (ratio>=0.8 ? ('模板的小节都填上了（'+filled+'/'+nb+' 段有你的内容）')
+                    : ('只有 '+filled+'/'+nb+' 段有你写的内容，模板原文不计分，缺的部分要补'))});
 
-  /* ② 评分要点覆盖 24（逐条比对本单元 rubric） */
+  /* ② 评分要点覆盖 24（逐条比对本单元 rubric，只看你自己写的内容） */
   const items=rubricItemsOf(u);
   let hitItems=0; const missNames=[];
   items.forEach(function(it){
     const terms=cjkTerms(it);
     const need=Math.min(3, Math.max(1, Math.ceil(terms.length*0.18)));
-    let c=0; for(let i=0;i<terms.length && c<need;i++){ if(t.indexOf(terms[i])>=0) c++; }
+    let c=0; for(let i=0;i<terms.length && c<need;i++){ if(own.indexOf(terms[i])>=0) c++; }
     if(c>=need) hitItems++; else missNames.push(it.slice(0,14));
   });
   const covScore=Math.round(24*hitItems/items.length);
@@ -2049,34 +2127,45 @@ function scoreWorkText(u,t){
   R.push({k:'评分要点覆盖（'+hitItems+'/'+items.length+'）',got:covScore,full:24,ok:hitItems>=Math.ceil(items.length*0.6),
     hint: hitItems>=items.length?('全部评分要点都有体现') : ('未体现：'+missNames.join('；'))});
 
-  /* ③ 有据可依 20 */
-  const qn=qualifiedNumbers(t), src=hasSource(t);
+  /* ③ 有据可依 20：只数你自己写的数字，模板里自带的「8 项 / 小时」不算 */
+  const qn=qualifiedNumbers(own), src=hasSource(own);
   const evScore = (qn>=2?20 : (qn===1?12 : (src?13:0)));
   total+=evScore;
   R.push({k:'有据可依',got:evScore,full:20,ok:evScore>=12,
-    hint: qn>=2?('已给出 '+qn+' 处带单位的数据') : ('需要 ≥2 处「数字+单位」（如 通过率 62%、3 个工作日、样本 12000 笔），当前 '+qn+' 处')});
+    hint: qn>=2?('已给出 '+qn+' 处带单位的数据') : ('需要 ≥2 处「数字+单位」（如 通过率 62%、3 个工作日、样本 12000 笔），当前 '+qn+' 处（模板里的数字不算）')});
 
   /* ④ 红线意识 18：必须同时有风险 + 规避动作 */
-  const rk=hasRisk(t), mt=hasMitigation(t);
+  const rk=hasRisk(own), mt=hasMitigation(own);
   const riskScore = (rk&&mt)?18 : (rk||mt)?9 : 0;
   total+=riskScore;
   R.push({k:'红线意识',got:riskScore,full:18,ok:riskScore===18,
-    hint: (rk&&mt)?('已指出风险并给出规避动作') : rk?('指出了风险，但没写规避动作（脱敏/审批/人工复核等）') : mt?('写了规避动作，但没说清风险点在哪') : ('需写明「风险点 + 规避动作」')});
+    hint: (rk&&mt)?('已指出风险并给出规避动作') : rk?('指出了风险，但没写规避动作（脱敏/审批/人工复核等）') : mt?('写了规避动作，但没说清风险点在哪') : ('需写明「风险点 + 规避动作」，模板里的红线提示不算你的')});
 
   /* ⑤ 可执行 18 */
-  const ow=hasOwner(t), tm=hasTime(t), ac=hasAcceptance(t);
+  const ow=hasOwner(own), tm=hasTime(own), ac=hasAcceptance(own);
   const actScore = (ow&&tm&&ac)?18 : ((ow&&tm)||(ow&&ac)||(tm&&ac))?12 : (ow||tm||ac)?6 : 0;
   total+=actScore;
   R.push({k:'可执行',got:actScore,full:18,ok:actScore>=12,
     hint: (ow&&tm&&ac)?('责任人/时间/验收标准齐全') : ('缺：'+[!ow?'责任人':null,!tm?'时间节点':null,!ac?'验收标准':null].filter(Boolean).join('、'))});
 
-  /* ---- 反灌水惩罚 ---- */
+  /* ---- 反灌水：先按「自己写的内容量」判，再说重合度 ---- */
   const pen=[];
+  if(ownLen<40){
+    total=Math.min(total,14);
+    pen.push('你贴回来的基本是模板原文（模板里自带的那份「参考样式」也算模板），只有 '+ownLen+' 字是你自己写的');
+  } else if(ownLen<120){
+    total=Math.min(total,35);
+    pen.push('你自己写的内容只有 '+ownLen+' 字，不足一份能进评审会的交付物');
+  } else if(O.tLen>0 && ownLen/O.tLen<0.35){
+    total-=15;
+    pen.push('自己的内容只占全文 '+Math.round(ownLen/O.tLen*100)+'%，其余是模板原文，请换成你自己的项目');
+  }
   const ov=templateOverlap(t,tpl);
-  if(ov>0.62 && t.length<900){ total-=25; pen.push('疑似直接照抄模板（重合度 '+Math.round(ov*100)+'%），请替换成你自己的内容'); }
+  if(ov>0.62 && ownLen<O.tLen*0.4){
+    total-=10; pen.push('疑似直接照抄模板（重合度 '+Math.round(ov*100)+'%），请替换成你自己的内容');
+  }
   const dr=dupRatio(t);
   if(dr>0.3){ total-=15; pen.push('存在重复/注水段落（重复率 '+Math.round(dr*100)+'%）'); }
-  if(t.length<120){ total=Math.min(total,35); pen.push('内容过短（'+t.length+' 字），未达到一份交付物的基本篇幅'); }
   total=Math.max(0,Math.min(100,Math.round(total)));
 
   const detail=R.map(function(x){ return {k:x.k+'　'+x.got+'/'+x.full+' 分', ok:x.ok, hint:x.hint}; });
@@ -2094,7 +2183,11 @@ function scoreWorkText(u,t){
 function previewScore(uid,elId){
   const el=document.getElementById(elId); if(!el) return;
   const r=computeUnit(uid);
-  const det=r.detail.map(d=>'<li class="'+(d.ok?'ok':'')+'">'+esc(d.k)+(d.ok?'':' <span class="hint">（'+esc(d.hint||'')+'）</span>')+'</li>').join('');
+  const det=r.detail.map(d=>'<li class="'+(d.ok?'ok':'')+'">'+esc(d.k)
+    +((!d.ok&&d.hint)?(' <span class="hint">（'+esc(d.hint)+'）</span>'):'')+'</li>').join('');
+  const a=actsOf(uid);
+  const empty=!String(a.work||'').trim() && !String(a.note||'').trim() && !String(a.rec||'').trim()
+    && !a.rounds && !a.sheet;
   el.innerHTML='<div class="kv" style="margin-top:10px"><b>预估得分：'+r.score+' 分</b>'
    +'<div class="bar"><i style="width:'+r.score+'%"></i></div>'
    +'<ul class="rub">'+det+'</ul>'
@@ -2102,7 +2195,7 @@ function previewScore(uid,elId){
       ? '<div style="font-size:12.6px;color:#be123c">还不能结算：'+r.blockers.map(esc).join('；')+'</div>'
       : (r.score>=60?'<div style="font-size:12.6px;color:#166534">已达通关线（60 分），可以结算。</div>'
                     : '<div style="font-size:12.6px;color:#be123c">还差 '+(60-r.score)+' 分到通关线。</div>'))
-   +((r.score===0)?'<div style="font-size:12.6px;color:var(--mut);margin-top:3px">还没开始计分 —— 上面几项每完成一项分数才动一格，模板标题行不算作答。</div>':'')
+   +((r.score===0&&empty)?'<div style="font-size:12.6px;color:var(--mut);margin-top:3px">还没开始计分 —— 上面几项每完成一项分数才动一格，模板标题行不算作答。</div>':'')
    +((r.advice&&r.advice.length)?'<div style="font-size:12.6px;color:#b45309;margin-top:3px">建议：'+r.advice.map(esc).join('；')+'</div>':'')
    +'</div>';
 }
@@ -2225,31 +2318,74 @@ function submitBank(uid){
   const r=computeUnit(uid);
   previewScore(uid,'u-score');
 }
-/* 收获笔记评分：不看字数，看是否具体、是否有下一步、是否分点 */
-/* 收获撰写：按模板的三问判，不再靠关键词暗号。
-   旧逻辑要同时命中「我的项目 / 下一步要验证」这类词才给分，写得再好也可能只 5 分——
-   学员只会觉得评分在瞎给，也说不清怎么改。现在按「哪几问写了、写没写满 10 字」给分，
-   面板上直接显示每问得几分，改哪儿一目了然。 */
-function scoreNoteText(t){
+/* 收获撰写：三问逐问判「有没有说到点上」，不只看字数。
+   bug：第 3 问写「还不确定的事实上是上帝会熟地黄的似乎」也能拿满 12 分——只要凑够 10 个字。
+   现在每问都要同时过三关：
+     ① 长度 ≥10 字（去掉空白）
+     ② 这一问该有的语义标记（结论型 / 具体工作 / 待查项）
+     ③ 含至少一个领域实词（本单元标题与目标里的词，或课程通用实词表）
+   ——不含任何实词的那类「字凑够了但没内容」直接 0 分，并说明差在哪一关。 */
+const DOMAIN_LEX=('脱敏 合规 红线 口径 看板 报表 评审 提效 落地 治理 埋点 选品 退货 差评 转化 留存 复购 召回 '
+ +'库存 履约 促销 大促 活动 详情页 卖点 人群 分层 标签 画像 漏斗 归因 样本 数据源 授权 责任 边界 审批 复核 留痕 '
+ +'幻觉 编造 频次 比例 指标 验收 试点 复盘 需求 排期 上线 迭代 字段 结构 结构化 提示词 模型 输出 校对 终稿 '
+ +'敏感 个人信息 订单号 手机号 地址 名单 出域 权限 分级 流程 节点 交付 文档 清单 计划 预算 成本 毛利 客单 竞品 '
+ +'供应商 采购 供应链 客服 法务 财务 研发 运营 主管 会议 纪要 周报 判断 取舍 结论 依据 风险 假设 验证 统计 数据组 数仓').split(/\s+/).filter(Boolean);
+const NOTE_Q=[
+  {k:'① 记住的一个结论',full:12,sig:/应|要|必须|不能|别|优先|先|关键|核心|取决于|原则|本质|而不是|只|反而/},
+  {k:'② 能用在手上的哪件事',full:16,sig:/周报|需求|评审|看板|报表|详情页|客服|退货|选品|排期|周会|复盘|活动|投放|文案|会议|数据|流程|方案|文档|清单|地图|PRD|表格|调价|上新|汇报|名单|库存/},
+  {k:'③ 还不确定、要再查什么',full:12,needSig:true,sig:/不确定|不清楚|没确认|待确认|待核实|需要查|要查|去查|核实|口径|是否|多少|怎么定|标准是|来源|依据|找.{0,8}(确认|问|核)|再问/}
+];
+function unitTermsOf(u){
+  const src=[(u&&u.title)||'',(u&&u.objective)||'',((u&&u.rubric)||[]).join(' '),(u&&u.transfer)||''].join(' ');
+  const out=[];
+  (src.match(/[\u4e00-\u9fa5]{2,8}/g)||[]).forEach(function(w){
+    for(let L=3;L<=4;L++){ for(let i=0;i+L<=w.length;i++){ const t=w.substr(i,L); if(!STOPWords.test(t)&&out.indexOf(t)<0) out.push(t); } }
+  });
+  return out;
+}
+/* 命中的领域实词个数：课程通用实词 + 本单元专有词 */
+function domainHits(s,u){
+  const t=String(s||''); let n=0;
+  DOMAIN_LEX.forEach(function(w){ if(t.indexOf(w)>=0) n++; });
+  (u?unitTermsOf(u):[]).forEach(function(w){ if(t.indexOf(w)>=0) n++; });
+  return n;
+}
+function noteQScore(meta,text,u){
+  const t=String(text||'').trim();
+  const len=t.replace(/\s/g,'').length;
+  const sig=meta.sig.test(t), hits=domainHits(t,u);
+  const stake=/数据组|数仓|法务|合规|客服|供应链|采购|财务|研发|运营|主管|负责人|上级|老板|评审|签字|审批/.test(t);
+  const base={len:len,sig:sig,hits:hits};
+  if(len<10) return Object.assign({score:0,ok:false,why:'不足 10 个字（当前 '+len+' 字）'},base);
+  if(!hits && !(len>=30 && (stake||/[0-9０-９]/.test(t))))
+    return Object.assign({score:0,ok:false,why:'里面没有一个具体对象（数据 / 事情 / 口径 / 制度），像随手打的'},base);
+  if(meta.needSig && !sig)
+    return Object.assign({score:Math.round(meta.full*0.6),ok:false,why:'没落到一个具体的待查项上——只说「不确定」不算，要写清查什么'},base);
+  return Object.assign({score:meta.full,ok:true},base);
+}
+function scoreNoteText(t,u){
   t=(t||'').trim();
   const R=[]; let s=0;
-  const Q=[['① 记住的一个结论',12],['② 能用在手上的哪件事',16],['③ 还不确定、要再查什么',12]];
   const S=splitSections(t,3);
   let filled=0;
   if(S.hit){
-    Q.forEach(function(q,i){
-      const n=(S.parts[i+1]||'').replace(/\s/g,'').length, ok=n>=10;
-      if(ok) filled++;
-      s+=ok?q[1]:0;
-      R.push({k:q[0]+'　'+(ok?q[1]:0)+'/'+q[1]+' 分',ok:ok,
-        hint: ok? '' : ('这一问还没写满 10 个字（当前 '+n+' 字）')});
+    NOTE_Q.forEach(function(q,i){
+      const r=noteQScore(q,S.parts[i+1]||'',u);
+      if(r.ok) filled++;
+      s+=r.score;
+      R.push({k:q.k+'　'+r.score+'/'+q.full+' 分',ok:r.ok,
+        hint: r.ok? '' : ('这一问'+r.why+'；命中的实词 '+r.hits+' 个')});
     });
   } else {
-    const n=t.replace(/\s/g,'').length;
-    const got = n>=90?40 : n>=60?32 : n>=30?20 : 8;
-    s=got; filled = n>=30?3:0;
-    R.push({k:'收获内容　'+got+'/40 分',ok:n>=30,
-      hint: n>=30? '' : '按 1) 结论 2) 用在哪 3) 还不确定什么 三问写，每问至少 10 字'});
+    /* 没按 1)2)3) 编号：整段当一份收获判，仍然要求「具体 + 覆盖两问以上」 */
+    const len=t.replace(/\s/g,'').length, hits=domainHits(t,u);
+    const sigs=NOTE_Q.filter(function(q){ return q.sig.test(t); }).length;
+    const got = (len>=40 && hits>=2 && sigs>=2) ? 40
+              : (len>=30 && hits>=1 && sigs>=1) ? 24
+              : 0;
+    s=got; filled = got>=24?2:0;
+    R.push({k:'收获内容　'+got+'/40 分',ok:got>=24,
+      hint: got>=24? '' : ('按 1) 结论 2) 用在哪 3) 还不确定什么 三问写，每问要有具体对象（当前 '+len+' 字，命中实词 '+hits+' 个）')});
   }
   return {score:Math.min(40,s), detail:R, filled:filled};
 }
@@ -2623,7 +2759,8 @@ function gradeWork(uid){
   const r=scoreWorkText(findUnit(uid).u,t);
   out.innerHTML='<div class="kv" style="margin-bottom:0"><b>得分 '+r.score+' 分</b>（通关线 60）'
     +'<div class="bar"><i style="width:'+r.score+'%"></i></div>'
-    +'<ul class="rub">'+r.detail.map(d=>'<li class="'+(d.ok?'ok':'')+'">'+esc(d.k)+(d.ok?'':' <span class="hint">（'+esc(d.hint||'')+'）</span>')+'</li>').join('')+'</ul>'
+    +'<ul class="rub">'+r.detail.map(d=>'<li class="'+(d.ok?'ok':'')+'">'+esc(d.k)
+      +((!d.ok&&d.hint)?(' <span class="hint">（'+esc(d.hint)+'）</span>'):'')+'</li>').join('')+'</ul>'
     +(r.need?'<div style="font-size:12.8px;color:#be123c">'+esc(r.need)+'</div>':'<div style="font-size:12.8px;color:#166534">已达通关线，可以结算本单元。</div>')
     +'</div>';
   if(r.ok) finishUnit(uid);
@@ -2638,11 +2775,24 @@ function addBubble(who,text){
   b.textContent=text; c.appendChild(b);
   if(b.scrollIntoView) b.scrollIntoView({block:'nearest'});
 }
+/* 换个追问：有材料时也要落到材料的具体条目上，不能只是念脚本 */
+function matAskQ(u,i){
+  const sp=u.spar||{};
+  const role=sub(sp.role||'评审');
+  const base=sub((sp.mustAsk&&sp.mustAsk[i])||'你的依据是什么？');
+  const m=matOf(u.id);
+  const items=m?matItems(m.text):[];
+  if(items.length){
+    const it=items[i%items.length];
+    return '（'+role+'）回到你第 '+(items.indexOf(it)+1)+' 项「'+matQuote(it,12)+'」：'+base;
+  }
+  return '（'+role+'）'+base;
+}
 function askQ(i){
   const f=findUnit(prog.cur); if(!f||!f.u.spar) return;
   const u=f.u;
   const q=(i<0)? u.spar.mustAsk[0] : u.spar.mustAsk[i];
-  const line='（'+sub(u.spar.role)+'）'+sub(q);
+  const line=(typeof matAskQ==='function')? matAskQ(u, (i<0?0:i)) : ('（'+sub(u.spar.role)+'）'+sub(q));
   addBubble('ai',line);
   sparHist.push({role:'assistant',content:line});
 }
@@ -2670,7 +2820,7 @@ function openSparChat(uid){
   SPAR_CHAT.msgs=[{role:'system',content:sparChatSystem(u)}];
   const ready=(typeof llmReady==='function')&&llmReady();
   const box=document.getElementById('spar-chat-box');
-  const firstQ=(u.spar&&u.spar.mustAsk&&u.spar.mustAsk.length)?sub(u.spar.mustAsk[0])
+  const firstQ=u.spar? matFirstQ(u)
               :('这一节讲的是「'+sub(u.title)+'」，你想先问哪一块？');
   box.innerHTML=
      '<div class="spar-hd"><div><h3>🤼 内嵌 AI 陪练</h3>'
@@ -2752,6 +2902,125 @@ async function sparChatSend(){
   try{ ta.focus(); }catch(e){}
 }
 
+/* ===================== 陪练材料：把上一节真做出来的产出带进这一关 =====================
+   背景：陪练的追问原本是预置脚本，学员刚写的《提效地图》根本没进来，
+   「哪几项含手机号」永远是同一句，问得很机械。
+   现在：① 自动取本模块上一节「我要做」的产出；② 允许上传 .txt/.md 或直接粘贴覆盖；
+        ③ 追问会引用材料里的具体条目（第几项 + 原话片段）。 */
+function matOf(uid){
+  const a=actsOf(uid);
+  const up=String(a.mat||'').trim();
+  if(up) return {text:up, name:a.matName||'我上传的材料', src:'upload'};
+  const f=findUnit(uid); if(!f) return null;
+  const m=(COURSE.modules||[]).find(function(x){ return x.id===f.m.id; });
+  if(!m) return null;
+  const i=m.units.findIndex(function(x){ return x.id===uid; });
+  for(let k=i-1;k>=0;k--){
+    const pu=m.units[k];
+    if(pu.step!=='todo') continue;
+    const w=String((actsOf(pu.id)||{}).work||'').trim();
+    if(w.length>=60) return {text:w, name:'《'+((pu.deliverable&&pu.deliverable.name)||pu.title)+'》', src:'prev', from:pu.id};
+  }
+  return null;
+}
+/* 材料里可被点名的条目：编号行 / 带 ■· 的行，太短的不算 */
+function matItems(text){
+  const out=[];
+  String(text||'').split('\n').forEach(function(ln){
+    const s=ln.replace(/^[\s■□◆●○▪•·\-\*>]+/,'').trim();
+    if(s.length<12) return;
+    if(/^[（(]?\s*[0-9]{1,2}\s*[)）.、．:：]/.test(s) || /^\s*[■□◆●○▪•·\-\*]/.test(ln)) out.push(s);
+  });
+  return out;
+}
+function matQuote(s,n){
+  const t=String(s||'').replace(/^[（(]?\s*[0-9]{1,2}\s*[)）.、．:：]\s*/,'')
+    .replace(/^[\s■□◆●○▪•·\-\*>]+/,'')
+    .replace(/\s+/g,' ')
+    .replace(/[（(][^）)]*[）)]\s*$/,'').trim();
+  const L=n||16;
+  return t.length>L? t.slice(0,L)+'\u2026' : t;
+}
+function findMatItem(items,re){
+  for(let i=0;i<items.length;i++){ if(re.test(items[i])) return items[i]; }
+  return '';
+}
+/* 对手开口第一句：直接点材料里的某一条，而不是念脚本 */
+function matFirstQ(u){
+  const sp=u.spar||{};
+  const role=sub(sp.role||'评审');
+  const fb=sub((sp.mustAsk&&sp.mustAsk[0])||'先说结论，再说依据。');
+  const m=matOf(u.id);
+  if(!m) return '（'+role+'）'+fb;
+  const items=matItems(m.text);
+  if(!items.length) return '（'+role+'）'+fb;
+  const pick=findMatItem(items,/手机号|电话|地址|订单号|姓名|身份证|会员|名单|个人信息|敏感/)
+          || findMatItem(items,/公开|竞品|外部|第三方|指标|口径/)
+          || items[0];
+  const n=items.indexOf(pick)+1;
+  return '（'+role+'）你第 '+n+' 项写「'+matQuote(pick,15)+'」——这一项到底用了哪些字段？'
+    + '里面有没有手机号、收货地址或订单号，脱敏到哪一层、谁签的字？';
+}
+function matPromptBlock(u){
+  const m=matOf(u.id); if(!m) return '';
+  return '\n【学员已交的材料（'+m.name+'，真实内容，必须据此提问）】\n'
+   + String(m.text).slice(0,1600)
+   + '\n【铁律】每个问题都要点到材料里的具体条目（说「你第几项写的某某」并引用原话片段），'
+   + '不要问材料里没有的泛泛问题；材料里没写的，就追问他为什么没写。';
+}
+function matBoxHtml(uid){
+  const m=matOf(uid);
+  let h='<div class="matbox"><div class="mhd">\uD83D\uDCCE 陪练材料'
+    + (m? (m.src==='prev'?'　已自动带入上一节产出':'　你上传/粘贴的') : '') + '</div>';
+  if(m){
+    h+='<div class="mname">'+esc(m.name)+'　'+m.text.replace(/\s/g,'').length+' 字</div>'
+     + '<div class="mhint">对手已经拿到这份材料，会挑里面的具体条目问，不再问泛泛的话。</div>'
+     + '<details><summary>看一眼他手上拿的是什么</summary><pre class="dtxt" style="background:#fff;max-height:200px;overflow:auto">'+esc(m.text.slice(0,1600))+'</pre></details>';
+  } else {
+    h+='<div class="mhint">还没拿材料 —— 陪练只能问通用问题，会很机械。'
+      + '把上一节做的产出贴进来（或上传文件），对手才会按你实际写的东西挑刺。</div>';
+  }
+  h+='<div class="mact">'
+   + '<label class="lnk" style="cursor:pointer">上传文件（.txt / .md）'
+   + '<input type="file" accept=".txt,.md,.markdown,text/plain" style="display:none" onchange="onMatFile(\''+uid+'\',this)"></label>'
+   + (m?'<span class="lnk" onclick="clearMat(\''+uid+'\')">清空重贴</span>':'')
+   + '</div>'
+   + '<details'+(m?'':' open')+'><summary>或直接把材料粘进来</summary>'
+   + '<textarea id="mat-text" placeholder="把《个人 AI 提效地图》全文贴进来（至少 40 字）">'+esc(m?m.text:'')+'</textarea>'
+   + '<button class="btn ghost" style="margin-top:6px" onclick="useMat(\''+uid+'\')">用这份材料开练</button>'
+   + '</details></div>';
+  return h;
+}
+function rerenderMat(uid){
+  const host=document.getElementById('mat-host');
+  if(host){ host.innerHTML=matBoxHtml(uid); }
+}
+function useMat(uid){
+  const el=document.getElementById('mat-text');
+  const v=el?el.value.trim():'';
+  if(v.length<40){ alert('材料太短了（至少 40 字）。把上一节的产出贴完整一点。'); return; }
+  setAct(uid,'mat',v); setAct(uid,'matName','我粘贴的材料');
+  rerenderMat(uid);
+  const f=findUnit(uid);
+  if(f){ addBubble('ai', matFirstQ(f.u)); }
+}
+function clearMat(uid){
+  setAct(uid,'mat',''); setAct(uid,'matName','');
+  rerenderMat(uid);
+}
+function onMatFile(uid,input){
+  const f=input.files&&input.files[0]; if(!f) return;
+  const rd=new FileReader();
+  rd.onload=function(){
+    const v=String(rd.result||'').trim();
+    if(v.length<40){ alert('文件内容太短（至少 40 字）'); return; }
+    setAct(uid,'mat',v); setAct(uid,'matName',f.name);
+    rerenderMat(uid);
+    const fu=findUnit(uid);
+    if(fu){ addBubble('ai', matFirstQ(fu.u)); }
+  };
+  rd.readAsText(f);
+}
 function sparSystem(u){
   const m=u.spar||{};
   return '你是一场企业内训里的角色扮演评审，此刻扮演「'+sub(m.role||'评审')+'」。'
@@ -2764,6 +3033,7 @@ function sparSystem(u){
    +'\n4) 若学员只是表态、复述问题或说空话，直接点破，并要求他给出数据或条款。'
    +'\n5) 你一定会问到这些方向：'+(m.mustAsk||[]).map(x=>sub(x)).join('；')+'。'
    +'\n6) 不要编造不存在的制度条款，需要引用时用「贵行的数据分级办法」这类通称。'
+   + matPromptBlock(u)
    +'\n只输出你要说的那一句话，不要有任何前缀说明。';
 }
 function anchorOf(t){
@@ -2786,15 +3056,26 @@ function localSparReply(u,t,rounds){
   const fb=['这一节的内容，你手上哪件事能立刻用上？','你的依据能指回哪份数据、条款或看板？','哪一步你不敢自己定，要交给谁确认？'];
   const arr=(sp.mustAsk&&sp.mustAsk.length)?sp.mustAsk:fb;
   const q=arr[rounds % Math.max(1,arr.length)] || '你的依据是什么？';
+  /* 有材料就从材料里点名一条来问：这才是「按你实际写的东西挑刺」 */
+  const mat=matOf(u.id);
+  const items=mat?matItems(mat.text):[];
+  let lab='';
+  if(items.length){
+    const it=items[rounds % items.length];
+    lab='你第 '+(items.indexOf(it)+1)+' 项写的「'+matQuote(it,14)+'」';
+  }
   if(!hasEvid){
+    if(lab) return '（'+role+'）'+lab+'——这一条到底用了哪些字段？有没有手机号、地址或订单号？脱敏到哪一层、谁留的痕？说不出出处，这条我先挂起。';
     return '（'+role+'）你说「'+anchor+'\u2026」\u2014\u2014 我听到的是立场，不是依据。这条结论落在哪份文件、哪张看板、哪组数据上？说得出出处，我们才谈得下去。';
   }
   if(!hasNum){
+    if(lab) return '（'+role+'）'+lab+'方向是对的，但你没给数。这项一周占多少小时、涉及几条数据、覆盖哪些字段？口径谁来定？';
     return '（'+role+'）「'+anchor+'\u2026」方向对了，但你给的是说法不是数。具体到多少、覆盖哪些产品、口径怎么定义的？';
   }
   if(!bd){
     return '（'+role+'）「'+anchor+'\u2026」这一处我暂时认。那我问下一层：如果这条依据本身不成立，你的结论要不要降级？哪部分你不敢下结论、要交给谁？';
   }
+  if(lab) return '（'+role+'）「'+anchor+'\u2026」有数、有出处、也划了边界，这条我认。再说一处：'+lab+'里如果有个人信息，谁能证明你没带出去？';
   return '（'+role+'）「'+anchor+'\u2026」有数、有出处、也划了边界，这条我认。最后再确认一件事：'+sub(q);
 }
 async function sendSpar(){
@@ -2914,7 +3195,7 @@ function closeQuiz(){ document.getElementById('quiz-modal').classList.remove('on
 /* ===================== 学习指引（本单元路径 + 下一步） ===================== */
 const STEP_ORDER=['understand','demo','todo','spar'];
 const STEP_HINT={
-  understand:'看视频讲解 → 做 3 道自检题 → 按三问写收获（① 结论 ② 用在哪件事 ③ 还不确定什么，每问 ≥10 字）。本环节只验理解，不做陪练。',
+  understand:'看视频讲解 → 做 3 道自检题 → 按三问写收获（① 结论 ② 用在哪件事 ③ 还不确定什么）。每问要写到具体对象（哪份数据 / 哪件事 / 哪个口径），凑字数不给分。本环节只验理解，不做陪练。',
   demo:'先按框架把多份素材整理成结构化字段（自动判分）→ 用整理结果请模型跑一遍 → 把输出改成你自己的终稿，写清改了哪几处。',
   todo:'按模板产出本单元交付物，提交后系统自动评分（≥60 分通关）。',
   spar:'与 AI 陪练至少 3 轮对话，给出可追溯依据，并划清责任边界。'
