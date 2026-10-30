@@ -1628,9 +1628,11 @@ function renderActivity(u,uid){
       +'<div id="demo-score"></div>'
       +'<button class="btn" id="demo-submit" onclick="submitTask(\''+uid+'\',this)" style="'+((actsOf(uid).ran)?'':'display:none')+'">提交并结算本单元</button></div>';
     const r=document.getElementById('demo-rec');
-    if(r){ r.addEventListener('input',()=>{ setAct(uid,'rec',r.value); previewScore(uid,'demo-score'); }); }
+    if(r){ r.value=(actsOf(uid).rec||''); r.addEventListener('input',()=>{ setAct(uid,'rec',r.value); previewScore(uid,'demo-score'); }); }
     const c=document.getElementById('demo-check');
-    if(c){ c.addEventListener('change',()=>{ setAct(uid,'checked',c.checked?1:0); previewScore(uid,'demo-score'); }); }
+    if(c){ c.checked=!!actsOf(uid).checked; c.addEventListener('change',()=>{ setAct(uid,'checked',c.checked?1:0); previewScore(uid,'demo-score'); }); }
+    /* 回到这个单元时按已有记录把分数面板重算一遍，别让学员以为分数丢了 */
+    if(actsOf(uid).ran||actsOf(uid).rec) previewScore(uid,'demo-score');
   } else if(u.step==='todo'){
     box.innerHTML=adminNote+'<div class="card"><h3>\u270D 我要做 · 产出你的交付物</h3>'
       + taskBox
@@ -1770,7 +1772,7 @@ function computeUnit(uid){
     if(!unusable) miss.push('哪部分不可用');
     if(!fixed) miss.push('你改了什么');
     if(!reuse) miss.push('可复用句式');
-    if(miss.length) advice.push('演示记录还缺：'+miss.join('、')+'（当前 '+recScore+'/80 分，标题行不算作答）');
+    if(miss.length) advice.push('演示记录还缺：'+miss.join('、')+'（记录部分当前 '+recScore+'/90 分，标题行不算作答）');
 
   } else if(u.step==='todo'){
     const t=(a.work||'').trim();
