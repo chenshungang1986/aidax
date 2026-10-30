@@ -6100,7 +6100,7 @@ function courseListFor(roleId, industryId) {
   // 学习地图 / 课程列表 / 学习计划 / 后台统计须与该丰富课一一对应（点击带 ?m=Mx 深链定位模块），
   // 否则会出现「地图列通用产品课、点进去却是车企 PM 课」的错位；同样不追加通用 AI 工具指南。
   if (industryId === 'auto' && roleId === 'pm') return (COURSES.auto_pm || []).slice();
-  // 零售电商 × 产品经理：课程实体 = 64 单元丰富课（course_retail_pm_full.html）的 8 个模块。
+  // 零售电商 × 产品经理：课程实体 = 64 单元丰富课（course_retail_pm_deep.html）的 8 个模块。
   // 学习地图 / 课程列表 / 学习计划须与该丰富课一一对应（点击带 ?m=Mx 深链定位模块），
   // 否则会出现「地图列通用产品课、点进去却是零售 PM 课」的错位；同样不追加通用 AI 工具指南。
   if (industryId === 'retail' && roleId === 'pm') return (COURSES.retail_pm || []).slice();
@@ -14863,13 +14863,13 @@ S.openCourse = function(idx) {
     window.open('course_auto_pm_full.html' + mparam + wparam + adminParam(mparam || wparam), '_blank', 'noopener');
     return;
   }
-  // 零售电商 × 产品经理：进入完整 64 单元课程（course_retail_pm_full.html），
+  // 零售电商 × 产品经理：进入完整 64 单元课程（course_retail_pm_deep.html，2026-10-30 深版），
   // 带 ?m=Mx 深链定位模块、&weak= 弱维做个性化高亮；管理员会话自动带 admin=1（跳过测验/考试直接看视频）。
   if (S.industry === 'retail' && S.role === 'pm') {
     const mparam = (c && c.id && /retail_pm_m(\d+)/.test(c.id)) ? ('?m=M' + c.id.match(/retail_pm_m(\d+)/)[1]) : '';
     const weak = weakDimList();
     const wparam = weak.length ? ((mparam ? '&' : '?') + 'weak=' + encodeURIComponent(weak.join(','))) : '';
-    window.open('course_retail_pm_full.html' + mparam + wparam + adminParam(mparam || wparam), '_blank', 'noopener');
+    window.open('course_retail_pm_deep.html' + mparam + wparam + adminParam(mparam || wparam), '_blank', 'noopener');
     return;
   }
   // 新人小白 × 应届生：进入完整 64 单元课程（course_newbie_graduate_full.html），
