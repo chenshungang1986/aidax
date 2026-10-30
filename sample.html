@@ -1763,6 +1763,7 @@ function computeUnit(uid){
     R.push({k:'确认已人工核对结果（门槛项，不计分）',ok:chk,hint:'勾选下方复选框'});
     s=(ran?10:0)+recScore;
     if(!ran) block.push('先跑一遍（复制提示词或用模型跑）');
+    if(!fixed) block.push('在第 3 小节写清你做了哪些人工修正 —— 这一课的核心就是「人接手」');
     if(!chk) block.push('勾选「我已人工核对过模型结果」');
     const miss=[];
     if(!usable) miss.push('哪部分可用');
