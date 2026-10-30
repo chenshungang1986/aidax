@@ -2781,10 +2781,10 @@ function matAskQ(u,i){
   const role=sub(sp.role||'评审');
   const base=sub((sp.mustAsk&&sp.mustAsk[i])||'你的依据是什么？');
   const m=matOf(u.id);
-  const items=m?matItems(m.text):[];
+  const items=m?matOrdered(matItems(m.text)):[];
   if(items.length){
     const it=items[i%items.length];
-    return '（'+role+'）回到你第 '+(items.indexOf(it)+1)+' 项「'+matQuote(it,12)+'」：'+base;
+    return '（'+role+'）回到你第 '+(matItems(m.text).indexOf(it)+1)+' 项「'+matQuote(it,12)+'」：'+base;
   }
   return '（'+role+'）'+base;
 }
@@ -2945,6 +2945,19 @@ function findMatItem(items,re){
   for(let i=0;i<items.length;i++){ if(re.test(items[i])) return items[i]; }
   return '';
 }
+/* 每一轮从不同角度挑条目：先挑含个人信息的，再挑「公开来源」，再挑带耗时/成本的，
+   最后挑标了责任/红线的。这样三轮问下来像真的在翻你的材料，而不是复读一句话。 */
+const MAT_PROBE=[/手机号|电话|地址|订单号|姓名|身份证|会员|名单|个人信息|敏感/,
+                 /公开|竞品|外部|第三方|来源|查来|截图/,
+                 /耗时|小时|h\/周|预算|成本|报价|价格|费用|人天/,
+                 /责任人|复核|签字|审批|风险|红线|授权/];
+function matOrdered(items){
+  const out=[];
+  const add=function(re){ items.forEach(function(it){ if(re.test(it)&&out.indexOf(it)<0) out.push(it); }); };
+  MAT_PROBE.forEach(add);
+  items.forEach(function(it){ if(out.indexOf(it)<0) out.push(it); });
+  return out;
+}
 /* 对手开口第一句：直接点材料里的某一条，而不是念脚本 */
 function matFirstQ(u){
   const sp=u.spar||{};
@@ -2952,12 +2965,10 @@ function matFirstQ(u){
   const fb=sub((sp.mustAsk&&sp.mustAsk[0])||'先说结论，再说依据。');
   const m=matOf(u.id);
   if(!m) return '（'+role+'）'+fb;
-  const items=matItems(m.text);
+  const items=matOrdered(matItems(m.text));
   if(!items.length) return '（'+role+'）'+fb;
-  const pick=findMatItem(items,/手机号|电话|地址|订单号|姓名|身份证|会员|名单|个人信息|敏感/)
-          || findMatItem(items,/公开|竞品|外部|第三方|指标|口径/)
-          || items[0];
-  const n=items.indexOf(pick)+1;
+  const pick=items[0];
+  const n=matItems(m.text).indexOf(pick)+1;
   return '（'+role+'）你第 '+n+' 项写「'+matQuote(pick,15)+'」——这一项到底用了哪些字段？'
     + '里面有没有手机号、收货地址或订单号，脱敏到哪一层、谁签的字？';
 }
@@ -3058,11 +3069,12 @@ function localSparReply(u,t,rounds){
   const q=arr[rounds % Math.max(1,arr.length)] || '你的依据是什么？';
   /* 有材料就从材料里点名一条来问：这才是「按你实际写的东西挑刺」 */
   const mat=matOf(u.id);
-  const items=mat?matItems(mat.text):[];
+  const allItems=mat?matItems(mat.text):[];
+  const items=allItems.length?matOrdered(allItems):[];
   let lab='';
   if(items.length){
     const it=items[rounds % items.length];
-    lab='你第 '+(items.indexOf(it)+1)+' 项写的「'+matQuote(it,14)+'」';
+    lab='你第 '+(allItems.indexOf(it)+1)+' 项写的「'+matQuote(it,14)+'」';
   }
   if(!hasEvid){
     if(lab) return '（'+role+'）'+lab+'——这一条到底用了哪些字段？有没有手机号、地址或订单号？脱敏到哪一层、谁留的痕？说不出出处，这条我先挂起。';
@@ -3073,6 +3085,7 @@ function localSparReply(u,t,rounds){
     return '（'+role+'）「'+anchor+'\u2026」方向对了，但你给的是说法不是数。具体到多少、覆盖哪些产品、口径怎么定义的？';
   }
   if(!bd){
+    if(lab) return '（'+role+'）「'+anchor+'\u2026」这一处我暂时认。那我问下一层：'+lab+'这条的依据如果本身不成立（比如那个「公开页」其实要登录才能看全），你的结论要不要降级？哪部分你不敢下结论、要交给谁？';
     return '（'+role+'）「'+anchor+'\u2026」这一处我暂时认。那我问下一层：如果这条依据本身不成立，你的结论要不要降级？哪部分你不敢下结论、要交给谁？';
   }
   if(lab) return '（'+role+'）「'+anchor+'\u2026」有数、有出处、也划了边界，这条我认。再说一处：'+lab+'里如果有个人信息，谁能证明你没带出去？';
