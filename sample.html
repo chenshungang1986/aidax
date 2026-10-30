@@ -1668,6 +1668,50 @@ function setAct(uid,k,v){
   const st=prog.units[uid]||{}; const a=Object.assign({},st.acts||{});
   a[k]=v; prog.units[uid]=Object.assign({},st,{acts:a}); saveProg();
 }
+/* ---------- 演示记录拆小节：只认「标题冒号之后」你亲手写的内容 ----------
+   背景（bug）：自动填的模板骨架里有「2) 可用/不可用：」「3) 我做了什么人工修正：」
+   「4) 下次复用的固定句式：」——标题本身就带着 可用 / 不可用 / 修正 / 复用 这些关键词，
+   于是「一字没写、点一下跑一遍」也能拿满 80 分。所以判定前必须先把标题剥掉。 */
+function splitDemoRec(rec){
+  function mk(){ return {text:'',noNeg:'',filled:false}; }
+  const out={1:mk(),2:mk(),3:mk(),4:mk()};
+  const t=(rec||'').replace(/\r/g,'');
+  let cur=0, hit=0;
+  t.split('\n').forEach(function(ln){
+    const m=ln.match(/^\s*[（(]?\s*([1-4])\s*[)）.、．:：]/);
+    if(m){
+      cur=parseInt(m[1],10); hit++;
+      let rest=ln.replace(/^\s*[（(]?\s*[1-4]\s*[)）.、．:：]\s*/,'');
+      const c=rest.search(/[：:]/);
+      if(c>=0 && c<=24) rest=rest.slice(c+1);       /* 去掉小节标题本身 */
+      if(out[cur]) out[cur].text+=(rest||'')+'\n';
+      return;
+    }
+    if(cur && out[cur]) out[cur].text+=ln+'\n';
+  });
+  const clean=function(b){
+    return (b||'')
+      .replace(/[（(]\s*(待补|在这里|写|填|直接)[^）)]*[）)]/g,'')  /* 占位提示不算作答 */
+      .replace(/[。．]{3,}|…+/g,'')
+      .replace(/[ \t\u3000]+/g,' ')
+      .trim();
+  };
+  Object.keys(out).forEach(function(k){ out[k].text=clean(out[k].text); });
+  /* 用户可能不按 1)2)3)4) 编号写：整段当一份记录判，但仍然剥掉行首标题 */
+  if(!hit){
+    const whole=clean(t.split('\n').map(function(ln){
+      return ln.replace(/^\s*[（(]?\s*[1-4]\s*[)）.、．:：]\s*/,'').replace(/^[^：:]{0,24}[：:]\s*/,'');
+    }).join('\n'));
+    Object.keys(out).forEach(function(k){ out[k].text=whole; });
+  }
+  Object.keys(out).forEach(function(k){
+    const b=out[k].text;
+    out[k].noNeg=b.replace(/不(?:可|能)用|无法用|不采纳|不能采信/g,'');
+    out[k].filled=b.replace(/[\s，。、；：:;,.!?—\-（）()]/g,'').length>=8;
+  });
+  return out;
+}
+
 const BOUNDARY_RE=/不确定|待确认|留给|由.{1,6}(判断|决定|确认)|需要.{0,4}确认|不能替|边界|存疑|风险|我会补|降级/;
 const EVID_RE=/[0-9０-９]|数据|口径|来源|条款|原文|看板|访谈|样本|比例|百分比|%|频次|制度|办法|规则/;
 const PLAN_RE=/责任人|负责人|时间|节点|下周|本周|月底|排期|截止|owner|上线|交付|deadline/i;
@@ -1703,23 +1747,29 @@ function computeUnit(uid){
     else if(nr.score<20) advice.push('收获可以更具体：说清能用在你的哪个项目/指标上，以及下一步要验证什么（当前 '+nr.score+'/40 分）');
 
   } else if(u.step==='demo'){
-    const ran=!!a.ran, rec=(a.rec||'').trim(), chk=!!a.checked;
-    /* 演示记录按质量判，不看字数：可用/不可用 + 人工修正 + 可复用句式，三要素 */
-    const usable=/(可用|能用|直接用|采纳|保留|没问题|符合预期|准确)/.test(rec);
-    const unusable=/(不可用|不能采信|不对|有误|编造|幻觉|偏差|失真|要改|需人工|不采纳|错误)/.test(rec);
-    const fixed=/(我改了|修正|调整|补充|人工核对|复核|替换|删掉|重写|改成)/.test(rec);
-    const reuse=/(以后|下次|复用|固定句式|模板化|沉淀|通用|以后都)/.test(rec);
-    const recScore=(usable?12:0)+(unusable?14:0)+(fixed?12:0)+(reuse?12:0);
-    R.push({k:'跑通一遍（复制提示词或用模型跑）',ok:ran,hint:'点「复制提示词」或「用模型跑一遍」都算'});
-    R.push({k:'指出哪部分可用',ok:usable,hint:'写明 AI 输出里哪些可以直接用'});
-    R.push({k:'指出哪部分不可用',ok:unusable,hint:'写明 AI 输出里哪些不能采信（幻觉/偏差/口径错）'});
-    R.push({k:'写了你的人工修正',ok:fixed,hint:'写明你改了什么、为什么改'});
-    R.push({k:'沉淀出可复用句式/模板',ok:reuse,hint:'写一句下次还能直接用的提示词或句式'});
-    R.push({k:'确认已人工核对结果',ok:chk,hint:'勾选下方复选框'});
-    s=(ran?30:0)+Math.min(50,recScore)+(chk?20:0);
+    const ran=!!a.ran, chk=!!a.checked;
+    const P=splitDemoRec(a.rec||'');
+    /* 四个内容项各自独立判定：必须「自己写满 8 个字以上」且说到了点子上，标题不算数 */
+    const usable   = P[2].filled && /可用|能用|直接用|采纳|保留|符合预期|准确|没问题/.test(P[2].noNeg);
+    const unusable = P[2].filled && /不可用|不能用|不能采信|无法用|不对|有误|编造|幻觉|偏差|失真|要改|需人工|不采纳|错误/.test(P[2].text);
+    const fixed    = P[3].filled && /改|修正|调整|补充|核对|复核|替换|删掉|重写|补上|换成/.test(P[3].text);
+    const reuse    = P[4].filled && /以后|下次|复用|固定句式|句式|模板|沉淀|通用|照这个|每次都/.test(P[4].text);
+    const recScore=(usable?20:0)+(unusable?30:0)+(fixed?25:0)+(reuse?15:0);
+    R.push({k:'跑通一遍　'+(ran?10:0)+'/10 分',ok:ran,hint:'点「▶ 跑一遍」把提示词真发给模型（或复制到 WorkBuddy 自己跑）'});
+    R.push({k:'指出哪部分可用　'+(usable?20:0)+'/20 分',ok:usable,hint:'第 2 小节写：哪几条可以直接用，为什么'});
+    R.push({k:'指出哪部分不可用　'+(unusable?30:0)+'/30 分',ok:unusable,hint:'第 2 小节写：哪条不能采信（编的频次 / 口径错 / 越权定性），错在哪'});
+    R.push({k:'写了你的人工修正　'+(fixed?25:0)+'/25 分',ok:fixed,hint:'第 3 小节写：你把哪句改成什么、为什么改'});
+    R.push({k:'沉淀出可复用句式　'+(reuse?15:0)+'/15 分',ok:reuse,hint:'第 4 小节写一句下次能直接粘的提示词或句式'});
+    R.push({k:'确认已人工核对结果（门槛项，不计分）',ok:chk,hint:'勾选下方复选框'});
+    s=(ran?10:0)+recScore;
     if(!ran) block.push('先跑一遍（复制提示词或用模型跑）');
     if(!chk) block.push('勾选「我已人工核对过模型结果」');
-    if(recScore<38) advice.push('演示记录还能写全：哪部分可用、哪部分不可用、你改了什么、沉淀出什么句式（当前 '+recScore+'/50 分）');
+    const miss=[];
+    if(!usable) miss.push('哪部分可用');
+    if(!unusable) miss.push('哪部分不可用');
+    if(!fixed) miss.push('你改了什么');
+    if(!reuse) miss.push('可复用句式');
+    if(miss.length) advice.push('演示记录还缺：'+miss.join('、')+'（当前 '+recScore+'/80 分，标题行不算作答）');
 
   } else if(u.step==='todo'){
     const t=(a.work||'').trim();
@@ -1875,6 +1925,7 @@ function previewScore(uid,elId){
       ? '<div style="font-size:12.6px;color:#be123c">还不能结算：'+r.blockers.map(esc).join('；')+'</div>'
       : (r.score>=60?'<div style="font-size:12.6px;color:#166534">已达通关线（60 分），可以结算。</div>'
                     : '<div style="font-size:12.6px;color:#be123c">还差 '+(60-r.score)+' 分到通关线。</div>'))
+   +((r.score===0)?'<div style="font-size:12.6px;color:var(--mut);margin-top:3px">还没开始计分 —— 上面几项每完成一项分数才动一格，模板标题行不算作答。</div>':'')
    +((r.advice&&r.advice.length)?'<div style="font-size:12.6px;color:#b45309;margin-top:3px">建议：'+r.advice.map(esc).join('；')+'</div>':'')
    +'</div>';
 }
@@ -2055,7 +2106,10 @@ async function runWb(uid){
         +'<p style="font-size:12.5px;color:var(--mut);margin-top:8px">AI 只给骨架与措辞；数字口径、责任人与时间节点由你补齐——这正是本单元要练的「人把关」位置。</p>';
       const rec=document.getElementById('demo-rec');
       if(rec && rec.value.trim().length<30){
-        rec.value='1) 我用的提示词：\n'+first+'\n\n2) 可用/不可用：\n'+txt.split('\n').filter(x=>x.trim()).slice(0,3).join('\n')+'\n\n3) 我做了什么人工修正：\n\n4) 下次复用的固定句式：';
+        rec.value='1) 我用的提示词：\n'+first
+          +'\n\n2) 可用/不可用：\n（在这里写：哪几条能直接用 / 哪条不能采信，错在哪）'
+          +'\n\n3) 我做了什么人工修正：\n（在这里写：你把哪句改成什么，为什么）'
+          +'\n\n4) 下次复用的固定句式：\n（在这里写：一句下次能直接粘的提示词）';
         setAct(uid,'rec',rec.value); previewScore(uid,'demo-score');
       }
       return;
@@ -2071,7 +2125,10 @@ async function runWb(uid){
     +'<div class="hl-line">\u26A0 需人工确认：以上是本地规则引擎按本单元课件拼装的骨架，不是模型实时生成。请复制上方提示词到 WorkBuddy 跑出真实结果，或点顶部「AI 未连接」查看接入方式。</div></div>';
   const rec=document.getElementById('demo-rec');
   if(rec && rec.value.trim().length<30){
-    rec.value='1) 我用的提示词：\n'+first+'\n\n2) 可用/不可用：\n（待补：用真实模型跑完后再填）\n\n3) 我做了什么人工修正：\n\n4) 下次复用的固定句式：';
+    rec.value='1) 我用的提示词：\n'+first
+      +'\n\n2) 可用/不可用：\n（在这里写：哪几条能直接用 / 哪条不能采信，错在哪）'
+      +'\n\n3) 我做了什么人工修正：\n（在这里写：你把哪句改成什么，为什么）'
+      +'\n\n4) 下次复用的固定句式：\n（在这里写：一句下次能直接粘的提示词）';
     setAct(uid,'rec',rec.value); previewScore(uid,'demo-score');
   }
 }
