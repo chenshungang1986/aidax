@@ -20,6 +20,11 @@
   .cfg-row label{color:var(--mut);width:40px;flex:none}
   .cfg-row input{flex:1;padding:7px 10px;border:1px solid var(--line);border-radius:9px;font-size:13px}
   .cfg-sep{border:none;border-top:1px solid var(--line);margin:13px 0}
+  .cfg-label{display:flex;align-items:center;gap:8px;text-align:left;font-size:12px;font-weight:700;color:var(--blue-d);margin:14px 0 5px;letter-spacing:.02em}
+  .cfg-hint{text-align:left;font-size:11.8px;color:var(--mut);line-height:1.65;margin:3px 0 2px}
+  .cfg-row label{width:auto;min-width:66px}
+  .cfg-note{font-size:11.5px;color:#8a6d1f;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:7px 9px;line-height:1.6;margin:6px 0}
+  .ident-chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;background:#eef4ff;border:1px solid #c7d9ff;color:var(--blue-d);border-radius:999px;padding:3px 10px}
   .scn{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--mut)}
   .scn input{padding:5px 8px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;width:112px}
   .scn button{padding:5px 12px;background:var(--blue);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12.5px}
@@ -513,19 +518,42 @@ function refreshProg(){
   set('prog-score',sc); set('prog-xp',totalXP()); set('admin-units',tot);
 }
 
-/* ===================== 设置面板（行业/机构/产品、模型、管理员预览都收进齿轮） ===================== */
+/* ===================== 设置面板 =====================
+   分三块，每块都写清「改了会影响什么」，不留填了没用的框：
+   ① 我的身份 —— 反馈署名与回访（本机保存）；
+   ② AI 陪练场景 —— 只改陪练/评审提示词里的行业举例，不改课程正文；
+      机构、产品两个词只有当课程正文里真的留了 {{company}}/{{product}} 占位符时才显示
+      （零售深版正文全写实、占位符 0 处 → 不显示；金融课有 10/71 处 → 显示）；
+   ③ 学习状态与高级项。 */
+function phCount(k){
+  try{ return (JSON.stringify(COURSE).match(new RegExp('\\{\\{'+k+'\\}\\}','g'))||[]).length; }catch(e){ return 0; }
+}
 function openCfg(){
   const box=document.getElementById('cfg-box'); if(!box) return;
   const tot=(typeof COURSE!=='undefined'&&COURSE.modules)?COURSE.modules.reduce((a,m)=>a+m.units.length,0):64;
   const done=Object.values(prog.units).filter(x=>x&&x.done).length;
+  const nCom=phCount('company'), nPro=phCount('product');
+  const hasId=!!(IDENT.name||IDENT.company);
   box.innerHTML='<h3 style="text-align:left">\u2699 设置</h3>'
+    +'<div class="cfg-label">我的身份'+(hasId?'<span class="ident-chip" style="margin-left:8px">'+esc(identLabel())+'</span>':'')+'</div>'
+    +'<div class="cfg-hint">只存本机浏览器，不上传。提交反馈时会带上，我们才知道是谁提的、怎么回访你；导出产出物也用它署名。</div>'
+    +'<div class="cfg-row"><label>姓名</label><input id="id-name" placeholder="如：张三" value="'+esc(IDENT.name||'')+'"></div>'
+    +'<div class="cfg-row"><label>企业</label><input id="id-company" placeholder="如：某连锁零售集团" value="'+esc(IDENT.company||'')+'"></div>'
+    +'<div class="cfg-row"><label>岗位</label><input id="id-role" placeholder="'+esc(META.roleLabel)+'" value="'+esc(IDENT.role||'')+'"></div>'
+    +'<div class="cfg-row"><label>联系方式</label><input id="id-contact" placeholder="微信 / 手机 / 邮箱（选填）" value="'+esc(IDENT.contact||'')+'"></div>'
+    +'<div style="text-align:right;margin-top:6px"><button class="btn" onclick="saveIdent(1)">保存身份</button></div>'
+    +'<hr class="cfg-sep">'
+    +'<div class="cfg-label">AI 陪练场景</div>'
     +'<div class="cfg-row"><label>行业</label><input id="cfg-industry" value="'+esc(CUSTOM.industry)+'"></div>'
-    +'<div class="cfg-row"><label>机构</label><input id="cfg-company" value="'+esc(CUSTOM.company)+'"></div>'
-    +'<div class="cfg-row"><label>产品</label><input id="cfg-product" value="'+esc(CUSTOM.product)+'"></div>'
-    +'<div style="text-align:right;margin-top:6px"><button class="btn" onclick="applyCustom(1)">保存并应用</button></div>'
+    +'<div class="cfg-hint">只影响 AI 陪练和评审时的举例与措辞，<b>不改课程正文</b>（正文固定为「'+esc(META.industry)+'」）。换成你自己公司所在的行业，陪练的例子会更贴你的活。</div>'
+    +(nCom?'<div class="cfg-row"><label>机构</label><input id="cfg-company" value="'+esc(CUSTOM.company)+'"></div>':'')
+    +(nPro?'<div class="cfg-row"><label>产品</label><input id="cfg-product" value="'+esc(CUSTOM.product)+'"></div>':'')
+    +(nCom||nPro?'<div class="cfg-hint">本课程正文里有 '+nCom+' 处机构、'+nPro+' 处产品按此替换。</div>':'')
+    +'<div style="text-align:right;margin-top:6px"><button class="btn ghost" onclick="applyCustom(1)">保存场景词</button></div>'
     +'<hr class="cfg-sep">'
     +'<div class="cfg-row"><span style="color:var(--mut)">学习进度</span><b style="margin-left:auto">'+done+' / '+tot+' 单元 · 积分 '+totalXP()+'</b></div>'
     +'<div class="cfg-row"><span style="color:var(--mut)">AI 能力</span><span class="llm" id="llm-badge" style="margin-left:auto" onclick="openLlm()"><i></i><span id="llm-text">检测中</span></span></div>'
+    +'<div class="cfg-hint" id="llm-hint"></div>'
     +'<hr class="cfg-sep">'
     +'<div class="cfg-row"><button id="admin-toggle" class="admin-toggle" style="margin:0" onclick="toggleAdmin()">管理员预览：'+(ADMIN?'开':'关')+'</button>'
     +'<button class="btn ghost" style="margin-left:auto" onclick="closeCfg();openScore(\'capstone\')">\uD83C\uDFC1 结业产出物评审</button></div>'
@@ -554,7 +582,37 @@ var META=Object.assign({
 },(typeof COURSE_META!=='undefined'&&COURSE_META)||{});
 /* 占位符替换：默认词先取课程数据里的 customization（行业/机构/产品定制），不再写死金融默认值 */
 let CUSTOM=Object.assign({industry:META.industry,company:'模拟机构 X',product:'主推产品'},(typeof COURSE!=='undefined'&&COURSE.customization)||{});
-try{ const s=localStorage.getItem('aidax_retail_pm_custom'); if(s) CUSTOM=Object.assign(CUSTOM,JSON.parse(s)); }catch(e){}
+/* 本机自定义只认 v2 写入：旧版本存下来的是别的课程留下的值（如「游戏 / 模拟某游戏X / 棋牌游戏」），
+   与当前课程行业不符却会盖掉默认值，表现就是「设置里写着游戏，课程内容却是零售电商」。 */
+try{
+  var _cs=localStorage.getItem('aidax_retail_pm_custom');
+  if(_cs){ var _co=JSON.parse(_cs); if(_co && Number(_co._v)>=2) CUSTOM=Object.assign(CUSTOM,_co); }
+}catch(e){}
+
+/* ===================== 学员身份（只存本机） =====================
+   用途：① 提交反馈时带上姓名/企业，后台能对应到「是谁提的、哪个班、怎么回访」；
+        ② 产出物导出时署名；③ AI 陪练可直呼姓名。
+   只在本机 localStorage，不上传；仅随本人主动提交的反馈一起发送。 */
+var IDENT=(function(){
+  var d={name:'',company:'',role:'',contact:''};
+  try{ var s=localStorage.getItem('aidax_ident_v1'); if(s) d=Object.assign(d,JSON.parse(s)||{}); }catch(e){}
+  if(!d.role) d.role=META.roleLabel;
+  return d;
+})();
+function identLabel(){
+  var n=(IDENT.name||'').trim(), c=(IDENT.company||'').trim();
+  if(!n && !c) return '';
+  return [n,c].filter(Boolean).join(' · ');
+}
+function saveIdent(close){
+  var v=function(id){ var e=document.getElementById(id); return e? e.value.trim() : ''; };
+  IDENT={name:v('id-name'),company:v('id-company'),role:v('id-role')||META.roleLabel,contact:v('id-contact')};
+  try{ localStorage.setItem('aidax_ident_v1',JSON.stringify(IDENT)); }catch(e){}
+  if(close) closeCfg();
+  toast(IDENT.name? ('已保存身份：'+identLabel()) : '已保存（未填姓名，反馈会记为匿名学员）');
+  var chip=document.getElementById('fb-ident-chip');
+  if(chip) chip.textContent=identLabel()? ('👤 '+identLabel()) : '👤 未填身份 · 点这里补';
+}
 /* 默认播放倍速：真人声按 -20% 语速合成（约 252 字/分），1.25× 后约 315 字/分 */
 const RATE_DEF=1.25;
 /* 单元真实音频秒数：有实测时长(d)用 d，没有才按字数估 0.205 秒/字 */
@@ -569,11 +627,12 @@ function applyCustom(close){
   const v=id=>{ const e=document.getElementById(id); return e? e.value.trim() : ''; };
   CUSTOM={industry:v('cfg-industry')||CUSTOM.industry,
           company:v('cfg-company')||CUSTOM.company,
-          product:v('cfg-product')||CUSTOM.product};
+          product:v('cfg-product')||CUSTOM.product,
+          _v:2};
   try{ localStorage.setItem('aidax_retail_pm_custom',JSON.stringify(CUSTOM)); }catch(e){}
-  ['cfg-industry','cfg-company','cfg-product'].forEach(id=>{ const e=document.getElementById(id); if(e) e.value=sub('{{'+id.slice(4)+'}}'); });
   if(close) closeCfg();
   renderUnit(prog.cur); renderSidebar();
+  toast('已保存：AI 陪练将按「'+CUSTOM.industry+'」举例');
 }
 const STEP_LABEL={understand:'理解',demo:'演示',todo:'我要做',spar:'陪练'};
 
@@ -689,8 +748,15 @@ function paintLlm(){
   if(LLM.state==='cloud'){ b.classList.add('on'); t.textContent='AI 陪练已就绪'; }
   else if(LLM.state==='proxy'){ b.classList.add('on'); t.textContent='AI 已连接（本地代理）'; }
   else if(LLM.state==='direct'){ b.classList.add('on'); t.textContent='AI 已连接（直连）'; }
-  else if(LLM.state==='off'){ b.classList.add('off'); t.textContent='AI 未连接 · 点此查看'; }
+  else if(LLM.state==='off'){ b.classList.add('off'); t.textContent='AI 未连接 · 点此处理'; }
   else { t.textContent='AI 能力检测中'; }
+  /* 状态旁边直接写清「影响什么、不影响什么」，否则学员只看到一个红点会以为课程坏了 */
+  const h=document.getElementById('llm-hint');
+  if(h){
+    if(LLM.state==='off') h.innerHTML='当前环境连不上云端大模型（云端只对指定域名开放）。陪练会回退到本地规则引擎：照样能提问、能按规则点评，<b>判分与进度不受影响</b>，只是回答不如真模型灵活。要升级可按「点此处理」里的两种办法接一个。';
+    else if(LLM.state==='cloud') h.innerHTML='已连云端模型，陪练是真实大模型在应答。';
+    else h.innerHTML='已连到你自己配置的模型通道。';
+  }
 }
 function llmReady(){ return LLM.state==='cloud' || LLM.state==='proxy' || LLM.state==='direct'; }
 
@@ -3324,7 +3390,15 @@ function fbSetCat(c){ fbSaveEditor(); const i=FB.cats.indexOf(c); if(i>=0)FB.cat
 function fbSetSev(v){ fbSaveEditor(); FB.sev=v; fbRenderInner(); }
 function fbSaveEditor(){
   const ta=document.getElementById('fb-text'); if(ta) FB.text=ta.value;
-  const ct=document.getElementById('fb-contact'); if(ct) FB.contact=ct.value;
+  const nm=document.getElementById('fb-name'), cp=document.getElementById('fb-company'), ct=document.getElementById('fb-contact');
+  if(nm||cp||ct){
+    IDENT={name:(nm?nm.value.trim():IDENT.name),
+           company:(cp?cp.value.trim():IDENT.company),
+           role:IDENT.role||META.roleLabel,
+           contact:(ct?ct.value.trim():IDENT.contact)};
+    try{ localStorage.setItem('aidax_ident_v1',JSON.stringify(IDENT)); }catch(e){}
+  }
+  if(ct) FB.contact=ct.value.trim();
 }
 /* ---- 图片灯箱：点任意截图放大，点背景/× 关闭 ---- */
 function fbZoom(src){
@@ -3350,7 +3424,9 @@ function fbPreviewHtml(){
 function fbRenderInner(){
   const box=document.getElementById('lf-box');
   let html='<div class="lf-head"><span style="font-size:20px">🐞</span><h3>提交问题反馈 / 建议</h3><button class="lf-close" onclick="closeFb()">×</button></div>';
-  html+='<div class="lf-meta">📍 当前位置：'+esc(FB_CTX)+'<br>自动附带你的学习上下文，方便我们定位问题。提交后可「复制反馈」发给我们。</div>';
+  html+='<div class="lf-meta">📍 当前位置：'+esc(FB_CTX)
+      +'<br>'+(identLabel()? ('👤 '+esc(identLabel())+' · 身份已记录') : '👤 尚未填写身份，第 ⑤ 项补一下我们才能回访')
+      +'<br>自动附带你的学习上下文，方便我们定位问题。</div>';
   html+='<div class="lf-label">① 反馈类型（录入方式）</div><div class="lf-type-grid">';
   Object.keys(FB_TYPE).forEach(function(k){ html+='<button class="lf-type'+(FB.type===k?' on':'')+'" onclick="fbSetType(\''+k+'\')"><span class="ti">'+FB_TYPE[k].i+'</span>'+FB_TYPE[k].n+'</button>'; });
   html+='</div>';
@@ -3366,8 +3442,16 @@ function fbRenderInner(){
       +'<input type="file" id="lf-img" accept="image/*" multiple hidden><input type="file" id="lf-audio" accept="audio/*" hidden><input type="file" id="lf-vid" accept="video/*" hidden></div>';
   html+='<div class="lf-drop" id="lf-drop">📋 可直接按 Ctrl/⌘+V 粘贴截图，或把图片拖到这里（支持多张）</div>';
   html+='<div class="lf-preview" id="lf-preview">'+fbPreviewHtml()+'</div>';
-  html+='<div class="lf-label">⑤ 联系方式（选填，方便我们回访）</div>';
-  html+='<input id="fb-contact" class="score-inp" style="width:100%" placeholder="微信 / 邮箱 / 电话，选填" value="'+esc(FB.contact)+'">';
+  html+='<div class="lf-label">⑤ 你是谁（随反馈一起提交，我们才知道是谁提的、怎么回访）</div>';
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+      +'<input id="fb-name" class="score-inp" style="width:100%;min-width:0" placeholder="姓名" value="'+esc(IDENT.name||'')+'">'
+      +'<input id="fb-company" class="score-inp" style="width:100%;min-width:0" placeholder="企业/机构" value="'+esc(IDENT.company||'')+'">'
+      +'</div>';
+  html+='<input id="fb-contact" class="score-inp" style="width:100%;margin-top:8px" placeholder="微信 / 邮箱 / 电话（选填，方便回访）" value="'+esc(IDENT.contact||FB.contact||'')+'">';
+  html+='<div class="lf-note" style="margin-top:6px;'+(identLabel()?'':'color:#a16207')+'">'
+      +(identLabel()? ('当前身份：'+esc(identLabel())+'（已存本机，下次自动带出）')
+                    : '还没填过身份。不填也能提交，但后台会显示「匿名学员」，我们没法回访你。')
+      +'</div>';
   const pend=fbOutbox().length;
   html+='<div class="lf-foot"><button class="btn" onclick="submitFb()">提交反馈</button>'
       +(pend?'<button class="btn ghost" onclick="fbRetryAll()">🔄 补推待发送（'+pend+'）</button>':'')
@@ -3455,13 +3539,14 @@ function fbReport(){
   const ts=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+pad(now.getHours())+':'+pad(now.getMinutes());
   const L=[];
   L.push('【'+META.courseTag+' · 用户反馈】');
+  L.push('提交人：'+(IDENT.name||'匿名学员')+(IDENT.company?('（'+IDENT.company+'）'):'')+(IDENT.role?(' · '+IDENT.role):''));
   L.push('类型：'+typeName+'　|　分类：'+catNames+'　|　严重度：'+FB_SEV[FB.sev]);
   L.push('位置：'+FB_CTX);
   L.push('时间：'+ts);
   L.push('描述：');
   L.push((FB.text||'（未填写）').trim());
   if(att.length) L.push('附件：'+att.join('、'));
-  if(FB.contact) L.push('联系方式：'+FB.contact);
+  if(IDENT.contact||FB.contact) L.push('联系方式：'+(IDENT.contact||FB.contact));
   return L.join('\n');
 }
 function submitFb(){
@@ -3472,12 +3557,22 @@ function submitFb(){
   let arr=[]; try{ arr=JSON.parse(localStorage.getItem('aidax_retail_pm_feedback')||'[]'); }catch(e){ arr=[]; }
   const id='f_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
   const doc={
-    id:id, ts:Date.now(), user:FB.contact||'课程学员', role:'learner',
+    id:id, ts:Date.now(),
+    /* 身份：姓名 + 真实企业 + 岗位 + 联系方式，后台才认得出「谁提的、哪家、怎么回访」。
+       company 仍取课程固定值（对齐全课聚合同一位置 + 满足 feedback 表 RLS 的 tenant 判定），
+       真实企业放 org，不改变既有按课程聚合的查询口径。 */
+    user:IDENT.name || IDENT.contact || '匿名学员',
+    role:IDENT.role || META.roleLabel,
+    org:IDENT.company || '',
     company:META.cloudCompany, type:FB.type, sev:FB.sev, cat:cats[0], cats:cats,
     text:FB.text, images:FB.imgs, media:FB.media, ownerKey:finOwner(),
-    page:META.cloudCompany, industry:META.industry, status:'new', ctx:FB_CTX, contact:FB.contact
+    page:META.cloudCompany, industry:META.industry, status:'new', ctx:FB_CTX,
+    contact:IDENT.contact || FB.contact,
+    identity:{name:IDENT.name||'', company:IDENT.company||'', role:IDENT.role||'', contact:IDENT.contact||FB.contact||''}
   };
-  arr.push({ts:doc.ts,type:doc.type,cats:cats,sev:doc.sev,text:doc.text,ctx:doc.ctx,attach:(FB.imgs.length+(FB.media.audio?1:0)+(FB.media.video?1:0)),contact:doc.contact});
+  arr.push({ts:doc.ts,type:doc.type,cats:cats,sev:doc.sev,text:doc.text,ctx:doc.ctx,
+            attach:(FB.imgs.length+(FB.media.audio?1:0)+(FB.media.video?1:0)),
+            user:doc.user, org:doc.org, contact:doc.contact});
   try{ localStorage.setItem('aidax_retail_pm_feedback', JSON.stringify(arr)); }catch(e){ toast('本机存储已满，但反馈已尝试同步云端'); }
   copyText(report);
   if(typeof window.supabase!=='undefined' && navigator.onLine!==false){
