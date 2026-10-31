@@ -712,6 +712,8 @@
 .fb-item .fi-top{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
 .fb-item .fi-text{font-size:13.5px;color:var(--text);white-space:pre-wrap;line-height:1.6;}
 .fb-item .fi-meta{font-size:11.5px;color:var(--text3);margin-top:8px;display:flex;gap:12px;flex-wrap:wrap;}
+.fb-item .fi-who{font-size:11.5px;color:var(--text2);margin-top:6px;display:flex;gap:12px;flex-wrap:wrap;background:#f1f5fd;border-radius:8px;padding:5px 9px;}
+.fb-item .fi-who b{font-weight:600;color:var(--text)}
 .fb-item .fi-thumb{margin-top:8px;max-width:120px;max-height:90px;border-radius:8px;border:1px solid var(--border);}
 .fb-item .fi-imgs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .fb-item .fi-imgs .fi-thumb{max-width:160px;max-height:120px}
@@ -2036,6 +2038,9 @@ function getQuizToken(cb) {
   if (S._cloudJwt && (Date.now() - (S._cloudJwtAt || 0) < 50 * 60 * 1000)) { cb(S._cloudJwt); return; }
   try {
     var s = (typeof getSessionSafe === 'function') ? getSessionSafe() : null;
+    // v134：只有游客能在无密码下续签。管理员/企业/注册用户拿空密码去 mint 一定失败，
+    // 失败回调会顺带清令牌（旧逻辑），等于把后台权限洗掉 → 这里直接用现有令牌，过期请重新登录。
+    if (s && (s.loginType === 'admin' || s.loginType === 'ent' || s.loginType === 'user')) { cb(S._cloudJwt || ''); return; }
     S.mintCloudToken({ type: (s && s.loginType) || 'guest', company: s ? s.company : '', phone: s ? s.phone : '', loginId: s ? s.loginId : '', companyId: (s ? s.companyId : '') || '', password: '' }, function () { cb(S._cloudJwt || ''); });
   } catch (e) { cb(''); }
 }
@@ -11801,8 +11806,18 @@ function sbClient(){
     try {
       // v75c：优先用登录后签发的租户 JWT（由 Postgres mint_token RPC 签发）；无或过期则回退 anon
       var jwt = (typeof S !== 'undefined' && S._cloudJwt && (Date.now() - (S._cloudJwtAt || 0) < 60*60*1000)) ? S._cloudJwt : null;
-      var key = jwt || cfg.supabaseAnonKey;
-      _sbClient = window.supabase.createClient(cfg.supabaseUrl, key); DB.mode = 'cloud'; outboxFlush(); return _sbClient;
+      // v134：apikey 只能是 anon/publishable key（网关只认这一把），租户 JWT 只能放 Authorization 头。
+      // 旧写法把 JWT 当第二个参数传给 createClient → supabase-js 把 JWT 同时当 apikey，
+      // 网关直接 401，带权限的读取全部失败：管理员后台因此永远只看到本地缓存（=看不到反馈）。
+      if (jwt) {
+        _sbClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, {
+          global: { headers: { Authorization: 'Bearer ' + jwt } },
+          auth: { persistSession: false, autoRefreshToken: false }
+        });
+      } else {
+        _sbClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+      }
+      DB.mode = 'cloud'; outboxFlush(); return _sbClient;
     }
     catch(e){ _sbClient = null; return null; }
   }
@@ -11819,9 +11834,12 @@ S.mintCloudToken = function(meta, cb){
     var m = meta || {};
     var body = {
       p_type: m.type, p_loginId: m.loginId, p_password: m.password,
-      p_company: m.company, p_phone: m.phone, p_owner: currentOwnerKey(),
-      p_companyId: m.companyId || ''
+      p_company: m.company, p_phone: m.phone, p_owner: currentOwnerKey()
     };
+    // v134：形参名必须全小写 p_companyid —— PostgREST 按形参名精确匹配，写成 p_companyId
+    // 会直接 404 PGRST202（函数找不到），于是所有登录都签不到 JWT、只能以 anon 身份读表，
+    // RLS 一行不放 → 管理员后台反馈恒为 0 条。空值不传，避免多余匹配。
+    if (m.companyId) body.p_companyid = m.companyId;
     fetch(fnUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': cfg.supabaseAnonKey, 'Authorization': 'Bearer ' + cfg.supabaseAnonKey },
@@ -11834,8 +11852,15 @@ S.mintCloudToken = function(meta, cb){
         // JWT 换了 key，旧的 client 缓存失效，下次 sbClient 重建
         _sbClient = undefined;
         cb(j);
+        // v134：拿到租户 JWT 后立刻用它重拉一次云端。
+        // 此前只在登录前用 anon key 拉过（RLS 一行不放），登录后不重拉，
+        // 管理员/企业账号必须手动点「刷新云端」才看得到反馈与线索。
+        setTimeout(function(){ try { if (sbClient()) bootCloud(); } catch(e){} }, 0);
       } else {
-        S._cloudJwt = null; localStorage.removeItem('aidax_cloud_jwt');
+        // v134：重签失败别顺手清掉仍然有效的旧令牌。管理员/企业/注册用户重签要密码，
+        // 密码不落地 → 无密码重签必然失败，一清就把刚拿到的权限丢了，后台随即读不到反馈。
+        var _keep = S._cloudJwt && (Date.now() - (S._cloudJwtAt || 0) < 50*60*1000);
+        if (!_keep) { S._cloudJwt = null; localStorage.removeItem('aidax_cloud_jwt'); }
         cb();
       }
     }).catch(function(){ S._cloudJwt = null; localStorage.removeItem('aidax_cloud_jwt'); cb(); });
@@ -12966,6 +12991,17 @@ function renderAdminFeedback() {
           <span style="margin-left:auto;font-size:11.5px;color:var(--text3)">${fmtTs(f.ts)} · ${escapeHtml(f.user||'')}</span>
         </div>
         <div class="fi-text">${escapeHtml(f.text || '（无文字描述）')}</div>`;
+      // v134：把「谁提的 / 哪家 / 什么岗位 / 怎么回访 / 在哪一页」显式列出。
+      // v133 起课程页会把身份写进 doc（user/org/role/contact/ctx），但后台此前一个都不展示。
+      (function(){
+        var who = [];
+        if (f.user) who.push('<span>姓名 <b>' + escapeHtml(f.user) + '</b></span>');
+        if (f.org) who.push('<span>企业 <b>' + escapeHtml(f.org) + '</b></span>');
+        if (f.role && f.role !== 'learner') who.push('<span>岗位 <b>' + escapeHtml(f.role) + '</b></span>');
+        if (f.contact) who.push('<span>联系 <b>' + escapeHtml(f.contact) + '</b></span>');
+        if (who.length) html += '<div class="fi-who">' + who.join('') + '</div>';
+        if (f.ctx) html += '<div class="fi-who">位置 ' + escapeHtml(f.ctx) + '</div>';
+      })();
       var imgs = (f.images && f.images.length) ? f.images : (m.image ? [m.image] : []);
       if (imgs.length) {
         html += '<div class="fi-imgs">';
