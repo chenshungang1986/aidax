@@ -555,6 +555,15 @@ var META=Object.assign({
 /* 占位符替换：默认词先取课程数据里的 customization（行业/机构/产品定制），不再写死金融默认值 */
 let CUSTOM=Object.assign({industry:META.industry,company:'模拟机构 X',product:'主推产品'},(typeof COURSE!=='undefined'&&COURSE.customization)||{});
 try{ const s=localStorage.getItem('aidax_retail_pm_custom'); if(s) CUSTOM=Object.assign(CUSTOM,JSON.parse(s)); }catch(e){}
+/* 默认播放倍速：真人声按 -20% 语速合成（约 252 字/分），1.25× 后约 315 字/分 */
+const RATE_DEF=1.25;
+/* 单元真实音频秒数：有实测时长(d)用 d，没有才按字数估 0.205 秒/字 */
+function unitSec(u){
+  return ((u&&u.vslides)||[]).reduce(function(a,s){
+    const d=Number(s.d);
+    return a+(d>0?d:Math.max(2,sub(s.n).length*0.205));
+  },0);
+}
 function sub(t){ return (t||'').replace(/\{\{industry\}\}/g,CUSTOM.industry).replace(/\{\{company\}\}/g,CUSTOM.company).replace(/\{\{product\}\}/g,CUSTOM.product); }
 function applyCustom(close){
   const v=id=>{ const e=document.getElementById(id); return e? e.value.trim() : ''; };
@@ -867,12 +876,12 @@ function renderCheckpoint(){
   const {m,u}=f;
   const step=CHECK.steps[CHECK.idx];
   const cp=document.getElementById('cp');
-  const mins=(u.vslides.reduce((a,s)=>a+(Number(s.d)>0?Number(s.d):Math.max(2,sub(s.n).length*0.205)),0)/60).toFixed(1);
+  const mins=(unitSec(u)/60/RATE_DEF).toFixed(1);
   const ui=m.units.indexOf(u);
   if(step.key==='watch'){
     cp.className='cp';
     cp.innerHTML='<div class="cp-head"><div class="cp-title">\uD83D\uDCFA 视频讲解</div>'
-      +'<div class="cp-sub">第 '+(ui+1)+'/'+m.units.length+' 单元 · 约 '+mins+' 分钟</div></div>'
+      +'<div class="cp-sub">第 '+(ui+1)+'/'+m.units.length+' 单元 · 约 '+mins+' 分钟（'+RATE_DEF+'\u00D7 速）</div></div>'
       + objBox(u)
       +'<div class="card"><h3>\uD83C\uDFAC 视频讲解<span class="h3lnk" onclick="openSparChat(\''+uid+'\')">边看边问 ›</span></h3>'
       +'<div class="vwrap" id="p-wrap">'
@@ -881,7 +890,7 @@ function renderCheckpoint(){
       +'<div class="vbar"><button class="play" id="p-play">\u25B6 播放</button>'
       +'<div class="seek" id="p-seek"><div class="fill"></div><div class="knob"></div></div>'
       +'<span class="time" id="p-time">0:00 / 0:00</span>'
-      +'<button class="pbtn" id="p-rate" title="倍速播放">1\u00D7</button>'
+      +'<button class="pbtn" id="p-rate" title="倍速播放（默认 '+RATE_DEF+'\u00D7）">'+RATE_DEF+'\u00D7</button>'
       +'<button class="pbtn" id="p-fs" title="全屏观看">\u26F6 全屏</button></div>'
       +'</div>'
       +'<div class="aud-note" id="p-note"></div></div>'
@@ -1249,7 +1258,7 @@ function makePlayer(uid, slides, aud){
   const stage=gid('p-stage'), subEl=gid('p-sub'), dots=gid('p-dots'), seek=gid('p-seek'),
         timeEl=gid('p-time'), playBtn=gid('p-play'), wrap=gid('p-wrap'),
         rateBtn=gid('p-rate'), fsBtn=gid('p-fs');
-  let cur=0, playing=false, mode=null, rate=1, dragging=false;
+  let cur=0, playing=false, mode=null, rate=RATE_DEF, dragging=false;
   let ttsTimer=null, ttsPulse=null, ttsStart=0, ttsGuard=null, pulsedIdx=-1;
   let audio=null, audioIdx=-1, pendingAt=null;      /* 单实例：物理上不可能两路同时响 */
   const posOf={};                                   /* 每段已播到的秒数 */
@@ -3246,9 +3255,9 @@ function guideCard(uid,m,u,st){
     return '<span class="'+cls+'">'+(ico?'<b style="margin-right:3px">'+ico+'</b>':'')+STEP_LABEL[s]+'</span>';
   }).join('');
   const hasDeliv=!!(u.deliverable&&u.deliverable.name);
-  const durMin=Math.round(u.vslides.reduce((a,s)=>a+Math.max(2,sub(s.n).length*0.205),0)/60);
+  const durMin=Math.max(1,Math.round(unitSec(u)/60/RATE_DEF));
   const path=[
-    '观看上方<b>视频讲解</b>（约 '+durMin+' 分钟）',
+    '观看上方<b>视频讲解</b>（约 '+durMin+' 分钟，'+RATE_DEF+'\u00D7 速）',
     '完成下方<b>「看完就练」/ 本环节活动</b>：'+STEP_HINT[u.step],
     '点<b>「提交并结算本单元」</b>，达到 60 分即通关',
     hasDeliv? '本单元含交付物：复制模板 → 在 WorkBuddy 找 <b>真·AI 陪练</b> → 回来做 <b>AI 打分</b>（可选，作能力佐证）' : '本单元无独立交付物，通关即完成'
