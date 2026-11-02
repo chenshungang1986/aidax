@@ -41,8 +41,16 @@
   .layout{display:flex;flex:1;min-height:0}
   .sidebar{width:288px;background:#fff;border-right:1px solid var(--line);overflow-y:auto;padding:10px}
   .mod{border:1px solid var(--line);border-radius:11px;margin-bottom:9px;overflow:hidden}
-  .mod-h{padding:9px 11px;cursor:pointer;font-size:13.5px;font-weight:600;display:flex;gap:7px;align-items:center;background:#fbfcff}
+  /* 模块头改为两层：标题独占一行（两行截断），进度/短板/测验标签下移一行，
+     避免标签把标题挤成「M1 写出第一句好…」这种半句话。 */
+  .mod-h{padding:9px 11px;cursor:pointer;font-size:13.5px;font-weight:600;background:#fbfcff}
+  .mod-h .mh-top{display:flex;gap:7px;align-items:flex-start}
+  .mod-h .mh-meta{display:flex;align-items:center;gap:6px;margin-top:5px}
+  .mod-h .mid{flex-shrink:0}
   .mod-h .mid{font-size:10.5px;background:var(--blue-bg);color:var(--blue-d);border-radius:5px;padding:1px 6px}
+  /* 模块标题：原来代码里写死 slice(0,12) 会把标题砍成半句（如「M1 写出第一句好用的提」），
+     改为最多两行、超出加省略号，标题完整可读且不撑破左栏。 */
+  .mod-h .mtitle{flex:1;min-width:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.4;word-break:break-word}
   .mod-h .mdone{margin-left:auto;font-size:11px;color:var(--green);font-weight:700}
   .mod-h .mquiz{font-size:11px;color:var(--amber);border:1px solid #ffd9a8;background:#fffbeb;border-radius:6px;padding:0 5px;cursor:pointer;white-space:nowrap}
   .mod-b{display:none;padding:2px 6px 6px}
@@ -55,6 +63,8 @@
   .unit.done:after{content:"✓";margin-left:auto;color:var(--green);font-weight:700}
   .unit.active.done:after{color:#d8ffe8}
   .unit .st{font-size:10px;padding:1px 6px;border-radius:5px;background:#f1f4fa;color:var(--mut)}
+  /* 单元标题原来写死 slice(0,11)，长标题被切成半句；改为单行省略，完整语义优先 */
+  .unit .ut{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .unit.active .st{background:rgba(255,255,255,.25);color:#fff}
   .main{flex:1;overflow-y:auto;padding:20px 26px 70px;max-width:980px;margin:0 auto;width:100%}
   .crumb{font-size:12px;color:var(--mut)}
@@ -830,23 +840,31 @@ function curModIndex(){
 function renderSidebar(){
   const sb=document.getElementById('sidebar'); sb.innerHTML='';
   const openIdx=curModIndex();
+  /* 短板标记的分寸：原先只要模块沾到任一弱维就打「📌 短板」，学员 8 维全弱时整栏 8 个模块全红，
+     等于没给优先级。现在弱维 ≤4 时照常全标；超过 4 个只标命中数最多的前 3 个模块。 */
+  const hitCnt = COURSE.modules.map(m=>((m.dims||[]).filter(d=>WEAK.includes(d)).length));
+  const markAll = WEAK.length <= 4;
+  const topIdx = new Set(hitCnt.map((n,i)=>({n:n,i:i})).filter(x=>x.n>0)
+    .sort((a,b)=>b.n-a.n).slice(0,3).map(x=>x.i));
   COURSE.modules.forEach((m,mi)=>{
     const mod=document.createElement('div'); mod.className='mod'+(mi===openIdx?' open':'');
     const done=m.units.filter(u=>prog.units[u.id]&&prog.units[u.id].done).length;
     const allDone=done===m.units.length;
     const passed=!!prog.quizzes[m.id];
-    const weakHit = m.dims && m.dims.some(d=>WEAK.includes(d));
+    const weakHit = m.dims && m.dims.some(d=>WEAK.includes(d)) && (markAll || topIdx.has(mi));
     if(weakHit) mod.className+=' weak';
     const hd=document.createElement('div'); hd.className='mod-h';
-    hd.innerHTML='<span class="mid">'+m.id+'</span><span>'+m.title.slice(0,12)+'</span>'
+    hd.innerHTML='<div class="mh-top"><span class="mid">'+m.id+'</span><span class="mtitle">'+esc(m.title)+'</span></div>'
+      +'<div class="mh-meta">'
       +(allDone?'<span class="mdone">'+done+'/8 已通关</span>':'<span class="mdone" style="color:var(--mut);font-weight:500">'+done+'/8</span>')
       +(weakHit?'<span class="mweak" style="font-size:11px;color:#dc2626;border:1px solid #fecaca;background:#fef2f2;border-radius:6px;padding:0 5px;cursor:default;white-space:nowrap">📌 短板</span>':'')
-      +'<span class="mquiz" style="'+(passed?'color:#166534;border-color:#86efac;background:#ecfdf5':'')+'">'+(passed?'\u2713 测验':'\uD83D\uDCDD 测验')+'</span>';
+      +'<span class="mquiz" style="'+(passed?'color:#166534;border-color:#86efac;background:#ecfdf5':'')+'">'+(passed?'\u2713 测验':'\uD83D\uDCDD 测验')+'</span>'
+      +'</div>';
     const body=document.createElement('div'); body.className='mod-b';
     m.units.forEach(u=>{
       const el=document.createElement('div');
       el.className='unit'+(prog.cur===u.id?' active':'')+((prog.units[u.id]&&prog.units[u.id].done)?' done':'');
-      el.innerHTML='<span>'+u.title.slice(0,11)+'</span><span class="st">'+STEP_LABEL[u.step]+'</span>';
+      el.innerHTML='<span class="ut">'+esc(u.title)+'</span><span class="st">'+STEP_LABEL[u.step]+'</span>';
       el.onclick=()=>openUnit(u.id);
       body.appendChild(el);
     });
@@ -1016,10 +1034,13 @@ function totalXP(){ let s=0; for(const k in prog.units){ const u=prog.units[k]; 
 function replayUnit(uid){ const st=prog.units[uid]||{}; prog.units[uid]=Object.assign({},st,{watched:false,taskDone:false,delivSeen:false,done:false,acts:{},score:0,detail:[]}); saveProg(); refreshProg(); renderSidebar(); openUnit(uid); }
 
 /* ===================== P1：可运行产出物卡片 + 真·AI 陪练（路线①） ===================== */
+/* 徽标文字一律中文；CSS class 仍用英文 key 走配色。
+   历史问题：map 的值就是 key 本身，页面上直接显示「skill / agent」英文，学员看不懂。 */
+var DELIV_TXT={skill:'技能',agent:'智能体',workflow:'工作流',kb:'知识库'};
+function delivTxt(t){ return DELIV_TXT[t]||'技能'; }
 function delivBadge(t){
-  const map={skill:'skill',agent:'agent',workflow:'workflow',kb:'kb'};
-  const k=map[t]||'skill';
-  return '<span class="badge '+k+'">'+(map[t]||t||'产出')+'</span>';
+  const k=DELIV_TXT[t]?t:'skill';
+  return '<span class="badge '+k+'">'+esc(delivTxt(t))+'</span>';
 }
 /* 可测学习目标 / 行为转化提示：老课程没有这两个字段，函数返回空串即不渲染，向后兼容。 */
 function objBox(u){
@@ -1059,7 +1080,7 @@ function delivStrip(u){
   const rub=(d.rubric&&d.rubric.length)? d.rubric.join(' \u00B7 ') : '';
   const bcls=(d.type==='agent')?'agent':(d.type==='workflow')?'workflow':(d.type==='kb')?'kb':'skill';
   return '<div class="dstrip">'
-    +'<div class="ds-h"><b>交这个：'+esc(d.name)+'</b>'+(d.type?('<span class="badge '+bcls+'">'+esc(d.type)+'</span>'):'')+'</div>'
+    +'<div class="ds-h"><b>交这个：'+esc(d.name)+'</b>'+(d.type?('<span class="badge '+bcls+'">'+esc(delivTxt(d.type))+'</span>'):'')+'</div>'
     +(d.acceptance?('<div class="ds-a">验收：'+esc(d.acceptance)+'</div>'):'')
     +(rub?('<div class="ds-r">评审看：'+esc(rub)+'</div>'):'')
     +'</div>';
