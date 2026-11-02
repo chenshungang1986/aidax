@@ -65,6 +65,13 @@
   .role-card:hover, .industry-card:hover { border-color:var(--blue); background:var(--card-hover); transform:translateY(-2px); box-shadow:var(--shadow-hover); }
   .role-card.selected { border-color:var(--blue); background:var(--blue-bg); box-shadow:0 0 0 3px rgba(99,102,241,.08); }
   .industry-card.selected { border-color:var(--blue); background:var(--blue-bg); box-shadow:0 0 0 3px rgba(99,102,241,.08); }
+  /* v140 场景-岗位配对锁：「新人小白」↔「应届生」是唯一合法组合，另一侧不兼容项灰化不可选 */
+  .role-card.pick-locked, .industry-card.pick-locked { opacity:.4; cursor:not-allowed; filter:grayscale(1); border-style:dashed; }
+  .role-card.pick-locked:hover, .industry-card.pick-locked:hover { border-color:var(--border); background:var(--card); transform:none; box-shadow:var(--shadow); }
+  .pick-lock-note { display:flex; align-items:center; gap:8px; flex-wrap:wrap; background:var(--blue-bg); border:1px solid rgba(99,102,241,.22); border-radius:10px; padding:10px 12px; margin:0 0 14px; font-size:12.5px; line-height:1.6; color:var(--text2); }
+  .pick-lock-note b { color:var(--blue); font-weight:600; }
+  .pick-lock-note .pick-unlock { margin-left:auto; flex:0 0 auto; cursor:pointer; background:#fff; border:1px solid rgba(99,102,241,.45); color:var(--blue); border-radius:8px; padding:4px 10px; font-size:12px; font-weight:600; }
+  .pick-lock-note .pick-unlock:hover { background:var(--blue); border-color:var(--blue); color:#fff; }
   .industry-icon svg { width:32px; height:32px; margin:0 auto 6px; display:block; stroke:var(--blue); }
   .industry-name { font-size:14px; font-weight:600; }
   .industry-desc { font-size:11px; color:var(--text2); margin-top:3px; }
@@ -97,6 +104,10 @@
   .quiz-dot.done { background:var(--green); }
   .quiz-dot.current { background:var(--blue); }
   .quiz-question { font-size:16px; font-weight:600; margin-bottom:16px; }
+  /* v140 题干合并块：情景与提问放进同一个框、同一套字色，连续读下来才不会被当成两段无关内容 */
+  .quiz-stem { background:var(--bg2); border-left:3px solid var(--accent); border-radius:10px; padding:14px 16px; margin-bottom:16px; }
+  .quiz-stem-ctx { font-size:15px; line-height:1.75; color:var(--text1); margin:0; }
+  .quiz-stem-q { font-size:16px; font-weight:700; line-height:1.55; color:var(--text1); margin:8px 0 0; }
   .quiz-option { display:block; width:100%; text-align:left; padding:12px 16px; margin-bottom:8px; background:var(--bg); border:1.5px solid var(--border); border-radius:var(--radius-sm); font-size:14px; color:var(--text2); cursor:pointer; transition:all .15s; }
   .quiz-option:hover { border-color:var(--blue); background:var(--blue-bg); }
   .quiz-option.selected { border-color:var(--blue); background:var(--blue-bg); color:var(--text); }
@@ -942,6 +953,30 @@ const ROLES = {
     dimKeys:['prompt','data','content','data','content','content','tools','workflow']
   }
 };
+
+// ==================== v140 场景-岗位配对锁 ====================
+// 「新人小白」场景只配套「应届生」岗位（反之亦然）：课程实体（course_newbie_deep.html）、
+// 题库（NEWBIE_QUIZ）、目标画像全部只按这一对建。任一侧被选中后，另一侧只留唯一选项，
+// 其余灰化不可选，避免出现「新人小白 × 产品」这类拿通用课顶替的错位组合。
+const PICK_LOCK = {
+  industry2role: { newbie: 'graduate' },   // 选了该行业 → 岗位只能是它
+  role2industry: { graduate: 'newbie' }    // 选了该岗位 → 行业只能是它
+};
+// 行业与岗位是否互斥（任一为空不算冲突）
+function pickConflict(industryId, roleId) {
+  if (!industryId || !roleId) return false;
+  var onlyRole = PICK_LOCK.industry2role[industryId];
+  if (onlyRole) return roleId !== onlyRole;
+  var onlyInd = PICK_LOCK.role2industry[roleId];
+  if (onlyInd) return industryId !== onlyInd;
+  return false;
+}
+// 把旧版本可能残留的非法组合收敛到唯一合法组合
+function normalizeScenePair() {
+  if (S.role === 'graduate' && S.industry !== 'newbie') { S.industry = 'newbie'; return true; }
+  if (S.industry === 'newbie' && S.role && S.role !== 'graduate') { S.role = 'graduate'; return true; }
+  return false;
+}
 
 // ==================== AI CAPABILITY MODEL ====================
 // 8 universal AI capability dimensions
@@ -5420,12 +5455,12 @@ const SELF_ASSESS_QUIZ = [
     q: '你平时用过以下哪些 AI 工具？（可多选）',
     multi: true,
     opts: [
-      {t:'ChatGPT / Claude / Gemini 等海外大模型'},
-      {t:'文心一言 / 通义千问 / 智谱清言 等国内大模型'},
-      {t:'DeepSeek'},
-      {t:'豆包 / 元宝 / Kimi 等国产 AI 助手'},
-      {t:'GitHub Copilot / Microsoft 365 Copilot 等办公或编程助手'},
-      {t:'即梦 / 可灵 / Midjourney 等图像或视频生成工具'},
+      {t:'ChatGPT / Claude / Gemini / Grok 等海外大模型'},
+      {t:'豆包 / 通义千问 / DeepSeek / 腾讯元宝 / Kimi 等国产大模型'},
+      {t:'Claude Code / Cursor / GitHub Copilot / TRAE 等 AI 编程工具'},
+      {t:'即梦 / 可灵 Kling / Midjourney / Nano Banana 等图像与视频生成工具'},
+      {t:'WorkBuddy / Manus / 扣子 Coze / 飞书智能伙伴 等 AI 工作台与智能体'},
+      {t:'以上都没用过（第一次接触 AI 工具）', none:true},
       {t:'其他（请填写）', other:true}
     ]
   },
@@ -9163,6 +9198,8 @@ function headerHtml(title, sub, showBack) {
 
 // ---- ROLE SELECTION ----
 function renderRoleSelection() {
+  // v140：进入选择页先把旧状态收敛成合法配对（防历史残留的「新人小白 × 产品」错位组合）
+  normalizeScenePair();
   let html = `
     <h2 class="sr-only">选择行业场景与岗位开始AI技能测评</h2>
     <div style="padding:20px 0;">
@@ -9180,21 +9217,34 @@ function renderRoleSelection() {
         <div class="industry-grid">`;
   for (const [id, ind] of Object.entries(INDUSTRIES)) {
     const subs = ind.subs ? ind.subs.map(s => `<span class="tag tag-blue" style="font-size:10px;padding:1px 7px;margin:2px 2px 0;">${s}</span>`).join('') : '';
+    // v140：已选「应届生」岗位时，只有「新人小白」场景可配，其余场景灰化
+    const lockOn = pickConflict(id, S.role);
+    const lockTip = lockOn ? `当前岗位「${(ROLES[S.role]||{}).name}」只配套「${(INDUSTRIES[PICK_LOCK.role2industry[S.role]]||{}).name}」场景` : '';
     html += `
-          <div class="industry-card${S.industry===id?' selected':''}" data-action="selectIndustry" data-id="${id}">
+          <div class="industry-card${S.industry===id?' selected':''}${lockOn?' pick-locked':''}" data-action="selectIndustry" data-id="${id}"${lockOn?' title="'+lockTip+'"':''}>
             <div class="industry-icon">${ind.icon}</div>
             <div class="industry-name">${ind.name}</div>
             <div class="industry-desc">${ind.desc}</div>
             ${subs ? `<div style="margin-top:6px;">${subs}</div>` : ''}
           </div>`;
   }
+  // v140：配对锁生效时给出说明条 + 一键解绑出口，避免学员被灰化卡片困住
+  const lockActive = !!PICK_LOCK.industry2role[S.industry] || !!PICK_LOCK.role2industry[S.role];
+  const lockNote = lockActive ? `<div class="pick-lock-note">
+      <span>🔒 已锁定配对 <b>${(INDUSTRIES[S.industry]||{}).name || '—'}</b> × <b>${(ROLES[S.role]||{}).name || '待选'}</b> · 「新人小白」与「应届生」是唯一绑定组合，课程与题库只按这一对交付，其余选项已灰化。</span>
+      <button class="pick-unlock" data-action="resetScenePair" onclick="if(typeof S!=='undefined'){S.resetScenePair()}">换个组合</button>
+    </div>` : '';
   html += `</div></div>
       <div class="card${!S.industry?'':' selected'}">
         <p style="font-weight:600;font-size:15px;margin-bottom:16px;">Step 2: 选择你的岗位</p>
+        ${lockNote}
         <div class="role-grid">`;
   for (const [id, r] of Object.entries(ROLES)) {
+    // v140：已选「新人小白」场景时，只有「应届生」岗位可配，其余灰化
+    const lockOn = pickConflict(S.industry, id);
+    const lockTip = lockOn ? `当前场景「${(INDUSTRIES[S.industry]||{}).name}」只配套「${(ROLES[PICK_LOCK.industry2role[S.industry]]||{}).name}」岗位` : '';
     html += `
-          <div class="role-card${S.role===id?' selected':''}" data-action="selectRole" data-id="${id}">
+          <div class="role-card${S.role===id?' selected':''}${lockOn?' pick-locked':''}" data-action="selectRole" data-id="${id}"${lockOn?' title="'+lockTip+'"':''}>
             <div class="role-icon">${r.icon}</div>
             <div class="role-name">${r.name}</div>
             <div class="role-desc">${r.desc}</div>
@@ -9340,9 +9390,8 @@ function renderBaseQuestion() {
 
   // v81：题干兜底 —— 部分题目把真实任务写在 scenario 里（q 只是短标签），
   // 基础素养卷原先只渲染 q.q，导致屏幕上看起来「没有题干」。此处与岗位卷渲染口径对齐。
-  const scenarioHtml = q.scenario
-    ? `<div style="font-size:13px;color:var(--accent);margin-bottom:12px;padding:10px 14px;background:var(--bg2);border-radius:8px;border-left:3px solid var(--accent);">${String(q.scenario).replace('场景：', '')}</div>`
-    : '';
+  // v140：情景与提问合并进同一题干块（stemHtml），避免只看到问句就作答。
+  const stemCtx = q.scenario ? String(q.scenario).replace('场景：', '') : '';
   let html = headerHtml(theme.icon + ' ' + theme.name + ' · AI 基础素养', '基础卷（计入综合分 · 30%）· ' + `第 ${idx + 1}/${total} 题`, true);
   html += `<div class="card slide-up" style="position:relative;">
     ${renderTimerBar()}
@@ -9352,8 +9401,7 @@ function renderBaseQuestion() {
       <span style="margin-left:auto;font-size:12px;color:var(--text2);">已答 ${answeredCount}/${total}</span>
     </div>
     <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">${dots}</div>
-    ${scenarioHtml}
-    <div class="quiz-question">${q.q}</div>
+    ${stemHtml(stemCtx, q.q)}
     <div style="display:flex;flex-direction:column;">`;
   // v83：选项仅暂存高亮，不判对错；本部分提交前可随时回看修改
   const recorded = (S._baseAnswers && S._baseAnswers[idx]) ? S._baseAnswers[idx].chosen : undefined;
@@ -9366,7 +9414,7 @@ function renderBaseQuestion() {
   });
   html += `</div>`;
   if (shown !== undefined) {
-    html += `<div style="margin-top:12px;font-size:12.5px;color:var(--text2);">已选 <b style="color:var(--accent);">${String.fromCharCode(65 + shown)}</b> · 提交前可随时修改；对错与解析在本部分结束后统一展示</div>`;
+    html += `<div style="margin-top:12px;font-size:12.5px;color:var(--text2);">已选 <b style="color:var(--accent);">${String.fromCharCode(65 + shown)}</b> · 可直接改选，改选即生效；对错与解析在本部分结束后统一展示</div>`;
   }
   const isLast = idx >= total - 1;
   const canSubmit = shown !== undefined;
@@ -9375,7 +9423,7 @@ function renderBaseQuestion() {
         <button class="btn btn-outline" data-action="goBack" onclick="if(typeof S!=='undefined'){S.goBack()}">← 退出</button>
         ${idx > 0 ? `<button class="btn btn-outline" data-action="basePrev" onclick="if(typeof S!=='undefined'){S.basePrev()}">← 上一题</button>` : ''}
       </div>
-      <button class="btn btn-primary" data-action="submitBaseOption" ${canSubmit ? 'onclick="if(typeof S!==\'undefined\'){S.submitBaseOption()}"' : 'disabled'} style="${canSubmit ? '' : 'opacity:.5;cursor:not-allowed;'}">${isLast ? '提交本部分 · 查看结果 →' : '提交本题 →'}</button>
+      <span style="font-size:12px;color:var(--text3);">点选项即提交 · 自动进入下一题</span>
     </div></div>`;
   html += renderPauseOverlay();
   return html;
@@ -9628,9 +9676,8 @@ function renderQuiz() {
   }
   // Inject industry context for non-PM roles to make questions industry-specific
   const indCtx = getIndustryContext(S.role, S.industry);
-  const scenarioHtml = q.scenario
-    ? `<div style="font-size:13px;color:var(--accent);margin-bottom:12px;padding:10px 14px;background:var(--bg2);border-radius:8px;border-left:3px solid var(--accent);">${indCtx}${q.scenario.replace('场景：','')}</div>`
-    : '';
+  // v140：情景与提问合并进同一题干块（stemHtml），避免只看到问句就作答
+  const stemCtx = q.scenario ? (indCtx + q.scenario.replace('场景：','')) : '';
   const levelNames = ['初阶','中阶','高阶'];
   const levelName = levelNames[t.lv] || '中阶';
   const totalDims = S._quizDims.length;
@@ -9659,8 +9706,8 @@ function renderQuiz() {
       <span style="margin-left:auto;font-size:12px;font-weight:600;color:${Object.keys(S._quizDone).length === totalDims ? 'var(--green)' : 'var(--text2)'};">已定级 ${Object.keys(S._quizDone).length}/${totalDims} 维</span>
     </div>
     <div class="quiz-progress">${dots}</div>
-    ${scenarioHtml}
-    <div class="quiz-question">${q.q}</div>
+    ${stemHtml(stemCtx, q.q)}
+    ${stepAnswered ? '' : '<div style="font-size:12px;color:var(--text3);margin:-2px 0 10px;">单选 · 点选后自动锁定并进入下一题</div>'}
     <div style="display:flex;flex-direction:column;">`;
   const committed = stepAnswered;
   const pending = committed ? undefined : ((S._quizPending && S._quizPending[step] !== undefined) ? S._quizPending[step] : undefined);
@@ -9689,12 +9736,12 @@ function renderQuiz() {
   const canSubmit = !committed && pending !== undefined;
   html += `<div class="flex-between mt-4">
       <button class="btn btn-outline" data-action="prevQuestion" ${canBackToFirst ? '' : 'disabled'} onclick="if(typeof S!=='undefined'){S.prevQuestion()}">↺ 重答上一题</button>
-      <span style="font-size:13px;color:${committed ? 'var(--text2)' : 'var(--red)'};">${doneCount}/${totalDims} 已完成${committed ? '' : '（请先选择并提交答案）'}</span>
+      <span style="font-size:13px;color:var(--text2);">${doneCount}/${totalDims} 已完成${committed ? '' : ' · 点选项即自动下一题'}</span>
       ${committed
         ? (isLastPlan && S._quizAllDone
             ? '<button class="btn btn-primary" data-action="finishQuiz" onclick="if(typeof S!==\'undefined\'){S.finishQuiz()}">查看结果</button>'
             : '<button class="btn btn-primary" data-action="nextQuestion" onclick="if(typeof S!==\'undefined\'){S.nextQuestion()}">下一题 →</button>')
-        : '<button class="btn btn-primary" data-action="submitQuizOption" ' + (canSubmit ? 'onclick="if(typeof S!==\'undefined\'){S.submitQuizOption()}"' : 'disabled') + ' style="' + (canSubmit ? '' : 'opacity:.5;cursor:not-allowed;') + '">提交本题</button>'}
+        : '<span style="font-size:12px;color:var(--text3);">点选项即提交 · 自动进入下一题</span>'}
     </div>
   </div>`;
   html += renderPauseOverlay();
@@ -12048,6 +12095,18 @@ function bootCloud(){
 }
 
 function uid(p){ return (p||'') + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+// v140：题干渲染 —— 情景描述与提问合并为一个题干块。
+// 旧版把情景做成灰底独立块（蓝色小字）、提问另起一行单独加粗，视觉上像两段无关内容，
+// 学员容易只看下面那句问句就作答。合并后连续阅读，视觉权重一致。
+function stemHtml(ctx, question) {
+  var c = ctx ? String(ctx).trim() : '';
+  if (!c) return '<div class="quiz-question">' + question + '</div>';
+  return '<div class="quiz-stem">'
+    + '<p class="quiz-stem-ctx">' + c + '</p>'
+    + '<p class="quiz-stem-q">' + question + '</p>'
+    + '</div>';
+}
 
 function showToast(msg){
   var t = document.getElementById('toastBox');
@@ -15346,9 +15405,49 @@ S.reportExportCsv = function(){
 };
 
 // ==================== ACTIONS ====================
-S.selectIndustry = function(id) { S.industry = id; render(); };
-S.selectRole = function(id) { S.role = id; render(); };
+S.selectIndustry = function(id) {
+  // v140：若当前岗位只属于特定场景（应届生 → 新人小白），点其他场景＝以本次点击为准，
+  // 自动解除岗位选择并提示重选，而不是让灰卡点了没反应。
+  var lockedInd = PICK_LOCK.role2industry[S.role];
+  if (lockedInd && id !== lockedInd) {
+    var droppedRole = (ROLES[S.role] || {}).name || '';
+    S.role = null;
+    S.industry = id;
+    render();
+    showToast('已切到「' + ((INDUSTRIES[id] || {}).name || '') + '」场景；「' + droppedRole + '」只属于「' + ((INDUSTRIES[lockedInd] || {}).name || '') + '」，请重新选择岗位');
+    return;
+  }
+  S.industry = id;
+  // 新人小白 → 岗位同步锁定应届生，不必再让学员多点一步
+  var forcedRole = PICK_LOCK.industry2role[id];
+  if (forcedRole) S.role = forcedRole;
+  render();
+};
+S.selectRole = function(id) {
+  // v140：若当前场景只配套特定岗位（新人小白 → 应届生），点其他岗位＝以本次点击为准，
+  // 自动解除场景选择并提示重选。
+  var lockedRole = PICK_LOCK.industry2role[S.industry];
+  if (lockedRole && id !== lockedRole) {
+    var droppedInd = (INDUSTRIES[S.industry] || {}).name || '';
+    S.industry = null;
+    S.role = id;
+    render();
+    showToast('已切到「' + ((ROLES[id] || {}).name || '') + '」岗位；「' + droppedInd + '」场景只配套「' + ((ROLES[lockedRole] || {}).name || '') + '」，请重新选择行业场景');
+    return;
+  }
+  S.role = id;
+  // 应届生 → 场景同步锁定新人小白
+  var forcedInd = PICK_LOCK.role2industry[id];
+  if (forcedInd) S.industry = forcedInd;
+  render();
+};
+S.resetScenePair = function() { // v140：解除配对锁，回到自由选择
+  S.industry = null; S.role = null; render();
+  showToast('已解除锁定，请重新选择行业场景与岗位');
+};
 S.startQuiz = function() { // 三段式：①AI基础素养 → ②AI业务场景应用(自适应) → ③AI能力自评
+  // v140：开考前再兜一次配对规则，防止任何路径带进错位组合（新人小白 × 非应届生）
+  if (normalizeScenePair()) { render(); showToast('已按场景-岗位配对规则校正为「新人小白 × 应届生」，请确认后重新点击'); return; }
   if (!S._baseResult && !S._baseSkipped) {
     S._basePhase = 'intro';
     S._quizPlan = []; // 清空旧计划，防止基础卷阶段误入自适应渲染
@@ -15408,7 +15507,17 @@ S.selfToggle = function(idx, optIdx) {
   const q = SELF_ASSESS_QUIZ[S._selfPlan[idx]];
   if (q.multi) {
     const p = sel.indexOf(optIdx);
-    if (p >= 0) sel.splice(p, 1); else sel.push(optIdx);
+    if (p >= 0) {
+      sel.splice(p, 1);
+    } else if (q.opts[optIdx] && q.opts[optIdx].none) {
+      // v140：「以上都没用过」为互斥项，选中即清空其它已选工具
+      S._selfSel[idx] = [optIdx];
+    } else {
+      // 选了具体工具 → 自动去掉「以上都没用过」，避免自相矛盾
+      const noneIdx = q.opts.findIndex(o => o && o.none);
+      if (noneIdx >= 0) { const np = sel.indexOf(noneIdx); if (np >= 0) sel.splice(np, 1); }
+      sel.push(optIdx);
+    }
   } else {
     S._selfSel[idx] = [optIdx];
   }
@@ -15466,11 +15575,17 @@ S.answerQuiz = function(i) {
   if (S._basePhase === 'active') { S.selectBaseOption(i); return; }
   answerCurrentQuestion(i);
 };
-S.selectBaseOption = function(i) { // v83：仅暂存高亮，可在本部分提交前任意修改
+S.selectBaseOption = function(i) { // v140：点选即提交并自动进入下一题（保留 380ms 高亮反馈）
   const idx = S._baseIdx || 0;
   if (!S._basePending) S._basePending = [];
   S._basePending[idx] = i;
   render();
+  cancelAutoAdvance();
+  S._autoAdvTimer = setTimeout(function(){
+    S._autoAdvTimer = null;
+    if (S.view !== 'quiz' || (S._baseIdx || 0) !== idx) return;   // 已离开本页或已回退
+    S.submitBaseOption();
+  }, QUIZ_AUTO_ADV_MS);
 };
 S.submitBaseOption = function() { // v83：记录选择并前进（不判对错），末题即「提交本部分」
   const idx = S._baseIdx || 0;
@@ -15491,12 +15606,26 @@ S.submitBaseOption = function() { // v83：记录选择并前进（不判对错�
 S.basePrev = function() { // v83：回看并修改上一题（本部分提交前均可改）
   if ((S._baseIdx || 0) > 0) { S._baseIdx--; render(); }
 };
+// v140：单击即提交 —— 点选项立刻锁定该题并自动进入下一题，
+// 不再要求学员「提交本题 → 下一题」点两次。先渲染出选中态给一次视觉反馈，
+// 再提交并推进；中途离开本页 / 回退 / 暂停都会取消自动推进。
+var QUIZ_AUTO_ADV_MS = 380;
+function cancelAutoAdvance(){ if (S._autoAdvTimer) { clearTimeout(S._autoAdvTimer); S._autoAdvTimer = null; } }
 S.selectQuizOption = function(i) {
   const step = S.quizIdx;
   if (S._quizSelectedStep && S._quizSelectedStep[step] !== undefined) return;
   if (!S._quizPending) S._quizPending = {};
   S._quizPending[step] = i;
   render();
+  cancelAutoAdvance();
+  S._autoAdvTimer = setTimeout(function(){
+    S._autoAdvTimer = null;
+    if (S.view !== 'quiz' || S.quizIdx !== step) return;       // 已离开本页或已回退
+    if (!S._quizPending || S._quizPending[step] === undefined) return;
+    S.submitQuizOption();
+    // 只有确认该题真的落库（_quizSelectedStep 写入）才推进，避免引擎拒收时跳过一题
+    if (S._quizSelectedStep && S._quizSelectedStep[step] !== undefined) S.nextQuestion();
+  }, QUIZ_AUTO_ADV_MS);
 };
 S.submitQuizOption = function() { // v96：单次提交即定稿——提交前可自由改选，提交后引擎按答案推进（错则按规则出下一题），不再二次提交
   const step = S.quizIdx;
@@ -16191,6 +16320,7 @@ function bindEvents() {
           switch (action) {
             case 'selectIndustry': S.selectIndustry(id); break;
             case 'selectRole': S.selectRole(id); break;
+            case 'resetScenePair': S.resetScenePair(); break;
             case 'startQuiz': S.startQuiz(); break;
             case 'answerQuiz': S.answerQuiz(idx); break;
             case 'baseStart': S.baseStart(); break;
