@@ -643,6 +643,50 @@
 .admin-tab{flex:1;min-width:84px;padding:9px 8px;border:none;background:transparent;border-radius:8px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .18s;}
 .admin-tab:hover{background:var(--card-hover);color:var(--text);}
 .admin-tab.active{background:#fff;color:var(--blue);box-shadow:var(--shadow);}
+/* v137 管理后台：分组导航 / 筛选条 / 分页 / 空态 / 多选 */
+.adm-seg{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;padding:6px;background:var(--bg);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;scrollbar-width:none;}
+.adm-seg::-webkit-scrollbar{display:none;}
+.adm-seg-btn{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border:none;background:transparent;border-radius:8px;font-size:13.5px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .16s;white-space:nowrap;}
+.adm-seg-btn:hover{background:var(--card-hover);color:var(--text);}
+.adm-seg-btn.active{background:#fff;color:var(--blue);box-shadow:var(--shadow);}
+.asb-ico{font-size:13px;line-height:1;}
+.asb-badge{min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:#ef4444;color:#fff;font-size:10.5px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;}
+.adm-sub{display:flex;gap:4px;flex-wrap:wrap;padding:0 2px 12px;border-bottom:1px solid var(--border);margin-bottom:16px;}
+.adm-sub-btn{padding:7px 12px;border:none;background:transparent;border-radius:7px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .15s;}
+.adm-sub-btn:hover{background:var(--bg);color:var(--text);}
+.adm-sub-btn.active{background:var(--blue-bg);color:var(--blue-d);font-weight:700;}
+.adm-sub-btn i{margin-left:5px;font-style:normal;font-size:10.5px;font-weight:700;color:#ef4444;}
+.adm-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+.adm-inp{flex:1;min-width:170px;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#fff;}
+.adm-inp:focus{outline:none;border-color:var(--blue);}
+.adm-sel{padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:#fff;color:var(--text);}
+.adm-pager{display:flex;gap:10px;align-items:center;justify-content:center;padding:14px 0 4px;}
+.pg-btn{padding:6px 12px;border:1px solid var(--border);background:#fff;border-radius:7px;font-size:12.5px;color:var(--text2);cursor:pointer;}
+.pg-btn:hover:not(:disabled){border-color:var(--blue);color:var(--blue);}
+.pg-btn:disabled{opacity:.4;cursor:not-allowed;}
+.pg-info{font-size:12px;color:var(--text3);}
+.adm-empty{text-align:center;padding:34px 20px;}
+.ae-ico{font-size:30px;opacity:.55;margin-bottom:8px;}
+.ae-t{font-size:14px;font-weight:600;color:var(--text2);}
+.ae-d{font-size:12.5px;color:var(--text3);margin-top:5px;line-height:1.7;}
+.adm-chk{width:16px;height:16px;cursor:pointer;accent-color:var(--blue);flex:0 0 auto;}
+.fb-item.sel{outline:2px solid var(--blue);}
+.adm-todo{display:flex;align-items:flex-start;gap:10px;text-align:left;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;transition:all .16s;width:100%;}
+.adm-todo:hover{border-color:var(--blue);box-shadow:0 2px 10px rgba(0,122,255,.10);transform:translateY(-1px);}
+.ato-ico{font-size:19px;flex:0 0 auto;line-height:1.3;}
+.ato-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+.ato-main b{font-size:13.5px;color:var(--text);font-weight:700;}
+.ato-main i{font-size:11.5px;color:var(--text3);font-style:normal;line-height:1.5;}
+.ato-go{color:var(--text3);font-size:15px;flex:0 0 auto;}
+.adm-two{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.adm-two-h{font-size:12.5px;font-weight:700;color:var(--text2);margin-bottom:8px;}
+@media(max-width:760px){.adm-two{grid-template-columns:1fr;gap:6px;}}
+@media(max-width:640px){
+  .adm-seg{gap:2px;padding:4px;}
+  .adm-seg-btn{padding:8px 10px;font-size:12.5px;}
+  .adm-seg-btn .asb-ico{display:none;}
+  .adm-sub-btn{padding:6px 9px;font-size:12px;}
+}
 .section-title{font-weight:700;font-size:14px;margin:4px 0 12px;display:flex;align-items:center;gap:8px;}
 .section-title .st-ico{font-size:16px;}
 .analysis-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
@@ -709,6 +753,12 @@
 .fb-list{display:flex;flex-direction:column;gap:10px;}
 .fb-item{border:1px solid var(--border);border-radius:12px;padding:14px;background:var(--card);transition:all .15s;}
 .fb-item.sel{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-bg);}
+/* v137 反馈列表：左侧复选框 + 卡片，点复选框才选中（原来点整条容易误触） */
+.fb-row{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;}
+.fb-row>.adm-chk{margin-top:15px;}
+.fb-row>.fb-item{flex:1;min-width:0;margin:0;}
+.adm-note{margin:6px 0 14px;padding:11px 14px;border-radius:10px;background:#f1f5fd;border:1px solid #dbe6fb;font-size:12.5px;line-height:1.85;color:var(--text2);}
+.adm-chklab{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text2);cursor:pointer;user-select:none;}
 .fb-item .fi-top{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
 .fb-item .fi-text{font-size:13.5px;color:var(--text);white-space:pre-wrap;line-height:1.6;}
 .fb-item .fi-meta{font-size:11.5px;color:var(--text3);margin-top:8px;display:flex;gap:12px;flex-wrap:wrap;}
@@ -8566,12 +8616,13 @@ S.adminSetPwd = function(){
   if (p.length < 6) { alert('密码至少 6 位'); return; }
   setAdminPwd(p); showToast('管理员密码已更新'); render();
 };
+// v137：日志筛选已并入通用筛选条（S._af.logs），这里仅保留兼容入口
 S.logFilterApply = function(){
-  S.adminLogFilter.date = (document.getElementById('logDate')||{}).value || '';
-  S.adminLogFilter.month = (document.getElementById('logMonth')||{}).value || '';
+  S._af = S._af || {}; S._af.logs = S._af.logs || {};
+  var d = document.getElementById('logDate'); if (d) S._af.logs.day = d.value || '';
   render();
 };
-S.logFilterClear = function(){ S.adminLogFilter = { date:'', month:'' }; render(); };
+S.logFilterClear = function(){ S._af = S._af || {}; S._af.logs = {}; render(); };
 
 // ---- 渲染：登录首屏 ----
 function renderLogin(){
@@ -8609,33 +8660,101 @@ function renderLogin(){
 
 // ---- 渲染：访问日志（#2 按日期/月筛选，列出全部）----
 function renderAdminLogs(){
-  function pad(n){ return n<10?'0'+n:''+n; }
+  function pad(n){ return n < 10 ? '0' + n : '' + n; }
+  function dayKey(ts){ var d = new Date(ts); return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()); }
   var session = JSON.parse(localStorage.getItem('ai_training_session') || '{}');
-  var logs = DB.all('access_log').slice().sort(function(a,b){ return b.ts - a.ts; });
-  if (session.role === 'ent' && session.company) logs = logs.filter(function(l){ return l.company === session.company; });
-  var f = S.adminLogFilter || {};
-  if (f.date) logs = logs.filter(function(l){ var d=new Date(l.ts); return (d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())) === f.date; });
-  if (f.month) logs = logs.filter(function(l){ var d=new Date(l.ts); return (d.getFullYear()+'-'+pad(d.getMonth()+1)) === f.month; });
-  var html = '<div class="card slide-up"><div class="section-title"><span class="st-ico">📋</span>访问 / 登录日志'+(session.role==='ent'?'（仅本企业）':'')+'</div>';
-  html += '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">'
-    + '<input id="logDate" type="date" value="'+(f.date||'')+'" style="padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px">'
-    + '<input id="logMonth" type="month" value="'+(f.month||'')+'" style="padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px">'
-    + '<button class="btn btn-sm btn-primary" data-action="logFilterApply">筛选</button>'
-    + '<button class="btn btn-sm btn-outline" data-action="logFilterClear">清空</button>'
-    + '<span style="font-size:12px;color:var(--text3)">共 '+logs.length+' 条</span></div>';
-  if (!logs.length) { html += '<p style="color:var(--text3);text-align:center;padding:24px">无匹配记录</p>'; }
-  else {
-    html += '<div style="overflow-x:auto"><table class="log-table"><thead><tr><th>时间</th><th>姓名</th><th>公司</th><th>手机号</th><th>类型</th><th>验证</th><th>页面</th></tr></thead><tbody>';
-    logs.forEach(function(l){
-      var phone = l.phone ? (l.phone.slice(0,3)+'****'+l.phone.slice(7)) : '—';
-      var type = l.loginType==='ent'?'企业':(l.loginType==='admin'?'管理员':'学员');
-      html += '<tr><td>'+fmtTs(l.ts)+'</td><td>'+escapeHtml(l.name||l.user||'—')+'</td><td>'+escapeHtml(l.company||'—')+'</td><td>'+phone+'</td><td>'+type+'</td><td>'+(l.verified?'✅':'—')+'</td><td>'+(VIEW_LABEL[l.view]||l.view)+'</td></tr>';
+  var all = DB.all('access_log').slice().sort(function(a,b){ return b.ts - a.ts; });
+  if (session.role === 'ent' && session.company) all = all.filter(function(l){ return l.company === session.company; });
+
+  var af = (S._af || {}).logs || {};
+  var list = all.slice();
+  if (af.range === 'today') {
+    var t0 = new Date(); t0.setHours(0,0,0,0);
+    list = list.filter(function(l){ return l.ts >= t0.getTime(); });
+  } else if (af.range === '7d') {
+    var t1 = new Date(); t1.setHours(0,0,0,0); t1 = t1.getTime() - 6 * 86400000;
+    list = list.filter(function(l){ return l.ts >= t1; });
+  } else if (af.range === '30d') {
+    var t2 = new Date(); t2.setHours(0,0,0,0); t2 = t2.getTime() - 29 * 86400000;
+    list = list.filter(function(l){ return l.ts >= t2; });
+  }
+  if (af.day) list = list.filter(function(l){ return dayKey(l.ts) === af.day; });
+  if (af.type) list = list.filter(function(l){
+    var t = l.loginType === 'ent' ? 'ent' : (l.loginType === 'admin' ? 'admin' : 'learner');
+    return t === af.type;
+  });
+  if (af.q) list = list.filter(function(l){ return admHit(af.q, [l.name, l.user, l.company, l.phone, VIEW_LABEL[l.view] || l.view]); });
+  S._logFiltered = list;
+
+  var pg = admPage('logs', list.length, 30);
+  var rows = list.slice(pg.from, pg.to);
+  var filtering = !!(af.q || af.day || af.range || af.type);
+
+  var html = '<div class="card slide-up"><div class="section-title"><span class="st-ico">📋</span>访问 / 登录日志'
+    + (session.role === 'ent' ? '（仅本企业）' : '')
+    + '<span style="font-size:12px;font-weight:400;color:var(--text3);margin-left:8px">'
+    + (filtering ? '筛选后 ' + list.length + ' 条 / 共 ' + all.length + ' 条' : '共 ' + all.length + ' 条') + '</span></div>';
+
+  html += admBar('logs', {
+    ph: '搜索姓名 / 公司 / 手机号 / 页面…',
+    selects: [
+      { f:'range', opts: [['','全部时间'],['today','今天'],['7d','近 7 天'],['30d','近 30 天']] },
+      { f:'type',  opts: [['','全部身份'],['learner','学员'],['ent','企业账号'],['admin','管理员']] }
+    ],
+    extra: '<span style="font-size:12px;color:var(--text3)">按日查看</span>'
+      + '<input class="adm-sel" type="date" data-af="logs" data-f="day" value="' + (af.day || '') + '">'
+      + '<button class="btn btn-sm btn-outline" data-action="admCsv" data-key="logs">⬇️ 导出 CSV</button>'
+  });
+
+  if (!all.length) {
+    html += admEmpty('📋', '还没有访问记录', '学员浏览测评 / 课程 / 仪表盘都会自动记一条，无需埋点');
+  } else if (!list.length) {
+    html += admEmpty('🔍', '这个时间范围内没有记录', '放宽时间范围，或点「重置」看全部');
+  } else {
+    html += '<div style="overflow-x:auto"><table class="log-table"><thead><tr>'
+      + '<th>时间</th><th>姓名</th><th>公司</th><th>手机号</th><th>身份</th><th>验证</th><th>页面</th></tr></thead><tbody>';
+    rows.forEach(function(l){
+      var phone = l.phone ? (String(l.phone).slice(0,3) + '****' + String(l.phone).slice(7)) : '—';
+      var type = l.loginType === 'ent' ? '企业账号' : (l.loginType === 'admin' ? '管理员' : '学员');
+      var typeTag = l.loginType === 'admin' ? '<span class="tag tag-red">管理员</span>'
+        : l.loginType === 'ent' ? '<span class="tag tag-purple">企业账号</span>'
+        : '<span class="tag tag-blue">学员</span>';
+      html += '<tr><td>' + fmtTs(l.ts) + '</td>'
+        + '<td>' + escapeHtml(l.name || l.user || '—') + '</td>'
+        + '<td>' + escapeHtml(l.company || '—') + '</td>'
+        + '<td>' + phone + '</td>'
+        + '<td>' + typeTag + '</td>'
+        + '<td>' + (l.verified ? '<span style="color:var(--green)">已验证</span>' : '<span style="color:var(--text3)">游客</span>') + '</td>'
+        + '<td>' + (VIEW_LABEL[l.view] || l.view) + '</td></tr>';
     });
     html += '</tbody></table></div>';
+    html += pg.html;
+    html += '<p style="font-size:11.5px;color:var(--text3);margin-top:10px">「游客」= 未登录仅浏览；手机号已脱敏显示，用于客服回访定位，完整号码不落库到前端展示。</p>';
   }
   html += '</div>';
   return html;
 }
+
+// ---- 日志导出 CSV（当前筛选结果）----
+S._csv_logs = function(){
+  var list = S._logFiltered || DB.all('access_log');
+  var rows = [['时间','姓名','公司','手机号','身份','是否验证','页面','行业','岗位']];
+  list.forEach(function(l){
+    rows.push([
+      new Date(l.ts).toLocaleString('zh-CN'),
+      l.name || l.user || '',
+      l.company || '',
+      l.phone || '',
+      l.loginType === 'ent' ? '企业账号' : (l.loginType === 'admin' ? '管理员' : '学员'),
+      l.verified ? '已验证' : '游客',
+      VIEW_LABEL[l.view] || l.view || '',
+      (INDUSTRIES[l.industry] || {}).name || '',
+      (ROLES[l.role] || {}).name || ''
+    ]);
+  });
+  var d = new Date();
+  csvDownload('访问日志_' + d.getFullYear() + ('0' + (d.getMonth()+1)).slice(-2) + ('0' + d.getDate()).slice(-2) + '.csv', rows);
+};
 
 // ---- 渲染：企业管理（管理员生成企业专属登录ID+密码）----
 function renderAdminCompanies(){
@@ -8659,6 +8778,13 @@ function renderAdminCompanies(){
     });
     html += '</tbody></table></div>';
   }
+  // v137：演示数据从总览移到这里并折叠——它是会写云端的高危按钮，不该摆在首页
+  html += '<div style="margin-top:18px;border-top:1px solid var(--border);padding-top:14px">'
+    + '<details><summary style="cursor:pointer;font-size:13px;color:var(--text3)">🧪 调试工具（演示数据）</summary>'
+    + '<p style="font-size:12.5px;color:var(--text2);margin:10px 0;line-height:1.7">生成 40 条演示学员档案 + 60 条访问日志，用于空库时预览看板与分析页。'
+    + '<b style="color:var(--red)">已连接云端时会同步写入云端</b>，对外演示完请清理，别把假数据留在客户看板里。</p>'
+    + '<button class="btn btn-outline btn-sm" data-action="seedDemoData">生成演示数据</button>'
+    + '</details></div>';
   html += '<div style="margin-top:18px;border-top:1px solid var(--border);padding-top:14px"><div class="section-title"><span class="st-ico">🔑</span>修改管理员密码</div>'
     + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">'
     + '<input id="newAdminPwd" type="password" placeholder="新密码（至少6位）" style="flex:1;min-width:160px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px">'
@@ -8977,6 +9103,9 @@ function syncPartTimer() {
 }
 
 function render() {
+  // v137：局部操作（勾选/翻页/筛选）重渲染时保持滚动位置，否则长列表点一下就被弹回顶部
+  var _keepY = null;
+  try { if (S._keepScroll != null) { _keepY = S._keepScroll; S._keepScroll = null; } } catch(e) {}
   // v74：进入学习/管理页时按账号可见范围收敛本地档案（每会话首次渲染执行一次）
   if (S.view !== 'login' && !S._scopeDone) { S._scopeDone = true; try { scopeLocalEmployees(); } catch(e){} }
   const app = document.getElementById('app');
@@ -9005,6 +9134,7 @@ function render() {
   if (S.view !== 'login') recordAccess(S.view);
   bindEvents();
   syncPartTimer();
+  if (_keepY != null) { try { window.scrollTo(0, _keepY); } catch(e) {} }
 }
 
 // ---- HEADER ----
@@ -12637,10 +12767,23 @@ S.leadExportJson = function(){
   showToast('已导出 ' + all.length + ' 条线索 JSON');
 };
 
-// ---- 演示数据（便于本地验证分析看板）----
+// v137：高危动作（会写云端）加二次确认，避免误点污染客户看板
 S.seedDemoData = function(){
+  showConfirm({
+    title: '生成演示数据',
+    msg: '将写入 <b>40 条</b>演示学员档案 + <b>60 条</b>访问日志。<br>'
+       + (DB.mode === 'cloud' ? '<b style="color:#ef4444">当前已连接云端，这些假数据会同步写入云端</b>：' : '当前为本地模式，只写本机 localStorage：')
+       + '对外演示后请自行清理，不要留在客户看板里。',
+    okText: '确认生成',
+    danger: DB.mode === 'cloud',
+    onOk: function(){ S._seedDemoDataRaw(); }
+  });
+};
+
+// ---- 演示数据（便于本地验证分析看板）----
+S._seedDemoDataRaw = function(){
   var inds = Object.keys(INDUSTRIES), roles = Object.keys(ROLES);
-  var companies = ['海尔智家','某头部家电制造集团','某城商行','某新能源车企','某快消集团'];
+  var companies = ['某头部家电制造集团','某城市商业银行','某新能源车企','某快消集团','某零售连锁集团'];
   var surnames = ['张','李','王','刘','陈','杨','赵','黄','周','吴'];
   for (var i = 0; i < 40; i++) {
     var dimScores = {};
@@ -12724,26 +12867,253 @@ function renderAdminSubscription(){
 S.adminSetTab = function(t){ S.adminTab = t; render(); };
 S.quizRefresh = function(){ S._quizStats = undefined; render(); };
 
+
+// ==================== v137 管理后台：分组导航 + 通用组件 ====================
+// 背景：14 个 tab 平铺成一行会换行成两行、长短参差、找不着东西。
+// 改为「5 个一级分组 + 组内子 tab」，并按角色过滤；待办数字直接标在导航上。
+var ADMIN_NAV = [
+  { g:'概览', ico:'📊', tabs:[['overview','总览']] },
+  { g:'分析', ico:'📈', tabs:[['industry','行业分析'],['company','企业分析'],['quiz','测评分析']] },
+  { g:'客户', ico:'🎯', tabs:[['leads','商机线索'],['cases','案例库'],['sales','销售方案']] },
+  { g:'运营', ico:'🛠️', tabs:[['feedback','反馈汇总'],['logs','访问日志'],['report','企业报告'],['roi','ROI 报告']] },
+  { g:'设置', ico:'⚙️', tabs:[['companies','企业管理'],['subscription','订阅/席位'],['bank','企业题库']] }
+];
+// 仅平台管理员可见的页（企业管理员看会空/越权）
+var ADMIN_ONLY_TABS = { companies:1, quiz:1, leads:1, cases:1 };
+
+function adminIsAdmin(){ try { return getSessionSafe().role === 'admin'; } catch(e) { return false; } }
+function adminNavVisible(isAdmin){
+  return ADMIN_NAV.map(function(g){
+    return { g:g.g, ico:g.ico, tabs:g.tabs.filter(function(t){ return isAdmin || !ADMIN_ONLY_TABS[t[0]]; }) };
+  }).filter(function(g){ return g.tabs.length > 0; });
+}
+function adminGroupOfTab(tab){
+  for (var i=0;i<ADMIN_NAV.length;i++){
+    var ts = ADMIN_NAV[i].tabs;
+    for (var j=0;j<ts.length;j++) if (ts[j][0] === tab) return ADMIN_NAV[i].g;
+  }
+  return '概览';
+}
+// 导航上的待办角标：只统计「真的等人处理」的，不统计总条数（总条数会一直涨，失去提示意义）
+function adminBadgeOf(tab, isAdmin){
+  try {
+    if (tab === 'feedback') {
+      var fs = DB.all('feedback');
+      if (!isAdmin) { var co = (getSessionSafe().company || ''); fs = fs.filter(function(f){ return (f.company||'') === co; }); }
+      return fs.filter(function(f){ return (f.status || 'new') === 'new'; }).length;
+    }
+    if (tab === 'leads' && isAdmin) {
+      return DB.all('sales_leads').filter(function(x){ return !x.stage || x.stage === 'new'; }).length;
+    }
+  } catch(e) {}
+  return 0;
+}
+function adminPersistTab(tab){
+  try { localStorage.setItem('aidax_admin_tab', tab); } catch(e) {}
+}
+function renderAdminTabs(isAdmin, curTab){
+  var nav = adminNavVisible(isAdmin);
+  if (!nav.length) return '';
+  var curG = adminGroupOfTab(curTab);
+  var grp = nav.filter(function(g){ return g.g === curG; })[0] || nav[0];
+  var has = grp.tabs.some(function(t){ return t[0] === curTab; });
+  var active = has ? curTab : grp.tabs[0][0];
+  var h = '<div class="adm-seg">';
+  nav.forEach(function(g){
+    var badge = g.tabs.reduce(function(s,t){ return s + adminBadgeOf(t[0], isAdmin); }, 0);
+    h += '<button class="adm-seg-btn' + (g.g === grp.g ? ' active' : '') + '" data-action="admGroup" data-val="' + g.g + '">'
+      + '<span class="asb-ico">' + g.ico + '</span>' + g.g
+      + (badge ? '<span class="asb-badge">' + badge + '</span>' : '')
+      + '</button>';
+  });
+  h += '</div>';
+  // 组内只有一个页时（如「概览」），二级栏没必要占一整行
+  if (grp.tabs.length > 1) {
+    h += '<div class="adm-sub">';
+    grp.tabs.forEach(function(t){
+      var b = adminBadgeOf(t[0], isAdmin);
+      h += '<button class="adm-sub-btn' + (t[0] === active ? ' active' : '') + '" data-action="admTab" data-val="' + t[0] + '">'
+        + t[1] + (b ? '<i>' + b + '</i>' : '') + '</button>';
+    });
+    h += '</div>';
+  } else {
+    h += '<div style="height:14px"></div>';
+  }
+  return { html:h, tab:active };
+}
+
+// ---- CSV 导出（统一走这里，带 BOM 防 Excel 中文乱码）----
+function csvDownload(name, rows){
+  if (!rows || rows.length < 2) { showToast('没有可导出的数据'); return; }
+  function cell(v){ v = (v == null ? '' : String(v)); return '"' + v.replace(/"/g, '""') + '"'; }
+  var text = rows.map(function(r){ return r.map(cell).join(','); }).join('\r\n');
+  try {
+    var blob = new Blob(['\ufeff' + text], { type:'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = name; a.style.display = 'none';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(url); if (a.parentNode) a.parentNode.removeChild(a); }, 1000);
+    showToast('已导出 ' + (rows.length - 1) + ' 行 → ' + name);
+  } catch(e) { showToast('导出失败：' + (e && e.message ? e.message : e)); }
+}
+
+// ---- 分页（状态存 S._pg_<key>，返回当前页切片区间 + 页码条 HTML）----
+function admPage(key, total, per){
+  per = per || 30;
+  var pages = Math.max(1, Math.ceil(total / per));
+  var cur = Math.min(pages, Math.max(1, parseInt(S['_pg_' + key]) || 1));
+  S['_pg_' + key] = cur;
+  var h = '';
+  if (pages > 1) {
+    h = '<div class="adm-pager">'
+      + '<button class="pg-btn" data-action="admPageGo" data-key="' + key + '" data-val="' + (cur - 1) + '"' + (cur <= 1 ? ' disabled' : '') + '>上一页</button>'
+      + '<span class="pg-info">第 ' + cur + ' / ' + pages + ' 页 · 共 ' + total + ' 条</span>'
+      + '<button class="pg-btn" data-action="admPageGo" data-key="' + key + '" data-val="' + (cur + 1) + '"' + (cur >= pages ? ' disabled' : '') + '>下一页</button>'
+      + '</div>';
+  } else if (total > 0) {
+    h = '<div class="adm-pager"><span class="pg-info">共 ' + total + ' 条</span></div>';
+  }
+  return { from:(cur - 1) * per, to:cur * per, cur:cur, pages:pages, per:per, html:h };
+}
+
+// ---- 筛选条（关键词 + 下拉；回车即搜）----
+function admEnter(e, key){
+  if (e && e.key === 'Enter') {
+    var b = document.querySelector('[data-action="admFilter"][data-key="' + key + '"]');
+    if (b) b.click();
+  }
+}
+function admBar(key, opts){
+  opts = opts || {};
+  S._af = S._af || {};
+  var cur = S._af[key] || {};
+  var h = '<div class="adm-bar">';
+  h += '<input class="adm-inp" id="adm-q-' + key + '" placeholder="' + (opts.ph || '搜索…') + '"'
+     + ' value="' + escapeHtml(cur.q || '') + '" onkeydown="admEnter(event,\'' + key + '\')">';
+  (opts.selects || []).forEach(function(s){
+    h += '<select class="adm-sel" data-af="' + key + '" data-f="' + s.f + '">';
+    s.opts.forEach(function(o){
+      h += '<option value="' + escapeHtml(o[0]) + '"' + (String(cur[s.f] == null ? '' : cur[s.f]) === String(o[0]) ? ' selected' : '') + '>' + escapeHtml(o[1]) + '</option>';
+    });
+    h += '</select>';
+  });
+  h += '<button class="btn btn-sm btn-primary" data-action="admFilter" data-key="' + key + '">搜索</button>';
+  h += '<button class="btn btn-sm btn-outline" data-action="admFilterClear" data-key="' + key + '">重置</button>';
+  h += (opts.extra || '');
+  h += '</div>';
+  return h;
+}
+// 通用文本匹配（多字段包含，大小写不敏感）
+function admHit(q, fields){
+  if (!q) return true;
+  q = String(q).toLowerCase();
+  for (var i=0;i<fields.length;i++){
+    if (String(fields[i] == null ? '' : fields[i]).toLowerCase().indexOf(q) >= 0) return true;
+  }
+  return false;
+}
+// 统一空态（图标 + 标题 + 说明 + 可选操作）
+function admEmpty(ico, title, desc, extra){
+  return '<div class="adm-empty"><div class="ae-ico">' + ico + '</div><div class="ae-t">' + title + '</div>'
+    + (desc ? '<div class="ae-d">' + desc + '</div>' : '') + (extra || '') + '</div>';
+}
+
+// ---- 后台通用交互入口（避免往大 switch 里塞十几个 case）----
+S.admAction = function(action, el){
+  var key = el.getAttribute('data-key') || '';
+  var val = el.getAttribute('data-val') || '';
+  var id  = el.getAttribute('data-id') || '';
+  function keepRender(){ S._keepScroll = window.scrollY || document.documentElement.scrollTop || 0; render(); }
+
+  if (action === 'admGroup') {
+    var nav = adminNavVisible(adminIsAdmin());
+    var g = nav.filter(function(x){ return x.g === val; })[0];
+    if (g && g.tabs.length) { S.adminTab = g.tabs[0][0]; adminPersistTab(S.adminTab); keepRender(); }
+    return;
+  }
+  if (action === 'admTab') { S.adminTab = val; adminPersistTab(val); keepRender(); return; }
+  if (action === 'admPageGo') { S['_pg_' + key] = Math.max(1, parseInt(val) || 1); keepRender(); return; }
+  if (action === 'admFilter') {
+    var o = {};
+    var q = document.getElementById('adm-q-' + key);
+    if (q) o.q = q.value.trim();
+    var sels = document.querySelectorAll('[data-af="' + key + '"]');
+    for (var i=0;i<sels.length;i++) o[sels[i].getAttribute('data-f')] = sels[i].value;
+    S._af = S._af || {}; S._af[key] = o; S['_pg_' + key] = 1;
+    keepRender(); return;
+  }
+  if (action === 'admFilterClear') {
+    S._af = S._af || {}; S._af[key] = {}; S['_pg_' + key] = 1;
+    keepRender(); return;
+  }
+  // 多选：S._sel[key][id]
+  if (action === 'admToggleSel') {
+    S._sel = S._sel || {}; S._sel[key] = S._sel[key] || {};
+    S._sel[key][id] = !S._sel[key][id];
+    keepRender(); return;
+  }
+  if (action === 'admSelAll') {
+    S._sel = S._sel || {}; S._sel[key] = S._sel[key] || {};
+    var on = (val === '1');
+    (S['_selPool_' + key] || []).forEach(function(x){ S._sel[key][x] = on; });
+    keepRender(); return;
+  }
+  if (action === 'admCsv') { (S['_csv_' + key] || function(){ showToast('该页暂不支持导出'); })(); return; }
+  if (action === 'admCleanTest') { S.admCleanTest(key); return; }
+  if (action === 'admBulk') { S.admBulkDo(key, val); return; }
+};
+
+// 清理明显是测试/占位的脏数据：先给命中预览，确认后才删
+S.admCleanTest = function(kind){
+  var TEST_RE = /^(1+|a+|aaa+|test|测试|abc|xxx|1111|1234|请?忽略)/i;
+  function dirty(v){
+    v = String(v == null ? '' : v).trim();
+    if (!v) return false;
+    if (TEST_RE.test(v)) return true;
+    if (v.replace(/[^\u4e00-\u9fa5a-z0-9]/gi, '').length <= 2) return true; // 「111」「aa」「。」这类
+    return false;
+  }
+  var hits = [];
+  if (kind === 'feedback') {
+    DB.all('feedback').forEach(function(f){
+      var badText = dirty(f.text);
+      var badWho  = dirty(f.user) || dirty(f.org) || dirty(f.contact);
+      if (badText || (badWho && String(f.text || '').length < 8)) hits.push(f);
+    });
+  }
+  if (!hits.length) { showToast('没有检出测试数据'); return; }
+  var preview = hits.slice(0, 5).map(function(f){ return '· ' + escapeHtml(String(f.text || '').slice(0, 18).replace(/\s+/g, ' ')); }).join('<br>');
+  showConfirm({
+    title: '清理测试数据',
+    msg: '检出 <b>' + hits.length + '</b> 条疑似测试/占位内容，确认后永久删除：<br>' + preview
+       + (hits.length > 5 ? '<br>…（仅预览前 5 条）' : ''),
+    okText: '删除 ' + hits.length + ' 条',
+    danger: true,
+    onOk: function(){
+      var n = 0;
+      hits.forEach(function(f){ try { DB.del('feedback', f.id); n++; } catch(e) {} });
+      S._fbSel = {}; S._sel = {};
+      showToast('已删除 ' + n + ' 条测试数据');
+      render();
+    }
+  });
+};
+
 function renderAdmin() {
-  S.adminTab = S.adminTab || 'overview';
   var session = JSON.parse(localStorage.getItem('ai_training_session') || '{}');
   var isAdmin = session.role === 'admin';
-  var tabs = [['overview','总览'],['industry','行业分析'],['company','企业分析'],['feedback','反馈汇总'],['logs','访问日志'],['sales','销售方案']];
-  tabs.push(['subscription','订阅/席位']); // 管理员与企业管理员均可见
-  tabs.push(['report','企业报告']); // 管理员与企业管理员均可见：向企业交付学习成果（按企业下钻）
-  if (isAdmin) tabs.push(['leads','商机线索']); // 销售线索库：仅平台管理员
-  if (isAdmin) tabs.push(['cases','案例库']); // 大赛作品案例库：仅平台管理员
-  tabs.push(['bank','企业题库']); // 管理员与企业管理员均可见：企业导入自有题目（默认不参与测评）
-  tabs.push(['roi','ROI 报告']); // 管理员与企业管理员均可见：企业自助查看本企业前后测 ROI（期次写操作仍限平台管理员）
-  if (isAdmin) tabs.push(['companies','企业管理']);
-  if (isAdmin) tabs.push(['quiz','测评分析']);
+  // v137：记忆上次停留的页（刷新/返回后回到原处），首次进入默认总览
+  if (!S.adminTab) {
+    var last = '';
+    try { last = localStorage.getItem('aidax_admin_tab') || ''; } catch(e) {}
+    S.adminTab = last || 'overview';
+  }
+  var navInfo = renderAdminTabs(isAdmin, S.adminTab);
+  if (navInfo && navInfo.tab !== S.adminTab) S.adminTab = navInfo.tab; // 角色无权访问该页时回落到组内第一页
   var html = headerHtml('管理员看板', isAdmin ? '平台管理员视角 · 团队AI学习全景' : '企业管理员视角 · 团队AI学习进度', true);
-  html += '<div class="admin-tabs">';
-  tabs.forEach(function(t){
-    html += '<button class="admin-tab' + (S.adminTab === t[0] ? ' active' : '') + '" data-action="adminSetTab" data-tab="' + t[0] + '">' + t[1] + '</button>';
-  });
-  html += '</div>';
-  if (S.adminTab === 'industry') html += renderAdminIndustry();
+  html += (navInfo ? navInfo.html : '');
+if (S.adminTab === 'industry') html += renderAdminIndustry();
   else if (S.adminTab === 'company') html += renderAdminCompany();
   else if (S.adminTab === 'feedback') html += renderAdminFeedback();
   else if (S.adminTab === 'logs') html += renderAdminLogs();
@@ -12761,110 +13131,182 @@ function renderAdmin() {
 }
 
 function renderAdminOverview(isAdmin) {
-  const all = teamEmployees(); // v74：管理员=全部；企业账号=仅本企业
-  const total = all.length;
-  const completed = all.filter(e => e.finalScore != null).length;
-  const avgScore = completed > 0 ? Math.round(all.filter(e=>e.finalScore!=null).reduce((s,e)=>s+e.finalScore,0)/completed) : 0;
-  const roleBreakdown = {};
-  all.forEach(e => { roleBreakdown[e.role] = (roleBreakdown[e.role]||0)+1; });
+  var all = teamEmployees(); // v74：管理员=全部；企业账号=仅本企业
+  var total = all.length;
+  var doneList = all.filter(function(e){ return e.finalScore != null; });
+  var completed = doneList.length;
+  var avgScore = completed > 0 ? Math.round(doneList.reduce(function(s,e){ return s + e.finalScore; }, 0) / completed) : 0;
+  var rate = total ? Math.round(completed / total * 100) : 0;
 
-  // 访问情况（#2）
   var logs = DB.all('access_log');
+  // v137：企业管理员只能看本企业的访问数据（原来这里没过滤，会把全平台访问量露给租户）
+  if (!isAdmin) {
+    var _sess = getSessionSafe();
+    var _co = _sess.company || '';
+    logs = logs.filter(function(l){ return _co && l.company === _co; });
+  }
   var todayStart = new Date(); todayStart.setHours(0,0,0,0);
+  var weekStart = todayStart.getTime() - 6 * 86400000;
   var todayLogs = logs.filter(function(l){ return l.ts >= todayStart.getTime(); });
+  var weekLogs = logs.filter(function(l){ return l.ts >= weekStart; });
   var uniq = {}; logs.forEach(function(l){ uniq[l.user] = 1; });
   var uniqCount = Object.keys(uniq).length;
-  var recent = logs.slice().sort(function(a,b){ return b.ts - a.ts; }).slice(0, 8);
+  var recent = logs.slice().sort(function(a,b){ return b.ts - a.ts; }).slice(0, 6);
 
-  let html = '';
-  // 云端同步面板（管理员可见）
-  var cc = cloudConfig() || {};
-  html += `<div class="card mt-3 slide-up">
-    <div class="section-title"><span class="st-ico">☁️</span>云端数据同步</div>
-    <div style="font-size:13px;color:var(--text2);margin-bottom:10px">当前模式：<b style="color:${DB.mode==='cloud'?'var(--green)':'var(--text3)'}">${DB.mode==='cloud'?'已连接云端 ☁️':'本地存储（未连接）'}</b></div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-      <input id="cloudUrl" placeholder="Supabase 项目 URL" value="${cc.supabaseUrl||''}" style="flex:1;min-width:150px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px">
-      <input id="cloudKey" placeholder="anon public key" value="${cc.supabaseAnonKey||''}" style="flex:1;min-width:150px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px">
-      <button class="btn btn-primary" data-action="cloudConnect">保存并连接</button>
-      <button class="btn" data-action="cloudSync">从云端同步</button>
-    </div>
-    <div style="font-size:12px;color:var(--text3);margin-top:8px">在 Supabase 建库并运行 supabase_schema.sql 后，填入项目 URL 与 anon key，即可跨设备汇总员工档案、反馈与访问数据。</div>
-  </div>`;
-  html += `<div class="card slide-up">
-    <div class="section-title"><span class="st-ico">📊</span>学习与考试进度</div>
-    <div class="stat-grid">
-      <div class="stat-card"><div class="stat-value" style="color:var(--blue);">${total}</div><div class="stat-label">参训人数</div></div>
-      <div class="stat-card"><div class="stat-value" style="color:var(--green);">${completed}</div><div class="stat-label">已完成测评</div></div>
-      <div class="stat-card"><div class="stat-value">${avgScore}</div><div class="stat-label">平均成绩</div></div>
-      <div class="stat-card"><div class="stat-value">${total?Math.round(completed/total*100):0}%</div><div class="stat-label">完成率</div></div>
-    </div>
-    <div class="progress-bar mt-2"><div class="progress-fill ${total&&completed/total>=0.8?'high':total&&completed/total>=0.4?'mid':'low'}" style="width:${total?Math.round(completed/total*100):0}%"></div></div>
-  </div>`;
+  var html = '';
 
-  html += `<div class="card mt-3 slide-up">
-    <div class="section-title"><span class="st-ico">👣</span>访问情况</div>
-    <div class="stat-grid">
-      <div class="stat-card"><div class="stat-value" style="color:var(--blue);">${logs.length}</div><div class="stat-label">累计访问</div></div>
-      <div class="stat-card"><div class="stat-value" style="color:var(--green);">${todayLogs.length}</div><div class="stat-label">今日访问</div></div>
-      <div class="stat-card"><div class="stat-value" style="color:var(--purple);">${uniqCount}</div><div class="stat-label">活跃学员</div></div>
-      <div class="stat-card"><div class="stat-value">${DB.all('feedback').length}</div><div class="stat-label">反馈条数</div></div>
-    </div>
-    <div style="margin-top:14px">`;
+  // ---------- ① 需要你处理（行动导向，置顶；没有待办就整块不出现）----------
+  var todos = [];
+  (function(){
+    var _fs = DB.all('feedback').filter(function(f){ return (f.status || 'new') === 'new'; });
+    if (!isAdmin) {
+      var _c = getSessionSafe().company || '';
+      _fs = _fs.filter(function(f){ return _c && f.company === _c; });
+    }
+    if (_fs.length) todos.push({ tab:'feedback', ico:'🐞', n:_fs.length, t:'条反馈待处理', d:'学员提交后还没人跟进，超过 3 天容易失去信任' });
+  })();
+  if (isAdmin) {
+    var leadNew = DB.all('sales_leads').filter(function(l){ return !l.status || l.status === 'new'; });
+    if (leadNew.length) todos.push({ tab:'leads', ico:'🎯', n:leadNew.length, t:'条线索待跟进', d:'生成陪跑方案后自动沉淀，尚未联系' });
+    var overSeat = (S.companies || []).filter(function(c){ var cap = seatCapacity(c); return !cap.unlimited && cap.used > cap.total; });
+    if (overSeat.length) todos.push({ tab:'subscription', ico:'🪑', n:overSeat.length, t:'家企业席位超限', d:'新学员已无法绑定，需要增购或调整' });
+    var soon = (S.companies || []).filter(function(c){
+      if (!c.licenseEnd || licenseState(c) !== 'active') return false;
+      var days = Math.ceil((Date.parse(c.licenseEnd) - Date.now()) / 86400000);
+      return days >= 0 && days <= 30;
+    });
+    if (soon.length) todos.push({ tab:'subscription', ico:'⏳', n:soon.length, t:'家企业 30 天内到期', d:'提前续费，别等学员登不上再补' });
+  }
+  if (todos.length) {
+    html += '<div class="card slide-up" style="border-left:3px solid #ef4444">'
+      + '<div class="section-title" style="margin-bottom:12px"><span class="st-ico">🔔</span>需要你处理</div>'
+      + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px">';
+    todos.forEach(function(t){
+      html += '<button class="adm-todo" data-action="admTab" data-val="' + t.tab + '">'
+        + '<span class="ato-ico">' + t.ico + '</span>'
+        + '<span class="ato-main"><b>' + t.n + ' ' + t.t + '</b><i>' + t.d + '</i></span>'
+        + '<span class="ato-go">→</span></button>';
+    });
+    html += '</div></div>';
+  }
+
+  // ---------- ② 学习与考试进度 ----------
+  html += '<div class="card ' + (todos.length ? 'mt-3 ' : '') + 'slide-up">'
+    + '<div class="section-title"><span class="st-ico">📊</span>学习与考试进度</div>'
+    + '<div class="stat-grid">'
+    + '<div class="stat-card"><div class="stat-value" style="color:var(--blue);">' + total + '</div><div class="stat-label">参训人数</div></div>'
+    + '<div class="stat-card"><div class="stat-value" style="color:var(--green);">' + completed + '</div><div class="stat-label">已完成测评</div></div>'
+    + '<div class="stat-card"><div class="stat-value">' + avgScore + '</div><div class="stat-label">平均成绩</div></div>'
+    + '<div class="stat-card"><div class="stat-value">' + rate + '%</div><div class="stat-label">完成率</div></div>'
+    + '</div>'
+    + '<div class="progress-bar mt-2"><div class="progress-fill ' + (total && rate >= 80 ? 'high' : total && rate >= 40 ? 'mid' : 'low') + '" style="width:' + rate + '%"></div></div>'
+    + '<p style="font-size:11.5px;color:var(--text3);margin:8px 0 0">口径：完成率 = 已完成终极测评人数 ÷ 参训人数；平均成绩只统计已完成者，学习中不计入。</p>'
+    + '</div>';
+
+  // ---------- ③ 访问情况 ----------
+  html += '<div class="card mt-3 slide-up">'
+    + '<div class="section-title"><span class="st-ico">👣</span>访问情况</div>'
+    + '<div class="stat-grid">'
+    + '<div class="stat-card"><div class="stat-value" style="color:var(--blue);">' + todayLogs.length + '</div><div class="stat-label">今日访问</div></div>'
+    + '<div class="stat-card"><div class="stat-value" style="color:var(--green);">' + weekLogs.length + '</div><div class="stat-label">近 7 天</div></div>'
+    + '<div class="stat-card"><div class="stat-value" style="color:var(--purple);">' + uniqCount + '</div><div class="stat-label">活跃学员</div></div>'
+    + '<div class="stat-card"><div class="stat-value">' + logs.length + '</div><div class="stat-label">累计访问</div></div>'
+    + '</div><div style="margin-top:14px">';
   if (!recent.length) {
-    html += `<p style="color:var(--text3);font-size:13px;text-align:center;padding:14px">暂无访问记录，浏览各页面后将自动记录</p>`;
+    html += admEmpty('👣', '还没有访问记录', '学员浏览测评/课程后会自动记录，无需埋点');
   } else {
     recent.forEach(function(l){
-      html += `<div class="log-line"><span class="ll-dot"></span>`
-            + `<span class="ll-time">${fmtTs(l.ts)}</span>`
-            + `<span class="ll-user">${escapeHtml(l.user)}</span>`
-            + `<span class="ll-meta">${VIEW_LABEL[l.view]||l.view}${l.industry&&INDUSTRIES[l.industry]?' · '+INDUSTRIES[l.industry].name:''}</span></div>`;
+      html += '<div class="log-line"><span class="ll-dot"></span>'
+        + '<span class="ll-time">' + fmtTs(l.ts) + '</span>'
+        + '<span class="ll-user">' + escapeHtml(l.user) + '</span>'
+        + '<span class="ll-meta">' + (VIEW_LABEL[l.view] || l.view) + (l.industry && INDUSTRIES[l.industry] ? ' · ' + INDUSTRIES[l.industry].name : '') + '</span></div>';
     });
+    html += '<div style="text-align:right;margin-top:8px"><button class="btn btn-sm btn-outline" data-action="admTab" data-val="logs">查看全部 ' + logs.length + ' 条 →</button></div>';
   }
-  html += `</div></div>`;
+  html += '</div></div>';
 
+  // ---------- ④ 行业 / 岗位分布（合并成一张卡两列，省一屏高度）----------
   if (total > 0) {
-    html += `<div class="card mt-3 slide-up"><div class="section-title"><span class="st-ico">🏢</span>行业分布</div>`;
-    var groups = aggregateBy(function(e){ return e.industry; });
-    groups.forEach(function(g){
-      var ind = INDUSTRIES[g.key];
-      html += `<div class="analysis-row"><div class="analysis-name">${ind?ind.name:g.key}</div>`
-            + `<div class="analysis-bar"><div class="analysis-fill" style="width:${Math.round(g.n/total*100)}%"></div></div>`
-            + `<div class="analysis-val"><b>${g.n}</b> 人 · ${Math.round(g.n/total*100)}%</div></div>`;
+    var byInd = {}, byRole = {};
+    all.forEach(function(e){
+      byInd[e.industry || '未填'] = (byInd[e.industry || '未填'] || 0) + 1;
+      byRole[e.role || '未填'] = (byRole[e.role || '未填'] || 0) + 1;
     });
-    html += `</div>`;
-
-    html += `<div class="card mt-3 slide-up"><div class="section-title"><span class="st-ico">👥</span>岗位分布</div>`;
-    for (const [rid, cnt] of Object.entries(roleBreakdown)) {
-      const r = ROLES[rid];
-      html += `<div class="analysis-row"><div class="analysis-name">${r?r.name:rid}</div>`
-            + `<div class="analysis-bar"><div class="analysis-fill" style="width:${Math.round(cnt/total*100)}%"></div></div>`
-            + `<div class="analysis-val"><b>${cnt}</b> 人 · ${Math.round(cnt/total*100)}%</div></div>`;
+    function bars(map, labelFn){
+      return Object.keys(map).sort(function(a,b){ return map[b] - map[a]; }).map(function(k){
+        var n = map[k], p = Math.round(n / total * 100);
+        return '<div class="analysis-row"><div class="analysis-name">' + labelFn(k) + '</div>'
+          + '<div class="analysis-bar"><div class="analysis-fill" style="width:' + p + '%"></div></div>'
+          + '<div class="analysis-val"><b>' + n + '</b> 人 · ' + p + '%</div></div>';
+      }).join('');
     }
-    html += `</div>`;
+    html += '<div class="card mt-3 slide-up"><div class="section-title"><span class="st-ico">🏢</span>人群分布</div>'
+      + '<div class="adm-two">'
+      + '<div><div class="adm-two-h">按行业</div>' + bars(byInd, function(k){ return INDUSTRIES[k] ? INDUSTRIES[k].name : k; }) + '</div>'
+      + '<div><div class="adm-two-h">按岗位</div>' + bars(byRole, function(k){ return ROLES[k] ? ROLES[k].name : k; }) + '</div>'
+      + '</div></div>';
   }
 
-  html += `<div class="card mt-3 slide-up"><div class="section-title"><span class="st-ico">🧾</span>员工详细记录</div>`;
-  if (all.length === 0) {
-    html += `<p style="color:var(--text2);text-align:center;padding:20px">暂无员工数据${isAdmin?'，可点击下方生成演示数据':''}</p>`;
-  } else {
-    all.forEach((e, i) => {
-      const r = ROLES[e.role];
-      const scoreCls = e.finalScore>=80?'var(--green)':e.finalScore>=60?'var(--amber)':'var(--red)';
-      html += `<div class="emp-row">
-        <div class="emp-avatar">${e.name[0]}</div>
-        <div class="emp-info"><div class="emp-name">${e.name}</div><div class="emp-meta">${r?r.icon+' '+r.name:''} · ${e.company?e.company+' · ':''}${e.date} · ${e.doneCourses||0}/${courseListFor(e.role, e.industry).length||0}课</div></div>
-        <div class="emp-score" style="color:${scoreCls}">${e.finalScore!=null?e.finalScore+'分':'学习中'}</div>
-        <button class="btn btn-sm btn-outline" data-action="loadAndGoDashboard" data-emp="${e.id}">查看</button>
-      </div>`;
+  // ---------- ⑤ 员工详细记录（搜索 / 筛选 / 分页）----------
+  var af = (S._af || {}).emp || {};
+  var emps = all.slice();
+  if (af.role) emps = emps.filter(function(e){ return e.role === af.role; });
+  if (af.status === 'done') emps = emps.filter(function(e){ return e.finalScore != null; });
+  if (af.status === 'learning') emps = emps.filter(function(e){ return e.finalScore == null; });
+  if (af.q) {
+    emps = emps.filter(function(e){
+      return admHit(af.q, [e.name, e.company, e.role, (ROLES[e.role] || {}).name, e.industry, (INDUSTRIES[e.industry] || {}).name]);
     });
   }
-  html += `</div>`;
-
-  if (isAdmin) {
-    html += `<div class="card mt-3 slide-up"><div class="section-title"><span class="st-ico">🧪</span>本地演示数据</div>
-      <p style="font-size:12.5px;color:var(--text2);margin-bottom:12px">当前为「本地优先」存储（localStorage）。生成演示数据可立即验证行业/企业分析与访问看板；接入云端后这些数据将自动改为读写云数据库。</p>
-      <button class="btn btn-outline btn-sm" data-action="seedDemoData">生成 40 条演示数据</button></div>`;
+  var roleOpts = [['', '全部岗位']];
+  Object.keys(ROLES).forEach(function(k){ roleOpts.push([k, ROLES[k].name]); });
+  var pg = admPage('emp', emps.length, 15);
+  var pageRows = emps.slice(pg.from, pg.to);
+  html += '<div class="card mt-3 slide-up"><div class="section-title"><span class="st-ico">🧾</span>员工详细记录'
+    + '<span style="font-size:12px;font-weight:400;color:var(--text3);margin-left:8px">共 ' + emps.length + ' 人'
+    + (af.q || af.role || af.status ? '（已筛选，原 ' + total + ' 人）' : '') + '</span></div>';
+  html += admBar('emp', {
+    ph: '搜索姓名 / 公司 / 岗位…',
+    selects: [
+      { f:'role', opts: roleOpts },
+      { f:'status', opts: [['','全部状态'],['done','已完成测评'],['learning','学习中']] }
+    ]
+  });
+  if (!pageRows.length) {
+    html += admEmpty('🔍', af.q || af.role || af.status ? '没有匹配的学员' : '暂无员工数据',
+      af.q || af.role || af.status ? '换个关键词，或点「重置」看全部' : (isAdmin ? '学员完成测评后会自动出现在这里' : '本企业还没有学员完成测评'));
+  } else {
+    pageRows.forEach(function(e){
+      var r = ROLES[e.role];
+      var scoreCls = e.finalScore >= 80 ? 'var(--green)' : e.finalScore >= 60 ? 'var(--amber)' : 'var(--red)';
+      html += '<div class="emp-row">'
+        + '<div class="emp-avatar">' + escapeHtml(String(e.name || '?').slice(0,1)) + '</div>'
+        + '<div class="emp-info"><div class="emp-name">' + escapeHtml(e.name || '—') + '</div>'
+        + '<div class="emp-meta">' + (r ? r.icon + ' ' + r.name : '') + ' · ' + (e.company ? escapeHtml(e.company) + ' · ' : '') + (e.date || '') + ' · ' + (e.doneCourses || 0) + '/' + (courseListFor(e.role, e.industry).length || 0) + '课</div></div>'
+        + '<div class="emp-score" style="color:' + (e.finalScore != null ? scoreCls : 'var(--text3)') + '">' + (e.finalScore != null ? e.finalScore + '分' : '学习中') + '</div>'
+        + '<button class="btn btn-sm btn-outline" data-action="loadAndGoDashboard" data-emp="' + e.id + '">查看</button>'
+        + '</div>';
+    });
+    html += pg.html;
   }
+  html += '</div>';
+
+  // ---------- ⑥ 云端同步（移到最底部；anon key 默认密文，别在会议室投屏时裸露）----------
+  var cc = cloudConfig() || {};
+  html += '<div class="card mt-3 slide-up"><details>'
+    + '<summary style="cursor:pointer;font-size:14px;font-weight:600;color:var(--text)">'
+    + '<span class="st-ico">☁️</span>云端数据同步'
+    + '<span style="font-weight:400;font-size:12.5px;margin-left:10px;color:' + (DB.mode === 'cloud' ? 'var(--green)' : 'var(--text3)') + '">'
+    + (DB.mode === 'cloud' ? '已连接' : '本地模式（未连接）') + '</span></summary>'
+    + '<div style="margin-top:12px">'
+    + '<p style="font-size:12.5px;color:var(--text2);margin-bottom:10px">本地优先存储，云端只做跨设备镜像。填入项目 URL 与 anon key 后点「保存并连接」，学员档案/反馈/测评记录会在后台自动补推。</p>'
+    + '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">'
+    + '<input id="cloudUrl" placeholder="Supabase 项目 URL" value="' + escapeHtml(cc.supabaseUrl || '') + '" style="flex:1;min-width:150px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px">'
+    + '<input id="cloudKey" type="password" placeholder="anon public key" value="' + escapeHtml(cc.supabaseAnonKey || '') + '" style="flex:1;min-width:150px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px">'
+    + '<button class="btn btn-sm btn-outline" onclick="var i=document.getElementById(\'cloudKey\');i.type=i.type===\'password\'?\'text\':\'password\';">显示</button>'
+    + '<button class="btn btn-primary" data-action="cloudConnect">保存并连接</button>'
+    + '<button class="btn" data-action="cloudSync">从云端同步</button>'
+    + '</div></div></details></div>';
   return html;
 }
 
@@ -12978,89 +13420,206 @@ function zoomImg(src){
   });
 }
 
+// 图片加载失败兜底：云端附件会过期，破图比「已失效」提示更让人困惑
+function fbImgFail(el){
+  try {
+    el.style.display = 'none';
+    var d = document.createElement('div');
+    d.style.cssText = 'font-size:11px;color:var(--text3);padding:6px 0';
+    d.textContent = '图片已失效（云端附件过期或本地缓存缺失）';
+    if (el.parentNode) el.parentNode.appendChild(d);
+  } catch(e) {}
+}
+
 function renderAdminFeedback() {
   // v75：企业账号仅看本企业反馈/需求（管理员看全部；无归属的历史记录仅管理员可见）
   var _s = getSessionSafe();
   var _co = _s.role === 'ent' ? (_s.company || '') : null;
-  var list = DB.all('feedback').slice().sort(function(a,b){ return b.ts - a.ts; });
+  var all = DB.all('feedback').slice().sort(function(a,b){ return b.ts - a.ts; });
   var reqs = DB.all('requirements').slice().sort(function(a,b){ return b.ts - a.ts; });
   if (_co !== null) {
-    list = list.filter(function(f){ return (f.company || '') === _co; });
+    all = all.filter(function(f){ return (f.company || '') === _co; });
     reqs = reqs.filter(function(r){ return !r.company || r.company === _co; });
   }
-  var sel = S._fbSel || {};
-  var selCount = Object.keys(sel).filter(function(k){ return sel[k]; }).length;
-  var newCount = list.filter(function(f){ return f.status === 'new'; }).length;
 
-  var html = `<div class="card slide-up">
-    <div class="section-title"><span class="st-ico">🐞</span>用户反馈（${list.length} 条，待处理 ${newCount} 条）</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
-      <span class="tag tag-blue">已选 ${selCount} 条</span>
-      <button class="btn btn-sm btn-primary" data-action="fbAggregate">汇总为产品需求</button>
-      <button class="btn btn-sm btn-outline" data-action="fbRefresh">🔄 刷新云端</button>
-    </div>`;
-  if (!list.length) {
-    html += `<p style="color:var(--text3);text-align:center;padding:24px">暂无反馈。学员可点击左下角「反馈」气泡提交文字/截图/语音/录屏。</p>`;
+  // ---- 筛选（关键词 / 状态 / 严重度 / 类型）----
+  var af = (S._af || {}).feedback || {};
+  var list = all.slice();
+  if (af.status) list = list.filter(function(f){ return (f.status || 'new') === af.status; });
+  if (af.sev) list = list.filter(function(f){ return (f.sev || 'mid') === af.sev; });
+  if (af.type) list = list.filter(function(f){ return f.type === af.type; });
+  if (af.q) list = list.filter(function(f){ return admHit(af.q, [f.text, f.user, f.org, f.contact, f.ctx, f.company, f.page]); });
+  S._fbFiltered = list;
+
+  // 选中态：统一存 S._sel.feedback，同时镜像到 S._fbSel 兼容「汇总为产品需求」
+  var selObj = (S._sel || {}).feedback || {};
+  var selIds = Object.keys(selObj).filter(function(k){ return selObj[k]; });
+  S._fbSel = {};
+  selIds.forEach(function(k){ S._fbSel[k] = true; });
+
+  var newCount = all.filter(function(f){ return (f.status || 'new') === 'new'; }).length;
+  var filtering = !!(af.q || af.status || af.sev || af.type);
+  var pg = admPage('feedback', list.length, 20);
+  var rows = list.slice(pg.from, pg.to);
+  S._selPool_feedback = rows.map(function(f){ return f.id; });
+  var allPageSel = rows.length > 0 && rows.every(function(f){ return selObj[f.id]; });
+
+  var typeOpts = [['', '全部类型']];
+  Object.keys(FB_TYPE).forEach(function(k){ typeOpts.push([k, FB_TYPE[k].i + ' ' + FB_TYPE[k].n]); });
+
+  var html = '<div class="card slide-up">'
+    + '<div class="section-title"><span class="st-ico">🐞</span>用户反馈'
+    + '<span style="font-size:12px;font-weight:400;color:var(--text3);margin-left:8px">'
+    + (filtering ? '筛选后 ' + list.length + ' 条 / 共 ' + all.length + ' 条' : '共 ' + all.length + ' 条')
+    + ' · 待处理 <b style="color:' + (newCount ? '#ef4444' : 'var(--text3)') + '">' + newCount + '</b> 条</span></div>';
+
+  html += admBar('feedback', {
+    ph: '搜索内容 / 姓名 / 企业 / 联系方式…',
+    selects: [
+      { f:'status', opts: [['','全部状态'],['new','待处理'],['triaged','处理中'],['done','已解决']] },
+      { f:'sev',    opts: [['','全部优先级'],['high','高优先级'],['mid','中优先级'],['low','低优先级']] },
+      { f:'type',   opts: typeOpts }
+    ]
+  });
+
+  // ---- 批量操作条（选中时才展开动作，平时只留导出/清理）----
+  html += '<div class="adm-bar" style="margin-top:-4px">';
+  if (rows.length) {
+    html += '<label class="adm-chklab"><input type="checkbox" class="adm-chk" data-action="admSelAll" data-key="feedback" data-val="' + (allPageSel ? '0' : '1') + '"' + (allPageSel ? ' checked' : '') + '> 全选本页</label>';
+  }
+  if (selIds.length) {
+    html += '<span class="tag tag-blue">已选 ' + selIds.length + ' 条</span>'
+      + '<button class="btn btn-sm btn-primary" data-action="fbAggregate">汇总为产品需求</button>'
+      + '<button class="btn btn-sm btn-outline" data-action="admBulk" data-key="feedback" data-val="triaged">标记处理中</button>'
+      + '<button class="btn btn-sm btn-outline" data-action="admBulk" data-key="feedback" data-val="done">标记已解决</button>'
+      + '<button class="btn btn-sm btn-outline" data-action="admBulk" data-key="feedback" data-val="del" style="color:var(--red)">删除</button>';
   } else {
-    html += `<div class="fb-list">`;
-    list.forEach(function(f){
+    html += '<span style="font-size:12px;color:var(--text3)">勾选后可批量改状态、汇总为需求</span>';
+  }
+  html += '<span style="flex:1"></span>'
+    + '<button class="btn btn-sm btn-outline" data-action="admCsv" data-key="feedback">⬇️ 导出 CSV</button>'
+    + '<button class="btn btn-sm btn-outline" data-action="admCleanTest" data-key="feedback">🧹 清理测试数据</button>'
+    + '<button class="btn btn-sm btn-outline" data-action="fbRefresh">🔄 刷新云端</button>'
+    + '</div>';
+
+  if (!all.length) {
+    html += admEmpty('🐞', '还没有收到反馈', '学员可在课程页左下角「反馈」气泡提交文字 / 截图 / 语音 / 录屏');
+  } else if (!list.length) {
+    html += admEmpty('🔍', '没有匹配的反馈', '换个关键词，或点「重置」看全部 ' + all.length + ' 条');
+  } else {
+    rows.forEach(function(f){
       var m = f.media || {};
-      html += `<div class="fb-item${sel[f.id]?' sel':''}" data-action="fbToggleSel" data-id="${f.id}">
-        <div class="fi-top">
-          <span class="tag tag-blue">${FB_TYPE[f.type]?FB_TYPE[f.type].i+' '+FB_TYPE[f.type].n:f.type}</span>
-          <span class="tag ${f.sev==='high'?'tag-red':f.sev==='low'?'tag-green':'tag-amber'}">${FB_SEV[f.sev]||'中'}优先级</span>
-          <span class="tag tag-purple">${FB_CAT[f.cat||classifyFeedback(f.text)]?FB_CAT[f.cat||classifyFeedback(f.text)].i+' '+FB_CAT[f.cat||classifyFeedback(f.text)].n:'其他'}</span>
-          <span class="status-pill status-${f.status||'new'}">${FB_STATUS[f.status||'new']}</span>
-          <span style="margin-left:auto;font-size:11.5px;color:var(--text3)">${fmtTs(f.ts)} · ${escapeHtml(f.user||'')}</span>
-        </div>
-        <div class="fi-text">${escapeHtml(f.text || '（无文字描述）')}</div>`;
-      // v134：把「谁提的 / 哪家 / 什么岗位 / 怎么回访 / 在哪一页」显式列出。
-      // v133 起课程页会把身份写进 doc（user/org/role/contact/ctx），但后台此前一个都不展示。
-      (function(){
-        var who = [];
-        if (f.user) who.push('<span>姓名 <b>' + escapeHtml(f.user) + '</b></span>');
-        if (f.org) who.push('<span>企业 <b>' + escapeHtml(f.org) + '</b></span>');
-        if (f.role && f.role !== 'learner') who.push('<span>岗位 <b>' + escapeHtml(f.role) + '</b></span>');
-        if (f.contact) who.push('<span>联系 <b>' + escapeHtml(f.contact) + '</b></span>');
-        if (who.length) html += '<div class="fi-who">' + who.join('') + '</div>';
-        if (f.ctx) html += '<div class="fi-who">位置 ' + escapeHtml(f.ctx) + '</div>';
-      })();
+      var isSel = !!selObj[f.id];
+      var catKey = f.cat || classifyFeedback(f.text);
+      html += '<div class="fb-row">'
+        + '<input type="checkbox" class="adm-chk" data-action="admToggleSel" data-key="feedback" data-id="' + f.id + '"' + (isSel ? ' checked' : '') + '>'
+        + '<div class="fb-item' + (isSel ? ' sel' : '') + '">'
+        + '<div class="fi-top">'
+        + '<span class="tag tag-blue">' + (FB_TYPE[f.type] ? FB_TYPE[f.type].i + ' ' + FB_TYPE[f.type].n : f.type) + '</span>'
+        + '<span class="tag ' + (f.sev === 'high' ? 'tag-red' : f.sev === 'low' ? 'tag-green' : 'tag-amber') + '">' + (FB_SEV[f.sev] || '中') + '优先级</span>'
+        + '<span class="tag tag-purple">' + (FB_CAT[catKey] ? FB_CAT[catKey].i + ' ' + FB_CAT[catKey].n : '其他') + '</span>'
+        + '<span class="status-pill status-' + (f.status || 'new') + '">' + FB_STATUS[f.status || 'new'] + '</span>'
+        + '<span style="margin-left:auto;font-size:11.5px;color:var(--text3)">' + fmtTs(f.ts) + ' · ' + escapeHtml(f.user || '匿名') + '</span>'
+        + '</div>'
+        + '<div class="fi-text">' + escapeHtml(f.text || '（无文字描述）') + '</div>';
+
+      // v134：把「谁提的 / 哪家 / 什么岗位 / 怎么回访 / 在哪一页」显式列出
+      var who = [];
+      if (f.user) who.push('<span>姓名 <b>' + escapeHtml(f.user) + '</b></span>');
+      if (f.org) who.push('<span>企业 <b>' + escapeHtml(f.org) + '</b></span>');
+      if (f.role && f.role !== 'learner') who.push('<span>岗位 <b>' + escapeHtml(f.role) + '</b></span>');
+      if (f.contact) who.push('<span>联系 <b>' + escapeHtml(f.contact) + '</b></span>');
+      if (who.length) html += '<div class="fi-who">' + who.join('') + '</div>';
+      if (f.ctx) html += '<div class="fi-who"><span>位置 ' + escapeHtml(f.ctx) + '</span></div>';
+
       var imgs = (f.images && f.images.length) ? f.images : (m.image ? [m.image] : []);
       if (imgs.length) {
         html += '<div class="fi-imgs">';
         imgs.forEach(function(src){
-        html += '<img class="fi-thumb" src="' + src + '" alt="截图" title="点击放大"'
-             +  ' onclick="zoomImg(this.src)" loading="lazy">';
-      });
+          html += '<img class="fi-thumb" src="' + src + '" alt="截图" title="点击放大" onclick="zoomImg(this.src)" onerror="fbImgFail(this)" loading="lazy">';
+        });
         html += '</div>';
       }
-      if (m.audio) html += `<audio class="fi-thumb" src="${m.audio}" controls style="width:100%;max-width:220px"></audio>`;
-      if (m.video) html += `<video class="fi-thumb" src="${m.video}" controls></video>`;
-      if (f._mediaDropped) html += `<div style="font-size:11px;color:var(--amber);margin-top:6px">（附件因存储空间不足未保留）</div>`;
-      html += `<div class="fi-meta"><span>页面：${escapeHtml(f.page||'—')}</span>${f.industry&&INDUSTRIES[f.industry]?'<span>行业：'+INDUSTRIES[f.industry].name+'</span>':''}</div>
-        <div class="fi-meta">
-          <button class="chip" data-action="fbStatus" data-id="${f.id}" data-st="triaged">标记处理中</button>
-          <button class="chip" data-action="fbStatus" data-id="${f.id}" data-st="done">标记已解决</button>
-          <button class="chip" data-action="fbDelete" data-id="${f.id}" style="color:var(--red)">删除</button>
-        </div>
-      </div>`;
-    });
-    html += `</div>`;
-  }
-  html += `</div>`;
+      if (m.audio) html += '<audio class="fi-thumb" src="' + m.audio + '" controls style="width:100%;max-width:220px"></audio>';
+      if (m.video) html += '<video class="fi-thumb" src="' + m.video + '" controls></video>';
+      if (f._mediaDropped) html += '<div style="font-size:11px;color:var(--amber);margin-top:6px">（附件因存储空间不足未保留）</div>';
 
-  html += `<div class="card mt-3 slide-up"><div class="section-title"><span class="st-ico">📌</span>产品迭代需求（${reqs.length} 条）</div>`;
-  if (!reqs.length) {
-    html += `<p style="color:var(--text3);text-align:center;padding:18px">勾选上方反馈后点击「汇总为产品需求」即可生成</p></div>`;
-    return html;
+      html += '<div class="fi-meta"><span>页面：' + escapeHtml(f.page || '—') + '</span>'
+        + (f.industry && INDUSTRIES[f.industry] ? '<span>行业：' + INDUSTRIES[f.industry].name + '</span>' : '')
+        + '</div><div class="fi-meta">'
+        + (f.status === 'triaged' ? '' : '<button class="chip" data-action="fbStatus" data-id="' + f.id + '" data-st="triaged">标记处理中</button>')
+        + (f.status === 'done' ? '' : '<button class="chip" data-action="fbStatus" data-id="' + f.id + '" data-st="done">标记已解决</button>')
+        + (f.status === 'new' ? '' : '<button class="chip" data-action="fbStatus" data-id="' + f.id + '" data-st="new">退回待处理</button>')
+        + '<button class="chip" data-action="fbDelete" data-id="' + f.id + '" style="color:var(--red)">删除</button>'
+        + '</div></div></div>';
+    });
+    html += pg.html;
   }
-  var REQ_ST = {todo:'待排期', doing:'开发中', done:'已上线'};
-  reqs.forEach(function(r){
-    html += renderRequirementCard(r, REQ_ST);
-  });
-  html += `</div>`;
+  html += '</div>';
+
+  // ---- 产品迭代需求 ----
+  html += '<div class="card mt-3 slide-up"><div class="section-title"><span class="st-ico">📌</span>产品迭代需求（' + reqs.length + ' 条）</div>';
+  if (!reqs.length) {
+    html += admEmpty('📌', '还没有汇总过需求', '勾选若干条同主题反馈，点「汇总为产品需求」会自动分类聚类、给出优先级与迭代建议');
+  } else {
+    var REQ_ST = {todo:'待排期', doing:'开发中', done:'已上线'};
+    reqs.forEach(function(r){ html += renderRequirementCard(r, REQ_ST); });
+  }
+  html += '</div>';
   return html;
 }
+
+// ---- 批量改状态 / 批量删除 ----
+S.admBulkDo = function(key, act){
+  if (key !== 'feedback') return;
+  var selObj = (S._sel || {}).feedback || {};
+  var ids = Object.keys(selObj).filter(function(k){ return selObj[k]; });
+  if (!ids.length) { showToast('请先勾选反馈'); return; }
+  if (act === 'del') {
+    showConfirm({
+      title: '批量删除反馈',
+      msg: '将永久删除 <b>' + ids.length + '</b> 条反馈（本地与云端同时删除，不可恢复）。',
+      okText: '删除 ' + ids.length + ' 条',
+      danger: true,
+      onOk: function(){
+        var n = 0;
+        ids.forEach(function(id){ try { DB.del('feedback', id); n++; } catch(e) {} });
+        S._sel.feedback = {}; S._fbSel = {};
+        showToast('已删除 ' + n + ' 条');
+        render();
+      }
+    });
+    return;
+  }
+  var n = 0;
+  ids.forEach(function(id){
+    var f = DB.get('feedback', id);
+    if (f) { f.status = act; DB.put('feedback', f); n++; }
+  });
+  S._sel.feedback = {}; S._fbSel = {};
+  showToast('已把 ' + n + ' 条改为「' + (FB_STATUS[act] || act) + '」');
+  render();
+};
+
+// ---- 反馈导出 CSV（用当前筛选结果，不是全量）----
+S._csv_feedback = function(){
+  var list = S._fbFiltered || DB.all('feedback');
+  var rows = [['提交时间','类型','优先级','分类','状态','内容','姓名','企业','岗位','联系方式','所在位置','页面','行业']];
+  list.forEach(function(f){
+    rows.push([
+      new Date(f.ts).toLocaleString('zh-CN'),
+      FB_TYPE[f.type] ? FB_TYPE[f.type].n : (f.type || ''),
+      FB_SEV[f.sev] || '中',
+      FB_CAT[f.cat || classifyFeedback(f.text)] ? FB_CAT[f.cat || classifyFeedback(f.text)].n : '其他',
+      FB_STATUS[f.status || 'new'] || '待处理',
+      f.text || '',
+      f.user || '', f.org || '', f.role || '', f.contact || '', f.ctx || '', f.page || '',
+      (INDUSTRIES[f.industry] || {}).name || ''
+    ]);
+  });
+  var d = new Date();
+  csvDownload('用户反馈_' + d.getFullYear() + ('0' + (d.getMonth()+1)).slice(-2) + ('0' + d.getDate()).slice(-2) + '.csv', rows);
+};
 
 function renderAdminSales() {
   var f = S._spForm || {industry: S.industry || 'mfg', role: S.role || 'pm', size: 20, weeks: 4};
@@ -13110,6 +13669,10 @@ function renderAdminLeads(){
   var all = DB.all('sales_leads').slice().sort(function(a,b){ return b.ts - a.ts; });
   var f = S._leadFilter || 'all';
   var list = all.filter(function(l){ return f === 'all' || l.status === f; });
+  var lq = (S._af || {}).leads || {};
+  if (lq.q) list = list.filter(function(l){
+    return admHit(lq.q, [l.industry, (INDUSTRIES[l.industry] || {}).name, l.role, (ROLES[l.role] || {}).name, (l.weakDimNames || []).join(' ')]);
+  });
   var LEAD_ST = { new:'新建', contacted:'已联系', won:'已转化', lost:'已丢单' };
   var ST_COLOR = { new:'#3b6fe0', contacted:'#e0a400', won:'#2e9e5b', lost:'#d94a3d' };
   var totalEst = all.reduce(function(s,l){ return s + (l.estLicenseYuan||0); }, 0);
@@ -13123,6 +13686,9 @@ function renderAdminLeads(){
     + aqKpi('预估授权费合计', '¥' + totalEst.toLocaleString())
     + aqKpi('已转化金额', '¥' + wonEst.toLocaleString(), wonList.length + ' 单')
     + '</div>';
+  html += '<div class="adm-bar"><input class="adm-inp" id="adm-q-leads" placeholder="搜索行业 / 岗位 / 短板维度…" value="' + escapeHtml(lq.q || '') + '" onkeydown="admEnter(event,\'leads\')">'
+    + '<button class="btn btn-sm btn-primary" data-action="admFilter" data-key="leads">搜索</button>'
+    + '<button class="btn btn-sm btn-outline" data-action="admFilterClear" data-key="leads">重置</button></div>';
   html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">';
   var chips = [['all','全部'],['new','新建'],['contacted','已联系'],['won','已转化'],['lost','已丢单']];
   chips.forEach(function(c){
@@ -13137,7 +13703,9 @@ function renderAdminLeads(){
   } else {
     html += '<div style="overflow-x:auto"><table class="log-table"><thead><tr>'
       + '<th>生成时间</th><th>行业×岗位</th><th>人数/周期</th><th>短板维度</th><th>预估授权费</th><th>状态</th><th>操作</th></tr></thead><tbody>';
-    list.forEach(function(l){
+    var lpg = admPage('leads', list.length, 20);
+    var lrows = list.slice(lpg.from, lpg.to);
+    lrows.forEach(function(l){
       var indn = (INDUSTRIES[l.industry] && INDUSTRIES[l.industry].name) || l.industry;
       var roln = (ROLES[l.role] && ROLES[l.role].name) || l.role;
       var wd = (l.weakDimNames||[]).join('、') || '—';
@@ -13152,6 +13720,7 @@ function renderAdminLeads(){
         + '</tr>';
     });
     html += '</tbody></table></div>';
+    html += lpg.html;
   }
   html += '</div>';
   if (S._leadViewId) {
@@ -14420,6 +14989,13 @@ function aqBar(label, rate, sub){
 function renderAdminQuiz() {
   if (S._quizStats === undefined) {
     S._quizStats = null;
+    // v137：同报告页，fetchCloud 不回调时会永久停在「加载中」
+    setTimeout(function(){
+      if (S._quizStats === null) {
+        S._quizStats = { error: '请求超时（8 秒无响应）' };
+        if (S.view === 'admin' && S.adminTab === 'quiz') render();
+      }
+    }, 8000);
     fetchCloud('quiz-stats', {}, function(st, j){
       if (st === 200 && j && j.ok && !j.empty) S._quizStats = j;
       else if (j && j.empty) S._quizStats = { empty: true };
@@ -14441,6 +15017,17 @@ function renderAdminQuiz() {
     + aqKpi('覆盖题目', ov.distinctQ + ' 题')
     + aqKpi('数据区间', (ov.firstDate||'?') + '<br>~ ' + (ov.lastDate||'?'))
     + '</div>';
+
+  // v137：加一段「怎么读」，避免只看到正确率数字就误判培训无效
+  (function(){
+    var cr = ov.correctRate || 0, n = ov.total || 0;
+    var notes = [];
+    if (n < 200) notes.push('样本仅 <b>' + n + '</b> 答，结论仅供参考；建议覆盖到 200 答以上再做判断。');
+    if (cr < 40) notes.push('正确率 <b>' + cr + '%</b> 偏低，常见两种原因：学员<b>快速作答</b>（题目秒过）、或题库<b>难度偏高</b>。先看下方「难度校准」：若高阶也低于 30%，更可能是难度问题；若初阶同样很低，更可能是没认真作答。');
+    else if (cr >= 70) notes.push('正确率 <b>' + cr + '%</b> 属健康区间，可重点看「维度掌握度」里低于 40% 的维度作为下一轮培训方向。');
+    else notes.push('正确率 <b>' + cr + '%</b> 中等，建议对照「维度掌握度」找最弱 2 个维度，而不是整体加练。');
+    html += '<div class="adm-note">💡 <b>怎么读</b>：' + notes.join(' ') + '</div>';
+  })();
 
   // 维度掌握度
   html += '<div class="mt-3" style="margin-top:18px"><div class="section-title" style="font-size:14px"><span class="st-ico">🧩</span>维度掌握度（8 维正确率）</div>';
@@ -14562,6 +15149,15 @@ function reportLearnerCard(l) {
 
 function loadEnterpriseReport(tenant) {
   S._reportAgg = null; S._reportLearners = null;
+  // v137：同上的 8 秒兜底，避免企业报告页永久「加载中」
+  setTimeout(function(){
+    var stuck = (S._reportAgg === null || S._reportLearners === null);
+    if (stuck) {
+      if (S._reportAgg === null) S._reportAgg = { error: '请求超时（8 秒无响应）' };
+      if (S._reportLearners === null) S._reportLearners = { error: '请求超时（8 秒无响应）' };
+      if (S.view === 'admin' && S.adminTab === 'report') render();
+    }
+  }, 8000);
   fetchCloud('quiz-stats', { scope: 'enterprise', tenant: tenant }, function(st, j){
     if (st===200 && j && !j.error && !j.empty) S._reportAgg = j;
     else if (j && j.empty) S._reportAgg = { empty: true };
@@ -14583,6 +15179,13 @@ function renderAdminReport() {
   if (isAdmin) {
     if (S._reportTenants === undefined) {
       S._reportTenants = null;
+      // v137：8 秒兜底——网络/RLS 异常时 fetchCloud 可能永不回调，页面会一直停在「正在加载」
+      setTimeout(function(){
+        if (S._reportTenants === null) {
+          S._reportTenants = { error: '请求超时（8 秒无响应）' };
+          if (S.view === 'admin' && S.adminTab === 'report') render();
+        }
+      }, 8000);
       fetchCloud('quiz-stats', { scope: 'enterprises' }, function(st, j){
         if (st===200 && j && j.ok) S._reportTenants = j.tenants || [];
         else S._reportTenants = { error: (j&&j.error)?String(j.error):('HTTP '+st) };
@@ -15670,6 +16273,10 @@ function bindEvents() {
             case 'roiBatchSelect': S.roiBatchSelect(el.value); break;
             case 'roiBatchRefresh': S.roiBatchRefresh(); break;
             case 'roiBatchExportCsv': S.roiBatchExportCsv(); break;
+            // v137 管理后台通用交互：分组导航 / 页签 / 分页 / 筛选 / 多选 / 批量 / 导出 / 清理测试数据
+            case 'admGroup': case 'admTab': case 'admPageGo': case 'admFilter': case 'admFilterClear':
+            case 'admToggleSel': case 'admSelAll': case 'admBulk': case 'admCsv': case 'admCleanTest':
+              S.admAction(action, el); break;
           }
           return;
         }
