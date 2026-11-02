@@ -13130,6 +13130,25 @@ if (S.adminTab === 'industry') html += renderAdminIndustry();
   return html;
 }
 
+// v137：员工档案（ai_training_employees）只写学员本机 localStorage，从不上云。
+// 管理员换台电脑登录就会看到「参训人数 0」——但访问日志是上云的，这里按人聚合出「活跃学员」兜底。
+function activeLearnersFromLogs(logs){
+  var map = {};
+  (logs || []).forEach(function(l){
+    var k = l.user || l.name || '';
+    if (!k || k === '管理员') return;
+    var g = map[k] || (map[k] = { name:k, company:'', role:'', industry:'', phone:'', n:0, last:0, views:{} });
+    g.n++;
+    if ((l.ts || 0) > g.last) g.last = l.ts || 0;
+    if (l.company) g.company = l.company;
+    if (l.role) g.role = l.role;
+    if (l.industry) g.industry = l.industry;
+    if (l.phone) g.phone = l.phone;
+    if (l.view) g.views[l.view] = (g.views[l.view] || 0) + 1;
+  });
+  return Object.keys(map).map(function(k){ return map[k]; }).sort(function(a, b){ return b.last - a.last; });
+}
+
 function renderAdminOverview(isAdmin) {
   var all = teamEmployees(); // v74：管理员=全部；企业账号=仅本企业
   var total = all.length;
@@ -13273,8 +13292,31 @@ function renderAdminOverview(isAdmin) {
     ]
   });
   if (!pageRows.length) {
-    html += admEmpty('🔍', af.q || af.role || af.status ? '没有匹配的学员' : '暂无员工数据',
-      af.q || af.role || af.status ? '换个关键词，或点「重置」看全部' : (isAdmin ? '学员完成测评后会自动出现在这里' : '本企业还没有学员完成测评'));
+    var alive = activeLearnersFromLogs(logs);
+    if (alive.length && !(af.q || af.role || af.status)) {
+      html += '<div class="adm-note" style="margin-top:0">📌 本机还没有学员测评档案（测评档案存在学员自己的浏览器里，不跨设备同步）。'
+        + '下面是<b>云端访问日志中出现的 ' + alive.length + ' 位学员</b>，可用于确认「谁在用、看到哪一步」。'
+        + '要做完整能力画像，需学员在其本机完成后用同一个浏览器打开，或开启档案同步。</div>';
+      html += '<div style="overflow-x:auto"><table class="log-table"><thead><tr>'
+        + '<th>学员</th><th>企业</th><th>岗位 / 行业</th><th>访问次数</th><th>最近活跃</th><th>常去哪一页</th></tr></thead><tbody>';
+      alive.slice(0, 15).forEach(function(a){
+        var topView = '', topN = 0;
+        Object.keys(a.views).forEach(function(v){ if (a.views[v] > topN) { topN = a.views[v]; topView = v; } });
+        html += '<tr><td>' + escapeHtml(a.name) + '</td>'
+          + '<td>' + escapeHtml(a.company || '—') + '</td>'
+          + '<td>' + (escapeHtml((ROLES[a.role] || {}).name || a.role || '—')) + ' / ' + (escapeHtml((INDUSTRIES[a.industry] || {}).name || a.industry || '—')) + '</td>'
+          + '<td>' + a.n + '</td>'
+          + '<td>' + fmtTs(a.last) + '</td>'
+          + '<td>' + (VIEW_LABEL[topView] || topView || '—') + ' ' + topN + ' 次</td></tr>';
+      });
+      html += '</tbody></table></div>';
+      if (alive.length > 15) {
+        html += '<p style="font-size:12px;color:var(--text3);margin-top:8px">仅显示最近活跃的 15 位，完整名单见「访问日志」。</p>';
+      }
+    } else {
+      html += admEmpty('🔍', af.q || af.role || af.status ? '没有匹配的学员' : '暂无员工数据',
+        af.q || af.role || af.status ? '换个关键词，或点「重置」看全部' : (isAdmin ? '学员完成测评后会自动出现在这里；若是新设备登录，先看下方「访问日志」里谁来过' : '本企业还没有学员完成测评'));
+    }
   } else {
     pageRows.forEach(function(e){
       var r = ROLES[e.role];
