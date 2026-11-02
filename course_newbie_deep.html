@@ -857,7 +857,10 @@ function renderSidebar(){
     const weakHit = m.dims && m.dims.some(d=>WEAK.includes(d)) && (markAll || topIdx.has(mi));
     if(weakHit) mod.className+=' weak';
     const hd=document.createElement('div'); hd.className='mod-h';
-    hd.innerHTML='<div class="mh-top"><span class="mid">'+m.id+'</span><span class="mtitle">'+esc(m.title)+'</span></div>'
+    /* 模块标题在数据里可能自带「M1 」前缀（应届生深版就是），侧栏已单独渲染代号，
+       不剥掉就会显示成「M1 M1 写出第一句好用的提示词」。 */
+    const mTitle=modTitle(m);
+    hd.innerHTML='<div class="mh-top"><span class="mid">'+m.id+'</span><span class="mtitle">'+esc(mTitle)+'</span></div>'
       +'<div class="mh-meta">'
       +(allDone?'<span class="mdone">'+done+'/8 已通关</span>':'<span class="mdone" style="color:var(--mut);font-weight:500">'+done+'/8</span>')
       +(weakHit?'<span class="mweak" style="font-size:11px;color:#dc2626;border:1px solid #fecaca;background:#fef2f2;border-radius:6px;padding:0 5px;cursor:default;white-space:nowrap">📌 短板</span>':'')
@@ -1123,7 +1126,7 @@ function buildSparPrompt(u,m,d){
   const dn=(d? (d.type+' —— 《'+d.name+'》') : '本单元产出');
   const L=[];
   L.push('# 角色');
-  L.push('你是「'+META.courseTag+' · '+m.title+' ·（'+stepLabel+'环节）《'+u.title+'》」的专属 AI 陪练（资深带教导师）。');
+  L.push('你是「'+META.courseTag+' · '+modTitle(m)+' ·（'+stepLabel+'环节）《'+u.title+'》」的专属 AI 陪练（资深带教导师）。');
   L.push('学员正在学习，并要亲手产出：'+dn+'。');
   L.push('');
   L.push('# 你的使命');
@@ -2501,6 +2504,8 @@ function pickUnderstand(el,i){
   previewScore(prog.cur,'u-score');
 }
 function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+/* 模块名去重：数据里 title 自带「M1 」前缀时，页面上已单独显示代号，别再拼一次 */
+function modTitle(m){ if(!m) return ''; return String(m.title||'').replace(new RegExp('^'+m.id+'\\s+'),''); }
 function bindEnter(id,fn){ const el=document.getElementById(id); if(el) el.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); fn(); } }); }
 function copyPrompt(){
   const t=document.getElementById('p-text'); if(!t) return;
@@ -3365,7 +3370,7 @@ function guideCard(uid,m,u,st){
     next+=' <b>本单元是 '+m.id+' 的最后一节</b>，通关后别忘了做模块测验。';
   }
   return '<div class="guide"><h3>🧭 学习指引</h3>'
-    +'<div class="g-ctx">📍 你现在在 <b>'+m.id+' · '+m.title+'</b> · 第 '+(ui+1)+'/'+total+' 单元'
+    +'<div class="g-ctx">📍 你现在在 <b>'+m.id+' · '+modTitle(m)+'</b> · 第 '+(ui+1)+'/'+total+' 单元'
     +(curDone?' · <span style="color:#166534;font-weight:700">本单元已通关</span>':'')
     +'</div>'
     +'<div class="g-steps">'+stepsHtml+'</div>'
@@ -3403,7 +3408,7 @@ let FB={type:'text',cats:[],sev:'mid',text:'',imgs:[],media:{},contact:''};
 let FB_CTX='';
 function openFb(){
   const f=findUnit(prog.cur);
-  FB_CTX = f ? (f.m.id+' · '+f.m.title+' · 单元 '+f.u.id+'（'+STEP_LABEL[f.u.step]+'环节）') : '未知位置';
+  FB_CTX = f ? (f.m.id+' · '+modTitle(f.m)+' · 单元 '+f.u.id+'（'+STEP_LABEL[f.u.step]+'环节）') : '未知位置';
   FB={type:'text',cats:[],sev:'mid',text:'',imgs:[],media:{},contact:''};
   fbRenderInner();
   document.getElementById('lf-modal').classList.add('on');
