@@ -689,10 +689,14 @@ const CLOUD_CFG = { endpoint:'https://fin-pm-course.app.workbuddy.host',
 let LLM = (function(){
   try{ return JSON.parse(localStorage.getItem('aidax_llm'))||{}; }catch(e){ return {}; }
 })();
+/* 127.0.0.1:3000 只是本地开发代理的默认值。以前不管学员有没有配过，页面加载都会 ping 一次，
+   线上没有本地代理时必然 ERR_CONNECTION_REFUSED，每人每次开课都在控制台留一条红字。
+   现在只在学员自己填过地址时才探；没填过就不探。 */
+LLM.baseUser = !!(LLM.base && String(LLM.base).trim());
 LLM.base = LLM.base || 'http://127.0.0.1:3000';
 LLM.key  = LLM.key  || '';
 LLM.state = 'unknown';           /* unknown | cloud | proxy | direct | off */
-function saveLlm(){ try{ localStorage.setItem('aidax_llm', JSON.stringify({base:LLM.base,key:LLM.key})); }catch(e){} }
+function saveLlm(){ LLM.baseUser=true; try{ localStorage.setItem('aidax_llm', JSON.stringify({base:LLM.base,key:LLM.key})); }catch(e){} }
 
 /* ---- 通道 C：云服务免密钥大模型 ---- */
 let _cloudClient=null, _cloudModel=null, _cloudErr='';
@@ -767,7 +771,7 @@ async function llmChat(messages, opts){
 async function llmProbe(silent){
   let st='off';
   try{ const m=await cloudModel(); if(m) st='cloud'; }catch(e){}
-  if(st==='off'){
+  if(st==='off' && LLM.baseUser){
     try{
       const r=await fetch(LLM.base.replace(/\/$/,'')+'/ping',{cache:'no-store'});
       if(r.ok) st='proxy';
@@ -854,9 +858,11 @@ async function saveLlmForm(){
     let diag='';
     if(_cloudErr && _cloudErr!=='SDK未加载') diag='云端：'+esc(_cloudErr)+'（若从其它域名打开本页，云端会拒绝跨域调用，请用课程主页链接打开）。';
     else if(_cloudErr==='SDK未加载') diag='云端 SDK 未加载（vendor/workbuddy-cloud-sdk.global.js 缺失）。';
-    try{ await fetch(LLM.base.replace(/\/$/,'')+'/ping',{cache:'no-store'}); }catch(e){
-      diag += (e&&e.message==='Failed to fetch')
-        ? ' 本地代理也没启动。' : ' 探测失败：'+esc(e.message);
+    if(LLM.baseUser){
+      try{ await fetch(LLM.base.replace(/\/$/,'')+'/ping',{cache:'no-store'}); }catch(e){
+        diag += (e&&e.message==='Failed to fetch')
+          ? ' 你填的本地代理没启动。' : ' 探测失败：'+esc(e.message);
+      }
     }
     res.innerHTML='<span style="color:#be123c">\u2717 未连上模型。</span>'
       +(diag?'<div style="margin-top:4px">诊断：'+diag+'</div>':'')
