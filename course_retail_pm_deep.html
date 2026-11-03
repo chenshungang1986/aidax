@@ -624,7 +624,7 @@ function saveIdent(close){
   if(chip) chip.textContent=identLabel()? ('👤 '+identLabel()) : '👤 未填身份 · 点这里补';
 }
 /* 默认播放倍速：真人声按 -20% 语速合成（约 252 字/分），1.25× 后约 315 字/分 */
-const RATE_DEF=1.25;
+const RATE_DEF=1.0;
 /* 单元真实音频秒数：有实测时长(d)用 d，没有才按字数估 0.205 秒/字 */
 function unitSec(u){
   return ((u&&u.vslides)||[]).reduce(function(a,s){
