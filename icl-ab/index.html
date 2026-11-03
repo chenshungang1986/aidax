@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>陈观老师 · 两个引擎对比</title>
+<style>
+  :root{--blue:#1a56db;--blue-d:#123a96;--ink:#0f172a;--sub:#5b667a;--line:#e3e8f0;--bg:#f5f7fb;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif;
+    line-height:1.65;padding:24px 16px 60px}
+  .wrap{max-width:760px;margin:0 auto}
+  header{background:linear-gradient(135deg,#1a56db,#0b2a6b);color:#fff;border-radius:16px;
+    padding:26px 24px;margin-bottom:20px;
+    box-shadow:0 10px 26px rgba(20,50,120,.22)}
+  header h1{margin:0 0 8px;font-size:21px;letter-spacing:.5px}
+  header p{margin:0;font-size:14px;opacity:.9;line-height:1.7}
+  .notice{background:#fff;border:1px solid var(--line);border-left:4px solid var(--blue);
+    border-radius:12px;padding:16px 18px;margin-bottom:20px;font-size:14px;color:var(--sub)}
+  .notice b{color:var(--ink)}
+  .grp{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 18px 14px;
+    margin-bottom:16px;box-shadow:0 2px 10px rgba(15,23,42,.04)}
+  .grp .no{display:inline-block;background:#eef3ff;color:var(--blue);font-weight:700;
+    font-size:12px;padding:2px 9px;border-radius:20px;margin-bottom:10px;letter-spacing:.5px}
+  .row{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px dashed #eef1f6}
+  .row:first-of-type{border-top:none}
+  .tag{flex:0 0 92px;font-size:13px;font-weight:600}
+  .tag .k{display:block;font-size:11px;color:var(--sub);font-weight:400;margin-top:2px}
+  .tag.a{color:#0b7a4b}
+  .tag.b{color:#b45309}
+  audio{flex:1;height:38px;min-width:0}
+  .meta{flex:0 0 62px;text-align:right;font-size:12px;color:var(--sub);font-variant-numeric:tabular-nums}
+  .ask{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;
+    font-size:14px;color:var(--sub);margin-top:4px}
+  .ask h3{margin:0 0 10px;font-size:15px;color:var(--ink)}
+  .ask ol{margin:0;padding-left:20px}
+  .ask li{margin:6px 0}
+  footer{text-align:center;font-size:12px;color:#9aa4b5;margin-top:28px;line-height:1.9}
+  @media (max-width:520px){
+    body{padding:16px 12px 44px}
+    header{padding:22px 18px}
+    header h1{font-size:19px}
+    .row{flex-wrap:wrap;gap:8px}
+    .tag{flex:1 1 100%}
+    audio{flex:1 1 100%;width:100%}
+    .meta{flex:0 0 auto;text-align:left}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>陈观老师 · 两个合成引擎对比</h1>
+    <p>同一个音色、同一段课文、同样放慢 15%。唯一差别是背后用的合成引擎不同。</p>
+  </header>
+
+  <div class="notice">
+    <b>怎么听（1 分钟）：</b>每组两段话内容完全一样。先听绿色「原来的」，再听橙色「新买的」。
+    只判断一件事：<b>哪个更像真人在讲课</b>。不用管语速快慢，那个我能单独调。
+  </div>
+
+  <div class="grp">
+    <span class="no">第 1 段</span>
+    <div class="row">
+      <div class="tag a">原来的<span class="k">2.0 还原模式</span></div>
+      <audio controls preload="metadata" src="2.0_0.m4a"></audio>
+      <div class="meta" data-dur="2.0_0.m4a"></div>
+    </div>
+    <div class="row">
+      <div class="tag b">新买的<span class="k">1.0 引擎</span></div>
+      <audio controls preload="metadata" src="1.0_0.m4a"></audio>
+      <div class="meta" data-dur="1.0_0.m4a"></div>
+    </div>
+  </div>
+
+  <div class="grp">
+    <span class="no">第 2 段</span>
+    <div class="row">
+      <div class="tag a">原来的<span class="k">2.0 还原模式</span></div>
+      <audio controls preload="metadata" src="2.0_1.m4a"></audio>
+      <div class="meta" data-dur="2.0_1.m4a"></div>
+    </div>
+    <div class="row">
+      <div class="tag b">新买的<span class="k">1.0 引擎</span></div>
+      <audio controls preload="metadata" src="1.0_1.m4a"></audio>
+      <div class="meta" data-dur="1.0_1.m4a"></div>
+    </div>
+  </div>
+
+  <div class="grp">
+    <span class="no">第 3 段</span>
+    <div class="row">
+      <div class="tag a">原来的<span class="k">2.0 还原模式</span></div>
+      <audio controls preload="metadata" src="2.0_2.m4a"></audio>
+      <div class="meta" data-dur="2.0_2.m4a"></div>
+    </div>
+    <div class="row">
+      <div class="tag b">新买的<span class="k">1.0 引擎</span></div>
+      <audio controls preload="metadata" src="1.0_2.m4a"></audio>
+      <div class="meta" data-dur="1.0_2.m4a"></div>
+    </div>
+  </div>
+
+  <div class="ask">
+    <h3>回一句话就行</h3>
+    <ol>
+      <li>新买的（橙色）能不能用？</li>
+      <li>如果能用，有没有明显比原来的差？差在哪（声音发闷 / 停顿怪 / 像念稿）？</li>
+    </ol>
+  </div>
+
+  <footer>
+    以上音频均由 AI 语音合成，文本为课程真实旁白。<br>
+    起点课堂企业服务团队制作
+  </footer>
+</div>
+<script>
+document.querySelectorAll('audio').forEach(function(a){
+  a.addEventListener('play', function(){
+    document.querySelectorAll('audio').forEach(function(o){ if(o!==a) o.pause(); });
+  });
+  var box = document.querySelector('.meta[data-dur="'+a.getAttribute('src')+'"]');
+  a.addEventListener('loadedmetadata', function(){
+    if(box && isFinite(a.duration)) box.textContent = a.duration.toFixed(0) + ' 秒';
+  });
+});
+</script>
+</body>
+</html>
