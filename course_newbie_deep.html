@@ -627,7 +627,7 @@ function saveIdent(close){
    原为 1.25×（当初合成是 252 字/分，想提到 315），但 1.25× 会把 3.7 分钟的单元
    压到 2.9 分钟，低于课程标准的 3–4 分钟，且二次变速会削掉刚做出来的自然停顿。
    倍速按钮保留，只是不再默认开启。 */
-const RATE_DEF=1.0;
+const RATE_DEF=1.25;
 /* 单元真实音频秒数：有实测时长(d)用 d，没有才按字数估 0.205 秒/字 */
 function unitSec(u){
   return ((u&&u.vslides)||[]).reduce(function(a,s){
