@@ -1026,6 +1026,11 @@ function admStudents(){
    +'<div class="cb p0">'
    +(rows?'<table class="dt"><thead><tr><th>姓名</th><th>登录账号</th><th>部门</th><th>学习进度</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead><tbody>'+rows+'</tbody></table>'
      :'<div class="empty">还没有学员。点右上角「新增学员」或「批量导入」创建。<br>学员用「登录账号 + 密码」登录，登录后看到的就是 M1/M2 两门课。</div>')
+   +'</div>'
+   +'<div class="ch2" style="border-top:1px solid var(--line);border-bottom:none">'
+   +'<span style="font-size:13px;color:var(--mid)">我的账号：<b>'+esc(Me.loginId)+'</b></span>'
+   +'<div class="spacer"></div>'
+   +'<button class="btn sm line" onclick="changeMyPwd()">修改我的密码</button>'
    +'</div></div>';
 }
 
@@ -1060,7 +1065,7 @@ function bulkAdd(){
     '<textarea class="inp" id="bulk-txt" style="height:180px;padding:11px;line-height:1.7;resize:vertical" '
     +'placeholder="张明,zhangming,财务共享中心&#10;李静,lijing,采购中心&#10;王涛,wangtao,人力资源部"></textarea>'
     +'<div style="font-size:12px;color:var(--soft);margin-top:10px;line-height:1.7">'
-    +'密码统一为 <b>gel123456</b>，学员首次登录后可自行修改。账号重复会自动跳过。</div>',
+    +'密码统一为 <b>gel123456</b>。学员忘记密码时，在此页点「重置密码」即可。账号重复会自动跳过。</div>',
     [{t:'取消',fn:function(){return true;}},{t:'导入',p:1,fn:function(){
       var txt=document.getElementById('bulk-txt').value;
       var lines=txt.split('\n').map(function(x){return x.trim();}).filter(Boolean);
@@ -1094,6 +1099,29 @@ function resetPwd(id){
   var salt=mkSalt();
   u.salt=salt;u.pwd=hash(np,salt);
   saveUser(u).then(function(){toast('密码已重置为：'+np);}).catch(function(e){toast('失败：'+e.message.slice(0,50));});
+}
+
+function changeMyPwd(){
+  dlg('修改我的密码','修改后请立即记住新密码，下次登录生效',
+    '<div class="field" style="margin-bottom:12px"><label style="font-size:12.5px;color:var(--mid);display:block;margin-bottom:6px">当前密码</label>'
+    +'<input class="inp" type="password" id="cp-old" placeholder="请输入当前密码"></div>'
+    +'<div class="field" style="margin-bottom:12px"><label style="font-size:12.5px;color:var(--mid);display:block;margin-bottom:6px">新密码</label>'
+    +'<input class="inp" type="password" id="cp-new" placeholder="至少 6 位"></div>'
+    +'<div class="field"><label style="font-size:12.5px;color:var(--mid);display:block;margin-bottom:6px">确认新密码</label>'
+    +'<input class="inp" type="password" id="cp-new2" placeholder="再输入一次"></div>',
+    [{t:'取消',fn:function(){return true;}},{t:'保存',p:1,fn:function(){
+      var o=document.getElementById('cp-old').value;
+      var n1=document.getElementById('cp-new').value;
+      var n2=document.getElementById('cp-new2').value;
+      var u=ADM.users.filter(function(x){return x.id===Me.id;})[0];
+      if(!u){toast('账号信息未加载，请刷新重试');return false;}
+      if(hash(o,u.salt)!==u.pwd){toast('当前密码不正确');return false;}
+      if(n1.length<6){toast('新密码至少 6 位');return false;}
+      if(n1!==n2){toast('两次输入的新密码不一致');return false;}
+      var salt=mkSalt();
+      u.salt=salt;u.pwd=hash(n1,salt);
+      saveUser(u).then(function(){toast('密码已修改');}).catch(function(e){toast('失败：'+e.message.slice(0,50));});
+    }}]);
 }
 
 function toggleUser(id,enable){
