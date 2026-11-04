@@ -459,7 +459,7 @@ const AUDIO  = {"M0U1": ["audio/auto_ai_pm/M0U1_0.m4a", "audio/auto_ai_pm/M0U1_1
    任何一段拉不下来，audio.onerror 会按 audLocal() 回落到站内相对路径，不会断音。 */
 const AUDIO_CDN = 'https://cdn.jsdelivr.net/gh/chenshungang1986/aidax@main/';
 /* ⚠️ 重新生成/替换配音后必须改这个版本号，否则 CDN 可能继续命中旧文件（换了音色还是老声音） */
-const AUDIO_VER = '202611041002';
+const AUDIO_VER = '202611041150';
 function audUrl(p){
   if(!p) return '';
   if(/^https?:/i.test(p)) return p;
@@ -924,28 +924,95 @@ function renderSidebar(){
 /* ===================== 单元主页 ===================== */
 let CUR=null;   /* 当前单元播放器句柄，切换单元时先 stop */
 let CHECK=null; /* 多邻国式分步通关状态：{uid, idx, steps} */
-/* 配音预取：手机上点播放到出声要等一段下载，很像「点了没反应」。
-   ⚠️ 用媒体元素预取，别用 fetch：audio 发的是 Range 请求，fetch 下来的整包缓存
-   满足不了 Range，等于白下（这个坑踩过）。媒体元素之间共享媒体缓存，所以有效。
-   预取只下载不播放，muted 保证不会有声。 */
+/* ---------- 分段配音「整段落地」：切段零等待 ----------
+   旧做法是用 <audio> 预取，指望媒体缓存被播放器复用；实测不可靠——播放器发的是
+   Range 请求，缓存命中不完全，界面上就是「已缓冲 13%，已等 6 秒」反复转圈。
+   现在改成：整段 300KB 直接 fetch 成 Blob，播放器读 blob: URL，段与段之间不碰网络。
+   ⚠️ 必须有兜底：fetch 被跨域/超时挡下时退回媒体元素预取，再退回直连地址。 */
 let _pf={}, _pfOrder=[];
+let _blob={}, _blobP={}, _blobOrder=[], _curBlob='';
+let AUD_ROUTE='';   /* '' 未定 | 'local' = 源站比 CDN 快，后续段优先走源站 */
+function blobOf(url){ return (url&&_blob[url])||''; }
+function segSrc(u){ const url=audUrl(u); return blobOf(url)||url; }
+function segLocal(url){
+  const m=String(url||'').match(/audio\/[\w\-\/\.]+\.(?:m4a|mp3|wav|ogg)/i);
+  return m?m[0]:'';
+}
+function segCands(url){
+  const loc=segLocal(url);
+  if(!loc||loc===url) return [url];
+  return AUD_ROUTE==='local' ? [loc,url] : [url,loc];
+}
+function fetchSeg(url){
+  if(!url) return Promise.resolve('');
+  if(_blob[url]) return Promise.resolve(_blob[url]);
+  if(_blobP[url]) return _blobP[url];
+  function one(u,ms){
+    return new Promise(function(res){
+      let done=false;
+      const ctl=(typeof AbortController!=='undefined')?new AbortController():null;
+      const tm=setTimeout(function(){ if(done) return; done=true; try{ctl&&ctl.abort();}catch(e){} res(''); }, ms);
+      fetch(u,{mode:'cors',credentials:'omit',signal:ctl?ctl.signal:undefined})
+        .then(function(r){ if(!r.ok) throw new Error('http '+r.status); return r.blob(); })
+        .then(function(b){
+          if(done) return; done=true; clearTimeout(tm);
+          if(!b||b.size<8000){ res(''); return; }
+          const bu=URL.createObjectURL(b);
+          _blob[u]=bu; _blob[url]=bu; _blobOrder.push(u);
+          /* 只留最近 6 段；正在播的那段无论如何不回收，否则播放直接断 */
+          while(_blobOrder.length>6){
+            const old=_blobOrder.shift();
+            if(_blob[old]===_curBlob){ _blobOrder.push(old); break; }
+            try{ URL.revokeObjectURL(_blob[old]); }catch(e){}
+            delete _blob[old];
+            if(old!==url) delete _blob[old];
+          }
+          res(bu);
+        })
+        .catch(function(){ if(done) return; done=true; clearTimeout(tm); res(''); });
+    });
+  }
+  const cands=segCands(url);
+  const p=(function(){
+    let i=0;
+    function next(){
+      if(i>=cands.length) return Promise.resolve('');
+      const first=(i===0);
+      const u=cands[i++];
+      return one(u, first?9000:12000).then(function(bu){
+        if(bu) return bu;
+        /* 首选线路没成，记住它慢，后面几段直接走备选，不再每段白等 9 秒 */
+        if(first && cands.length>1 && AUD_ROUTE!=='local') AUD_ROUTE='local';
+        return next();
+      });
+    }
+    return next();
+  })();
+  _blobP[url]=p;
+  p.then(function(){ delete _blobP[url]; });
+  return p;
+}
 function prefetchAud(u){
   const url=audUrl(u);
   if(!url) return Promise.resolve();
-  if(_pf[url]) return Promise.resolve();
-  return new Promise(function(res){
-    try{
-      const a=new Audio(); a.preload='auto'; a.muted=true; a.src=url;
-      _pf[url]=a; _pfOrder.push(url);
-      /* 只留最近 12 段，别让长逛的用户攒一堆实例吃内存 */
-      while(_pfOrder.length>12){ const old=_pfOrder.shift(); try{ _pf[old].src=''; }catch(e){} delete _pf[old]; }
-      let done=false;
-      const fin=function(){ if(done) return; done=true; res(); };
-      a.addEventListener('canplaythrough',fin,{once:true});
-      a.addEventListener('error',fin,{once:true});
-      setTimeout(fin, 25000);
-      try{ a.load(); }catch(e){}
-    }catch(e){ res(); }
+  if(_blob[url]) return Promise.resolve();
+  return fetchSeg(url).then(function(bu){
+    if(bu) return;
+    if(_pf[url]) return;
+    /* 兜底：整段 fetch 拿不到（跨域/超时）时，仍用媒体元素预载一次 */
+    return new Promise(function(res){
+      try{
+        const a=new Audio(); a.preload='auto'; a.muted=true; a.src=url;
+        _pf[url]=a; _pfOrder.push(url);
+        while(_pfOrder.length>6){ const old=_pfOrder.shift(); try{ _pf[old].src=''; }catch(e){} delete _pf[old]; }
+        let done=false;
+        const fin=function(){ if(done) return; done=true; res(); };
+        a.addEventListener('canplaythrough',fin,{once:true});
+        a.addEventListener('error',fin,{once:true});
+        setTimeout(fin, 15000);
+        try{ a.load(); }catch(e){}
+      }catch(e){ res(); }
+    });
   });
 }
 /* 整单元顺序预取：第一段立刻拉，后面两段等前一段落地再排队，
@@ -1451,14 +1518,21 @@ function makePlayer(uid, slides, aud){
   let cdnTimer=null;
   function armCdnWatch(a){
     clearTimeout(cdnTimer); cdnTimer=null;
-    if(!a || !/cdn\.jsdelivr/.test(a.dataset.full||'')) return;
+    /* 走本地 blob 的段不设看门狗：字节已经在内存里，没有「线路慢」这回事 */
+    if(!a || /^blob:/.test(a.src||'')) return;
+    if(!/cdn\.jsdelivr/.test(a.dataset.full||'')) return;
     cdnTimer=setTimeout(function(){
       if(!playing||mode!=='audio'||audioIdx!==cur) return;
       if(a.readyState>=1) return;
-      const loc=localOf(a.dataset.full||'');
-      if(!loc||a.dataset.fb===loc) return;
-      a.dataset.fb=loc;
-      a.src=loc;
+      const full=a.dataset.full||'';
+      if(blobOf(full)){ a.src=blobOf(full); _curBlob=blobOf(full); }
+      else{
+        const loc=localOf(full);
+        if(!loc||a.dataset.fb===loc) return;
+        a.dataset.fb=loc;
+        AUD_ROUTE='local';          /* 记住 CDN 这条线慢，后面几段直接走源站 */
+        a.src=loc;
+      }
       bufOn('线路较慢，已切换备用地址…');
       try{ const p=a.play(); if(p&&p.catch) p.catch(function(){}); }catch(e){}
     }, 3000);
@@ -1661,8 +1735,9 @@ function makePlayer(uid, slides, aud){
          否则按钮显示 1.25× 而实际按 1.0 播（听感与标注时长都对不上）。 */
       try{ audio.playbackRate=rate; audio.defaultPlaybackRate=rate; }catch(e){}
       if(playing&&mode==='audio'&&audioIdx===cur&&playBtn) playBtn.innerHTML='\u23F8 暂停';
-      /* 真出声音了，再从容预取后面没播的段，别跟第一段抢带宽 */
-      if(mode==='audio'&&aud&&aud.length) prefetchUnit(aud.slice(cur+1));
+      /* 真出声音了，再从容预取后面没播的段。只排最近 3 段：
+         深度单元有 12 段，一次把 11 段全排上会跟正在播的这段抢带宽。 */
+      if(mode==='audio'&&aud&&aud.length) prefetchUnit(aud.slice(cur+1, cur+4));
     };
     audio.oncanplay=function(){ if(playing&&mode==='audio'&&audioIdx===cur) bufWatch(false); };
     audio.onprogress=function(){ if(bufT0) bufHint(); };
@@ -1758,7 +1833,7 @@ function makePlayer(uid, slides, aud){
     if(aud&&aud[i]){
       mode='audio';
       const a=ensureAudio();
-      if(audioIdx!==i){ audioIdx=i; pendingAt=off; a.dataset.full=audUrl(aud[i]); a.dataset.fb=''; a.src=audUrl(aud[i]); prefetchAud(aud[i+1]); armCdnWatch(a); }
+      if(audioIdx!==i){ audioIdx=i; pendingAt=off; a.dataset.full=audUrl(aud[i]); a.dataset.fb=''; _curBlob=blobOf(a.dataset.full); a.src=segSrc(aud[i]); prefetchAud(aud[i+1]); armCdnWatch(a); }
       else if(off>0.03){
         if(a.readyState>=1){ try{ a.currentTime=off; }catch(e){} pendingAt=null; }
         else pendingAt=off;
@@ -1826,7 +1901,7 @@ function makePlayer(uid, slides, aud){
     if(aud&&aud[idx]){
       mode='audio';
       const a=ensureAudio();
-      if(audioIdx!==idx){ audioIdx=idx; a.dataset.full=audUrl(aud[idx]); a.dataset.fb=''; a.src=audUrl(aud[idx]); pendingAt=off; prefetchAud(aud[idx+1]); armCdnWatch(a); }
+      if(audioIdx!==idx){ audioIdx=idx; a.dataset.full=audUrl(aud[idx]); a.dataset.fb=''; _curBlob=blobOf(a.dataset.full); a.src=segSrc(aud[idx]); pendingAt=off; prefetchAud(aud[idx+1]); armCdnWatch(a); }
       else if(a.readyState>=1){ try{ a.currentTime=off; }catch(e){} pendingAt=null; }
       else pendingAt=off;
       try{ a.playbackRate=rate; }catch(e){}
