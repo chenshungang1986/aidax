@@ -508,8 +508,9 @@ a{color:var(--pri);text-decoration:none}
   .cd-title{font-size:19px;margin:18px 0 4px}
   .cd-name{font-size:24px}
   .cd-conds{grid-template-columns:1fr 1fr;gap:7px}
-  .cd-ft{gap:12px;flex-direction:column}
-  .cd-seal{flex:0 0 74px;width:74px;height:74px;font-size:10px}
+  .cd-ft{display:grid;grid-template-columns:1fr 76px;gap:9px 14px;align-items:center}
+  .cd-ft>div:not(.cd-seal){grid-column:1}
+  .cd-seal{grid-column:2;grid-row:1 / span 3;width:76px;height:76px;flex:none;margin:0;font-size:10px}
 }
 </style>
 </head>
@@ -645,7 +646,30 @@ var Prog={
   },
   moduleDone:function(mk,total){var m=this.all(),c=0;
     for(var i=1;i<=total;i++){var p=m[this.key(mk,i)];if(p&&(p.status==='done'||p.status==='quizzed'))c++;}
-    return c;}
+    return c;},
+  /* 换设备 / 清缓存后本地进度为空，但云端有——不回灌就会出现
+     「管理员看到 15/15，学员自己看到 0/15」，证书上的学习完成度也会失真。
+     只按 updatedAt 取较新的一条，不覆盖本地更新的进度。 */
+  hydrate:function(){
+    if(!Me||Me.role!=='student')return Promise.resolve(0);
+    /* userId 在 doc(jsonb) 里、不是列，按列过滤会 400；id 形如 <uid>__<mk>__s<n>，按前缀取即可 */
+    return Cloud.req('gel_progress',{qs:'?select=id,doc&id=like.'+encodeURIComponent(Me.id+'__%')+'&limit=2000'})
+      .then(function(rows){
+        if(!rows||!rows.length)return 0;
+        var m=lsGet('prog',{}),ch=0;
+        rows.forEach(function(r){
+          var d=r.doc||{};if(!d.unitId)return;
+          var loc=m[d.unitId], rAt=d.updatedAt||'';
+          if(!loc||(rAt&&(!loc.updatedAt||rAt>loc.updatedAt))){
+            m[d.unitId]={status:d.status||'none',seconds:d.seconds||0,
+              visits:d.visits||0,heard:d.heard||loc&&loc.heard||0,updatedAt:rAt};
+            ch++;
+          }
+        });
+        if(ch)lsSet('prog',m);
+        return ch;
+      }).catch(function(){return 0;});
+  }
 };
 
 /* ---------- 考试成绩 ---------- */
@@ -707,6 +731,9 @@ async function login(loginId,pwd){
   setMe({id:u.id,loginId:u.loginId,name:u.name,role:u.role,company:u.company});
   logEvent('login');
   route();
+  // 换设备登录：把云端进度补回本地，补到了就重绘一次
+  Prog.hydrate().then(function(n){if(n)route();});
+  if(u.role==='student')Cert.sync();
   return true;
 }
 
