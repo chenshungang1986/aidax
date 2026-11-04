@@ -1063,7 +1063,9 @@ function renderCheckpoint(){
   } else if(step.key==='task'){
     cp.className='cp';
     cp.innerHTML='<div class="cp-head"><div class="cp-title">\uD83D\uDCDD 做任务</div>'
-      +'<div class="cp-sub">'+STEP_LABEL[u.step]+'环节 · '+STEP_HINT[u.step]+'</div></div>'
+      /* 深度演示单元的副标题要换口径：原来那句「把多份素材整理成结构化字段」是情景题的流程，
+         套在「逐节读标准件」上会让学员以为这一节要填表。 */
+      +'<div class="cp-sub">'+STEP_LABEL[u.step]+'环节 · '+(u.deep?'先逐节读标准件（14 分钟），再自己跑一遍，最后写下你要在自己功能上补哪几处':STEP_HINT[u.step])+'</div></div>'
       +'<div id="act-area"></div>';
     renderActivity(u,uid);
   } else if(step.key==='deliv'){
