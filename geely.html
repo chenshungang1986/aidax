@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231b4f8a'/%3E%3Ctext x='16' y='22' font-size='17' font-family='sans-serif' fill='%23fff' text-anchor='middle'%3E用%3C/text%3E%3C/svg%3E">
+<title>吉利汽车 · 用户思维线上课程</title>
+<style>
+:root{
+  --pri:#1b4f8a; --deep:#10243d; --ink:#1a1a1a; --mid:#3d4c5c; --muted:#5c6670;
+  --soft:#8b96a3; --line:#dfe5ec; --bg:#f4f7fb; --white:#fff;
+  --tint:#eef4fb; --tint2:#f8fafd; --accent:#c8102e; --ok:#0f7b5f; --warn:#b26a00;
+  --r:10px; --sh:0 1px 2px rgba(16,36,61,.06),0 4px 16px rgba(16,36,61,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background:var(--bg); color:var(--ink); font-size:15px; line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;cursor:pointer;border:none;background:none;font-size:inherit;color:inherit}
+input,select{font-family:inherit;font-size:inherit}
+a{color:var(--pri);text-decoration:none}
+.hide{display:none!important}
+
+/* ---------- 登录 ---------- */
+#login{min-height:100%;display:flex;align-items:center;justify-content:center;padding:20px;
+  background:linear-gradient(160deg,#0d2238 0%,#17395f 55%,#1b4f8a 100%)}
+.login-card{width:100%;max-width:420px;background:#fff;border-radius:16px;padding:34px 30px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.login-brand{display:flex;align-items:center;gap:10px;margin-bottom:22px}
+.login-brand .bar{width:4px;height:34px;background:var(--pri);border-radius:2px}
+.login-brand h1{font-size:19px;font-weight:600;letter-spacing:.01em}
+.login-brand p{font-size:12px;color:var(--soft);margin-top:2px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12.5px;color:var(--mid);margin-bottom:6px;font-weight:500}
+.field input{width:100%;height:44px;border:1px solid var(--line);border-radius:8px;padding:0 13px;background:#fbfcfe;transition:.15s}
+.field input:focus{outline:none;border-color:var(--pri);background:#fff;box-shadow:0 0 0 3px rgba(27,79,138,.1)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:44px;padding:0 20px;
+  border-radius:8px;background:var(--pri);color:#fff;font-weight:500;transition:.15s;width:100%}
+.btn:hover{background:#173f6e}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn.line{background:#fff;color:var(--pri);border:1px solid var(--pri)}
+.btn.line:hover{background:var(--tint)}
+.btn.sm{height:34px;padding:0 13px;font-size:13px;width:auto;border-radius:7px}
+.btn.gray{background:#eef1f5;color:var(--mid)}
+.btn.danger{background:#fdecee;color:var(--accent)}
+.login-err{background:#fdecee;color:var(--accent);font-size:13px;padding:9px 12px;border-radius:7px;margin-bottom:12px}
+.login-tip{font-size:12px;color:var(--soft);text-align:center;margin-top:16px;line-height:1.7}
+
+/* ---------- 通用外壳 ---------- */
+.shell{display:flex;flex-direction:column;min-height:100%}
+.topbar{position:sticky;top:0;z-index:50;height:56px;background:#fff;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:12px;padding:0 18px}
+.topbar .brand{font-weight:600;font-size:15px;color:var(--deep);white-space:nowrap}
+.topbar .brand span{color:var(--soft);font-weight:400;font-size:12.5px;margin-left:8px}
+.topbar .spacer{flex:1}
+.who{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mid)}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--tint);color:var(--pri);
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600}
+.wrap{width:100%;max-width:1180px;margin:0 auto;padding:22px 18px 60px}
+.crumb{font-size:13px;color:var(--soft);margin-bottom:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.crumb button{color:var(--pri);font-size:13px}
+.crumb button:hover{text-decoration:underline}
+
+/* ---------- 课程卡 ---------- */
+.hero{background:linear-gradient(120deg,#10243d,#1b4f8a);border-radius:14px;padding:26px 28px;color:#fff;margin-bottom:22px}
+.hero h2{font-size:22px;font-weight:600;margin-bottom:8px}
+.hero p{font-size:13.5px;color:#c5d6e8;line-height:1.75;max-width:760px}
+.hero .meta{display:flex;gap:18px;margin-top:16px;flex-wrap:wrap;font-size:12.5px;color:#a8c2dc}
+.hero .meta b{color:#fff;font-weight:600}
+.mod-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+.mod-card{background:#fff;border-radius:14px;padding:22px;box-shadow:var(--sh);border:1px solid #edf1f6;
+  display:flex;flex-direction:column;transition:.18s}
+.mod-card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(16,36,61,.1)}
+.mod-card .no{font-size:11.5px;font-weight:600;color:var(--pri);letter-spacing:.1em;margin-bottom:8px}
+.mod-card h3{font-size:18px;font-weight:600;color:var(--deep);margin-bottom:8px}
+.mod-card .desc{font-size:13px;color:var(--mid);line-height:1.72;flex:1}
+.mod-card .tags{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0}
+.tag{font-size:11.5px;padding:3px 9px;border-radius:20px;background:var(--tint);color:var(--pri)}
+.tag.gray{background:#f0f2f5;color:var(--muted)}
+.prog-wrap{margin:14px 0 6px}
+.prog-bar{height:6px;background:#e9eef4;border-radius:3px;overflow:hidden}
+.prog-bar i{display:block;height:100%;background:linear-gradient(90deg,#1b4f8a,#3f7fc4);border-radius:3px;transition:width .4s}
+.prog-txt{display:flex;justify-content:space-between;font-size:12px;color:var(--soft);margin-top:6px}
+.mod-actions{display:flex;gap:10px;margin-top:14px}
+.mod-actions .btn{flex:1}
+
+/* ---------- 学习页 ---------- */
+.learn{display:grid;grid-template-columns:246px 1fr;gap:22px;align-items:start}
+.sidelist{background:#fff;border-radius:12px;border:1px solid #edf1f6;overflow:hidden;position:sticky;top:74px;max-height:calc(100vh - 96px);display:flex;flex-direction:column}
+.sidelist .hd{padding:14px 16px;border-bottom:1px solid var(--line);font-size:13px;font-weight:600;color:var(--deep);display:flex;justify-content:space-between;align-items:center}
+.sidelist .hd small{font-weight:400;color:var(--soft);font-size:11.5px}
+.sidelist .list{overflow-y:auto;flex:1;padding:6px}
+.sitem{display:flex;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;align-items:flex-start;transition:.13s}
+.sitem:hover{background:var(--tint2)}
+.sitem.on{background:var(--tint)}
+.sitem .sn{width:20px;height:20px;border-radius:50%;background:#e9eef4;color:var(--soft);font-size:11px;
+  display:flex;align-items:center;justify-content:center;flex:0 0 20px;margin-top:2px;font-weight:600}
+.sitem.done .sn{background:#e3f3ec;color:var(--ok)}
+.sitem.on .sn{background:var(--pri);color:#fff}
+.sitem .st{font-size:12.5px;line-height:1.5;color:var(--mid)}
+.sitem.on .st{color:var(--deep);font-weight:500}
+.sitem .sm{font-size:11px;color:var(--soft);margin-top:2px}
+
+.panel{background:#fff;border-radius:12px;border:1px solid #edf1f6;overflow:hidden;min-height:520px;display:flex;flex-direction:column}
+.panel .ph{padding:22px 28px 16px;border-bottom:1px solid #f0f3f7}
+.panel .ph .k{font-size:11.5px;color:var(--pri);font-weight:600;letter-spacing:.06em;margin-bottom:8px}
+.panel .ph h2{font-size:21px;line-height:1.45;font-weight:600;color:var(--deep)}
+.panel .pb{padding:24px 28px;flex:1}
+.panel .pf{padding:14px 28px;border-top:1px solid #f0f3f7;display:flex;align-items:center;gap:12px;background:#fbfcfe}
+.panel .pf .spacer{flex:1}
+.pg-ind{font-size:12.5px;color:var(--soft)}
+
+/* 内容页版式 */
+.hook{background:var(--tint);border-left:4px solid var(--pri);border-radius:0 8px 8px 0;padding:16px 20px;margin-bottom:22px}
+.hook .lab{font-size:11.5px;color:var(--pri);font-weight:600;letter-spacing:.06em;margin-bottom:6px}
+.hook p{font-size:15.5px;color:var(--deep);font-weight:500;line-height:1.6}
+.goals{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:8px}
+.goal{border-top:2px solid var(--line);padding-top:10px}
+.goal .gno{font-size:11px;color:var(--pri);font-weight:700;margin-bottom:5px}
+.goal p{font-size:13.5px;color:var(--mid);line-height:1.65}
+
+.cpage h3{font-size:19px;font-weight:600;color:var(--deep);line-height:1.5;margin-bottom:8px}
+.cpage .lead{font-size:13.5px;color:var(--muted);line-height:1.7;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #f0f3f7}
+.mcards{display:grid;gap:12px}
+.mcards.c2{grid-template-columns:1fr 1fr}
+.mcards.c3{grid-template-columns:repeat(3,1fr)}
+.mcards.c4{grid-template-columns:repeat(2,1fr)}
+.mcard{border:1px solid var(--line);border-radius:10px;padding:16px 18px;background:#fff;position:relative;overflow:hidden}
+.mcard:before{content:"";position:absolute;left:0;top:0;width:3px;height:100%;background:var(--pri)}
+.mcard .n{font-size:11px;color:#b9c6d4;font-weight:700;letter-spacing:.06em;margin-bottom:7px}
+.mcard h4{font-size:14.5px;font-weight:600;color:var(--pri);margin-bottom:8px;line-height:1.45}
+.mcard p{font-size:13px;color:var(--muted);line-height:1.72}
+
+.steps{display:flex;flex-direction:column;gap:9px}
+.mstep{display:flex;gap:14px;border:1px solid var(--line);border-radius:9px;padding:13px 16px;background:#fff;align-items:flex-start}
+.mstep .sn{font-size:13px;font-weight:700;color:var(--pri);flex:0 0 26px;padding-top:1px}
+.mstep .sc h4{font-size:14px;font-weight:600;color:var(--deep);margin-bottom:4px}
+.mstep .sc p{font-size:12.8px;color:var(--muted);line-height:1.65}
+
+.mtable{width:100%;border-collapse:collapse;font-size:12.8px}
+.mtable th{background:var(--pri);color:#fff;padding:9px 11px;text-align:left;font-weight:500;font-size:12.5px}
+.mtable th:first-child{border-radius:7px 0 0 0}
+.mtable th:last-child{border-radius:0 7px 0 0}
+.mtable td{border-bottom:1px solid #eef1f5;padding:10px 11px;color:var(--muted);line-height:1.6;vertical-align:top}
+.mtable tr:nth-child(even) td{background:#fafbfd}
+.mtable td:first-child{color:var(--deep);font-weight:500}
+
+.bands{display:flex;flex-direction:column;gap:9px}
+.band{border-radius:9px;padding:14px 18px;display:flex;gap:16px;align-items:flex-start;border:1px solid}
+.band .bn{font-size:13px;font-weight:700;flex:0 0 64px;padding-top:1px}
+.band p{font-size:13px;line-height:1.68;color:var(--mid)}
+
+.mcompare{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.ccol{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+.ccol .ch{padding:11px 16px;font-size:13.5px;font-weight:600;color:#fff}
+.ccol.good .ch{background:var(--pri)}
+.ccol.bad .ch{background:#6b7785}
+.ccol ul{list-style:none;padding:12px 16px}
+.ccol li{position:relative;padding-left:16px;font-size:12.8px;color:var(--mid);line-height:1.65;margin-bottom:9px}
+.ccol li:before{content:"";position:absolute;left:0;top:8px;width:5px;height:5px;border-radius:50%;background:var(--pri)}
+
+.note{background:#fbfaf6;border:1px solid #efe9d9;border-radius:9px;padding:15px 18px;margin-top:16px}
+.note .nl{font-size:11.5px;font-weight:600;color:#8a6d2f;letter-spacing:.05em;margin-bottom:7px}
+.note p{font-size:13px;color:#5c5340;line-height:1.75;white-space:pre-wrap}
+
+.case{border:1px solid var(--line);border-radius:12px;padding:22px;background:#fff}
+.case .cd{font-size:11.5px;color:var(--pri);font-weight:600;letter-spacing:.05em}
+.case h3{font-size:19px;font-weight:600;color:var(--deep);margin:8px 0 16px;line-height:1.45}
+.case .cs{font-size:13.5px;color:var(--mid);line-height:1.8;white-space:pre-wrap}
+.case .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}
+.case .stat{background:var(--tint2);border:1px solid var(--line);border-radius:9px;padding:12px}
+.case .stat b{display:block;font-size:20px;color:var(--pri);font-weight:600;line-height:1.2}
+.case .stat span{font-size:11.5px;color:var(--soft);display:block;margin-top:4px}
+.case .flip{background:var(--tint);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:14px 18px;margin-top:16px}
+.case .flip .fl{font-size:11.5px;color:var(--accent);font-weight:600;margin-bottom:6px}
+.case .flip p{font-size:13px;color:var(--mid);line-height:1.72}
+.case .wrong{font-size:12.5px;color:var(--soft);margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+.case .wrong b{color:var(--muted);font-weight:500}
+
+/* 答题 */
+.qbox{background:#fbfcfe;border:1px solid #e6ecf3;border-radius:12px;padding:22px}
+.qbox .qh{font-size:11.5px;color:var(--pri);font-weight:600;letter-spacing:.05em;margin-bottom:12px}
+.qbox .qt{font-size:15.5px;color:var(--deep);font-weight:500;line-height:1.65;margin-bottom:18px}
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{display:flex;gap:12px;border:1px solid var(--line);border-radius:9px;padding:12px 14px;background:#fff;
+  cursor:pointer;transition:.13s;align-items:flex-start}
+.opt:hover{border-color:#b9cde3;background:#fbfdff}
+.opt .ol{width:24px;height:24px;border-radius:6px;background:var(--tint);color:var(--pri);font-size:12px;
+  font-weight:600;display:flex;align-items:center;justify-content:center;flex:0 0 24px}
+.opt .ot{font-size:13.5px;line-height:1.6;color:var(--ink);padding-top:1px}
+.opt.sel{border-color:var(--pri);background:var(--tint)}
+.opt.sel .ol{background:var(--pri);color:#fff}
+.opt.right{border-color:var(--ok);background:#eefaf5}
+.opt.right .ol{background:var(--ok);color:#fff}
+.opt.wrong{border-color:var(--accent);background:#fdeef0}
+.opt.wrong .ol{background:var(--accent);color:#fff}
+.opt.lock{cursor:default}
+.explain{margin-top:16px;background:#fff;border:1px solid var(--line);border-radius:9px;padding:15px 17px}
+.explain .el{font-size:11.5px;font-weight:600;color:var(--ok);margin-bottom:6px}
+.explain p{font-size:13px;color:var(--mid);line-height:1.72}
+.explain.bad .el{color:var(--accent)}
+
+/* 成绩单 */
+.score-hero{text-align:center;padding:34px 20px;background:linear-gradient(130deg,#10243d,#1b4f8a);border-radius:14px;color:#fff;margin-bottom:20px}
+.score-hero .big{font-size:52px;font-weight:600;line-height:1;letter-spacing:-.02em}
+.score-hero .big small{font-size:18px;font-weight:400;color:#a8c2dc}
+.score-hero .lbl{font-size:13px;color:#c5d6e8;margin-top:10px}
+.score-hero.pass{background:linear-gradient(130deg,#0b4a3a,#0f7b5f)}
+.score-hero.fail{background:linear-gradient(130deg,#5a1520,#a3283c)}
+.qreview{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+.qr{border:1px solid var(--line);border-radius:9px;padding:14px 16px;background:#fff}
+.qr .qrt{font-size:13.5px;color:var(--deep);line-height:1.6;margin-bottom:8px;font-weight:500}
+.qr .qra{font-size:12.5px;display:flex;gap:16px;flex-wrap:wrap}
+.qr .qra span.ok{color:var(--ok)}
+.qr .qra span.no{color:var(--accent)}
+
+/* ---------- 管理端 ---------- */
+.mtabs{display:flex;gap:4px;background:#fff;border-radius:10px;padding:5px;border:1px solid #edf1f6;margin-bottom:20px;overflow-x:auto}
+.mtab{padding:9px 16px;border-radius:7px;font-size:13.5px;color:var(--mid);white-space:nowrap;transition:.13s}
+.mtab:hover{background:var(--tint2)}
+.mtab.on{background:var(--pri);color:#fff;font-weight:500}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:20px}
+.kpi{background:#fff;border-radius:12px;padding:18px;border:1px solid #edf1f6}
+.kpi .kl{font-size:12px;color:var(--soft);margin-bottom:8px}
+.kpi .kv{font-size:26px;font-weight:600;color:var(--deep);line-height:1.1}
+.kpi .kv small{font-size:13px;font-weight:400;color:var(--soft)}
+.kpi .ks{font-size:11.5px;color:var(--soft);margin-top:6px}
+.card{background:#fff;border-radius:12px;border:1px solid #edf1f6;overflow:hidden;margin-bottom:18px}
+.card .ch2{padding:15px 20px;border-bottom:1px solid #f0f3f7;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.card .ch2 h3{font-size:15px;font-weight:600;color:var(--deep)}
+.card .ch2 .spacer{flex:1}
+.card .cb{padding:18px 20px}
+.card .cb.p0{padding:0}
+.dt{width:100%;border-collapse:collapse;font-size:13px}
+.dt th{background:#f7f9fc;padding:11px 14px;text-align:left;font-weight:500;font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--line);white-space:nowrap}
+.dt td{padding:11px 14px;border-bottom:1px solid #f3f6f9;color:var(--mid);vertical-align:middle}
+.dt tr:last-child td{border-bottom:none}
+.dt tr:hover td{background:#fbfcfe}
+.dt .nm{color:var(--deep);font-weight:500}
+.rank{width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:600;background:#f0f3f7;color:var(--muted)}
+.rank.r1{background:#fdf3d7;color:#8a6d12}
+.rank.r2{background:#eef0f4;color:#5c6670}
+.rank.r3{background:#f7ece3;color:#8a5a33}
+.pill{display:inline-block;font-size:11.5px;padding:2px 9px;border-radius:20px;background:var(--tint);color:var(--pri)}
+.pill.ok{background:#e6f6ef;color:var(--ok)}
+.pill.no{background:#fdeef0;color:var(--accent)}
+.pill.warn{background:#fdf4e3;color:var(--warn)}
+.pill.gray{background:#f0f2f5;color:var(--muted)}
+.bar-mini{height:5px;background:#eef1f5;border-radius:3px;overflow:hidden;min-width:60px}
+.bar-mini i{display:block;height:100%;background:var(--pri);border-radius:3px}
+.empty{text-align:center;padding:44px 20px;color:var(--soft);font-size:13.5px;line-height:1.8}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.inp{height:38px;border:1px solid var(--line);border-radius:7px;padding:0 11px;background:#fff;font-size:13.5px;width:100%}
+.inp:focus{outline:none;border-color:var(--pri);box-shadow:0 0 0 2px rgba(27,79,138,.1)}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.form-grid .fi label{display:block;font-size:12px;color:var(--mid);margin-bottom:5px}
+
+/* 弹层 */
+.mask{position:fixed;inset:0;background:rgba(16,36,61,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(2px)}
+.dlg{background:#fff;border-radius:14px;width:100%;max-width:560px;max-height:88vh;overflow:auto;box-shadow:0 24px 70px rgba(0,0,0,.28)}
+.dlg .dh{padding:20px 24px 14px;border-bottom:1px solid #f0f3f7}
+.dlg .dh h3{font-size:17px;font-weight:600;color:var(--deep)}
+.dlg .dh p{font-size:12.5px;color:var(--soft);margin-top:5px}
+.dlg .db{padding:20px 24px}
+.dlg .df{padding:14px 24px 20px;display:flex;gap:10px;justify-content:flex-end}
+.dlg .df .btn{width:auto;min-width:88px}
+.toast{position:fixed;left:50%;bottom:32px;transform:translateX(-50%);background:rgba(16,36,61,.94);color:#fff;
+  padding:11px 20px;border-radius:9px;font-size:13.5px;z-index:400;box-shadow:0 8px 26px rgba(0,0,0,.24);
+  opacity:0;transition:.24s;pointer-events:none;max-width:88vw;text-align:center}
+.toast.on{opacity:1;bottom:40px}
+
+@media (max-width:860px){
+  .learn{grid-template-columns:1fr}
+  .sidelist{position:static;max-height:none;margin-bottom:12px}
+  .sidelist .hd{cursor:pointer}
+  .sidelist .list{max-height:0;overflow:hidden;transition:max-height .22s ease}
+  .sidelist.open .list{max-height:300px;overflow-y:auto}
+  .sidelist .hd .tg{font-size:11.5px;color:var(--pri);font-weight:500}
+  .mcards.c3,.mcards.c2,.mcards.c4{grid-template-columns:1fr}
+  .mcompare{grid-template-columns:1fr}
+  .row2{grid-template-columns:1fr}
+  .case .stats{grid-template-columns:1fr}
+  .wrap{padding:16px 13px 50px}
+  .panel .ph,.panel .pb,.panel .pf{padding-left:17px;padding-right:17px}
+  .topbar{padding:0 13px;gap:8px}
+  .topbar .brand{font-size:14px;white-space:nowrap}
+  .topbar .brand span{display:none}
+  .topbar .who span{display:none}
+  .topbar .btn.sm{white-space:nowrap;flex:0 0 auto}
+  .hero{padding:20px}
+  .hero h2{font-size:19px}
+  .score-hero .big{font-size:42px}
+  .kpis{grid-template-columns:1fr 1fr}
+  .mtabs{padding:4px}
+  .mtab{padding:8px 12px;font-size:13px}
+  .dt{font-size:12.5px}
+  .dt th,.dt td{padding:9px 8px}
+  .case .stats{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast" class="toast"></div>
+<script>
+window.__COURSE__={"course":"geely-user-thinking","modules":[{"no":1,"key":"m1","name":"用户思维总纲","min":60,"ability":"场景还原能力（主） / 需求挖掘与识别（辅）","ability_short":"场景还原","output":"场景还原五问卡","intro":"把「用户思维」从态度问题重新定义成判断顺序问题，并交付全课唯一一把通用尺子——场景还原五问。","points":["三种伪用户思维，以及判断顺序的三步","B 端四层用户与诉求互斥时的判据","从「用户满意」到「组织绩效改善」的翻译"],"wrap":["判断顺序错了，努力就是成本","四层用户先分清谁承担后果","内部系统的价值必须能翻译成组织指标"],"sections":[{"n":1,"m":3,"t":"用户思维不是「态度好」，而是一套可验证的判断顺序","hook":"为什么加了 12 个字段，一线还是不用？","goals":["三种伪用户思维长什么样","判断顺序：先场景、再问题、后功能","顺序错了，代价落在谁身上"],"pages":[{"L":"cards","T":"三种伪用户思维，共同点是「没有判断顺序」","K":"态度好、调研勤、听领导——三件事都做了，问题还是没解决","D":[["态度好，但判断错","把「用户满意」当成目标，把功能多当成诚意。系统越做越重，一线越用越绕。"],["调研走过场","问卷发了、访谈做了，结论是「希望更好用」。没有一句能落到设计决策上。"],["把领导当用户","按汇报口径设计系统，上线后发现天天用它的是一线专员。"]]}],"q":{"q":"某事业部提出「考勤系统补卡流程太麻烦」。以下哪个动作最接近「有判断顺序」的做法？","o":["直接评估把三步改成一步需要多少开发量","先问上个月补了几次卡、当时人在哪、为什么没打上","发一份满意度问卷，看大家打几分","参考同业系统，看别人做成几步"],"a":1,"why":"先还原场景（谁、在什么条件下、为完成什么），再定义问题，最后才谈功能。A 是先给方案，C 拿不到场景，D 是抄答案。"}},{"n":2,"m":5,"t":"数字化转型中三类典型错位","hook":"流程搬上线，为什么一线反而更慢了？","goals":["把流程线上化当成体验","把报表当成决策支持","把使用率当成满意度"],"pages":[{"L":"cards","T":"三类错位，都是把「做了什么」当成了「改善了没有」","K":"上线不等于改善；下发数据不等于支持决策；有人用不等于有人满意","D":[["流程线上化 ≠ 体验","纸质表单原样搬进系统，只是不再手写。字段一个没少、审批一环没减，唯一变化是打字代替写字。"],["报表 ≠ 决策支持","给出一堆数，不给结论。看的人还要自己算一遍，于是继续用 Excel——绕行从这里开始。"],["使用率 ≠ 满意度","被制度强制使用的系统，使用率天然高。它反映流程强制力，不反映体验。"]]}],"q":{"q":"某内部系统月活 96%，管理层据此认为体验良好。以下哪个证据最能推翻这个结论？","o":["用户日均登录 3.2 次","用户把系统数据导出后，在 Excel 里完成核心分析","页面平均加载 1.8 秒","客服工单月均 40 单"],"a":1,"why":"96% 是被制度推上去的。导出到 Excel 完成核心动作，说明系统只承担了「留痕」，真正的决策动作仍在系统外——这就是绕行。"}},{"n":3,"m":10,"t":"场景还原五问：谁在用、在什么条件下、为完成什么、现在怎么绕过、不做会怎样","hook":"五问填完，为什么能直接否掉三成需求？","goals":["五问的提问顺序与每问要拿的证据","「现在怎么绕过」为什么最值钱","怎么用五问当场否需求"],"pages":[{"L":"steps","T":"场景还原五问：顺序不能反","K":"每一问都要拿到可指认的证据，拿不到就是没还原","D":[["谁在用","岗位、职级、是否外包、是否兼职。不是「财务人员」，是「某基地一位费用审核员」。"],["在什么条件下","时间压力、设备、场地、是否被打断。同一个人在不同条件下是完全不同的用户。"],["为完成什么","他要交付的那个动作，不是系统里的功能名。例如「月结前把这张单子核完」。"],["现在怎么绕过","Excel、微信、纸质、私人台账、口头代填。绕行路径暴露真实约束。"],["不做会怎样","后果、承担者、时限。用来判断紧迫性，也用来判断该不该由系统解决。"]],"note":["为什么「绕过」这一问最值钱","因为它是唯一不依赖用户表态的证据。用户嘴上会说「挺好的」，但手会诚实地打开 Excel。\n\n绕行的五种形态：Excel 台账、微信群转发、纸质签批、私人表格、口头代填。每发现一种，就找到一处系统没覆盖的断点。"]},{"L":"table","T":"五问的输出：一张能拿去开会的卡","K":"填不满的那三行，说明需求还没到能评审的程度","w":[2.2,4.4,3.0],"D":{"h":["问","要拿到的证据","填不出来意味着"],"r":[["谁在用","岗位、职级、人数，以及是否外包或兼职","你还没找到真正的使用者"],["什么条件下","一次完整观察或一次跟班记录","你只在会议室里理解用户"],["为完成什么","他交付的动作，以及这件事的截止时间","你在按功能清单设计"],["怎么绕过","具体的文件名、群名、台账名","你还没看到真实约束"],["不做会怎样","后果、承担者、时限","优先级只能靠谁声音大"]]}}],"q":{"q":"复盘一个审批系统时，五问里哪一问最能暴露「设计假设错误」？","o":["谁在用","在什么条件下","现在怎么绕过","不做会怎样"],"a":2,"why":"绕行路径是用户用行为投票的结果，它直接显示「系统没覆盖的那一段」，通常就是假设错的地方。其余三问指向范围与优先级。"}},{"n":4,"m":10,"t":"B 端产品的用户：使用者、管理者、决策者、监管者四层","hook":"一个字段加不加，四个角色四种答案，听谁的？","goals":["四层各自看什么、要什么","三种典型互斥结构与唯一判据","影响者为什么不在四层却能否决"],"pages":[{"L":"bands","T":"四层用户：诉求不同，语言也不同","K":"同一套系统，四个人说的「好用」根本不是一件事","D":[["使用者","看动作与频次：一天点几次、每次几步、会不会被打断。他要的是快。"],["管理者","看指标与考核：人均单量、差错率、周期。他要的是稳、可算。"],["决策者","看投入产出：这笔钱换来什么、能不能对外讲。他要的是值。"],["监管者","看留痕与合规：三年后能不能追溯、有没有依据。他要的是可查。"]]},{"L":"cards","T":"三种互斥结构，判据只有一个：谁承担后果","K":"不按级别排，不按人数排，按后果归属排","D":[["快 vs 稳","一线要少填，审核要留痕。字段越多审核越省事、一线越费时。判据：出错时谁去解释、谁被追责。"],["细 vs 简","管理层要维度，执行层要步数。判据：这个维度有没有人真的拿去做决定。"],["留痕 vs 效率","合规要审批链，业务要当天办完。判据：这条链是制度要求，还是历史遗留。"]]}],"q":{"q":"费控系统拟新增 6 个成本维度字段。一线报销人反对，财务审核员支持。判断依据应是：","o":["报销人人数多，按人数决定","审核员是需求提出方，按提出方决定","出错时由谁承担解释与追责责任","上报分管领导裁决"],"a":2,"why":"四层互斥时的判据是「谁承担后果」。若退单与稽查责任落在审核员，字段就有必要；但必须同时压缩填报代价（预填、默认值）。按人数或按提出方都会系统性伤害一方。"}},{"n":5,"m":10,"t":"B 端价值判据：从「用户满意」走到「组织绩效改善」","hook":"「更好用」这三个字，怎么翻译成领导听得懂的话？","goals":["三个价值锚点：少一个人 / 少一次返工 / 少一天关账","把「更好用」翻译成组织指标的四个动作","翻不出来的需求该排第几"],"pages":[{"L":"cards","T":"内部系统的价值，只有三个锚点","K":"用户满意是过程指标，组织绩效才是结果指标","D":[["少一个人","原来 3 个人干的活，2 个人能干。等价于编制与人力成本，是最容易被管理层听懂的语言。"],["少一次返工","退单、重填、二次核对。可直接折算工时与人日，也最容易验证。"],["少一天关账","周期缩短影响的是资金效率与管理节奏，比工时更值钱，但需要跨部门数据才能算。"]]},{"L":"steps","T":"把「更好用」翻译成组织指标的四个动作","K":"翻不出来的需求，通常不是第一优先级","D":[["找到那个动作","用户说的「麻烦」，对应哪一个具体动作：填、核、催、查、等。"],["数清它的频次","一天几次、一月几次、涉及几个人。频次决定价值量级。"],["折算成时间","单次耗时 × 频次 × 人数 = 月工时，再折算人日。"],["挂到组织指标上","工时→人均单量；周期→关账天数；差错→退单率。挂不上就降级。"]],"note":["一个换算示例","「报销单均填报 41 分钟」，2,400 人月均 1.4 单，就是每月 2,296 小时 ≈ 13 人日。\n\n省一半即 6.5 人日/月，一年 78 人日。这个数比「提升体验」有说服力得多，也更容易进预算评审。"]}],"q":{"q":"以下四条需求，哪一条最容易被直接判为「非第一优先级」？","o":["单据预填，减少 30% 填报时间","审批超时自动提醒，平均缩短 1.2 天","界面配色改为品牌蓝，提升一致性","三单自动匹配，减少人工核对 2 人日/月"],"a":2,"why":"配色无法翻译成「少一个人 / 少一次返工 / 少一天关账」中的任何一项。它未必不做，但不能与前三者争同一批资源。"}},{"n":6,"m":10,"t":"行业数字化产品全景与用户地图","hook":"六类系统，用户的「使用动机」根本不是一回事","goals":["六类系统的用户结构差异","职能域的三个特征：用户即同事","你负责的系统属于哪一类"],"pages":[{"L":"table","T":"六类系统，用户结构完全不同","K":"照搬另一类的做法，方法论就会失焦","w":[2.0,2.6,2.2,2.6],"D":{"h":["系统类别","主要用户","动机来源","体验关键"],"r":[["集团协同办公","全体员工","被要求使用","流程不绕、状态可见"],["供应链与采购","采购执行、需求方、供应商","业务必须完成","状态透明、时效"],["制造与质量","班组长、质检、工艺","生产节拍驱动","少录入、能离线"],["经销商与售后","门店顾问、服务经理","考核与返利","算得清、少返工"],["车主 App 与车机","车主","自愿使用","快、准、有惊喜"],["职能数字化（本期）","人力、财务、采购的同事","制度要求 + 自身省事","一次填对、状态可查"]]}},{"L":"cards","T":"职能域的三个特征，决定了方法要改哪里","K":"用户即同事、需求即管理动作、系统即制度载体","D":[["用户即同事","你明天还要跟他开会。所以不能「调研完就下结论」，方案要能当场被质疑、当场解释。"],["需求即管理动作","需求背后往往是一条管理制度。改系统等于改制度，光靠产品经理推不动，要拉制度 owner。"],["系统即制度载体","它承载的是「必须这样做」。体验的天花板由制度决定，不由界面决定。"]]}],"q":{"q":"职能数字化系统的体验天花板，最先由什么决定？","o":["前端组件选型","背后的管理制度与审批链","服务器性能","培训是否到位"],"a":1,"why":"字段、审批链、留痕要求都由制度规定。界面能优化的是「在制度内少走一步」，改不了「必须走这三步」。先改制度，再谈界面。"}},{"n":7,"m":2,"t":"全课路线图与作业说明","hook":"8 个模块学完，你手上会多出什么？","goals":["模块与能力的对应关系","作品集标准与提交方式","两周学习节奏"],"pages":[{"L":"table","T":"每个模块都有一件产出物，其中两件必须进作品集","K":"课程真正的交付不是「听完」，是那几张填满的表","w":[2.4,3.4,1.6],"D":{"h":["模块","产出物","进作品集"],"r":[["M1 用户思维总纲","场景还原五问卡","配套材料"],["M2 定性研究方法","深访提纲 + 观察记录表","—"],["M3 定量研究方法","问卷自查 20 条 + 样本量速算","—"],["M4 用户画像构建","用户画像卡（1 页 A4）","选交"],["M5 需求挖掘与识别","需求鉴真表","必交"],["M6 需求优先级判断","排序表 + 一页纸理由","选交"],["M7 用户旅程绘制","用户旅程地图（含泳道）","必交"],["M8 反馈闭环与度量","闭环 SOP + 指标卡","—"]]}}],"q":{"q":"认证作品集中的两件必交件是：","o":["画像卡 + 优先级排序表","需求鉴真表 + 用户旅程图","深访提纲 + 问卷","五问卡 + 闭环 SOP"],"a":1,"why":"必交是需求鉴真表（验洞察能力）与用户旅程图（验共情与场景能力）。另外两件为选交加分项，合格每件加 2 分。"}}],"cases":[{"domain":"财务域 · 费控报销","title":"两年加了 14 个字段，退单率反而升到 34%","scene":"某集团费控报销系统上线两年，单据字段从 12 个增至 26 个。一线单均填报 41 分钟，退单率 34%，财务共享中心每月约 3 人日用于解释退回原因。\n\n逐条复盘：哪个字段是「万一要用」加的？哪个字段的数据在合同系统里已经有了？哪个字段的业务规则三个月内改过两次？","stats":[["26","单据字段（两年前 12 个）"],["41 分钟","一线单均填报耗时"],["34%","退单率"]],"flip":"复盘落点不在「删字段」，而在「哪 3 个字段在需求提出时就该被拦下，拦下的依据是哪一问」。","wrong":"每次业务提需求就加字段，理由是「先加上，也许以后用得上」。"},{"domain":"对照 · 车主 App","title":"同一个活动入口，站在车边的人根本不会点","scene":"首页新增活动入口后点击率仅 0.8%。团队第一反应是挪位置、换图标、加动效，连改三版仍无起色。\n\n场景还原后发现真正的变量是「打开 App 时人在哪」：站在车边的人要充电和开门，坐在家里的人才看活动。同一个入口，两种场景，一个场景根本不该出现这个入口。","stats":[["0.8%","入口点击率"],["2 类","真实使用场景"],["3 轮","无效的界面优化"]],"flip":"C 端与 B 端共用同一套场景还原逻辑。差异在于：B 端的「场景」由流程节点定义，不由物理位置定义。","wrong":"把入口从第二屏挪到首屏，并换了一版更大的图标。"}],"quiz":[["五问填完能直接否掉约三成需求，依据是什么？","B","拿不到可指认证据的需求占比约三成，缺证据即缺场景"],["使用率 96% 能否说明体验好？","B","不能，需与绕行率、任务完成时长、退回率交叉验证"],["四层用户诉求互斥时按什么判据排序？","C","按谁承担后果，不按级别、不按人数、不按提出方"],["「更好用」无法翻译成组织指标时应如何处理？","D","降级，不与「少一人/少一次返工/少一天关账」争资源"],["职能系统的体验天花板由什么决定？","B","制度与审批链；界面只能在制度内优化步数"]]},{"no":2,"key":"m2","name":"定性研究方法","min":60,"ability":"定性研究方法（主） / 场景还原能力（辅）","ability_short":"定性研究","output":"深访提纲 + 观察记录表","intro":"能独立设计并执行一次有效访谈或一次现场观察，且拿回来的结论经得起追问。重点不在「会问」，在「不被用户的方案牵着走」。","points":["研究问题的改写：角色、环节、缺失物","BEI 提纲与四类必须删掉的提问","跟班观察：记录打断与绕行，不记录评价"],"wrap":["只访接口人，只能拿到系统的成功故事","绕行和沉默才是设计缺陷的证据","结论强度必须跟证据强度匹配"],"sections":[{"n":1,"m":5,"t":"从业务问题到研究问题：把「不满意」翻译成可观察的现象","hook":"「用户为什么不满意」这个问题，为什么问不出答案？","goals":["不可研究题目的三个特征","研究问题的三要素：角色、环节、缺失物","改写前后的对照"],"pages":[{"L":"cards","T":"不可研究的题目，通常缺三样东西之一","K":"能被观察到，才可能被研究；「想要什么」不可观察","D":[["缺角色","「用户觉得流程太麻烦」——哪个用户？一线还是审批人？两拨人的麻烦不是一回事。","把「用户」直接当成一个人。"],["缺环节","「报销体验不好」——填报、审批、打款，哪一段？没有环节就没有观察点。","用整体评价代替具体环节。"],["缺缺失物","「希望系统更智能」——缺的是信息、是提醒、还是自动填？说不出缺失物，就设计不出方案。","把感受当需求记录下来。"]]},{"L":"steps","T":"改写公式：谁 → 在哪一环 → 因为缺什么而放弃","K":"三要素齐了，题目才可研究，访谈提纲才有落点","D":[["写下原始问题","把业务方原话照抄，不要先美化。「大家都说难用」。"],["找角色","具体到岗位、职级、是否外包。一个角色一张提纲。"],["切环节","把流程切成 4–6 段，指出问题落在哪一段。"],["补缺失物","在这一段里，他缺的是信息、权限、提醒，还是模板？"]],"note":["一个改写示例","原始：「用户觉得绩效系统难用」。\n\n改写：「某基地部门经理，在季度考核打分这一环，因为看不到下属上一季度的目标完成情况，而反复退出系统去翻邮件」。\n\n改写后，下一步做什么已经很清楚：先解决「目标完成情况在打分页不可见」。"]}],"q":{"q":"以下哪一项是可以直接进入研究设计的题目？","o":["用户希望报销系统更好用","员工对HR系统的满意度如何","新员工在入职首周，因找不到导师联系方式而反复询问HR","管理层希望提升数字化体验"],"a":2,"why":"它有角色（新员工）、环节（入职首周）、缺失物（导师联系方式），可直接设计观察与访谈。其余三项都缺至少一个要素。"}},{"n":2,"m":5,"t":"抽样：为什么不能只访接口人","hook":"访谈了 8 个人都说「还行」，问题出在哪？","goals":["接口人偏差：他已是系统的成功适应者","极端用户与边缘用户的选法","6–8 人的饱和判断"],"pages":[{"L":"bands","T":"四类样本，缺一类就会得出偏乐观的结论","K":"接口人最容易被约到，也最不代表真实用户","D":[["关键接口人","各部门指定的系统联络人。熟悉流程、配合度高，但已经适应了系统，问题在他这里被消化掉了。"],["极端用户","用得最多的人和完全不用的人。前者暴露效率瓶颈，后者暴露放弃原因。"],["边缘用户","外包、兼职、跨基地、临退休。权限与培训覆盖最薄弱，问题最集中。"],["放弃者","已经彻底绕行的人。他们不在系统里，只能靠观察和旁敲侧击找到。"]]},{"L":"cards","T":"抽样不看人数，看是否覆盖了四种处境","K":"6–8 人饱和的判断标准：新访谈不再出现新的问题类型","D":[["按处境分层","同一角色下，按使用频次、权限范围、入职时长各取 2 人，比随机抽 10 人有效。"],["必须找到 1 个绕行者","找不到绕行者，说明你的样本仍全在系统内。让他演示他现在怎么做这件事。"],["饱和即停","连续 2–3 人不再带来新的问题类型，可以停；靠人数堆不增加信息量。"]]}],"q":{"q":"一次内部系统调研只访谈了各部门指定的系统联络人，最可能出现的偏差是：","o":["样本量太小，结论不显著","系统性低估问题严重程度，因为联络人已适应系统","受访者不愿说真话","结论无法量化"],"a":1,"why":"联络人是系统的成功适应者，他们的问题已在日常中自行消化。真正的缺陷留在绕行者与边缘用户身上。"}},{"n":3,"m":7,"t":"深访提纲设计：BEI 结构、五问追问、四类必须删掉的提问","hook":"为什么问「你觉得应该怎么改」，永远问不出真问题？","goals":["BEI 的三段结构：情境—行为—结果","五问追问的模板句","四类必须删掉的提问"],"pages":[{"L":"steps","T":"BEI：不问观点，问最近一次具体发生了什么","K":"人的记忆在具体事件上最准，在抽象评价上最不可靠","D":[["情境","「上一次遇到这个问题是什么时候？当时你在做什么？」锁定时间、地点、任务。"],["行为","「你当时第一步做了什么？然后呢？」只要动作，不要解释。"],["结果","「最后这件事怎么解决的？花了多久？」拿到代价与绕行路径。"],["复述校验","「我复述一遍，你看我理解得对不对」——当场纠偏，比事后猜测可靠。"]],"note":["四类必须删掉的提问","① 假设性：「如果系统能自动填，你会用吗」——答案永远是会。\n② 诱导性：「是不是因为字段太多才觉得麻烦」——把答案塞给对方。\n③ 双重问题：「系统是不是又慢又难用」——两个变量，无法归因。\n④ 让对方预测未来：「你希望以后怎么改」——他在给你方案，不是在给你事实。"]},{"L":"cards","T":"五问追问法：把一个模糊回答挖到具体","K":"每一问都要求对方给一个可指认的细节","D":[["「能举个最近的例子吗」","把评价拉回事件。对方说「经常出错」，就问他上一次出错是哪天。"],["「当时你怎么做的」","拿到动作序列，特别是系统外的动作。"],["「为什么这么做」","拿到他的判断依据，往往就是需求的真实约束。"],["「后来怎么解决的」","拿到绕行路径与代价，这是需求的入口。"],["「还有别人也这样吗」","判断这是个体特例还是结构性问题，决定要不要扩大样本。"]]}],"q":{"q":"以下哪个提问方式最符合 BEI 行为事件访谈？","o":["你觉得现在的审批流程合理吗","如果只能改一处，你会改哪里","上一次审批被退回是什么情况？当时你先做了什么","你希望系统增加什么功能"],"a":2,"why":"BEI 问具体事件中的行为。「上一次…当时…」锁定了情境与动作；其余三项分别是要评价、要方案、要功能清单。"}},{"n":4,"m":7,"t":"访谈执行：破冰、沉默、录音与当场复述","hook":"对方说「挺好的」，后面 40 分钟就白聊了？","goals":["破冰的真正目的是消除考核感","沉默 5 秒的作用","复述校验与合规要求"],"pages":[{"L":"steps","T":"四个动作，决定这次访谈有没有真话","K":"内部访谈最大的阻力不是时间，是「他怕你在考核他」","D":[["破冰：先说清用途","「这次不是评估你的工作，是看系统哪里给你添了麻烦，问题会匿名汇总。」"],["前 10 分钟不问系统","先聊他一天怎么过、什么时候最忙，让他进入叙述状态。"],["沉默 5 秒","对方说完停住时不要急着接话。5 秒的空白，往往换来最关键的那句补充。"],["当场复述","「我复述一遍：你每月初要花两天做这件事，因为…，对吗？」让他纠错。"]],"note":["录音与合规","内部访谈同样要口头告知并取得同意：「我录个音，只用于整理，不外传，可以吗？」\n\n转写标注规范：每段标注受访者编号、岗位、时间点；引语保留原话，不要顺手改成书面语——原话里的用词往往就是需求的线索。"]},{"L":"cards","T":"三类现场反应，对应三种处理","K":"访谈不是聊天，是有一张清单要拿满","D":[["对方开始给方案","先接住再还原：「这个思路我记下了。你说的这个问题，最近一次发生是什么时候？」"],["对方只说「都挺好」","换问法，问「最麻烦的一次」或「有没有想过去 Excel 里做」，用对比逼出问题。"],["对方开始抱怨人","把话题拉回系统与流程：「这件事在系统里是怎么走的？」人的问题另行记录。"]]}],"q":{"q":"受访者反复说「系统挺好的，没什么问题」，最有效的下一步是：","o":["换一个受访者","直接问「那你觉得哪里最需要改进」","问他「有没有哪次干脆不在系统里做，而是用 Excel 处理的」","结束访谈，记录为满意"],"a":2,"why":"用具体的绕行行为做切口，比继续问评价有效。绕行几乎人人都做过，承认绕行的心理成本远低于承认不满。"}},{"n":5,"m":5,"t":"焦点小组：什么时候能用，什么时候一定不能用","hook":"把 8 个人关在一间屋子里，为什么反而问不出真话？","goals":["焦点小组适合探索共识边界","同部门同层级的压制效应","主持人的三个控场动作"],"pages":[{"L":"compare","T":"焦点小组的适用与不适用","K":"它擅长找「大家怎么看」，不擅长挖「你实际怎么做」","D":{"l":["适合用",["探索一个群体对某类问题的共同认知边界，例如「大家眼里的『状态不透明』指什么」。","快速收敛选项：当备选方案有 6 个以上，用它淘汰明显不被接受的。","跨部门对齐认知：让财务、采购、IT 坐在一间屋子里，彼此听见对方的约束。"]],"r":["不要用",["挖掘个人真实做法：群体压力会让「绕行」这类行为消失。","同部门同层级同坐：谁职级低谁闭嘴；跨层级则变成汇报会。","涉及考核与责任的话题：没人会当面说自己填错过。"]]}},{"L":"cards","T":"主持人的三个控场动作","K":"控场的目的是让沉默的人说话，不是让会议顺利","D":[["先写后说","开场 5 分钟让大家各自写下 3 条，再轮流念。避免第一个发言者定调。"],["点名沉默者","「刚才你点了下头，你是怎么看的？」用动作召唤，不用「你有什么意见」。"],["压住强势者","「这个观点我先记下，想听听其他人有没有不同做法。」"]]}],"q":{"q":"以下哪个议题最适合用焦点小组，而不是深访？","o":["审核员核对发票时的具体判断顺序","各部门对「状态不透明」这个词的理解是否一致","某位用户上个月为什么放弃使用系统","高管对预算的真实态度"],"a":1,"why":"焦点小组擅长探索群体共识边界。A、C 属于个体行为细节，D 涉及敏感立场，都应在私下深访中获取。"}},{"n":6,"m":7,"t":"现场观察：跟班、影子跟随与工作日志","hook":"为什么观察一天，比访谈 8 个人更有用？","goals":["记录什么、不记录什么","观察记录表的三列结构","跟班的时长与时段选择"],"pages":[{"L":"cards","T":"只记录可数的行为，不记录评价","K":"「他看起来很烦躁」不是证据；「他在 10 分钟内切换了 7 次窗口」才是","D":[["记录打断","每被打断一次记一笔，并记下打断来源：电话、同事、系统弹窗、领导。"],["记录绕行","什么时候打开 Excel、什么时候发微信、什么时候打印。每一次都是一处断点。"],["记录口头禅","「这个我得先问问」「等会儿再弄」——口头禅指向流程里的不确定处。"],["缺勤记录","不要写「态度不好」「不熟练」。评价性描述无法复盘，也无法让设计师行动。"]]},{"L":"table","T":"观察记录表：三列就够，但要连续","K":"时间—动作—打断/绕行，一天下来就是一张流程图","w":[1.4,4.4,3.2],"D":{"h":["时间","他在做什么（动作）","打断 / 绕行"],"r":[["09:12","打开待办，逐条浏览 14 条","电话打断 1 次"],["09:20","打开发票 PDF，与单据逐项核对","系统弹窗提醒 2 次"],["09:34","切到 Excel 台账查该供应商历史付款","绕行：系统内查不到"],["09:51","退回 1 单，填写退回原因（自由文本）","——"],["10:05","在微信群问采购员合同编号","绕行：跨系统取数"]]}}],"q":{"q":"跟班观察时，以下哪条记录符合「只记行为」的要求？","o":["她显然不熟悉这个界面","09:34 她切到 Excel 台账查该供应商历史付款","她觉得系统太复杂了","她对系统很不满意"],"a":1,"why":"行为记录包含时间、动作、对象，可复盘。其余三项都是评价或推断，无法定位设计问题，也无法验证。"}},{"n":7,"m":9,"t":"B 端与 C 端定性研究的五处关键差异","hook":"把 C 端的用户研究方法直接搬到内部系统，哪里会失效？","goals":["五处差异：样本、意愿、场景边界、决策链、采信标准","B 端为什么要「走出去拿」","哪些方法可以照搬"],"pages":[{"L":"table","T":"五处差异，决定方法要改哪里","K":"方法是同一套，取材方式完全不同","w":[1.8,4.2,4.2],"D":{"h":["维度","C 端","B 端（职能域）"],"r":[["样本可得性","公开招募，量大，可筛选","要一层层约，靠业务方配合"],["表达意愿","有动力吐槽，也可能为奖励而说好话","怕被考核，倾向说「挺好」"],["场景边界","全场景，物理位置决定行为","工位、会议、现场，流程节点决定行为"],["决策链","产品经理 → 用户","使用者、管理者、决策者、监管者四层"],["采信标准","数据与增长指标","能不能说服业务方与制度 owner"]]}},{"L":"cards","T":"B 端的三条取材原则","K":"等反馈来，等到的都是已经被消化过的问题","D":[["走出去","坐在他工位旁边看半天，比发一次问卷有效。每月固定半天驻场。"],["找绕行","真实的约束藏在 Excel 和微信里，不在工单里。"],["拿代价","不问「烦不烦」，问「这件事花了你多久、多久做一次」。"]]}],"q":{"q":"B 端内部访谈中「对方倾向说挺好」的根本原因是：","o":["对系统不了解","担心反馈被用于考核自己","表达能力有限","系统确实没问题"],"a":1,"why":"内部访谈的受访者同时是同事与被考核对象。破冰阶段必须先解除「考核感」，否则后面拿到的都是安全答案。"}},{"n":8,"m":5,"t":"定性结论的可信度：三角验证、反例搜寻与强度分级","hook":"「用户都说要这个功能」——这句话什么时候能信？","goals":["三角验证的三种组合","反例搜寻怎么做","结论强度的三档表述"],"pages":[{"L":"steps","T":"让结论站得住的三件事","K":"一个来源是故事，两个来源是线索，三个来源才敢写进需求文档","D":[["三角验证","访谈 + 观察 + 文档/日志，三者指向同一结论才立项。只有访谈的结论先别写。"],["反例搜寻","主动找 2 个不符合结论的人，问他们为什么不同。找不到反例再下结论。"],["强度分级","「普遍」（多数样本＋多来源）/「多见于」（多来源但样本少）/「个别」（仅个案）。"]],"note":["为什么必须分级","结论强度直接决定资源投入。写成「普遍」的问题，评审会要求你上方案；写成「个别」的问题，可以进观察清单而不占正式资源。\n\n反面案例：把 3 个外包人员的反馈写成「全体员工反映」，一旦被业务方抽查，整个调研的可信度都会被质疑。"]}],"q":{"q":"关于定性结论，以下哪个表述最专业？","o":["用户普遍反映审批太慢","8 位受访者中有 6 位提到审批卡在部门经理环节，与日志中位时长 4 小时吻合","大家都觉得系统不好用","用户希望系统更快"],"a":1,"why":"给出了样本量、具体环节、以及第二来源（日志）的互证。其余三项都是无来源、无强度分级的概括。"}}],"cases":[{"domain":"财务域 · 共享中心","title":"跟班一位费用审核员一天：被系统打断 27 次","scene":"跟班财务共享中心一位费用审核员完整一个工作日，记录系统打断 27 次，其中 19 次发生在「正在核对发票与单据」的过程中。\n\n观察发现她真实的判断顺序是：先看供应商历史付款记录 → 再看金额 → 最后看发票。而系统把「费用类型」设为第一个必填项，每次核对都被打断重来。","stats":[["27 次","单日系统打断"],["19 次","发生在核对过程中"],["1 天","跟班观察时长"]],"flip":"结论不是「界面不好用」，而是「必填项顺序与专业判断顺序不一致」，导致每次核对都被打断重来。","wrong":"把页面字段做成两列布局，减少了滚动距离。"},{"domain":"人力资源 · 招聘 ATS","title":"深访 8 位用人经理：说的是「麻烦」，痛的是「看不见」","scene":"8 位用人经理普遍反馈「面试安排太麻烦」。深访追问具体事件后发现，麻烦不在操作步数，而在「面试官时间不可见」。\n\n结果是平均每个岗位改约 2.3 次，每次改约要打 3 通电话。表层诉求是「简化操作」，真实问题是「时间可见性」。","stats":[["8 位","用人经理深访"],["2.3 次","平均每岗改约次数"],["3 通","每次改约的电话量"]],"flip":"表层诉求「简化操作」与真实问题「时间可见性」对应的方案完全不同：前者做表单瘦身，后者做日历打通。","wrong":"把面试安排表单从 11 个字段减到 7 个字段。"}],"quiz":[["研究问题必须包含的三要素是？","A","角色、环节、缺失物，缺一即不可观察"],["为什么不能只访接口人？","B","接口人是系统的成功适应者，问题已被消化"],["BEI 访谈的提问对象是什么？","C","最近一次具体事件中的行为，不是观点"],["焦点小组最适合回答哪类问题？","B","群体对某概念的理解边界是否一致"],["观察记录中不应出现的内容是？","D","评价性判断，如「她很不熟练」"]]}]};
+</script>
+<script>
+/* ============================================================
+   吉利汽车 · 用户思维线上课程  (独立系统)
+   数据隔离：localStorage 前缀 gel_ ；云端表 gel_*
+   与 aidax 主站（aidax_* / app.html）完全独立，互不读写
+   ============================================================ */
+var SB_URL='https://nyqiwjwzbpnepamldqto.supabase.co';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55cWl3and6YnBuZXBhbWxkcXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5NzMwMjcsImV4cCI6MjEwNTU0OTAyN30.ZTHpavVBlN80wO4OwYv7njdlFOuUBNVlyLYFyi9Oy5w';
+var LS='gel_';
+var APP_VER='g1.0.0';
+
+/* ---------- 本地存储 ---------- */
+function lsGet(k,d){try{var v=localStorage.getItem(LS+k);return v?JSON.parse(v):d;}catch(e){return d;}}
+function lsSet(k,v){try{localStorage.setItem(LS+k,JSON.stringify(v));}catch(e){}}
+function lsDel(k){try{localStorage.removeItem(LS+k);}catch(e){}}
+
+/* ---------- 工具 ---------- */
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function nl2(s){return esc(s).replace(/\n/g,'<br>');}
+function uid(p){return (p||'')+Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
+function nowISO(){return new Date().toISOString();}
+function fmtDate(iso){if(!iso)return '—';var d=new Date(iso);if(isNaN(d))return '—';
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+function ago(iso){if(!iso)return '—';var t=new Date(iso).getTime();if(isNaN(t))return '—';
+  var s=Math.floor((Date.now()-t)/1000);
+  if(s<60)return '刚刚';if(s<3600)return Math.floor(s/60)+' 分钟前';
+  if(s<86400)return Math.floor(s/3600)+' 小时前';if(s<2592000)return Math.floor(s/86400)+' 天前';
+  return fmtDate(iso).slice(0,10);}
+
+/* 简易哈希（内训场景；不可逆，加盐） */
+function hash(pwd,salt){
+  var s=salt+'|'+pwd+'|gel-geely';
+  var h1=0x811c9dc5,h2=0x01000193;
+  for(var i=0;i<s.length;i++){
+    var c=s.charCodeAt(i);
+    h1^=c; h1=(h1*16777619)>>>0;
+    h2=(h2+c*(i+7))>>>0; h2=((h2<<5)|(h2>>>27))>>>0;
+  }
+  return ('00000000'+h1.toString(16)).slice(-8)+('00000000'+h2.toString(16)).slice(-8);
+}
+function mkSalt(){var a='abcdefghijkmnpqrstuvwxyz23456789',s='';for(var i=0;i<12;i++)s+=a[Math.floor(Math.random()*a.length)];return s;}
+
+function toast(msg,ms){
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('on');
+  clearTimeout(t._h); t._h=setTimeout(function(){t.classList.remove('on');},ms||2200);
+}
+
+/* ---------- 云端（PostgREST） ---------- */
+var Cloud={
+  ready:false,
+  async req(table,opt){
+    opt=opt||{};
+    var url=SB_URL+'/rest/v1/'+table+(opt.qs||'');
+    var h={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+    if(opt.prefer)h['Prefer']=opt.prefer;
+    var r=await fetch(url,{method:opt.method||'GET',headers:h,body:opt.body?JSON.stringify(opt.body):undefined});
+    if(!r.ok){var t=await r.text();throw new Error(r.status+' '+t.slice(0,160));}
+    var txt=await r.text();
+    return txt?JSON.parse(txt):null;
+  },
+  async upsert(table,rows){
+    if(!rows||!rows.length)return;
+    await this.req(table,{method:'POST',prefer:'resolution=merge-duplicates,return=minimal',body:rows});
+  },
+  async all(table,qs){
+    return await this.req(table,{qs:qs||'?select=id,doc&limit=5000'});
+  }
+};
+
+/* ---------- 会话 ---------- */
+var Me=null;
+function loadMe(){var s=lsGet('session',null);if(s&&s.id)Me=s;return Me;}
+function setMe(u){Me=u;lsSet('session',u?{id:u.id,loginId:u.loginId,name:u.name,role:u.role,company:u.company}:null);}
+
+/* ---------- 账号 ---------- */
+async function findUser(loginId){
+  var rows=await Cloud.req('gel_users',{qs:'?select=id,doc&doc->>loginId=eq.'+encodeURIComponent(loginId)+'&limit=1'});
+  return rows&&rows.length?Object.assign({id:rows[0].id},rows[0].doc):null;
+}
+async function listUsers(){
+  var rows=await Cloud.all('gel_users','?select=id,doc&order=updated_at.desc&limit=2000');
+  return (rows||[]).map(function(r){return Object.assign({id:r.id},r.doc);});
+}
+async function saveUser(u){
+  var doc={loginId:u.loginId,name:u.name,role:u.role||'student',pwd:u.pwd,salt:u.salt,
+    company:u.company||'',active:u.active!==false,createdAt:u.createdAt||nowISO()};
+  await Cloud.upsert('gel_users',[{id:u.id,doc:doc}]);
+}
+
+/* ---------- 进度 ---------- */
+var Prog={
+  key:function(mk,n){return mk+'__s'+n;},
+  get:function(mk,n){var m=lsGet('prog',{});return m[this.key(mk,n)]||null;},
+  all:function(){return lsGet('prog',{});},
+  set:function(mk,n,st,extra){
+    var m=lsGet('prog',{});var k=this.key(mk,n);
+    var cur=m[k]||{status:'none',seconds:0,visits:0};
+    cur.status=st; cur.visits=(cur.visits||0)+1; cur.updatedAt=nowISO();
+    if(extra)Object.assign(cur,extra);
+    m[k]=cur; lsSet('prog',m);
+    if(Me&&Me.role==='student')Cloud.upsert('gel_progress',[{id:Me.id+'__'+k,
+      doc:{userId:Me.id,course:mk,unitId:k,status:st,seconds:cur.seconds||0,visits:cur.visits,updatedAt:cur.updatedAt}}]).catch(function(){});
+  },
+  moduleDone:function(mk,total){var m=this.all(),c=0;
+    for(var i=1;i<=total;i++){var p=m[this.key(mk,i)];if(p&&(p.status==='done'||p.status==='quizzed'))c++;}
+    return c;}
+};
+
+/* ---------- 考试成绩 ---------- */
+var Exam={
+  key:function(mk){return 'exam_'+mk;},
+  get:function(mk){var e=lsGet('exams',{});return e[mk]||null;},
+  save:function(mk,res){
+    var e=lsGet('exams',{});var old=e[mk];
+    res.attempts=old?(old.attempts||1)+1:1;
+    if(old&&old.score>res.score){res.best=old.score;}else{res.best=res.score;}
+    e[mk]=res;lsSet('exams',e);
+    if(Me&&Me.role==='student'){
+      Cloud.upsert('gel_exams',[{id:Me.id+'__'+mk,doc:Object.assign({userId:Me.id,course:mk},res)}]).catch(function(){});
+    }
+  }
+};
+
+/* ---------- 课程索引 ---------- */
+var COURSE=window.__COURSE__;
+var MODS=COURSE.modules;
+function modByKey(k){return MODS.filter(function(m){return m.key===k;})[0];}
+
+/* ============================================================
+   渲染：登录
+   ============================================================ */
+function renderLogin(err){
+  document.getElementById('app').innerHTML=
+   '<div id="login"><div class="login-card">'
+  +'<div class="login-brand"><div class="bar"></div><div>'
+  +'<h1>用户思维 · 线上课程</h1><p>吉利汽车 · 第一期业务产品经理能力培养</p></div></div>'
+  +(err?'<div class="login-err">'+esc(err)+'</div>':'')
+  +'<div class="field"><label>账号</label><input id="lg-id" autocomplete="username" placeholder="工号或管理员账号"></div>'
+  +'<div class="field"><label>密码</label><input id="lg-pw" type="password" autocomplete="current-password" placeholder="请输入密码"></div>'
+  +'<button class="btn" id="lg-go">登 录</button>'
+  +'<div class="login-tip">学员账号由企业管理员统一发放<br>忘记密码请联系管理员重置</div>'
+  +'</div></div>';
+  var go=function(){
+    var id=document.getElementById('lg-id').value.trim();
+    var pw=document.getElementById('lg-pw').value;
+    if(!id||!pw){renderLogin('请填写账号和密码');return;}
+    var b=document.getElementById('lg-go');b.disabled=true;b.textContent='登录中…';
+    login(id,pw).then(function(ok){
+      if(!ok){renderLogin('账号或密码不正确，或账号已停用');}
+    }).catch(function(e){
+      renderLogin('无法连接服务器，请检查网络后重试');
+      console.error(e);
+    });
+  };
+  document.getElementById('lg-go').onclick=go;
+  document.getElementById('lg-pw').onkeydown=function(e){if(e.key==='Enter')go();};
+  document.getElementById('lg-id').onkeydown=function(e){if(e.key==='Enter'){document.getElementById('lg-pw').focus();}};
+}
+
+async function login(loginId,pwd){
+  var u=await findUser(loginId);
+  if(!u)return false;
+  if(u.active===false)return false;
+  if(hash(pwd,u.salt)!==u.pwd)return false;
+  setMe({id:u.id,loginId:u.loginId,name:u.name,role:u.role,company:u.company});
+  logEvent('login');
+  route();
+  return true;
+}
+
+function logout(){
+  setMe(null);Me=null;
+  location.hash='';
+  renderLogin();
+}
+
+function logEvent(type,ref){
+  if(!Me)return;
+  Cloud.upsert('gel_events',[{id:uid('ev_'),doc:{userId:Me.id,name:Me.name,type:type,ref:ref||'',
+    at:nowISO(),ua:navigator.userAgent.slice(0,120)}}]).catch(function(){});
+}
+
+/* ============================================================
+   路由
+   ============================================================ */
+function route(){
+  if(!Me){renderLogin();return;}
+  var h=(location.hash||'').replace(/^#/,'');
+  var p=h.split('/').filter(Boolean);
+  if(!p.length){Me.role==='admin'?renderAdmin('overview'):renderHome();return;}
+  if(p[0]==='learn')return renderLearn(p[1],parseInt(p[2]||'1',10));
+  if(p[0]==='exam')return renderExam(p[1]);
+  if(p[0]==='admin'){
+    if(Me.role!=='admin'){toast('无权访问管理后台');location.hash='';return;}
+    return renderAdmin(p[1]||'overview');
+  }
+  if(p[0]==='result')return renderResult(p[1]);
+  Me.role==='admin'?renderAdmin('overview'):renderHome();
+}
+window.addEventListener('hashchange',route);
+
+/* ============================================================
+   学员端：课程首页
+   ============================================================ */
+function topbar(title){
+  return '<div class="topbar"><div class="brand">'+title
+    +'<span>吉利汽车 · 用户思维</span></div><div class="spacer"></div>'
+    +'<div class="who"><div class="avatar">'+esc((Me.name||'?').slice(0,1))+'</div>'
+    +'<span>'+esc(Me.name)+(Me.role==='admin'?' · 管理员':'')+'</span></div>'
+    +'<button class="btn sm gray" onclick="logout()">退出</button></div>';
+}
+
+function renderHome(){
+  var totalSec=MODS.reduce(function(a,m){return a+m.sections.length;},0);
+  var doneSec=MODS.reduce(function(a,m){return a+Prog.moduleDone(m.key,m.sections.length);},0);
+  var cards=MODS.map(function(m){
+    var d=Prog.moduleDone(m.key,m.sections.length),t=m.sections.length;
+    var pct=Math.round(d/t*100);
+    var ex=Exam.get(m.key);
+    return '<div class="mod-card">'
+      +'<div class="no">MODULE '+m.no+'</div>'
+      +'<h3>'+esc(m.name)+'</h3>'
+      +'<div class="desc">'+esc(m.intro)+'</div>'
+      +'<div class="tags"><span class="tag">'+m.sections.length+' 节</span>'
+      +'<span class="tag gray">约 '+m.min+' 分钟</span>'
+      +(ex?'<span class="tag" style="background:#e6f6ef;color:#0f7b5f">测评 '+ex.best+' 分</span>':'')
+      +'</div>'
+      +'<div class="prog-wrap"><div class="prog-bar"><i style="width:'+pct+'%"></i></div>'
+      +'<div class="prog-txt"><span>已学 '+d+' / '+t+' 节</span><span>'+pct+'%</span></div></div>'
+      +'<div class="mod-actions">'
+      +'<button class="btn" onclick="location.hash=\'#learn/'+m.key+'/1\'">'+(d?'继续学习':'开始学习')+'</button>'
+      +'<button class="btn line" onclick="location.hash=\'#exam/'+m.key+'\'"'+(d<t?' disabled style="opacity:.5"':'')+'>模块测评</button>'
+      +'</div></div>';
+  }).join('');
+
+  document.getElementById('app').innerHTML='<div class="shell">'+topbar('用户思维 · 线上课程')
+   +'<div class="wrap">'
+   +'<div class="hero"><h2>用户思维：从「态度好」到可验证的判断顺序</h2>'
+   +'<p>本课程面向人力、财务、采购等职能数字化系统的业务产品经理。两个模块共 '+totalSec+' 节，'
+   +'每个模块学完后有一次测评，用于能力认证。</p>'
+   +'<div class="meta"><span>总进度 <b>'+doneSec+' / '+totalSec+' 节</b></span>'
+   +'<span>预计时长 <b>约 '+(MODS.reduce(function(a,m){return a+m.min;},0))+' 分钟</b></span>'
+   +'<span>考核方式 <b>模块测评（客观题）</b></span></div></div>'
+   +'<div class="mod-grid">'+cards+'</div>'
+   +'</div></div>';
+}
+
+/* ============================================================
+   学员端：学习页
+   ============================================================ */
+var LS_ = {mk:null, n:1};
+function renderLearn(mk,n){
+  var m=modByKey(mk);
+  if(!m){renderHome();return;}
+  var sec=m.sections.filter(function(s){return s.n===n;})[0]||m.sections[0];
+  n=sec.n;
+  LS_.mk=mk;LS_.n=n;
+
+  var items=m.sections.map(function(s){
+    var p=Prog.get(mk,s.n);
+    var done=p&&(p.status==='done'||p.status==='quizzed');
+    return '<div class="sitem'+(s.n===n?' on':'')+(done?' done':'')+'" onclick="goSec(\''+mk+'\','+s.n+')">'
+      +'<div class="sn">'+(done?'✓':s.n)+'</div>'
+      +'<div><div class="st">'+esc(s.t)+'</div><div class="sm">'+s.m+' 分钟</div></div></div>';
+  }).join('');
+
+  // 页序列：封面 -> 内容页 -> 案例（最后）-> 小测
+  var body=pageHTML(sec,m,mk);
+
+  var idx=m.sections.indexOf(sec);
+  var prev=idx>0?m.sections[idx-1]:null;
+  var next=idx<m.sections.length-1?m.sections[idx+1]:null;
+
+  document.getElementById('app').innerHTML='<div class="shell">'+topbar('用户思维 · 线上课程')
+   +'<div class="wrap"><div class="crumb"><button onclick="location.hash=\'\'">我的课程</button>'
+   +'<span>/</span><span>M'+m.no+' '+esc(m.name)+'</span><span>/</span><span>第 '+n+' 节</span></div>'
+   +'<div class="learn">'
+   +'<div class="sidelist" id="side"><div class="hd" onclick="toggleSide()"><span>M'+m.no+' '+esc(m.name)
+   +'</span><small>'+Prog.moduleDone(mk,m.sections.length)+'/'+m.sections.length
+   +' <span class="tg" id="sidetg">目录 ▾</span></small></div>'
+   +'<div class="list">'+items+'</div></div>'
+   +'<div class="panel">'
+   +'<div class="ph"><div class="k">第 '+n+' 节 · '+sec.m+' 分钟</div><h2>'+esc(sec.t)+'</h2></div>'
+   +'<div class="pb" id="pbody">'+body+'</div>'
+   +'<div class="pf">'
+   +(prev?'<button class="btn line sm" onclick="goSec(\''+mk+'\','+prev.n+')">← 上一节</button>':'<span></span>')
+   +'<div class="spacer"></div>'
+   +'<button class="btn sm" id="btn-next">'+(next?'下一节 →':'进入模块测评 →')+'</button>'
+   +'</div></div></div></div></div>';
+
+  // 标记在学
+  var cur=Prog.get(mk,n);
+  if(!cur||cur.status==='none')Prog.set(mk,n,'reading');
+  else Prog.set(mk,n,cur.status);
+
+  document.getElementById('btn-next').onclick=function(){
+    var st=Prog.get(mk,n);
+    if(!st||(st.status!=='done'&&st.status!=='quizzed')){
+      toast('先完成本节的课后小测，才能进入下一节');
+      showQuiz(mk,n);
+      return;
+    }
+    if(next)goSec(mk,next.n);else location.hash='#exam/'+mk;
+  };
+
+  // 若本节未完成小测，底部提示
+  var st2=Prog.get(mk,n);
+  if(!st2||(st2.status!=='done'&&st2.status!=='quizzed')){
+    var isLast=idx===m.sections.length-1;
+    var tip=document.createElement('div');
+    tip.className='note';tip.style.background='#fff8e8';tip.style.borderColor='#f0e0b8';
+    tip.innerHTML='<div class="nl" style="color:#8a6d2f">本节随堂测</div>'
+      +'<p>学完这一节，做 1 道题检验一下（不占分，答错可重做）。答对后本节记为完成。'
+      +'<button class="btn sm" style="margin-left:8px;vertical-align:middle" onclick="showQuiz(\''+mk+'\','+n+')">开始作答</button></p>';
+    document.getElementById('pbody').appendChild(tip);
+  }
+  window.scrollTo(0,0);
+}
+
+function goSec(mk,n){location.hash='#learn/'+mk+'/'+n;}
+function toggleSide(){
+  var s=document.getElementById('side'),t=document.getElementById('sidetg');
+  if(!s)return;
+  s.classList.toggle('open');
+  if(t)t.textContent=s.classList.contains('open')?'收起 ▴':'目录 ▾';
+}
+
+function pageHTML(sec,m,mk){
+  var h='';
+  // 1) 开场
+  h+='<div class="hook"><div class="lab">本节要解决的一个判断</div><p>'+esc(sec.hook)+'</p></div>';
+  h+='<div style="font-size:11.5px;color:var(--muted);font-weight:600;letter-spacing:.06em;margin-bottom:10px">这一节你会拿到</div>';
+  h+='<div class="goals">'+sec.goals.map(function(g,i){
+      return '<div class="goal"><div class="gno">'+String(i+1).padStart(2,'0')+'</div><p>'+esc(g)+'</p></div>';
+    }).join('')+'</div>';
+
+  // 2) 内容页
+  sec.pages.forEach(function(p){
+    h+='<div class="cpage" style="margin-top:34px;padding-top:26px;border-top:1px solid #eef1f5">'+renderPage(p)+'</div>';
+  });
+
+  // 3) 案例
+  if(m.cases&&sec.n===m.sections[0].n){
+    // 案例放在第一节末尾（模块导入）
+  }
+  return h;
+}
+
+function renderPage(p){
+  var h='<h3>'+esc(p.T)+'</h3>';
+  if(p.K)h+='<div class="lead">'+esc(p.K)+'</div>';
+  var D=p.D;
+  if(p.L==='cards'){
+    var cls=D.length>=4?'c4':(D.length===2?'c2':'c3');
+    h+='<div class="mcards '+cls+'">'+D.map(function(it,i){
+      return '<div class="mcard"><div class="n">'+String(i+1).padStart(2,'0')+'</div>'
+        +'<h4>'+esc(it[0])+'</h4><p>'+esc(it[1])+'</p></div>';
+    }).join('')+'</div>';
+  }else if(p.L==='steps'){
+    h+='<div class="steps">'+D.map(function(it,i){
+      return '<div class="mstep"><div class="sn">'+String(i+1).padStart(2,'0')+'</div>'
+        +'<div class="sc"><h4>'+esc(it[0])+'</h4><p>'+esc(it[1])+'</p></div></div>';
+    }).join('')+'</div>';
+  }else if(p.L==='table'){
+    var w=p.w||[],tot=w.reduce(function(a,b){return a+b;},0)||1;
+    h+='<div style="overflow-x:auto"><table class="mtable"><thead><tr>'
+      +p.D.h.map(function(x,j){return '<th'+(w[j]?' style="width:'+Math.round(w[j]/tot*100)+'%"':'')+'>'+esc(x)+'</th>';}).join('')
+      +'</tr></thead><tbody>'
+      +p.D.r.map(function(row){
+        return '<tr>'+row.map(function(c){return '<td>'+esc(c)+'</td>';}).join('')+'</tr>';
+      }).join('')+'</tbody></table></div>';
+  }else if(p.L==='bands'){
+    var cols=[['#eef4fb','#1b4f8a'],['#f0f7f4','#0f7b5f'],['#fdf6ec','#b26a00'],['#f6f2fa','#6b4fa8']];
+    h+='<div class="bands">'+D.map(function(it,i){
+      var c=cols[i%4];
+      return '<div class="band" style="background:'+c[0]+';border-color:'+c[0]+'">'
+        +'<div class="bn" style="color:'+c[1]+'">'+esc(it[0])+'</div><p>'+esc(it[1])+'</p></div>';
+    }).join('')+'</div>';
+  }else if(p.L==='compare'){
+    h+='<div class="mcompare">'
+      +'<div class="ccol good"><div class="ch">'+esc(p.D.l[0])+'</div><ul>'
+      +p.D.l[1].map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></div>'
+      +'<div class="ccol bad"><div class="ch">'+esc(p.D.r[0])+'</div><ul>'
+      +p.D.r[1].map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></div></div>';
+  }
+  if(p.note){
+    h+='<div class="note"><div class="nl">'+esc(p.note[0])+'</div><p>'+esc(p.note[1])+'</p></div>';
+  }
+  return h;
+}
+
+/* ============================================================
+   随堂小测（每节 1 题，答对算完成）
+   ============================================================ */
+function showQuiz(mk,n){
+  var m=modByKey(mk),sec=m.sections.filter(function(s){return s.n===n;})[0];
+  if(!sec||!sec.q){doneSection(mk,n);return;}
+  var q=sec.q,sel=-1,locked=false;
+  var body='<div class="qbox"><div class="qh">随堂测 · 第 '+n+' 节</div>'
+    +'<div class="qt">'+esc(q.q)+'</div><div class="opts" id="opts">'
+    +q.o.map(function(o,i){return '<div class="opt" data-i="'+i+'"><div class="ol">'+'ABCD'[i]+'</div><div class="ot">'+esc(o)+'</div></div>';}).join('')
+    +'</div><div id="ex"></div></div>';
+  dlg('随堂测','答对后本节记为完成，可重新作答',body,
+    [{t:'提交',p:1,fn:function(){
+      if(locked){closeDlg();return;}
+      if(sel<0){toast('请先选择一个答案');return false;}
+      locked=true;
+      var ok=sel===q.a;
+      document.querySelectorAll('#opts .opt').forEach(function(el){
+        var i=+el.dataset.i;el.classList.add('lock');el.classList.remove('sel');
+        if(i===q.a)el.classList.add('right');
+        else if(i===sel)el.classList.add('wrong');
+      });
+      document.getElementById('ex').innerHTML='<div class="explain'+(ok?'':' bad')+'">'
+        +'<div class="el">'+(ok?'回答正确':'回答错误 · 正确答案 '+'ABCD'[q.a])+'</div>'
+        +'<p>'+esc(q.why)+'</p></div>';
+      if(ok){doneSection(mk,n);}
+      var b=document.querySelector('.dlg .df .btn:last-child');
+      if(b){b.textContent=ok?'完成本节':'关闭';}
+      return false;
+    }}]);
+  setTimeout(function(){
+    document.querySelectorAll('#opts .opt').forEach(function(el){
+      el.onclick=function(){
+        if(locked)return;
+        document.querySelectorAll('#opts .opt').forEach(function(x){x.classList.remove('sel');});
+        el.classList.add('sel');sel=+el.dataset.i;
+      };
+    });
+  },0);
+}
+
+function doneSection(mk,n){
+  Prog.set(mk,n,'done');
+  var m=modByKey(mk);
+  var idx=m.sections.filter(function(s){return s.n===n;})[0];
+  var next=m.sections[m.sections.indexOf(idx)+1];
+  if(document.getElementById('pbody')){
+    renderLearn(mk,n);
+  }
+  logEvent('section_done',mk+'_s'+n);
+  toast(next?'本节完成，可以进入下一节':'本节完成，全部章节已学完');
+}
+
+/* ============================================================
+   模块测评
+   ============================================================ */
+var QUIZ={m1:[],m2:[]};
+
+function renderExam(mk){
+  var m=modByKey(mk);
+  var bank=getBank(mk);
+  var old=Exam.get(mk);
+  document.getElementById('app').innerHTML='<div class="shell">'+topbar('用户思维 · 线上课程')
+   +'<div class="wrap"><div class="crumb"><button onclick="location.hash=\'\'">我的课程</button>'
+   +'<span>/</span><span>M'+m.no+' '+esc(m.name)+'</span><span>/</span><span>模块测评</span></div>'
+   +'<div style="max-width:800px;margin:0 auto">'
+   +'<div class="hero"><h2>M'+m.no+' '+esc(m.name)+' · 模块测评</h2>'
+   +'<p>共 '+bank.length+' 题，均为单选题。每题 1 分，满分 '+bank.length+' 分。'
+   +'达 '+passLine(bank.length)+' 分（'+Math.round(passLine(bank.length)/bank.length*100)+'%）视为通过。'
+   +(old?'<br>你已作答 '+old.attempts+' 次，最高分 '+old.best+' 分。':'')
+   +'</p></div>'
+   +'<div id="examarea"></div></div></div></div>';
+  startExam(mk);
+}
+
+function passLine(t){return Math.ceil(t*0.8);}
+
+function startExam(mk){
+  var bank=getBank(mk);
+  var ans=new Array(bank.length).fill(-1);
+  var area=document.getElementById('examarea');
+  area.innerHTML=bank.map(function(q,i){
+    return '<div class="card" style="margin-bottom:12px"><div class="cb">'
+      +'<div class="qh" style="font-size:11.5px;color:var(--pri);font-weight:600;margin-bottom:10px">第 '+(i+1)+' 题</div>'
+      +'<div style="font-size:14.5px;color:var(--deep);font-weight:500;line-height:1.6;margin-bottom:14px">'+esc(q.q)+'</div>'
+      +'<div class="opts" data-q="'+i+'">'
+      +q.o.map(function(o,j){return '<div class="opt" data-i="'+j+'"><div class="ol">'+'ABCD'[j]+'</div><div class="ot">'+esc(o)+'</div></div>';}).join('')
+      +'</div></div></div>';
+  }).join('')
+  +'<div style="display:flex;gap:12px;margin-top:20px">'
+  +'<button class="btn" id="sub-exam">提交测评</button></div>';
+
+  area.querySelectorAll('.opts').forEach(function(g){
+    var qi=+g.dataset.q;
+    g.querySelectorAll('.opt').forEach(function(el){
+      el.onclick=function(){
+        g.querySelectorAll('.opt').forEach(function(x){x.classList.remove('sel');});
+        el.classList.add('sel');ans[qi]=+el.dataset.i;
+      };
+    });
+  });
+
+  document.getElementById('sub-exam').onclick=function(){
+    var un=ans.filter(function(a){return a<0;}).length;
+    if(un>0){toast('还有 '+un+' 题未作答');return;}
+    var right=0,detail=[];
+    bank.forEach(function(q,i){
+      var ok=ans[i]===q.a;if(ok)right++;
+      detail.push({i:i,sel:ans[i],ok:ok});
+    });
+    var res={score:right,total:bank.length,right:right,pct:Math.round(right/bank.length*100),
+      detail:detail,submittedAt:nowISO()};
+    Exam.save(mk,res);
+    logEvent('exam_submit',mk+' '+right+'/'+bank.length);
+    location.hash='#result/'+mk;
+  };
+}
+
+function renderResult(mk){
+  var m=modByKey(mk),bank=getBank(mk),ex=Exam.get(mk);
+  if(!ex){location.hash='#exam/'+mk;return;}
+  var pass=ex.score>=passLine(bank.length);
+  var h='<div class="shell">'+topbar('用户思维 · 线上课程')
+   +'<div class="wrap"><div class="crumb"><button onclick="location.hash=\'\'">我的课程</button>'
+   +'<span>/</span><span>M'+m.no+' '+esc(m.name)+'</span><span>/</span><span>测评结果</span></div>'
+   +'<div style="max-width:800px;margin:0 auto">'
+   +'<div class="score-hero '+(pass?'pass':'fail')+'">'
+   +'<div class="big">'+ex.score+'<small> / '+ex.total+'</small></div>'
+   +'<div class="lbl">'+(pass?'已通过 · ':'未通过 · ')+'本次正确率 '+ex.pct+'%　（通过线 '+passLine(bank.length)+' 分）</div>'
+   +'</div>'
+   +'<div class="card"><div class="ch2"><h3>逐题回顾</h3></div><div class="cb">'
+   +'<div class="qreview">'
+   +bank.map(function(q,i){
+     var d=ex.detail&&ex.detail[i]||{};
+     return '<div class="qr"><div class="qrt">'+(i+1)+'. '+esc(q.q)+'</div>'
+       +'<div class="qra"><span class="'+(d.ok?'ok':'no')+'">你的答案：'+(d.sel>=0?'ABCD'[d.sel]:'—')+'</span>'
+       +'<span class="ok">正确答案：'+'ABCD'[q.a]+'</span></div>'
+       +'<div style="font-size:12.5px;color:var(--muted);line-height:1.7;margin-top:8px">'+esc(q.why)+'</div></div>';
+   }).join('')
+   +'</div></div></div>'
+   +'<div style="display:flex;gap:12px;margin-top:18px">'
+   +'<button class="btn line" onclick="location.hash=\'#exam/'+mk+'\'">重新测评</button>'
+   +'<button class="btn" onclick="location.hash=\'\'">返回课程</button></div>'
+   +'</div></div></div>';
+  document.getElementById('app').innerHTML=h;
+}
+
+function getBank(mk){
+  var out=[];
+  (QUIZ[mk]||[]).forEach(function(q){out.push(q);});
+  return out;
+}
+
+/* ============================================================
+   弹层
+   ============================================================ */
+function dlg(title,sub,body,btns){
+  var mask=document.createElement('div');mask.className='mask';
+  mask.innerHTML='<div class="dlg"><div class="dh"><h3>'+esc(title)+'</h3>'
+    +(sub?'<p>'+esc(sub)+'</p>':'')+'</div><div class="db">'+body+'</div>'
+    +'<div class="df">'+btns.map(function(b,i){
+      return '<button class="btn'+(b.p?'':' line')+'" data-i="'+i+'">'+esc(b.t)+'</button>';
+    }).join('')+'</div></div>';
+  document.body.appendChild(mask);
+  mask.querySelectorAll('.df .btn').forEach(function(el){
+    el.onclick=function(){
+      var b=btns[+el.dataset.i];
+      var r=b.fn?b.fn():undefined;
+      if(r===false)return;
+      closeDlg();
+    };
+  });
+  mask.onclick=function(e){if(e.target===mask)closeDlg();};
+}
+function closeDlg(){var m=document.querySelector('.mask');if(m)m.remove();}
+
+/* ============================================================
+   管理端
+   ============================================================ */
+var ADM={tab:'overview',users:[],prog:[],exams:[],events:[],loaded:false,loading:false};
+
+async function admLoad(force){
+  if(ADM.loading)return;
+  if(ADM.loaded&&!force)return;
+  ADM.loading=true;
+  try{
+    var r=await Promise.all([
+      Cloud.all('gel_users','?select=id,doc&order=updated_at.desc&limit=2000'),
+      Cloud.all('gel_progress','?select=id,doc&limit=8000'),
+      Cloud.all('gel_exams','?select=id,doc&limit=4000'),
+      Cloud.all('gel_events','?select=id,doc&order=updated_at.desc&limit=300')
+    ]);
+    ADM.users=(r[0]||[]).map(function(x){return Object.assign({id:x.id},x.doc);});
+    ADM.prog=(r[1]||[]).map(function(x){return Object.assign({id:x.id},x.doc);});
+    ADM.exams=(r[2]||[]).map(function(x){return Object.assign({id:x.id},x.doc);});
+    ADM.events=(r[3]||[]).map(function(x){return Object.assign({id:x.id},x.doc);});
+    ADM.loaded=true;
+  }catch(e){
+    console.error(e);
+    toast('云端数据拉取失败，显示本地缓存');
+  }
+  ADM.loading=false;
+}
+
+function renderAdmin(tab){
+  ADM.tab=tab||'overview';
+  var TABS=[['overview','概览'],['students','学员账号'],['progress','学习进度'],['scores','成绩与排名'],['bank','题库与答案'],['content','课程内容']];
+  var h='<div class="shell">'+topbar('用户思维 · 管理后台')
+   +'<div class="wrap">'
+   +'<div class="mtabs">'+TABS.map(function(t){
+      return '<button class="mtab'+(ADM.tab===t[0]?' on':'')+'" onclick="location.hash=\'#admin/'+t[0]+'\'">'+t[1]+'</button>';
+    }).join('')+'</div>'
+   +'<div id="admpane"><div class="empty">正在读取云端数据…</div></div></div></div>';
+  document.getElementById('app').innerHTML=h;
+
+  admLoad(ADM.tab==='overview'?false:true).then(function(){
+    paintAdmin();
+  });
+}
+
+function paintAdmin(){
+  var el=document.getElementById('admpane');
+  if(!el)return;
+  if(ADM.tab==='overview')el.innerHTML=admOverview();
+  else if(ADM.tab==='students')el.innerHTML=admStudents();
+  else if(ADM.tab==='progress')el.innerHTML=admProgress();
+  else if(ADM.tab==='scores')el.innerHTML=admScores();
+  else if(ADM.tab==='bank')el.innerHTML=admBank();
+  else if(ADM.tab==='content')el.innerHTML=admContent();
+}
+
+function students(){return ADM.users.filter(function(u){return u.role!=='admin';});}
+
+function examOf(uid,mk){
+  return ADM.exams.filter(function(e){return e.userId===uid&&e.course===mk;})[0]||null;
+}
+function progOf(uid,mk){
+  return ADM.prog.filter(function(p){return p.userId===uid&&p.course===mk;});
+}
+function doneOf(uid,mk){
+  var total=modByKey(mk).sections.length;
+  var d=progOf(uid,mk).filter(function(p){return p.status==='done'||p.status==='quizzed';}).length;
+  return {done:d,total:total,pct:total?Math.round(d/total*100):0};
+}
+function totalDone(uid){
+  return MODS.reduce(function(a,m){return a+doneOf(uid,m.key).done;},0);
+}
+function totalSec(){return MODS.reduce(function(a,m){return a+m.sections.length;},0);}
+function avgScore(){
+  var s=0,c=0;
+  ADM.exams.forEach(function(e){if(e.userId&&students().some(function(u){return u.id===e.userId;})){s+=e.best||e.score||0;c++;}});
+  return c?Math.round(s/c*10)/10:0;
+}
+
+function admOverview(){
+  var st=students();
+  var act=st.filter(function(u){return totalDone(u.id)>0;}).length;
+  var finished=st.filter(function(u){return totalDone(u.id)>=totalSec();}).length;
+  var examed=st.filter(function(u){return ADM.exams.some(function(e){return e.userId===u.id;});}).length;
+  var rate=st.length?Math.round(finished/st.length*100):0;
+
+  var feed=ADM.events.slice(0,14).map(function(ev){
+    var d=ev.doc||ev;
+    var typ={login:'登录',section_done:'完成一节',exam_submit:'提交测评'}[d.type]||d.type;
+    return '<tr><td class="nm">'+esc(d.name||(findName(d.userId)))+'</td><td><span class="pill '+(d.type==='exam_submit'?'ok':(d.type==='login'?'gray':''))+'">'+esc(typ)+'</span></td>'
+      +'<td>'+esc(d.ref||'')+'</td><td style="white-space:nowrap">'+ago(d.at)+'</td></tr>';
+  }).join('');
+
+  return '<div class="kpis">'
+   +kpi('学员总数',st.length,'人','已建账号')
+   +kpi('已开始学习',act,'人',st.length?Math.round(act/st.length*100)+'%':'—')
+   +kpi('完成全部课程',finished,'人','完成率 '+rate+'%')
+   +kpi('已参加测评',examed,'人','平均分 '+avgScore())
+   +'</div>'
+   +'<div class="row2">'
+   +'<div class="card"><div class="ch2"><h3>各模块完成情况</h3></div><div class="cb">'
+   +MODS.map(function(m){
+      var c=0;
+      st.forEach(function(u){if(doneOf(u.id,m.key).done>=m.sections.length)c++;});
+      var pct=st.length?Math.round(c/st.length*100):0;
+      return '<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px">'
+        +'<span style="color:var(--deep);font-weight:500">M'+m.no+' '+esc(m.name)+'</span>'
+        +'<span style="color:var(--soft)">'+c+' / '+st.length+' 人完成</span></div>'
+        +'<div class="prog-bar"><i style="width:'+pct+'%"></i></div></div>';
+    }).join('')
+   +(st.length?'':'<div class="empty">还没有学员账号</div>')
+   +'</div></div>'
+   +'<div class="card"><div class="ch2"><h3>最近活动</h3><div class="spacer"></div>'
+   +'<button class="btn sm line" onclick="admLoad(true).then(paintAdmin)">刷新</button></div>'
+   +'<div class="cb p0">'
+   +(feed?'<table class="dt"><thead><tr><th>学员</th><th>动作</th><th>对象</th><th>时间</th></tr></thead><tbody>'+feed+'</tbody></table>'
+     :'<div class="empty">暂无活动记录</div>')
+   +'</div></div></div>';
+}
+
+function kpi(label,val,unit,sub){
+  return '<div class="kpi"><div class="kl">'+label+'</div>'
+    +'<div class="kv">'+val+'<small> '+unit+'</small></div>'
+    +(sub?'<div class="ks">'+sub+'</div>':'')+'</div>';
+}
+function findName(uid){var u=ADM.users.filter(function(x){return x.id===uid;})[0];return u?u.name:'—';}
+
+function admStudents(){
+  var st=students();
+  var rows=st.map(function(u){
+    var td=totalDone(u.id);
+    return '<tr><td class="nm">'+esc(u.name)+'</td>'
+      +'<td><code style="font-size:12px;color:var(--muted)">'+esc(u.loginId)+'</code></td>'
+      +'<td>'+(u.company?esc(u.company):'—')+'</td>'
+      +'<td>'+td+' / '+totalSec()+' 节</td>'
+      +'<td><span class="pill '+(u.active===false?'no':'ok')+'">'+(u.active===false?'已停用':'正常')+'</span></td>'
+      +'<td style="white-space:nowrap">'+fmtDate(u.createdAt)+'</td>'
+      +'<td style="white-space:nowrap">'
+      +'<button class="btn sm gray" onclick="resetPwd(\''+u.id+'\')" style="margin-right:6px">重置密码</button>'
+      +'<button class="btn sm '+(u.active===false?'line':'danger')+'" onclick="toggleUser(\''+u.id+'\','+(u.active===false)+')">'+(u.active===false?'启用':'停用')+'</button>'
+      +'</td></tr>';
+  }).join('');
+
+  return '<div class="card"><div class="ch2"><h3>学员账号</h3><span class="pill gray">共 '+st.length+' 人</span>'
+   +'<div class="spacer"></div>'
+   +'<button class="btn sm line" onclick="bulkAdd()" style="margin-right:8px">批量导入</button>'
+   +'<button class="btn sm" onclick="addStudent()">新增学员</button></div>'
+   +'<div class="cb p0">'
+   +(rows?'<table class="dt"><thead><tr><th>姓名</th><th>登录账号</th><th>部门</th><th>学习进度</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead><tbody>'+rows+'</tbody></table>'
+     :'<div class="empty">还没有学员。点右上角「新增学员」或「批量导入」创建。<br>学员用「登录账号 + 密码」登录，登录后看到的就是 M1/M2 两门课。</div>')
+   +'</div></div>';
+}
+
+function addStudent(pre){
+  var p=pre||{};
+  dlg('新增学员','创建后把账号密码发给学员', 
+    '<div class="form-grid">'
+    +'<div class="fi"><label>姓名</label><input class="inp" id="nu-name" value="'+esc(p.name||'')+'" placeholder="如 张明"></div>'
+    +'<div class="fi"><label>登录账号</label><input class="inp" id="nu-id" value="'+esc(p.loginId||'')+'" placeholder="如 zh0001"></div>'
+    +'<div class="fi"><label>部门 / 职能</label><input class="inp" id="nu-co" value="'+esc(p.company||'')+'" placeholder="如 财务共享中心"></div>'
+    +'<div class="fi"><label>初始密码</label><input class="inp" id="nu-pw" value="'+(p.pwd||'gel123456')+'"></div>'
+    +'</div>',
+    [{t:'取消',fn:function(){return true;}},{t:'创建',p:1,fn:function(){
+      var name=document.getElementById('nu-name').value.trim();
+      var lid=document.getElementById('nu-id').value.trim();
+      var co=document.getElementById('nu-co').value.trim();
+      var pw=document.getElementById('nu-pw').value.trim()||'gel123456';
+      if(!name||!lid){toast('姓名和登录账号必填');return false;}
+      var salt=mkSalt();
+      var u={id:uid('u_'),loginId:lid,name:name,role:'student',company:co,
+        salt:salt,pwd:hash(pw,salt),active:true,createdAt:nowISO()};
+      saveUser(u).then(function(){
+        ADM.users.unshift(u);ADM.loaded=true;
+        toast('已创建：'+lid+' / '+pw);
+        paintAdmin();
+      }).catch(function(e){toast('创建失败：'+e.message.slice(0,60));});
+    }}]);
+}
+
+function bulkAdd(){
+  dlg('批量导入学员','每行一个：姓名,登录账号,部门（密码默认 gel123456）',
+    '<textarea class="inp" id="bulk-txt" style="height:180px;padding:11px;line-height:1.7;resize:vertical" '
+    +'placeholder="张明,zhangming,财务共享中心&#10;李静,lijing,采购中心&#10;王涛,wangtao,人力资源部"></textarea>'
+    +'<div style="font-size:12px;color:var(--soft);margin-top:10px;line-height:1.7">'
+    +'密码统一为 <b>gel123456</b>，学员首次登录后可自行修改。账号重复会自动跳过。</div>',
+    [{t:'取消',fn:function(){return true;}},{t:'导入',p:1,fn:function(){
+      var txt=document.getElementById('bulk-txt').value;
+      var lines=txt.split('\n').map(function(x){return x.trim();}).filter(Boolean);
+      if(!lines.length){toast('请粘贴学员名单');return false;}
+      var exist={};ADM.users.forEach(function(u){exist[u.loginId]=1;});
+      var batch=[],skipped=0;
+      lines.forEach(function(ln){
+        var c=ln.split(/[,，\t]/).map(function(x){return x.trim();});
+        if(c.length<2)return;
+        if(exist[c[1]]){skipped++;return;}
+        var salt=mkSalt();
+        batch.push({id:uid('u_'),loginId:c[1],name:c[0],role:'student',company:c[2]||'',
+          salt:salt,pwd:hash('gel123456',salt),active:true,createdAt:nowISO()});
+        exist[c[1]]=1;
+      });
+      if(!batch.length){toast('没有可导入的新账号');return false;}
+      Promise.all(batch.map(function(u){return saveUser(u);})).then(function(){
+        batch.forEach(function(u){ADM.users.unshift(u);});
+        ADM.loaded=true;
+        toast('已导入 '+batch.length+' 人'+(skipped?'，跳过重复 '+skipped+' 人':''));
+        paintAdmin();
+      }).catch(function(e){toast('导入失败：'+e.message.slice(0,60));});
+    }}]);
+}
+
+function resetPwd(id){
+  var u=ADM.users.filter(function(x){return x.id===id;})[0];if(!u)return;
+  var np=prompt('给「'+u.name+'」设置新密码：','gel123456');
+  if(np===null)return;
+  np=np.trim();if(!np){toast('密码不能为空');return;}
+  var salt=mkSalt();
+  u.salt=salt;u.pwd=hash(np,salt);
+  saveUser(u).then(function(){toast('密码已重置为：'+np);}).catch(function(e){toast('失败：'+e.message.slice(0,50));});
+}
+
+function toggleUser(id,enable){
+  var u=ADM.users.filter(function(x){return x.id===id;})[0];if(!u)return;
+  u.active=!!enable;
+  saveUser(u).then(function(){toast(enable?'已启用':'已停用');paintAdmin();})
+    .catch(function(e){toast('失败：'+e.message.slice(0,50));});
+}
+
+function admProgress(){
+  var st=students();
+  if(!st.length)return '<div class="card"><div class="empty">还没有学员账号，先到「学员账号」页创建。</div></div>';
+  var head=MODS.map(function(m){return m.sections.map(function(s){
+    return '<th style="text-align:center;padding:8px 4px;font-size:11px" title="第'+s.n+'节 '+esc(s.t)+'">'+s.n+'</th>';
+  }).join('');}).join('');
+  var body=st.map(function(u){
+    var cells=MODS.map(function(m){
+      return m.sections.map(function(s){
+        var p=ADM.prog.filter(function(x){return x.userId===u.id&&x.unitId===m.key+'__s'+s.n;})[0];
+        var done=p&&(p.status==='done'||p.status==='quizzed');
+        var color=done?'#0f7b5f':(p?'#e8b04b':'#eef1f5');
+        var mark=done?'✓':(p?'·':'');
+        var first=s.n===1?'border-left:2px solid #c9d6e5;':'';
+        return '<td style="text-align:center;padding:6px 4px;'+first+'"><span style="display:inline-block;width:22px;height:22px;line-height:22px;border-radius:6px;'
+          +'background:'+color+';color:'+(done?'#fff':'#8a97a6')+';font-size:12px;font-weight:'+(done?'700':'400')+'">'+mark+'</span></td>';
+      }).join('');
+    }).join('');
+    var td=totalDone(u.id);
+    return '<tr><td class="nm" style="white-space:nowrap">'+esc(u.name)+'</td>'
+      +cells
+      +'<td style="white-space:nowrap"><b style="color:var(--pri)">'+td+'</b> / '+totalSec()+'</td></tr>';
+  }).join('');
+
+  var mhead=MODS.map(function(m){
+    return '<th colspan="'+m.sections.length+'" style="text-align:center;border-left:2px solid #c9d6e5;font-size:11.5px">M'+m.no+' '+esc(m.name)+'</th>';
+  }).join('');
+
+  return '<div class="card"><div class="ch2"><h3>学习进度矩阵</h3>'
+   +'<span class="pill gray">✓ 已完成　· 在学　空 未开始</span><div class="spacer"></div>'
+   +'<button class="btn sm line" onclick="admLoad(true).then(paintAdmin)">刷新数据</button></div>'
+   +'<div class="cb p0" style="overflow-x:auto">'
+   +'<table class="dt" style="min-width:'+(220+totalSec()*28+90)+'px"><thead>'
+   +'<tr><th rowspan="2" style="vertical-align:bottom">学员</th>'+mhead+'<th rowspan="2" style="vertical-align:bottom;border-left:2px solid #c9d6e5">合计</th></tr>'
+   +'<tr>'+head+'</tr></thead><tbody>'+body+'</tbody></table></div></div>';
+}
+
+function admScores(){
+  var st=students();
+  var list=st.map(function(u){
+    var rec={u:u,m1:examOf(u.id,'m1'),m2:examOf(u.id,'m2')};
+    var vals=[];
+    if(rec.m1)vals.push(rec.m1.best||rec.m1.score);
+    if(rec.m2)vals.push(rec.m2.best||rec.m2.score);
+    rec.sum=vals.length?vals.reduce(function(a,b){return a+b;},0):-1;
+    rec.avg=vals.length?Math.round(rec.sum/vals.length*10)/10:-1;
+    rec.last=Math.max.apply(null,[0].concat([rec.m1,rec.m2].filter(Boolean).map(function(e){return new Date(e.submittedAt||0).getTime();})));
+    return rec;
+  });
+  list.sort(function(a,b){
+    if(b.sum!==a.sum)return b.sum-a.sum;
+    return b.last-a.last;
+  });
+
+  var rows=list.map(function(r,i){
+    var m1=r.m1?((r.m1.best||r.m1.score)+' 分'):'<span style="color:var(--soft)">未考</span>';
+    var m2=r.m2?((r.m2.best||r.m2.score)+' 分'):'<span style="color:var(--soft)">未考</span>';
+    var rk=i+1;
+    return '<tr><td><span class="rank'+(rk<=3?' r'+rk:'')+'">'+rk+'</span></td>'
+      +'<td class="nm">'+esc(r.u.name)+'</td>'
+      +'<td>'+esc(r.u.company||'—')+'</td>'
+      +'<td>'+m1+'</td><td>'+m2+'</td>'
+      +'<td><b style="color:var(--pri)">'+(r.sum>=0?r.avg:'—')+'</b></td>'
+      +'<td style="white-space:nowrap;color:var(--soft)">'+(r.last?ago(new Date(r.last).toISOString()):'—')+'</td></tr>';
+  }).join('');
+
+  return '<div class="card"><div class="ch2"><h3>成绩与实时排名</h3>'
+   +'<span class="pill">按模块最高分合计排序</span><div class="spacer"></div>'
+   +'<button class="btn sm line" onclick="admLoad(true).then(paintAdmin)">刷新排名</button></div>'
+   +'<div class="cb p0">'
+   +(rows?'<table class="dt"><thead><tr><th style="width:56px">名次</th><th>学员</th><th>部门</th>'
+     +'<th>M1 测评</th><th>M2 测评</th><th>平均分</th><th>最近提交</th></tr></thead><tbody>'+rows+'</tbody></table>'
+     :'<div class="empty">还没有测评数据。学员完成学习后在本页可看到成绩与排名。</div>')
+   +'</div></div>';
+}
+
+function admBank(){
+  var h='';
+  MODS.forEach(function(m){
+    var bank=getBank(m.key);
+    var sectQ=m.sections.filter(function(s){return s.q;});
+    h+='<div class="card"><div class="ch2"><h3>M'+m.no+' '+esc(m.name)+' · 模块测评</h3>'
+     +'<span class="pill">'+bank.length+' 题 · 通过线 '+passLine(bank.length)+' 分</span></div><div class="cb">';
+    bank.forEach(function(q,i){
+      h+='<div style="padding:14px 0;border-bottom:1px solid #f2f5f8">'
+        +'<div style="font-size:14px;color:var(--deep);font-weight:500;line-height:1.6;margin-bottom:10px">'
+        +(i+1)+'. '+esc(q.q)+'</div>'
+        +'<div style="display:flex;flex-direction:column;gap:5px;margin-bottom:10px">'
+        +q.o.map(function(o,j){
+          var isA=j===q.a;
+          return '<div style="font-size:13px;line-height:1.6;padding:6px 11px;border-radius:6px;'
+            +(isA?'background:#e9f7f1;color:#0b5f49;font-weight:500':'color:var(--muted);background:#fafbfd')
+            +'">'+'ABCD'[j]+'. '+esc(o)+(isA?'　✓ 正确答案':'')+'</div>';
+        }).join('')+'</div>'
+        +'<div style="font-size:12.5px;color:var(--muted);background:#fbfaf6;border-left:3px solid #d9c48a;'
+        +'padding:9px 13px;border-radius:0 6px 6px 0;line-height:1.7">解析：'+esc(q.why)+'</div></div>';
+    });
+    h+='</div></div>';
+
+    h+='<div class="card"><div class="ch2"><h3>M'+m.no+' 随堂测（每节 1 题）</h3>'
+     +'<span class="pill gray">'+sectQ.length+' 题 · 不计入成绩</span></div><div class="cb">';
+    sectQ.forEach(function(s){
+      var q=s.q;
+      h+='<div style="padding:11px 0;border-bottom:1px solid #f2f5f8">'
+        +'<div style="font-size:13px;color:var(--mid);margin-bottom:5px">第 '+s.n+' 节 · '+esc(s.t)+'</div>'
+        +'<div style="font-size:13.5px;color:var(--deep);line-height:1.6">'+esc(q.q)+'</div>'
+        +'<div style="font-size:12.5px;margin-top:6px"><span class="pill ok">答案 '+'ABCD'[q.a]+'</span>'
+        +'<span style="color:var(--soft);margin-left:10px">'+esc(q.o[q.a])+'</span></div></div>';
+    });
+    h+='</div></div>';
+  });
+  return h;
+}
+
+function admContent(){
+  var h='';
+  MODS.forEach(function(m){
+    h+='<div class="card"><div class="ch2"><h3>M'+m.no+' '+esc(m.name)+'</h3>'
+     +'<span class="pill">'+m.sections.length+' 节 · '+m.min+' 分钟</span>'
+     +'<span class="pill gray">能力项：'+esc(m.ability)+'</span></div><div class="cb">'
+     +'<p style="font-size:13.5px;color:var(--mid);line-height:1.75;margin-bottom:16px">'+esc(m.intro)+'</p>';
+    m.sections.forEach(function(s){
+      h+='<div style="border:1px solid var(--line);border-radius:9px;padding:14px 16px;margin-bottom:10px;background:#fff">'
+        +'<div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap">'
+        +'<span class="pill">第 '+s.n+' 节</span>'
+        +'<b style="font-size:14px;color:var(--deep);font-weight:600">'+esc(s.t)+'</b>'
+        +'<span style="font-size:12px;color:var(--soft)">'+s.m+' 分钟 · '+s.pages.length+' 个内容页</span></div>'
+        +'<div style="font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.7">'
+        +'<b>本节判断：</b>'+esc(s.hook)+'</div>'
+        +'<div style="font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.7">'
+        +'<b>拿到：</b>'+s.goals.map(esc).join(' ／ ')+'</div></div>';
+    });
+    if(m.cases&&m.cases.length){
+      h+='<div style="margin-top:14px;font-size:12px;color:var(--soft);font-weight:600;margin-bottom:8px">本模块案例</div>';
+      h+=m.cases.map(function(c){
+        return '<div style="border-left:3px solid var(--pri);background:var(--tint2);border-radius:0 8px 8px 0;padding:12px 15px;margin-bottom:8px">'
+          +'<div style="font-size:11.5px;color:var(--pri);font-weight:600">'+esc(c.domain)+'</div>'
+          +'<div style="font-size:13.5px;color:var(--deep);font-weight:500;margin:4px 0 6px">'+esc(c.title)+'</div>'
+          +'<div style="font-size:12.5px;color:var(--muted);line-height:1.7">'+esc(c.flip)+'</div></div>';
+      }).join('');
+    }
+    h+='</div></div>';
+  });
+  return h;
+}
+
+/* 模块测测评题库：M1 / M2 各 12 题。答案下标为 0-3（A-D） */
+var QUIZ={
+m1:[
+ {q:"业务部门要求「报销系统增加预算校验」，按本课的判断顺序，最该先确认的是哪件事？",
+  o:["这项功能的开发工作量和排期",
+     "一线在什么环节发现超预算、当时是怎么处理的",
+     "同行业其他公司是否都有这个功能",
+     "分管领导是否已经点头同意"],
+  a:1,
+  why:"判断顺序是先场景、再问题、后功能。B 拿到的是使用现场；A 是先给方案，C 是抄答案，D 是把决策权当成依据。三者在课上都被归为「没有判断顺序」。"},
+
+ {q:"某集团上线一套采购系统，汇报时管理层评价很高，但一线专员仍在用微信群里接龙下单。这属于课里说的哪类错位？",
+  o:["把用户满意当成目标",
+     "调研走过场",
+     "把领导当用户",
+     "把功能多当成诚意"],
+  a:2,
+  why:"按汇报口径验收通过、天天用它的人却绕开系统，是典型的「把领导当用户」。识别信号是：验收结论来自汇报层，使用证据来自一线，两者不一致。"},
+
+ {q:"场景还原五问里，哪一问拿到的证据最不依赖用户的主观表态？",
+  o:["谁在用",
+     "为完成什么",
+     "现在怎么绕过",
+     "在什么条件下"],
+  a:2,
+  why:"「现在怎么绕过」看的是已发生的行为痕迹（Excel 台账、微信群、纸质单），用户嘴上会说「挺好的」，但手会诚实地打开 Excel。所以它是五问里最硬的一问。"},
+
+ {q:"一套系统中，使用者嫌步骤多、管理者嫌数据不准、监管者要留痕，三者诉求互相冲突。按本课判据，应优先满足谁？",
+  o:["按职级高低，先满足管理层",
+     "按人数多少，先满足一线",
+     "按谁承担后果，由后果最直接、最可核算的一方优先",
+     "按提出顺序，谁先提先做谁"],
+  a:2,
+  why:"四层用户的排序判据是「谁承担后果」，不是级别、不是人数、不是提出方。后果越直接、越能被考核和追责，优先级越高。"},
+
+ {q:"某项需求只能表达为「界面更美观、体验更好」，无法翻译成组织指标。按 B 端价值判据应如何处理？",
+  o:["先做，反正体验总会变好",
+     "降级处理，不与「少一人、少一次返工、少一天关账」这类需求争资源",
+     "找使用人数最多的部门联名提需求",
+     "交给设计团队自行决定"],
+  a:1,
+  why:"内部系统的价值必须能翻译成组织指标。翻译不出来不等于没价值，但在资源排序上应当降级——这一条是防止「体验」变成谁都能用、又谁都不用负责的筐。"},
+
+ {q:"在跟班时发现，一线把系统里的数据手工抄到一张私人 Excel 台账上再对外报。最该记下的判断是什么？",
+  o:["这是个别人的操作习惯问题，要求整改即可",
+     "系统在某个真实环节没有被覆盖，这张台账就是缺口的位置",
+     "系统性能不够，需要优化导出速度",
+     "用户培训没做到位"],
+  a:1,
+  why:"绕行是唯一不依赖表态的证据。每发现一种绕行形态，就对应一处系统没覆盖的断点。把它当纪律问题处理，等于把需求线索扔掉。"},
+
+ {q:"按五问做需求鉴真，如果「在什么条件下」这一行填不出来，说明什么？",
+  o:["这个需求可以进入评审",
+     "只是资料没收集全，不影响立项",
+     "需求还没到能评审的程度，应退回补充观察",
+     "说明该需求价值不高，直接删除"],
+  a:2,
+  why:"五问的输出是一张能拿去开会的卡。填不满的行就是风险点——它意味着你只在会议室里理解用户，还没进过现场。正确动作是退回补观察，不是硬推。"},
+
+ {q:"某功能模块使用率 96%，能不能据此判断体验好？",
+  o:["能，使用率是最直接的证据",
+     "不能，要和使用时长、退回率、绕行率交叉验证",
+     "能，只要超过 90% 就说明用户认可",
+     "不能，使用率在 B 端系统里没有意义"],
+  a:1,
+  why:"使用率高可能来自强制流程——不用就报不了销。单看使用率会被制度绑架，必须和任务完成时长、退回率、绕行率交叉看，才能判断是不是真顺畅。"},
+
+ {q:"职能类数字化系统的价值，最终应当翻译成什么形态才算站得住？",
+  o:["用户满意度评分",
+     "功能覆盖度与上线数量",
+     "可核算的组织绩效改善，如少一人、少一次返工、少一天关账",
+     "系统日活与访问人次"],
+  a:2,
+  why:"B 端价值判据是从「用户满意」走到「组织绩效改善」。只有能落到可核算指标上的改善，才能在预算会上和别的项目争资源。"},
+
+ {q:"同一个岗位的人，在不同条件下为什么会被当成不同的用户？",
+  o:["因为他们的职级不同",
+     "因为时间压力、设备、场地、是否被打断这些条件会改变他的行为方式",
+     "因为他们的考核指标不同",
+     "因为不同基地的系统版本不同"],
+  a:1,
+  why:"「在什么条件下」是五问里最容易被跳过的一问。月结前 3 天和月中同一个人，是完全不同的用户——他能容忍的步骤数、能看到的字段数都不一样。"},
+
+ {q:"如果先定功能、再回头找工作场景，最大的风险是什么？",
+  o:["开发成本会变高",
+     "做出来的功能没人用，而且事后无法判断该删哪一个",
+     "上线时间会推迟",
+     "用户会觉得需求变化太频繁"],
+  a:1,
+  why:"顺序反了不只是浪费开发资源，更麻烦的是失去了删除的依据——每个功能都能找到一句当初的理由，于是系统只能越加越重。费控 26 个字段就是这么来的。"},
+
+ {q:"需求评审会上要否掉一个需求，以下哪个理由最站得住？",
+  o:["这个需求优先级不高",
+     "预算不够，先放一放",
+     "拿不出可指认的使用证据：不知道谁在用、在什么条件下用、现在怎么绕过",
+     "别的部门没有提过类似需求"],
+  a:2,
+  why:"否需求要靠证据缺口，不靠优先级排序或预算。前两个理由都是可以被推翻的主观判断，第三个是可以在会上当场核验的硬缺口。"}
+],
+m2:[
+ {q:"业务方反馈「这个系统不好用」。做定性研究时，第一步应该把它翻译成什么？",
+  o:["一句可以放进问卷的满意度评价",
+     "具体是哪个动作、在哪一步停下来、当时花了多久、最后怎么解决的",
+     "一份改进建议清单",
+     "一组功能使用频率数据"],
+  a:1,
+  why:"「不好用」是评价，不是现象。研究问题必须能落到可观察的行为上：哪个动作、停在哪一步、耗时多少、如何收尾。翻译不到这一层，后面的访谈提纲就写不出来。"},
+
+ {q:"只访谈各部门的接口人，最大的研究风险是什么？",
+  o:["他们太忙，约不到时间",
+     "他们给的是转述和立场，不是操作现场",
+     "他们不了解系统功能",
+     "他们的职级太高，不敢说真话"],
+  a:1,
+  why:"接口人提供的是二手信息和部门立场，真正值得看的是坐在工位上那个人怎么操作。抽样时必须有「实际执行者」这一层，否则拿到的全是转述。"},
+
+ {q:"BEI（行为事件访谈）的核心提问方式是哪一种？",
+  o:["如果系统改成这样，你会怎么用？",
+     "请回忆最近一次，具体是哪天、当时在做什么、你怎么处理的？",
+     "你觉得现在的系统有哪三点需要改进？",
+     "你们部门对这件事的整体看法是什么？"],
+  a:1,
+  why:"BEI 要的是已发生的一次具体经历，不是假设、不是评价、不是群体观点。只有落到「哪天、在做什么、怎么处理」，才能拿到真实细节。"},
+
+ {q:"访谈中提到「用户希望操作更简单」，下一步最该做的追问是什么？",
+  o:["那你们希望简化到几步？",
+     "上一次你觉得操作复杂，是在做哪件事的时候？",
+     "你觉得哪个模块最需要改？",
+     "其他部门也有同样的感受吗？"],
+  a:1,
+  why:"「希望更简单」是评价，要追问到具体一次经历才能落地。A 是把用户当设计师，C 是让对方替你排序，D 是把个体感受泛化成群体结论。"},
+
+ {q:"访谈中受访者说完一句就停住了，访谈者最合适的动作是什么？",
+  o:["立刻接话，用下一个问题填满时间",
+     "保持沉默几秒，等对方自己补完",
+     "复述一遍刚才的话，确认理解",
+     "换个轻松的话题缓和气氛"],
+  a:1,
+  why:"停顿往往出现在关键处，对方在想「这个能不能说」。留白 3-5 秒经常能补出最有价值的细节。急着接话等于把线索掐断。"},
+
+ {q:"访谈结束前当场复述要点，主要作用是什么？",
+  o:["表示对受访者的尊重",
+     "校准理解偏差，让没问清的地方还有机会追问",
+     "让受访者签字确认，便于留档",
+     "节省后续整理时间"],
+  a:1,
+  why:"当场复述是唯一的纠错窗口。离开现场后再发现理解偏了，就再也问不到本人了——这是定性研究里最贵的成本。"},
+
+ {q:"以下哪种情况一定不能用焦点小组？",
+  o:["需要快速收敛 6 个以上备选方案",
+     "需要挖掘个人真实做法，尤其是绕行行为",
+     "需要跨部门对齐对同一问题的认知",
+     "需要探索一个群体对某类问题的共同理解"],
+  a:1,
+  why:"焦点小组擅长找「大家怎么看」，不擅长挖「你实际怎么做」。群体压力会让绕行这类行为当场消失——没人会在同事和领导面前承认自己用 Excel 台账。"},
+
+ {q:"「跟班观察」与「影子跟随」的主要区别是什么？",
+  o:["时长不同，跟班更短",
+     "跟班看流程怎么走，影子跟随看这一个人在流程之外补了什么动作",
+     "跟班需要预约，影子跟随不需要",
+     "两者没有实质区别"],
+  a:1,
+  why:"跟班看到的是标准流程，影子跟随看到的是流程失效时人的补位动作——而补位动作恰恰是需求最集中的地方。"},
+
+ {q:"B 端定性研究与 C 端相比，抽样上最需要额外覆盖的是哪一层？",
+  o:["只需要覆盖一线使用者",
+     "管理者与监管者，因为他们的约束决定了一线能做什么",
+     "只需要覆盖决策者",
+     "只需要覆盖外部客户"],
+  a:1,
+  why:"B 端四层用户里，管理者和监管者决定了制度边界，一线的很多「不方便」其实是制度要求。只访一线会得出「简化流程」这种做不到的结论。"},
+
+ {q:"定性研究中的「三角验证」指的是什么？",
+  o:["找三个不同部门的受访者做访谈",
+     "用访谈、现场观察、文档或系统日志等多个来源互相印证同一结论",
+     "把同一批人访谈三次",
+     "请三位专家各自评审结论"],
+  a:1,
+  why:"三角验证是多来源互证，不是多人数。三个来自同一岗位的受访者说同样的话，仍然只算一个来源。"},
+
+ {q:"研究结论写完之后，为什么还要主动做「反例搜寻」？",
+  o:["为了让报告看起来更全面",
+     "为了找出不成立的场景，防止结论只覆盖顺利的情况",
+     "为了增加报告的篇幅",
+     "为了照顾少数派意见"],
+  a:1,
+  why:"结论最容易在顺利场景里成立、在异常场景里崩塌。主动找反例是把崩塌点提前暴露出来，也是结论强度分级的前提。"},
+
+ {q:"「有三个人都提到了这个问题」，能不能直接作为强证据？",
+  o:["能，三人成众，可以定论",
+     "不能，要看这三人是否来自同一岗位、同一场景，是否是同一个来源",
+     "能，只要三人是不同部门",
+     "不能，定性研究不能计数"],
+  a:1,
+  why:"重复次数不等于证据强度，来源独立性才是关键。同一岗位的三个人经历同一套流程，本质上是同一个数据点被数了三遍。"}
+]
+};
+
+/* ============================================================
+   启动
+   ============================================================ */
+(async function boot(){
+  try{
+    var rows=await Cloud.req('gel_users',{qs:'?select=id&doc->>role=eq.admin&limit=1'});
+    if(!rows||!rows.length){
+      var salt=mkSalt();
+      await Cloud.upsert('gel_users',[{id:'u_admin',doc:{
+        loginId:'admin',name:'企业管理员',role:'admin',company:'',
+        salt:salt,pwd:hash('gel@2026',salt),active:true,createdAt:nowISO()
+      }}]);
+      console.log('已初始化管理员账号 admin / gel@2026');
+    }
+  }catch(e){
+    console.error('初始化检查失败',e);
+  }
+  loadMe();
+  route();
+})();
+
+</script>
+</body>
+</html>
