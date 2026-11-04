@@ -1930,17 +1930,22 @@ function renderActivity(u,uid){
       +((u.demo.fix&&u.demo.fix.length)?('<div style="font-size:12.8px;margin:10px 0 4px"><b>人在这份输出上做了哪几件事（这才是本单元要学的）</b></div><ul class="rub">'+u.demo.fix.map(x=>'<li>'+esc(sub(x))+'</li>').join('')+'</ul>'):'')
       +((u.demo.judge)?('<div style="font-size:12.5px;color:var(--mut)">判断依据：'+esc(sub(u.demo.judge))+'</div>'):'')
       +'</details>') : '';
-    box.innerHTML=adminNote+'<div class="card"><h3>\uD83D\uDEE0 演示环节 · 在 WorkBuddy 里跑一遍</h3>'
+    /* 深度演示单元（重度产出物）的页面顺序要反过来：先读标准件全文，再跑模型。
+       把 2000 字的标准件放在「跑一遍」按钮之后，学员会先跑完再看范本，等于先答题后看答案。 */
+    const drFirst = u.deep ? dr : '';
+    const drLate  = u.deep ? '' : dr;
+    box.innerHTML=adminNote+'<div class="card"><h3>'+(u.deep?'\uD83C\uDFAC 标准件走读 · 先看一份能过会的 PRD，再跑一遍':'\uD83D\uDEE0 演示环节 · 在 WorkBuddy 里跑一遍')+'</h3>'
       + taskBox
+      + drFirst
       + '<details open><summary>\uD83D\uDCCB 展开填写模板</summary><div class="tpl">'+esc(sub(u.template||''))+'</div></details>'
       +'<div style="margin-top:10px"><h4 style="font-size:13.5px;margin-bottom:6px">提示词（可直接复制到 WorkBuddy 使用）</h4>'
       +'<textarea id="p-text">'+esc(sub(u.demoScript.prompt))+'</textarea></div>'
       +'<button class="btn" onclick="runWb(\''+uid+'\')">▶ 跑一遍（提示词自动复制）</button>'
-      + dr
+      + drLate
       +'<div id="wb-out" style="margin-top:10px"></div>'
       + ((u.rubric&&u.rubric.length)?'<details style="margin-top:10px"><summary>\uD83C\uDFAF 本单元评分要点</summary><ul class="rub">'+u.rubric.map(r=>'<li>'+esc(r)+'</li>').join('')+'</ul></details>':'')
       +'<div style="margin-top:14px"><h4 style="font-size:13.5px;margin-bottom:6px">演示记录（这一项计入得分）</h4>'
-      +'<textarea id="demo-rec" placeholder="把上面模板的 4 小节贴进来：我用的提示词 / 哪里可用哪里不可用 / 我做了哪些人工修正 / 下次复用的固定句式"></textarea></div>'
+      +'<textarea id="demo-rec" placeholder="'+(u.deep?'对照上面那份标准件写：① 我用的提示词 ② AI 给回来的哪里可用、哪里不能直接用 ③ 我补了哪几处（数字/非目标/降级终点） ④ 下次复用的固定句式':'把上面模板的 4 小节贴进来：我用的提示词 / 哪里可用哪里不可用 / 我做了哪些人工修正 / 下次复用的固定句式')+'"></textarea></div>'
       +'<label style="display:block;font-size:13px;margin:8px 0"><input type="checkbox" id="demo-check"> 我已人工核对过模型结果，清楚哪一步必须由人接手</label>'
       +'<div id="demo-score"></div>'
       /* 同上：按钮常显，没跑就点会用拦截提示说清「先跑一遍」，而不是干脆没有出口 */
