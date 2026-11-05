@@ -757,6 +757,28 @@ a{color:var(--pri);text-decoration:none}
 .pl-time{color:#cfdcea;font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .pl-rate{background:rgba(255,255,255,.12);color:#dfe9f3;border:1px solid rgba(255,255,255,.18);
   border-radius:6px;padding:4px 6px;font-size:12px}
+/* 全屏按钮：与倍速同风格的小方钮 */
+.pl-fs{width:30px;height:30px;flex:0 0 30px;border-radius:6px;display:flex;align-items:center;
+  justify-content:center;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);
+  color:#dfe9f3;transition:.14s}
+.pl-fs:hover{background:rgba(255,255,255,.24);color:#fff}
+.pl-fs svg{width:15px;height:15px;display:block}
+.pl-fs .i-exit{display:none}
+.pl-fs.on .i-fs{display:none}
+.pl-fs.on .i-exit{display:block}
+.pl-fs.on{background:rgba(74,159,224,.34);border-color:rgba(124,186,240,.6);color:#fff}
+
+/* 全屏态：只留画面 / 字幕 / 控制条，16:9 居中，其余区域压黑 */
+.player:fullscreen,.player:-webkit-full-screen{margin:0;border-radius:0;width:100vw;height:100vh;
+  display:flex;flex-direction:column;justify-content:center;background:#05080d}
+.player:fullscreen .stage,.player:-webkit-full-screen .stage{
+  width:min(100vw,calc((100vh - 128px) * 16 / 9));max-height:calc(100vh - 128px);
+  margin:0 auto;border-radius:0}
+.player:fullscreen .cap,.player:-webkit-full-screen .cap{
+  width:min(100vw,calc((100vh - 128px) * 16 / 9));margin:0 auto;font-size:17px;min-height:60px}
+.player:fullscreen .pl-top,.player:-webkit-full-screen .pl-top{padding:10px 26px 0}
+.player:fullscreen .pl-tools,.player:-webkit-full-screen .pl-tools{padding:9px 26px 13px}
+.player:fullscreen .pl-text,.player:-webkit-full-screen .pl-text{display:none}
 .cap.done{color:#8ba3ba}
 .pl-sub{margin:12px 14px 0;color:#eaf1f8;font-size:13.5px;line-height:1.78;min-height:44px;
   display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;max-height:76px}
@@ -4774,13 +4796,36 @@ function renderIntro(){
   var ok=Prog.introDone(), pct=Prog.introPct();
   /* 导学的收听记录单独挂在 m0 下：不进 seq() 的节数分母，但它是必修门禁 */
   LS_.mk='m0'; LS_.n=1;
+  var mins=Math.round(tot/60*10)/10;
+  /* 左侧目录与普通学习页同一套：导学在顶端，下面是 8 个模块（没听完导学一律锁） */
+  var modItems=(window.PLAN||[]).map(function(p){
+    var has=!!modByKey(p.key);
+    var d=has?Prog.moduleDone(p.key,modByKey(p.key).sections.length):0;
+    var can=has&&ok&&Prog.unlocked(p.key,1);
+    var sub=!has?'暂未开放':(!ok?'先看完开篇导学':(can?(d?'已学 '+d+'/'+p.secs:'未开始 · '+p.secs+' 节'):'完成上一章后解锁'));
+    return '<div class="sitem'+(can?'':' lock')+'" data-n="'+p.no+'"'
+      +(can?' onclick="goSec(\''+p.key+'\',1)"':' title="'+sub+'"')+'>'
+      +'<div class="sn">'+(can?p.no:'<span class="lk">🔒</span>')+'</div>'
+      +'<div><div class="st">M'+p.no+' '+esc(p.short)+'</div><div class="sm">'+sub+'</div></div></div>';
+  }).join('');
+  var totalSecs=(window.PLAN||[]).reduce(function(a,p){return a+(p.secs||0);},0);
+  var totalMods=(window.PLAN||[]).length;
+
   document.getElementById('app').innerHTML='<div class="shell">'+topbar('用户思维 · 线上课程')
    +'<div class="wrap"><div class="crumb"><button onclick="location.hash=\'\'">我的课程</button>'
    +'<span>/</span><span>开篇导学</span></div>'
-   +'<div class="panel" style="max-width:1080px;margin:0 auto">'
-   +'<div class="ph"><div class="k">开篇导学 · 必修 · 讲解 '+Math.round(tot/60*10)/10+' 分钟 · 共 '+segs.length+' 页</div>'
+   +'<div class="learn">'
+   +'<div class="sidelist" id="side"><div class="hd" onclick="toggleSide()">'
+   +'<span>课程目录</span><small>'+totalMods+' 模块 · '+totalSecs+' 节 <span class="tg" id="sidetg">目录 ▾</span></small></div>'
+   +'<div class="list">'
+   +'<div class="sitem on"><div class="sn">导</div><div><div class="st">开篇导学 · 必修</div>'
+   +'<div class="sm">'+mins+' 分钟 · '+segs.length+' 页</div></div></div>'
+   +modItems
+   +'</div></div>'
+   +'<div class="panel">'
+   +'<div class="ph"><div class="k">开篇导学 · 必修 · 讲解 '+mins+' 分钟 · 共 '+segs.length+' 页</div>'
    +'<h2>先花 8 分钟，把规则说清楚</h2></div>'
-   +'<div class="pb">'+playerHTML(uid)
+   +'<div class="pb" id="pbody">'+playerHTML(uid)
    +'<div class="ib-prog'+(ok?' ok':'')+'" id="ib-prog">'
    +'<b class="ibp-cap">导学观看进度</b>'
    +'<span class="ibp-bar"><i style="width:'+pct+'%"></i></span>'
@@ -4794,7 +4839,7 @@ function renderIntro(){
    +'<div class="spacer"></div>'
    +'<button class="btn sm'+(ok?'':' gray')+'" id="intro-go">'
    +(ok?'进入模块一 →':'还差 '+(80-pct)+'%，看完再进 →')+'</button></div>'
-   +'</div></div></div>';
+   +'</div></div></div></div>';
 
   document.getElementById('intro-go').onclick=function(){
     if(!Prog.introDone()){
@@ -5362,6 +5407,10 @@ function playerHTML(uid) {
     + '<div class="pl-bar" id="pl-bar" title="点击定位"><i id="pl-fill"></i></div>'
     + '<div class="pl-time" id="pl-time">00:00 / ' + fmtT(tot) + '</div>'
     + '<select class="pl-rate" id="pl-rate">' + rates + '</select>'
+    + '<button class="pl-fs" id="pl-fs" type="button" title="全屏" aria-label="全屏">'
+    + '<svg class="i-fs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>'
+    + '<svg class="i-exit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3"/><path d="M16 3v3a2 2 0 0 0 2 2h3"/><path d="M8 21v-3a2 2 0 0 0-2-2H3"/><path d="M16 21v-3a2 2 0 0 1 2-2h3"/></svg>'
+    + '</button>'
     + '</div>'
     + '<div class="pl-tools">'
     + '<span class="pl-hint" id="pl-hint">本节 ' + Math.round(tot / 60) + ' 分钟 · 共 ' + segs.length + ' 页</span></div>'
@@ -5404,6 +5453,21 @@ function initPlayer(uid) {
   if (tg) tg.onclick = plToggle;
   var rt = document.getElementById('pl-rate');
   if (rt) rt.onchange = function (e) { Pl.rate = +e.target.value; a.playbackRate = Pl.rate; };
+  var fsb = document.getElementById('pl-fs');
+  if (fsb) fsb.onclick = plFsToggle;
+  if (!Pl.fsHook) {
+    Pl.fsHook = true;
+    var onFs = function () {
+      var on = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      var b = document.getElementById('pl-fs');
+      if (b) b.classList.toggle('on', on);
+      // 全屏切换后容器尺寸变了，必须重算画布缩放，否则画面停在旧比例
+      setTimeout(function () { if (window.stageFit) stageFit(); }, 80);
+      setTimeout(function () { if (window.stageFit) stageFit(); }, 260);
+    };
+    document.addEventListener('fullscreenchange', onFs);
+    document.addEventListener('webkitfullscreenchange', onFs);
+  }
   var bar = document.getElementById('pl-bar');
   if (bar) bar.onclick = function (e) {
     var r = e.currentTarget.getBoundingClientRect();
@@ -5433,6 +5497,24 @@ function initPlayer(uid) {
     window.addEventListener('hashchange', flush);
   }
   plPaint();
+}
+
+/* 全屏：整块播放器（画面 + 字幕 + 控制条）一起进全屏，不是单独放大画面 */
+function plFsToggle() {
+  var el = document.getElementById('pl');
+  if (!el) return;
+  var d = document;
+  var cur = d.fullscreenElement || d.webkitFullscreenElement;
+  if (cur) {
+    if (d.exitFullscreen) { try { d.exitFullscreen(); } catch (e) { } }
+    else if (d.webkitExitFullscreen) { try { d.webkitExitFullscreen(); } catch (e) { } }
+    return;
+  }
+  var req = el.requestFullscreen || el.webkitRequestFullscreen;
+  if (!req) { toast('当前浏览器不支持元素全屏，可按 F11 全屏'); return; }
+  var r;
+  try { r = req.call(el); } catch (e) { toast('当前浏览器不支持元素全屏，可按 F11 全屏'); return; }
+  if (r && r.catch) r.catch(function () { toast('全屏被浏览器拦截了，再点一次或按 F11'); });
 }
 
 function plToggle() {
