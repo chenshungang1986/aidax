@@ -521,6 +521,57 @@ a{color:var(--pri);text-decoration:none}
 .kk{transition:opacity .5s ease}
 .stage.hl .kk{opacity:.42}
 .stage.hl .kk.on{opacity:1}
+
+/* ---- 章节封面 / 结束封面 ---- */
+.cv{background:linear-gradient(122deg,#07182b 0%,#0d2c4e 46%,#1a4b84 100%);color:#fff}
+.cv-wash{position:absolute;inset:0;
+  background:radial-gradient(circle at 86% 10%,rgba(88,162,242,.30),transparent 48%),
+    radial-gradient(circle at 6% 94%,rgba(28,88,158,.38),transparent 54%)}
+.cv:after{content:'';position:absolute;right:-190px;top:150px;width:780px;height:780px;
+  border:1px solid rgba(255,255,255,.10);border-radius:50%;pointer-events:none}
+.cv-lg{position:absolute;right:64px;top:44px;width:190px;height:auto;
+  background:rgba(255,255,255,.95);padding:9px 13px;border-radius:6px}
+.cv-kick{position:absolute;left:100px;top:118px;display:flex;align-items:center;
+  font-size:22px;font-weight:600;letter-spacing:.06em;color:#9dc4ee}
+.cv-kick i{display:block;width:34px;height:2px;background:rgba(157,196,238,.55);margin:0 16px}
+.cv-h{position:absolute;left:100px;right:150px;bottom:430px;font-size:78px;line-height:1.3;
+  font-weight:800;letter-spacing:.01em;color:#fff}
+.cv-h b{font-weight:800;color:#8ec5ff}
+.cv-sub{position:absolute;left:102px;right:210px;top:500px;font-size:26px;
+  color:rgba(255,255,255,.74);font-weight:500;line-height:1.6}
+.cv-pts{position:absolute;left:100px;right:100px;top:588px;display:grid;
+  grid-template-columns:repeat(3,1fr);gap:20px}
+.cv-pt{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);
+  border-radius:10px;padding:22px 24px;display:flex;gap:14px;align-items:flex-start}
+.cv-pt b{font-size:22px;font-weight:800;color:#7db8f2;line-height:1.5;flex:0 0 auto}
+.cv-pt span{font-size:21px;font-weight:600;color:rgba(255,255,255,.92);line-height:1.55}
+.cv-foot{position:absolute;left:100px;right:100px;bottom:56px;display:flex;
+  align-items:flex-end;justify-content:space-between;padding-top:22px;
+  border-top:1px solid rgba(255,255,255,.14)}
+.cv-credit{font-size:17px;line-height:1.75;color:rgba(255,255,255,.70);letter-spacing:.02em}
+.cv-credit .cvl{color:rgba(255,255,255,.86);margin-bottom:4px;font-weight:600}
+.cv-no{font-size:34px;font-weight:800;color:rgba(255,255,255,.9);letter-spacing:.04em;flex:0 0 auto}
+.cv-no em{font-size:17px;font-style:normal;font-weight:600;color:rgba(255,255,255,.45);
+  margin-left:7px;letter-spacing:.02em}
+.ce-mark{position:absolute;left:100px;top:118px;display:flex;align-items:center;
+  font-size:22px;font-weight:700;letter-spacing:.14em;color:#8ec5ff}
+.ce-mark:before{content:'';width:46px;height:2px;background:#8ec5ff;margin-right:16px}
+.cv-end .cv-h{top:172px;bottom:auto;font-size:56px;line-height:1.28;right:190px}
+.ce-pts{position:absolute;left:100px;right:640px;top:348px}
+.ce-lab{font-size:19px;font-weight:600;color:rgba(255,255,255,.45);
+  letter-spacing:.14em;margin-bottom:14px}
+.ce-pt{display:flex;gap:16px;align-items:flex-start;padding:13px 0;
+  border-bottom:1px solid rgba(255,255,255,.09)}
+.ce-pt b{font-size:20px;font-weight:800;color:#7db8f2;line-height:1.6;flex:0 0 auto}
+.ce-pt span{font-size:26px;font-weight:600;color:rgba(255,255,255,.94);line-height:1.55}
+.ce-nx{position:absolute;left:100px;right:100px;top:622px;display:flex;
+  align-items:center;gap:16px}
+.ce-nx i{font-style:normal;background:rgba(142,197,255,.18);color:#8ec5ff;font-size:18px;
+  font-weight:700;padding:6px 14px;border-radius:4px;flex:0 0 auto}
+.ce-nx span{font-size:22px;color:rgba(255,255,255,.82);font-weight:500}
+.ce-wm{position:absolute;right:68px;bottom:214px;font-size:300px;font-weight:800;
+  line-height:1;color:rgba(255,255,255,.055);letter-spacing:-.05em;pointer-events:none}
+
 .cap{min-height:56px;display:flex;align-items:center;justify-content:center;
   padding:13px 22px;background:#0c1725;color:#f4f9ff;font-size:18px;font-weight:600;line-height:1.55;
   text-align:center;letter-spacing:.02em;border-top:1px solid rgba(255,255,255,.06)}
@@ -816,8 +867,89 @@ function blkHTML(b) {
   return '';
 }
 
+/* ---------- 章节封面 / 结束封面 ---------- */
+var CREDIT_HTML = '<div class="cv-credit">'
+  + '<div class="cvl">本课程由：</div>'
+  + '<div class="cvr">起点课程研发中心　设计开发</div>'
+  + '<div class="cvr">产品经理课程讲师团队　评审校验</div>'
+  + '<div class="cvr">陈观.AI老师声音　录制</div>'
+  + '</div>';
+
+function pad2(n) { return (n < 10 ? '0' : '') + n; }
+function plainOf(t) {
+  return String(t || '').replace(/<br\s*\/?>/gi, ' ').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+}
+
+function coverOf(uid) {
+  var c = (window.COVERS && window.COVERS[uid]) || null;
+  if (c) return c;
+  /* 兜底：拿第 1 页的页眉与大标题凑一张封面 */
+  var arr = (window.SLIDES && window.SLIDES[uid]) || [];
+  var s = arr[0] || {};
+  var kick = String(s.kicker || '');
+  var mm = /^(M\d+)\s*(.*?)\s*·/.exec(kick);
+  return {
+    mod: mm ? mm[1] : '', modName: mm ? mm[2] : kick.replace(/·.*$/, '').trim(),
+    no: 1, total: 1,
+    title: String(s.h || '本节内容'), sub: '', pts: []
+  };
+}
+
+function nextCoverOf(uid) {
+  var C = window.COVERS || {}, ks = Object.keys(C), i = ks.indexOf(uid);
+  return (i >= 0 && i < ks.length - 1) ? C[ks[i + 1]] : null;
+}
+
+function cvFont(title) {
+  var lines = String(title || '').split(/<br\s*\/?>/i).map(plainOf), mx = 0;
+  lines.forEach(function (x) { if (x.length > mx) mx = x.length; });
+  if (mx <= 12) return 84;
+  if (mx <= 15) return 74;
+  if (mx <= 18) return 66;
+  return 58;
+}
+
+function coverHTML() {
+  var c = coverOf(STAGE.uid);
+  return '<div class="sl cv">'
+    + '<div class="cv-wash"></div>'
+    + '<img class="cv-lg" alt="" src="' + LOGO_SRC + '">'
+    + '<div class="cv-kick">' + esc(c.modName || '') + '<i></i>第 ' + c.no + ' 节</div>'
+    + '<h2 class="cv-h" style="font-size:' + cvFont(c.title) + 'px">' + (c.title || '') + '</h2>'
+    + (c.sub ? '<p class="cv-sub">' + esc(c.sub) + '</p>' : '')
+    + (c.pts && c.pts.length ? '<div class="cv-pts">' + c.pts.map(function (p, i) {
+      return '<div class="cv-pt"><b>' + pad2(i + 1) + '</b><span>' + esc(p) + '</span></div>';
+    }).join('') + '</div>' : '')
+    + '<div class="cv-foot">' + CREDIT_HTML
+    + '<div class="cv-no">' + pad2(c.no) + '<em>/ ' + pad2(c.total) + '</em></div>'
+    + '</div></div>';
+}
+
+function endHTML() {
+  var c = coverOf(STAGE.uid), nx = nextCoverOf(STAGE.uid);
+  return '<div class="sl cv cv-end">'
+    + '<div class="cv-wash"></div>'
+    + '<div class="ce-wm">' + pad2(c.no) + '</div>'
+    + '<img class="cv-lg" alt="" src="' + LOGO_SRC + '">'
+    + '<div class="ce-mark">' + esc(c.modName || '') + ' · 第 ' + c.no + ' 节完</div>'
+    + '<h2 class="cv-h ce-h">' + (c.title || '') + '</h2>'
+    + (c.pts && c.pts.length ? '<div class="ce-pts"><div class="ce-lab">带走三句话</div>'
+      + c.pts.map(function (p, i) {
+        return '<div class="ce-pt"><b>' + pad2(i + 1) + '</b><span>' + esc(p) + '</span></div>';
+      }).join('') + '</div>' : '')
+    + '<div class="ce-nx"><i>' + (nx ? '下一节' : '本模块') + '</i><span>'
+    + (nx ? esc(nx.mod + ' 第 ' + nx.no + ' 节 · ' + plainOf(nx.title))
+      : '已到最后一节，做完随堂练习即可进入下一模块')
+    + '</span></div>'
+    + '<div class="cv-foot">' + CREDIT_HTML
+    + '<div class="cv-no">END<em>' + pad2(c.no) + ' / ' + pad2(c.total) + '</em></div>'
+    + '</div></div>';
+}
+
 function slideHTML(i) {
   var arr = (window.SLIDES && window.SLIDES[STAGE.uid]) || [];
+  if (i < 0) return coverHTML();
+  if (i >= arr.length) return endHTML();
   var s = arr[i];
   if (!s) {
     return '<div class="sl"><div class="sl-bg" style="background-image:url(' + BG_SRC + ')"></div>'
@@ -836,13 +968,16 @@ function slideHTML(i) {
 
 /* ---------- 切页 ---------- */
 function stageShow(i) {
-  if (STAGE.i === i && document.getElementById('p-canvas').firstChild) return;
-  STAGE.i = i;
   var cv = document.getElementById('p-canvas');
-  if (!cv) return;
+  if (!cv) return;                       // 无画面层（回退图文）直接跳过
+  if (STAGE.i === i && cv.firstChild) return;
+  STAGE.i = i;
   cv.innerHTML = slideHTML(i);
   stageFit();
   stageArm(i);
+  var st = document.getElementById('p-stage');
+  var arr = (window.SLIDES && window.SLIDES[STAGE.uid]) || [];
+  if (st && (i < 0 || i >= arr.length)) st.classList.remove('hl');
   var sub = document.getElementById('pl-sub');
   if (sub) sub.classList.remove('done');
 }
@@ -2725,6 +2860,107 @@ window.SLIDES = {
 
 };
 
+/* ============================================================
+   每节的章节封面 / 结束封面数据
+   —— 与 NARR 的 key 一一对应；缺项时自动用第 1 页的标题兜底
+   —— title 支持 <br> 与 <b>（<b> 会加一层浅蓝底纹）
+   ============================================================ */
+window.COVERS = {
+
+  'g_m1_1': {
+    mod: 'M1', modName: '用户思维总纲', no: 1, total: 7,
+    title: '用户思维不是「态度好」<br>是<b>一套可验证的判断顺序</b>',
+    sub: '为什么加了 12 个字段，一线还是不用？',
+    pts: ['判断顺序是 场景 → 问题 → 功能', '交付物 ≠ 成果，验收要写行为改变', '上线三个月，才谈得上真的跑起来']
+  },
+  'g_m1_2': {
+    mod: 'M1', modName: '用户思维总纲', no: 2, total: 7,
+    title: '数字化转型里<br><b>三类典型错位</b>',
+    sub: '流程搬上线，为什么一线反而更慢了？',
+    pts: ['错位一：把领导当用户', '错位二：把功能当价值', '错位三：把交付当成果']
+  },
+  'g_m1_3': {
+    mod: 'M1', modName: '用户思维总纲', no: 3, total: 7,
+    title: '场景还原五问<br><b>把需求问回现场</b>',
+    sub: '五问填完，为什么能直接否掉三成需求？',
+    pts: ['谁在用 · 在什么条件下 · 为完成什么', '现在怎么绕过：最能暴露真痛点', '不做会怎样：决定值不值得投']
+  },
+  'g_m1_4': {
+    mod: 'M1', modName: '用户思维总纲', no: 4, total: 7,
+    title: 'B 端用户的四层角色<br><b>一个字段，四种答案</b>',
+    sub: '一个字段加不加，四个角色四种答案，听谁的？',
+    pts: ['使用者：关心手上这一步顺不顺', '管理者：关心能不能管得住', '决策者与监管者：关心风险与合规']
+  },
+  'g_m1_5': {
+    mod: 'M1', modName: '用户思维总纲', no: 5, total: 7,
+    title: '从「用户满意」<br>走到<b>组织绩效改善</b>',
+    sub: '「更好用」这三个字，怎么翻译成领导听得懂的话？',
+    pts: ['价值链条：行为改变 → 业务指标 → 组织绩效', '用省多少小时、少返工几次说话', '拿不到基线数据，价值主张就不算数']
+  },
+  'g_m1_6': {
+    mod: 'M1', modName: '用户思维总纲', no: 6, total: 7,
+    title: '六类行业系统<br>与它们的<b>用户地图</b>',
+    sub: '六类系统，用户的使用动机根本不是一回事',
+    pts: ['交易 · 管控 · 协同 · 分析 · 工具 · 平台', '动机不同，研究方式不能照搬', '先定位系统类型，再定访谁、问什么']
+  },
+  'g_m1_7': {
+    mod: 'M1', modName: '用户思维总纲', no: 7, total: 7,
+    title: '全课路线图<br>与<b>作业说明</b>',
+    sub: '8 个模块学完，你手上会多出什么？',
+    pts: ['8 模块 15 节，按两周节奏推进', '三个提交节点，逾期不补', '必交件：五问卡 + 深访提纲与观察记录']
+  },
+
+  'g_m2_1': {
+    mod: 'M2', modName: '定性研究方法', no: 1, total: 8,
+    title: '把「不满意」<br>翻译成<b>可观察的现象</b>',
+    sub: '「用户为什么不满意」这个问题，为什么问不出答案？',
+    pts: ['研究问题要落到 谁 · 什么条件 · 做了什么', '「不满意」是情绪，不是研究问题', '一句话测试：这句话能被观察到吗']
+  },
+  'g_m2_2': {
+    mod: 'M2', modName: '定性研究方法', no: 2, total: 8,
+    title: '抽样<br><b>为什么不能只访接口人</b>',
+    sub: '访谈了 8 个人都说「还行」，问题出在哪？',
+    pts: ['接口人早就被系统驯化了', '要覆盖四类处境，含一个「不爱用」的', '少于 6 个人，不要下结论']
+  },
+  'g_m2_3': {
+    mod: 'M2', modName: '定性研究方法', no: 3, total: 8,
+    title: '深访提纲<br><b>BEI 结构与四类必删提问</b>',
+    sub: '为什么问「你觉得应该怎么改」，永远问不出真问题？',
+    pts: ['BEI：先问最近一次具体事件', '五问追问：一次往下挖三层', '假设性 · 引导性 · 评价性 · 未来性，全删']
+  },
+  'g_m2_4': {
+    mod: 'M2', modName: '定性研究方法', no: 4, total: 8,
+    title: '访谈执行<br><b>破冰、沉默与当场复述</b>',
+    sub: '对方说「挺好的」，后面 40 分钟就白聊了？',
+    pts: ['破冰说清：不是评估你 · 会添麻烦 · 匿名汇总', '沉默五秒，对方会补上关键那句', '当场复述，换来一句「其实还有个事」']
+  },
+  'g_m2_5': {
+    mod: 'M2', modName: '定性研究方法', no: 5, total: 8,
+    title: '焦点小组<br><b>什么时候能用，什么时候一定不能用</b>',
+    sub: '把 8 个人关在一间屋子里，为什么反而问不出真话？',
+    pts: ['适合探索群体共识的边界', '不适合个体行为细节与敏感立场', '八人以上，必然有人不说话']
+  },
+  'g_m2_6': {
+    mod: 'M2', modName: '定性研究方法', no: 6, total: 8,
+    title: '现场观察<br><b>跟班、影子跟随与工作日志</b>',
+    sub: '为什么观察一天，比访谈 8 个人更有用？',
+    pts: ['跟班一天，胜过访谈八人', '记时间、地点、动作，还有绕行', '绕行处就是需求，也是机会']
+  },
+  'g_m2_7': {
+    mod: 'M2', modName: '定性研究方法', no: 7, total: 8,
+    title: 'B 端与 C 端<br><b>定性研究的五处差异</b>',
+    sub: '把 C 端的方法直接搬到内部系统，哪里会失效？',
+    pts: ['样本 · 动机 · 场景 · 权力 · 验证，五处都不同', '内部用户没有「换一家」的自由', '结论要备两套说法：业务方与制度 owner']
+  },
+  'g_m2_8': {
+    mod: 'M2', modName: '定性研究方法', no: 8, total: 8,
+    title: '定性结论的<b>可信度</b><br>三角验证与强度分级',
+    sub: '「用户都说要这个功能」——这句话什么时候能信？',
+    pts: ['三角验证：访谈 + 观察 + 日志', '主动找反例，找不到才敢下结论', '强度分级：单点提及 / 多人共识 / 行为印证']
+  }
+
+};
+
 /* 吉利《用户思维》随堂练习题库
    每节 5 题，15 节 = 75 题。全部单选，四选一。
    计分：随堂练习合计 5 分（占认证总分 5%），按 15 节答对率折算，每节取最好一次。
@@ -4212,7 +4448,14 @@ function initPlayer(uid) {
     var pct = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
     plSeek(Pl.tot * pct);
   };
-  stageShow(0);
+  // 一进本节先停章节封面，点播放才进第 1 页
+  if (window.SLIDES && window.SLIDES[uid]) {
+    stageShow(-1);
+    var sb0 = document.getElementById('pl-sub');
+    if (sb0) { var _c = coverOf(uid); sb0.textContent = (_c.mod ? _c.mod + ' ' : '') + '第 ' + _c.no + ' 节 · 点播放开始'; }
+  } else {
+    stageShow(0);
+  }
   document.querySelectorAll('.pl-seg').forEach(function (el) {
     el.onclick = function () { plGo(+el.dataset.k, true); };
   });
@@ -4233,6 +4476,8 @@ function initPlayer(uid) {
 function plToggle() {
   if (!Pl.audio) return;
   if (Pl.audio.paused) {
+    // 停在封面时点播放，直接进第 1 页
+    if (STAGE.i < 0 && window.SLIDES && window.SLIDES[Pl.uid]) { STAGE._lastHl = -2; stageShow(0); }
     Pl.audio.play().catch(function () { toast('浏览器阻止了自动播放，请再点一次'); });
   } else {
     Pl.audio.pause();
@@ -4267,6 +4512,8 @@ function plNext() {
     Pl.audio.pause();
     var b = document.getElementById('pl-toggle');
     if (b) b.textContent = '▶';
+    // 最后一页播完 → 停在本节结束封面
+    if (window.SLIDES && window.SLIDES[Pl.uid]) stageShow(Pl.segs.length);
     var sb = document.getElementById('pl-sub');
     if (sb) { sb.textContent = '本节已播完，可以进入下一节'; sb.classList.add('done'); }
     toast('本节音频已播完');
