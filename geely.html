@@ -26,13 +26,58 @@ a{color:var(--pri);text-decoration:none}
 .hide{display:none!important}
 
 /* ---------- 登录 ---------- */
-#login{min-height:100%;display:flex;align-items:center;justify-content:center;padding:20px;
-  background:linear-gradient(160deg,#0d2238 0%,#17395f 55%,#1b4f8a 100%)}
-.login-card{width:100%;max-width:420px;background:#fff;border-radius:16px;padding:34px 30px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
-.login-brand{display:flex;align-items:center;gap:10px;margin-bottom:22px}
-.login-brand .bar{width:4px;height:34px;background:var(--pri);border-radius:2px}
-.login-brand h1{font-size:19px;font-weight:600;letter-spacing:.01em}
-.login-brand p{font-size:12px;color:var(--soft);margin-top:2px}
+#login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:36px 22px;
+  background:
+    radial-gradient(1100px 560px at 8% -12%,#dce8f6 0%,rgba(220,232,246,0) 62%),
+    radial-gradient(900px 520px at 102% 112%,#e3ecf7 0%,rgba(227,236,247,0) 58%),
+    #f1f5fa}
+.lg-wrap{width:100%;max-width:1032px;min-height:548px;display:grid;grid-template-columns:1.12fr .88fr;
+  background:#fff;border-radius:20px;overflow:hidden;
+  box-shadow:0 1px 3px rgba(16,36,61,.05),0 24px 64px rgba(16,36,61,.13)}
+
+/* 左：项目品牌墙 */
+.lg-hero{position:relative;overflow:hidden;padding:48px 42px 34px;color:#fff;
+  display:flex;flex-direction:column;
+  background:linear-gradient(148deg,#0a1c2f 0%,#12314f 48%,#1b4f8a 100%)}
+.lg-hero:before{content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);
+  background-size:40px 40px;
+  -webkit-mask-image:linear-gradient(155deg,#000 6%,rgba(0,0,0,.35) 52%,transparent 82%);
+  mask-image:linear-gradient(155deg,#000 6%,rgba(0,0,0,.35) 52%,transparent 82%)}
+.lg-hero:after{content:'';position:absolute;width:360px;height:360px;right:-130px;top:-120px;
+  border-radius:50%;background:radial-gradient(circle,rgba(96,165,250,.3),rgba(96,165,250,0) 70%)}
+.lg-hero>*{position:relative;z-index:1}
+.lg-proj{font-size:11.5px;line-height:1.7;letter-spacing:.04em;color:#9dbfe0;
+  display:flex;align-items:flex-start;gap:9px}
+.lg-proj:before{content:'';width:20px;height:2px;background:#4b8bcb;flex:0 0 20px;margin-top:8px}
+.lg-title{font-size:42px;font-weight:700;letter-spacing:.04em;line-height:1.22;margin-top:22px}
+.lg-sub{margin-top:10px;font-size:14px;color:#bed4ea;line-height:1.8;max-width:430px}
+.lg-sub b{color:#fff;font-weight:600}
+.lg-facts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:28px;padding:17px 0;
+  border-top:1px solid rgba(255,255,255,.15);border-bottom:1px solid rgba(255,255,255,.15)}
+.lg-facts b{display:block;font-size:23px;font-weight:600;line-height:1.15;letter-spacing:.01em}
+.lg-facts span{display:block;font-size:11px;color:#8fb1d1;margin-top:3px;letter-spacing:.02em}
+.lg-mods{margin-top:22px;display:flex;flex-direction:column;gap:10px}
+.lg-mod{display:flex;gap:11px;align-items:flex-start;padding:12px 14px;border-radius:10px;
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.11)}
+.lg-mod i{flex:0 0 32px;height:32px;border-radius:8px;background:rgba(255,255,255,.15);
+  display:flex;align-items:center;justify-content:center;font-style:normal;
+  font-size:11.5px;font-weight:600;color:#e2eefb;letter-spacing:.02em}
+.lg-mod-t{flex:1;min-width:0}
+.lg-mod b{display:block;font-size:13.5px;font-weight:600}
+.lg-mod b em{font-style:normal;font-size:11px;color:#8fb1d1;font-weight:400;margin-left:7px}
+.lg-mod p{font-size:11.5px;color:#a9c5de;margin-top:3px;line-height:1.6}
+.lg-foot{margin-top:auto;padding-top:24px;display:flex;justify-content:space-between;
+  gap:12px;font-size:11.5px;color:#7c9dbf;letter-spacing:.02em;flex-wrap:wrap}
+.lg-foot span:last-child{color:#a8c9e8}
+
+/* 右：登录表单 */
+.lg-form{display:flex;align-items:center;justify-content:center;padding:48px 42px}
+.lg-form-in{width:100%;max-width:320px}
+.lg-form h2{font-size:20px;font-weight:600;color:var(--deep);letter-spacing:.01em}
+.lg-hint{font-size:12.5px;color:var(--soft);line-height:1.7;margin:7px 0 24px}
+.lg-btn{height:46px;font-size:15px;letter-spacing:.06em;margin-top:4px}
 .field{margin-bottom:14px}
 .field label{display:block;font-size:12.5px;color:var(--mid);margin-bottom:6px;font-weight:500}
 .field input{width:100%;height:44px;border:1px solid var(--line);border-radius:8px;padding:0 13px;background:#fbfcfe;transition:.15s}
@@ -47,7 +92,7 @@ a{color:var(--pri);text-decoration:none}
 .btn.gray{background:#eef1f5;color:var(--mid)}
 .btn.danger{background:#fdecee;color:var(--accent)}
 .login-err{background:#fdecee;color:var(--accent);font-size:13px;padding:9px 12px;border-radius:7px;margin-bottom:12px}
-.login-tip{font-size:12px;color:var(--soft);text-align:center;margin-top:16px;line-height:1.7}
+.login-tip{font-size:11.5px;color:var(--soft);text-align:center;margin-top:18px;line-height:1.85}
 
 /* ---------- 通用外壳 ---------- */
 .shell{display:flex;flex-direction:column;min-height:100%}
@@ -283,6 +328,19 @@ a{color:var(--pri);text-decoration:none}
 .toast.on{opacity:1;bottom:40px}
 
 @media (max-width:860px){
+  #login{padding:14px 11px;align-items:flex-start}
+  .lg-wrap{grid-template-columns:1fr;border-radius:16px;max-width:460px;min-height:0}
+  .lg-hero{padding:24px 22px 20px}
+  .lg-title{font-size:27px;margin-top:13px}
+  .lg-sub{font-size:12.5px;margin-top:8px}
+  .lg-facts{margin-top:16px;padding:12px 0;gap:6px}
+  .lg-facts b{font-size:19px}
+  .lg-facts span{font-size:10px}
+  .lg-mods{display:none}
+  .lg-foot{padding-top:14px;font-size:10.5px}
+  .lg-form{padding:24px 22px 28px}
+  .lg-form h2{font-size:18px}
+  .lg-hint{margin-bottom:18px}
   .learn{grid-template-columns:1fr}
   .sidelist{position:static;max-height:none;margin-bottom:12px}
   .sidelist .hd{cursor:pointer}
@@ -534,7 +592,7 @@ window.NARR={"g_m1_1":[{"u":"audio/geely/g_m1_1_0.m4a?v=2026110417","d":60.24,"t
 var SB_URL='https://nyqiwjwzbpnepamldqto.supabase.co';
 var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55cWl3and6YnBuZXBhbWxkcXRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5NzMwMjcsImV4cCI6MjEwNTU0OTAyN30.ZTHpavVBlN80wO4OwYv7njdlFOuUBNVlyLYFyi9Oy5w';
 var LS='gel_';
-var APP_VER='g2.1.0';
+var APP_VER='g2.1.1';
 
 /* ---------- 本地存储 ---------- */
 function lsGet(k,d){try{var v=localStorage.getItem(LS+k);return v?JSON.parse(v):d;}catch(e){return d;}}
@@ -698,16 +756,50 @@ function modByKey(k){return MODS.filter(function(m){return m.key===k;})[0];}
    渲染：登录
    ============================================================ */
 function renderLogin(err){
+  var mods=[],nAll=0,minAll=0;
+  try{
+    MODS.forEach(function(m){
+      var n=m.sections.length;
+      var mm=m.sections.reduce(function(a,x){return a+(+x.m||0);},0);
+      nAll+=n; minAll+=mm;
+      mods.push({i:'M'+m.no,name:m.name,ab:m.ability_short||'',n:n,min:mm,out:m.output||''});
+    });
+  }catch(e){}
+  var modCards=mods.map(function(m){
+    return '<div class="lg-mod"><i>'+m.i+'</i><div class="lg-mod-t">'
+     +'<b>'+esc(m.name)+(m.ab?'<em>'+esc(m.ab)+'</em>':'')+'</b>'
+     +'<p>'+m.n+' 节 · '+m.min+' 分钟'+(m.out?'　交付「'+esc(m.out)+'」':'')+'</p>'
+     +'</div></div>';
+  }).join('');
+
   document.getElementById('app').innerHTML=
-   '<div id="login"><div class="login-card">'
-  +'<div class="login-brand"><div class="bar"></div><div>'
-  +'<h1>用户思维 · 线上课程</h1><p>吉利汽车 · 第一期业务产品经理能力培养</p></div></div>'
-  +(err?'<div class="login-err">'+esc(err)+'</div>':'')
-  +'<div class="field"><label>账号</label><input id="lg-id" autocomplete="username" placeholder="工号或管理员账号"></div>'
-  +'<div class="field"><label>密码</label><input id="lg-pw" type="password" autocomplete="current-password" placeholder="请输入密码"></div>'
-  +'<button class="btn" id="lg-go">登 录</button>'
-  +'<div class="login-tip">学员账号由企业管理员统一发放<br>忘记密码请联系管理员重置</div>'
-  +'</div></div>';
+   '<div id="login"><div class="lg-wrap">'
+
+   +'<section class="lg-hero">'
+   +'<div class="lg-proj">吉利汽车 · 第一期业务产品经理能力培养与认证项目</div>'
+   +'<h1 class="lg-title">用户思维</h1>'
+   +'<p class="lg-sub">从「态度好」到<b>可验证的判断顺序</b><br>把用户需求翻译成可执行的产品判断</p>'
+   +'<div class="lg-facts">'
+   +'<div><b>'+(mods.length||2)+'</b><span>已开模块</span></div>'
+   +'<div><b>'+(nAll||15)+'</b><span>节微课</span></div>'
+   +'<div><b>'+(minAll||100)+'</b><span>分钟成片</span></div>'
+   +'<div><b>4</b><span>项认证条件</span></div>'
+   +'</div>'
+   +'<div class="lg-mods">'+modCards+'</div>'
+   +'<div class="lg-foot"><span>起点课堂 · 企业服务</span><span>全课 8 学时 · 阶段一已开放</span></div>'
+   +'</section>'
+
+   +'<main class="lg-form"><div class="lg-form-in">'
+   +'<h2>学员登录</h2>'
+   +'<p class="lg-hint">使用企业管理员发放的工号与初始密码登录</p>'
+   +(err?'<div class="login-err">'+esc(err)+'</div>':'')
+   +'<div class="field"><label>账号</label><input id="lg-id" autocomplete="username" placeholder="工号 / 管理员账号"></div>'
+   +'<div class="field"><label>密码</label><input id="lg-pw" type="password" autocomplete="current-password" placeholder="请输入密码"></div>'
+   +'<button class="btn lg-btn" id="lg-go">登 录</button>'
+   +'<div class="login-tip">账号由企业管理员统一发放<br>忘记密码请联系管理员重置</div>'
+   +'</div></main>'
+
+   +'</div></div>';
   var go=function(){
     var id=document.getElementById('lg-id').value.trim();
     var pw=document.getElementById('lg-pw').value;
