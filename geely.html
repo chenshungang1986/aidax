@@ -186,6 +186,25 @@ a{color:var(--pri);text-decoration:none}
 .ib-go{flex:0 0 auto;font-size:13px;font-weight:600;color:var(--pri)}
 .intro-bar.done .ib-ic{background:#2e7d5b}
 .intro-bar.done .ib-go{color:var(--soft)}
+/* 必修未完成的强调：左侧橙条 + 橙色图标 */
+.intro-bar.need{border-color:#f0d6ae;background:linear-gradient(96deg,#fff9ee,#fffdf9);
+  box-shadow:0 2px 12px rgba(184,113,26,.08)}
+.intro-bar.need:hover{border-color:#e6c185;box-shadow:0 6px 20px rgba(184,113,26,.14)}
+.intro-bar.need .ib-ic{background:linear-gradient(140deg,#d9962f,#b8711a)}
+/* 导学页里的收听进度条 */
+.ib-prog{display:flex;align-items:center;gap:12px;margin:18px 0 4px;padding:12px 16px;
+  background:#f7fafd;border:1px solid #e6eef7;border-radius:11px;
+  font-size:12.5px;color:var(--mid);flex-wrap:wrap}
+.ibp-cap{flex:0 0 auto;font-size:12px;color:var(--soft);font-weight:400;letter-spacing:.02em}
+.ibp-bar{position:relative;flex:1;min-width:120px;height:8px;border-radius:99px;background:#e3ebf5;overflow:hidden;
+  box-shadow:inset 0 1px 2px rgba(16,36,61,.07)}
+/* 80% 处标一条刻度，让人知道"还差多少" */
+.ibp-bar:after{content:'';position:absolute;left:80%;top:-1px;bottom:-1px;width:1px;
+  background:rgba(184,113,26,.5);box-shadow:0 0 0 1px rgba(255,255,255,.7)}
+.ibp-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#d9962f,#e6b45c);transition:width .3s}
+.ib-prog.ok{color:#2e7d5b;background:#f4fbf7;border-color:#dcefe4}
+.ib-prog.ok .ibp-bar i{background:linear-gradient(90deg,#2e7d5b,#4aa87c)}
+.ibp-txt{flex:0 0 auto;font-weight:500}
 .intro-pts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0 4px}
 .intro-pts>div{background:#f6f9fd;border:1px solid #e6eef7;border-radius:11px;padding:14px 16px}
 .intro-pts b{display:block;font-size:13px;color:var(--deep);margin-bottom:6px}
@@ -4319,6 +4338,23 @@ var Prog={
     return Math.min(100,Math.round(((p&&p.heard)||0)/full*100));
   },
   heardOk:function(mk,n){ return this.heardPct(mk,n)>=80; },
+  /* ---- 开篇导学（M0）是必修 ----
+     导学不在 MODS 里，所以单独算：不进 seq() 的节数分母、不进认证计分。
+     听过 80%（与其他节同一口径）才允许进 M1 第 1 节，之后的解锁链不变。 */
+  introTot:function(){
+    var segs=(window.NARR||{})['g_m0_1']||[];
+    return segs.reduce(function(a,x){return a+x.d;},0);
+  },
+  introPct:function(){
+    var p=this.get('m0',1);
+    if(p&&(p.status==='done'||p.status==='quizzed'))return 100;
+    var tot=this.introTot();
+    if(!tot)return 0;
+    return Math.min(100,Math.round(((p&&p.heard)||0)/tot*100));
+  },
+  introDone:function(){ return this.introPct()>=80; },
+  /* 门禁只对学员生效：管理员后台预览要能打开任意节 */
+  needIntro:function(){ return !this.introDone() && !(window.Me&&Me.role==='admin'); },
   quizOk:function(mk,n){
     var p=this.get(mk,n);
     return !!(p&&p.quiz&&(p.quiz.best||0)>=PQ_PASS);
@@ -4335,6 +4371,8 @@ var Prog={
     return sq.length-1;
   },
   unlocked:function(mk,n){
+    /* 导学必修：没听完 80%，M1 一节都不开（管理员除外） */
+    if(mk==='m1'&&this.needIntro())return false;
     var sq=this.seq(),idx=-1;
     for(var i=0;i<sq.length;i++){ if(sq[i].mk===mk&&sq[i].n===n){idx=i;break;} }
     if(idx<0)return false;
@@ -4553,7 +4591,17 @@ function renderMe(){
   var cm=modByKey(cur.mk);
   var isChap=!!(cur&&cur.chap);
   var cs=cm&&!isChap?cm.sections.filter(function(x){return x.n===cur.n;})[0]:null;
-  var curHash=isChap?('#chap/'+cur.mk):('#learn/'+cur.mk+'/'+cur.n);
+  /* 导学没听完，本次「下一项」其实是必修导学，不是 M1 第 1 节 */
+  var introNeed=Prog.needIntro();
+  var curHash=introNeed?'#intro':(isChap?('#chap/'+cur.mk):('#learn/'+cur.mk+'/'+cur.n));
+  var nextT=introNeed?'开篇导学':(isChap?'章节测评':'下一节');
+  var nextB=introNeed?'M0 必修 · 8 分钟':(isChap?'章节测评':'下一节');
+  var nextN=introNeed?'':(isChap?'　'+(cm?'M'+cm.no:''):('　'+(cm?'M'+cm.no:'')+'·'+cur.n));
+  var nextP=introNeed?'学习规划、测评规则、三条注意事项'
+    :esc(isChap?((cm?cm.name:'')+' 全部内容，10 道题'):(cs?cs.t:''));
+  var curLabel=introNeed?'开篇导学（必修）':(isChap?('M'+(cm?cm.no:'')+' 章测'):('第 '+cur.n+' 节'));
+  var nextMin=introNeed?'8 分钟':(isChap?'10 分钟':((cs?cs.m:0)+' 分钟'));
+  var nextMinTxt=introNeed?'必修时长':(isChap?'章节测评时长':'下一节时长');
 
   var mods=MODS.map(function(m){
     var d=Prog.moduleDone(m.key,m.sections.length),t=m.sections.length;
@@ -4596,7 +4644,7 @@ function renderMe(){
    +'<div class="me-av">'+esc((Me.name||'?').slice(0,1))+'</div>'
    +'<div class="me-id"><h2>'+esc(Me.name)+'</h2>'
    +'<p>'+esc(Me.company||'吉利汽车')+'　·　'+(Me.role==='admin'?'企业管理员':'学员')+'　·　已完成 '+done+' / '+total+' 节</p></div>'
-   +'<button class="btn sm me-go" onclick="location.hash=\''+curHash+'\'">'+(isChap?'去章节测评':'继续学习')+'</button>'
+   +'<button class="btn sm me-go" onclick="location.hash=\''+curHash+'\'">'+(introNeed?'去看导学':(isChap?'去章节测评':'继续学习'))+'</button>'
    +'</div>'
 
    +'<div class="card"><div class="ch2"><h3>学习计划</h3>'
@@ -4605,13 +4653,12 @@ function renderMe(){
    +'<div class="plan-grid">'
    +'<div><b>'+done+' / '+total+'</b><span>已完成节数</span></div>'
    +'<div><b>'+leftMin+' 分钟</b><span>预计剩余时长</span></div>'
-   +'<div><b>'+(isChap?('M'+(cm?cm.no:'')+' 章测'):('第 '+cur.n+' 节'))+'</b><span>当前解锁到</span></div>'
-   +'<div><b>'+(isChap?10:(cs?cs.m:0))+' 分钟</b><span>'+(isChap?'章节测评时长':'下一节时长')+'</span></div>'
+   +'<div><b>'+curLabel+'</b><span>当前解锁到</span></div>'
+   +'<div><b>'+nextMin+'</b><span>'+nextMinTxt+'</span></div>'
    +'</div>'
-   +'<div class="plan-next"><div><b>'+(isChap?'章节测评':'下一节')
-   +(isChap?('　'+(cm?'M'+cm.no:'')):('　'+(cm?'M'+cm.no:'')+'·'+cur.n))+'</b>'
-   +'<p>'+esc(isChap?((cm?cm.name:'')+' 全部内容，10 道题'):(cs?cs.t:''))+'</p></div>'
-   +'<button class="btn sm" onclick="location.hash=\''+curHash+'\'">进入</button></div>'
+   +'<div class="plan-next"><div><b>'+nextB+nextN+'</b>'
+   +'<p>'+nextP+'</p></div>'
+   +'<button class="btn sm" onclick="location.hash=\''+curHash+'\'">'+(introNeed?'去观看':'进入')+'</button></div>'
    +'</div></div>'
 
    +'<div class="me-two">'
@@ -4676,13 +4723,16 @@ function renderHome(){
       +'<span class="tag'+(openN<t?' gray':'')+'">已解锁 '+openN+' / '+t+' 节</span>'
       +(chOk?'<span class="tag good">章测 '+(chS?chS.best:0)+' / 10 已过</span>'
         :(chOpen?'<span class="tag warn">章节测评待做</span>':''))
+      +(m.key==='m1'&&Prog.needIntro()?'<span class="tag warn">待看开篇导学</span>':'')
       +'</div>'
       +'<div class="prog-wrap"><div class="prog-bar"><i style="width:'+pct+'%"></i></div>'
       +'<div class="prog-txt"><span>已学 '+d+' / '+t+' 节</span><span>'+pct+'%</span></div></div>'
       +'<div class="mod-actions">'
-      +(allDone?'':(openN<1
+      +(allDone?'':(m.key==='m1'&&Prog.needIntro()
+        ?'<button class="btn" onclick="location.hash=\'#intro\'">先看开篇导学 · 必修</button>'
+        :(openN<1
         ?'<button class="btn line" onclick="toast(\'先通过 M1 的章节测评，本章会自动解锁\')">M1 章测通过后开始</button>'
-        :'<button class="btn" onclick="goSec(\''+m.key+'\','+nx+')">'+(d?'继续学习':'开始学习')+'</button>'))
+        :'<button class="btn" onclick="goSec(\''+m.key+'\','+nx+')">'+(d?'继续学习':'开始学习')+'</button>')))
       +(chOpen&&!chOk?'<button class="btn'+(allDone?'':' line')+'" onclick="location.hash=\'#chap/'+m.key+'\'">'
         +(allDone?'进入章节测评':'章节测评')+'</button>':'')
       +(chOk?'<button class="btn line" onclick="location.hash=\'#chap/'+m.key+'\'">章测重做</button>':'')
@@ -4702,11 +4752,13 @@ function renderHome(){
    +'<div class="cb1"><b>阶段 1 · '+(jr.ready?(jr.passed?'已通过 · '+jr.total+' 分':'未通过 · '+jr.total+' 分'):'认证进行中 · '+jr.total+' / '+jr.totalFull)
    +'</b><p>学习完成度 '+jr.learn.score+'/5　随堂练习 '+jr.prac.score+'/5　客观题 '+jr.obj.got+'/'+jr.obj.full+'　作品集 '+jr.port.got+'/'+jr.port.full
    +'　·　9 项能力已开评 3 项</p></div><div class="arr">→</div></div>'
-   +'<div class="intro-bar'+(lsGet('intro_seen',false)?' done':'')+'" onclick="location.hash=\'#intro\'">'
+   +'<div class="intro-bar'+(Prog.introDone()?' done':' need')+'" onclick="location.hash=\'#intro\'">'
    +'<div class="ib-ic">导</div>'
-   +'<div class="ib-t"><b>开篇导学 · 8 分钟 · 12 页</b>'
-   +'<p>学习规划、测评规则（随堂 5 题 / 章测 10 题 / 10 分钟倒计时）、三条注意事项</p></div>'
-   +'<div class="ib-go">'+(lsGet('intro_seen',false)?'再看一遍':'先看这一节')+' →</div></div>'
+   +'<div class="ib-t"><b>开篇导学 · 必修 · 8 分钟 · 12 页</b>'
+   +'<p>'+(Prog.introDone()
+      ?'已完成。学习规划、测评规则（随堂 5 题 / 章测 10 题 / 10 分钟倒计时）、三条注意事项'
+      :'学完这一章（听到 80% 以上）才会解锁模块一 · 已听 '+Prog.introPct()+'%')+'</p></div>'
+   +'<div class="ib-go">'+(Prog.introDone()?'再看一遍':'先看这一节')+' →</div></div>'
    +'<div class="mod-grid">'+cards+'</div>'
    +'</div></div>';
 }
@@ -4720,34 +4772,60 @@ function renderIntro(){
   var segs=(window.NARR&&window.NARR[uid])||[];
   var tot=segs.reduce(function(a,x){return a+x.d;},0);
   if(!segs.length){toast('导学音频未加载，请刷新重试');location.hash='';return;}
-  var seen=lsGet('intro_seen',false);
-  /* 导学的收听记录单独挂在 m0 下：不进入 MODS 的解锁链，也不会被算成章节进度 */
+  var ok=Prog.introDone(), pct=Prog.introPct();
+  /* 导学的收听记录单独挂在 m0 下：不进 seq() 的节数分母，但它是必修门禁 */
   LS_.mk='m0'; LS_.n=1;
   document.getElementById('app').innerHTML='<div class="shell">'+topbar('用户思维 · 线上课程')
    +'<div class="wrap"><div class="crumb"><button onclick="location.hash=\'\'">我的课程</button>'
    +'<span>/</span><span>开篇导学</span></div>'
    +'<div class="panel" style="max-width:1080px;margin:0 auto">'
-   +'<div class="ph"><div class="k">开篇导学 · 讲解 '+Math.round(tot/60*10)/10+' 分钟 · 共 '+segs.length+' 页</div>'
+   +'<div class="ph"><div class="k">开篇导学 · 必修 · 讲解 '+Math.round(tot/60*10)/10+' 分钟 · 共 '+segs.length+' 页</div>'
    +'<h2>先花 8 分钟，把规则说清楚</h2></div>'
    +'<div class="pb">'+playerHTML(uid)
+   +'<div class="ib-prog'+(ok?' ok':'')+'" id="ib-prog">'
+   +'<b class="ibp-cap">导学观看进度</b>'
+   +'<span class="ibp-bar"><i style="width:'+pct+'%"></i></span>'
+   +'<span class="ibp-txt">'+(ok?'已听完 · 模块一已解锁':'已听 '+pct+'% · 听到 80% 才解锁模块一')+'</span></div>'
    +'<div class="intro-pts">'
-   +'<div><b>怎么学</b><p>看完视频（听到 80% 以上）→ 马上测评 → 下一节解锁。两个条件缺一不可。</p></div>'
+   +'<div><b>怎么学</b><p>这一章是必修：听完导学（80% 以上）→ 模块一才会开；之后每节「听完 + 测评过关」逐节解锁。</p></div>'
    +'<div><b>怎么测</b><p>随堂 5 题答对 3 题过关，章测 10 题答对 6 题过关，都是 10 分钟倒计时。</p></div>'
    +'<div><b>怎么拿证</b><p>100 分四条件：总分 75、客观题 70%、作品集 70%、九项能力无短板。</p></div>'
    +'</div></div>'
    +'<div class="pf"><button class="btn line sm" onclick="location.hash=\'\'">← 返回课程首页</button>'
    +'<div class="spacer"></div>'
-   +'<button class="btn sm" id="intro-go">看完了，进入模块一 →</button></div>'
+   +'<button class="btn sm'+(ok?'':' gray')+'" id="intro-go">'
+   +(ok?'进入模块一 →':'还差 '+(80-pct)+'%，看完再进 →')+'</button></div>'
    +'</div></div></div>';
 
   document.getElementById('intro-go').onclick=function(){
-    var p=Prog.get('m0',1)||{};
-    var pct=tot?Math.min(100,Math.round((p.heard||0)/tot*100)):0;
+    if(!Prog.introDone()){
+      toast('导学是必修，听到 80% 才解锁模块一（当前 '+Prog.introPct()+'%）');
+      return;
+    }
     lsSet('intro_seen',true);
-    if(pct<80)toast('导学还没听完（已听 '+pct+'%），可以先看，但规则后面会用到');
     location.hash='#learn/m1/1';
   };
   initPlayer(uid);
+  /* 边听边刷新进度条，听完立刻放开按钮，不用退出去重进 */
+  if(!ok && window.Pl && Pl.onTick===undefined){
+    var t=setInterval(function(){
+      if(location.hash!=='#intro'){clearInterval(t);return;}
+      var p=Prog.introPct(), bar=document.getElementById('ib-prog');
+      if(!bar){clearInterval(t);return;}
+      var fill=bar.querySelector('i');
+      if(fill)fill.style.width=p+'%';
+      var txt=bar.querySelector('.ibp-txt');
+      if(!Prog.introDone()){
+        if(txt)txt.textContent='已听 '+p+'% · 听到 80% 才解锁模块一';
+      }else{
+        clearInterval(t);
+        bar.className='ib-prog ok';
+        if(txt)txt.textContent='已听完 · 模块一已解锁';
+        var g=document.getElementById('intro-go');
+        if(g){g.className='btn sm';g.textContent='进入模块一 →';}
+      }
+    },2000);
+  }
   window.scrollTo(0,0);
 }
 
@@ -4760,6 +4838,12 @@ function renderLearn(mk,n){
   if(!m){renderHome();return;}
   var sec=m.sections.filter(function(s){return s.n===n;})[0]||m.sections[0];
   n=sec.n;
+  /* 开篇导学是必修：没听完 80%，整章 M1 都进不来（管理员除外） */
+  if(mk==='m1'&&Prog.needIntro()){
+    toast('开篇导学是必修，听完 80% 才解锁模块一');
+    location.hash='#intro';
+    return;
+  }
   if(!(Me&&Me.role==='admin')&&!Prog.unlocked(mk,n)){
     toast('这一节还没解锁，先完成上一节');
     location.hash='';
