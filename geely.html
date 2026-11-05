@@ -285,6 +285,43 @@ a{color:var(--pri);text-decoration:none}
 .opt.right .ol{background:var(--ok);color:#fff}
 .opt.wrong{border-color:var(--accent);background:#fdeef0}
 .opt.wrong .ol{background:var(--accent);color:#fff}
+
+/* 随堂练习（视频下方直接作答） */
+.pq{margin-top:24px;border:1px solid #e4ebf3;border-radius:14px;background:#fff;overflow:hidden}
+.pqh{display:flex;gap:16px;align-items:flex-start;padding:20px 22px 18px;border-bottom:1px solid #eef2f7;
+  background:linear-gradient(180deg,#f7fafd,#fff)}
+.pqh-l{flex:1;min-width:0}
+.pqh .k{font-size:11.5px;color:var(--pri);font-weight:600;letter-spacing:.06em;margin-bottom:6px}
+.pqh h3{font-size:17px;color:var(--deep);font-weight:600;line-height:1.5}
+.pqh p{font-size:12.5px;color:var(--muted);line-height:1.75;margin-top:6px}
+.pqtag{flex:none;font-size:11.5px;font-weight:600;color:var(--pri);background:var(--tint);
+  border:1px solid #d6e4f2;border-radius:99px;padding:5px 12px;white-space:nowrap}
+.pqtag.ok{color:var(--ok);background:#eaf7f2;border-color:#c9e8dd}
+.pqi{padding:20px 22px;border-bottom:1px solid #f2f5f9}
+.pqi:last-of-type{border-bottom:0}
+.pqi.ok{background:#fcfffd}
+.pqq{display:flex;gap:9px;align-items:flex-start;margin-bottom:12px}
+.pqq .qn{flex:none;font-size:11.5px;font-weight:700;color:var(--pri);background:var(--tint);
+  border-radius:5px;padding:2px 6px;margin-top:2px}
+.pqq .qtx{flex:1;font-size:14.5px;color:var(--deep);font-weight:500;line-height:1.7}
+.pqm{flex:none;font-size:12px;font-weight:700;border-radius:5px;padding:2px 7px;margin-top:2px}
+.pqm.ok{color:var(--ok);background:#eaf7f2}
+.pqm.no{color:var(--accent);background:#fdeef0}
+.pqi .opts{gap:7px}
+.pqx{margin-top:12px;font-size:12.8px;line-height:1.8;color:var(--mid);background:#f6f9fc;
+  border-left:3px solid #cfdcea;border-radius:0 8px 8px 0;padding:10px 13px}
+.pqx b{display:block;font-size:11.5px;color:var(--pri);letter-spacing:.04em;margin-bottom:4px}
+.pqx.bad{border-left-color:#e8b4bc;background:#fdf6f7}
+.pqx.bad b{color:var(--accent)}
+.pqf{display:flex;align-items:center;gap:12px;padding:16px 22px;background:#fbfcfe;border-top:1px solid #eef2f7;flex-wrap:wrap}
+.pqf .spacer{flex:1}
+.pqcnt{font-size:12.5px;color:var(--muted)}
+.pqscore{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.pqscore b{font-size:26px;line-height:1;color:var(--pri);font-variant-numeric:tabular-nums}
+.pqscore.ok b{color:var(--ok)}
+.pqscore.no b{color:var(--accent)}
+.pqscore span{font-size:12.5px;color:var(--muted)}
+.pqscore em{font-size:12.5px;color:var(--mid);font-style:normal;margin-left:8px}
 .opt.lock{cursor:default}
 .explain{margin-top:16px;background:#fff;border:1px solid var(--line);border-radius:9px;padding:15px 17px}
 .explain .el{font-size:11.5px;font-weight:600;color:var(--ok);margin-bottom:6px}
@@ -429,64 +466,64 @@ a{color:var(--pri);text-decoration:none}
   font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif}
 .sl-bg{position:absolute;inset:0;background-size:100% 100%;background-repeat:no-repeat}
 .sl-lg{position:absolute;right:54px;top:32px;width:148px;height:auto;opacity:.95}
-.sl-kicker{position:absolute;left:74px;top:116px;font-size:17px;letter-spacing:.15em;color:#5d7ba6}
-.sl-h{position:absolute;left:74px;right:210px;top:142px;font-size:46px;line-height:1.34;
-  font-weight:700;color:#0a3d91;letter-spacing:.01em}
+.sl-kicker{position:absolute;left:74px;top:112px;font-size:19px;letter-spacing:.15em;color:#4c6d99;font-weight:600}
+.sl-h{position:absolute;left:74px;right:200px;top:138px;font-size:51px;line-height:1.32;
+  font-weight:800;color:#0a3d91;letter-spacing:.01em}
 .sl-h b{font-weight:800;position:relative;z-index:0}
 .sl-h b:after{content:'';position:absolute;left:-3px;right:-3px;bottom:3px;height:13px;
   background:rgba(120,175,235,.40);z-index:-1}
 .sl-body{position:absolute;left:74px;right:74px;top:300px;bottom:92px;display:flex;flex-direction:column;justify-content:center;gap:30px}
 .sl-body.one>.bl{width:100%}
-.bl-cols.n4 .bc-card,.bl-cols.n5 .bc-card{min-height:206px}
-.bl-cols.n4 .bc-card h4,.bl-cols.n5 .bc-card h4{font-size:25px}
-.sl-tag{position:absolute;right:74px;bottom:36px;background:#0a3d91;color:#fff;
-  font-size:14px;letter-spacing:.04em;padding:5px 13px;border-radius:3px}
+.bl-cols.n4 .bc-card,.bl-cols.n5 .bc-card{min-height:172px;padding:22px 22px 18px}
+.bl-cols.n4 .bc-card h4,.bl-cols.n5 .bc-card h4{font-size:28px}
+.sl-tag{position:absolute;right:74px;bottom:34px;background:#0a3d91;color:#fff;
+  font-size:15px;letter-spacing:.04em;padding:5px 13px;border-radius:3px}
 .sl-miss{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#9aa8b8}
 
-.bl-lead{font-size:25px;color:#33475f;line-height:1.6;padding-left:20px;border-left:5px solid #0a3d91}
+.bl-lead{font-size:28px;color:#2c3f56;line-height:1.58;font-weight:600;padding-left:20px;border-left:5px solid #0a3d91}
 .bl-stats{display:flex;gap:20px}
 .bs-item{flex:1;background:#fff;border:1px solid #dde5ef;border-radius:8px;padding:30px 26px;
   box-shadow:0 1px 2px rgba(16,36,61,.04)}
-.bs-item b{display:block;font-size:54px;font-weight:700;color:#0a3d91;line-height:1.1}
-.bs-item span{display:block;font-size:16.5px;color:#61738a;margin-top:7px}
+.bs-item b{display:block;font-size:60px;font-weight:800;color:#0a3d91;line-height:1.1}
+.bs-item span{display:block;font-size:18.5px;color:#4e647d;margin-top:7px;font-weight:600}
 .bl-chain{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.bc-lab{font-size:17px;color:#8798ac}
-.bc-node{background:#eaf1fa;color:#12406f;font-size:21px;padding:10px 17px;border-radius:6px}
+.bc-lab{font-size:19px;color:#7086a0;font-weight:600}
+.bc-node{background:#eaf1fa;color:#12406f;font-size:24px;font-weight:600;padding:10px 17px;border-radius:6px}
 .bc-ar{color:#9fb4cc;font-style:normal}
-.bc-tail{font-size:17px;color:#c8102e;margin-left:8px}
+.bc-tail{font-size:19px;font-weight:600;color:#c8102e;margin-left:8px}
 .bl-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
 .bc-card{background:#fff;border:1px solid #e3eaf3;border-radius:10px;padding:26px 26px 22px;
   box-shadow:0 1px 3px rgba(16,36,61,.05);display:flex;flex-direction:column;min-height:300px}
-.bc-n{font-size:16px;font-weight:700;color:#7ba3d4;letter-spacing:.12em}
-.bc-card h4{font-size:28px;color:#0a3d91;margin:8px 0 12px;font-weight:700}
-.bc-card p{font-size:18px;line-height:1.75;color:#3d4c5c}
-.bc-card em{display:block;margin-top:auto;font-size:16px;color:#c8102e;font-style:normal;
+.bc-n{font-size:17px;font-weight:800;color:#6b98cd;letter-spacing:.12em}
+.bc-card h4{font-size:31px;color:#0a3d91;margin:8px 0 12px;font-weight:800}
+.bc-card p{font-size:20.5px;line-height:1.72;color:#33455a}
+.bc-card em{display:block;margin-top:auto;font-size:17.5px;font-weight:600;color:#c8102e;font-style:normal;
   border-top:1px dashed #e3eaf3;padding-top:12px}
 .bl-band{background:#eef4fb;border-left:5px solid #0a3d91;padding:18px 24px;
-  font-size:25px;color:#12406f;border-radius:0 8px 8px 0}
-.bl-band b{color:#0a3d91;font-weight:700}
+  font-size:28px;font-weight:600;color:#12406f;border-radius:0 8px 8px 0}
+.bl-band b{color:#0a3d91;font-weight:800}
 .bl-steps{display:flex;align-items:stretch}
 .bst{flex:1;background:#fff;border:1px solid #e3eaf3;border-radius:10px;padding:26px 26px 24px;min-height:196px}
-.bst i{display:flex;width:30px;height:30px;border-radius:50%;background:#0a3d91;color:#fff;
-  align-items:center;justify-content:center;font-style:normal;font-size:15px;font-weight:600}
-.bst h4{font-size:26px;color:#0a3d91;margin:12px 0 7px}
-.bst p{font-size:17px;color:#4a5b6e;line-height:1.65}
+.bst i{display:flex;width:32px;height:32px;border-radius:50%;background:#0a3d91;color:#fff;
+  align-items:center;justify-content:center;font-style:normal;font-size:16px;font-weight:700}
+.bst h4{font-size:29px;font-weight:800;color:#0a3d91;margin:12px 0 7px}
+.bst p{font-size:19.5px;color:#3d4f63;line-height:1.62}
 .bst-line{width:26px;align-self:center;height:3px;background:#b9cde4;flex:0 0 26px;border-radius:2px}
-.bl-pairs h5{font-size:17px;color:#8798ac;margin-bottom:10px;letter-spacing:.02em}
+.bl-pairs h5{font-size:19px;font-weight:600;color:#7086a0;margin-bottom:10px;letter-spacing:.02em}
 .bp{display:flex;align-items:center;gap:16px;padding:13px 0;border-bottom:1px solid #eef2f7}
-.bp-a{font-size:19px;color:#8798ac;min-width:100px}
-.bp-b{font-size:22px;color:#1f3147}
-.bl-todo{margin-top:auto;background:#fff7e8;border:1px solid #f0dcb8;
+.bp-a{font-size:21px;font-weight:600;color:#7086a0;min-width:100px}
+.bp-b{font-size:25px;font-weight:600;color:#1a2c40}
+.bl-todo{background:#fff7e8;border:1px solid #f0dcb8;
   border-radius:8px;padding:12px 17px;display:flex;gap:11px;align-items:center;
-  font-size:17.5px;color:#7a5310;line-height:1.5}
-.bl-todo i{font-style:normal;background:#d08a2c;color:#fff;font-size:13.5px;
+  font-size:19px;font-weight:600;color:#6b470c;line-height:1.5}
+.bl-todo i{font-style:normal;background:#d08a2c;color:#fff;font-size:14.5px;
   padding:3px 9px;border-radius:4px;flex:0 0 auto}
 .kk{transition:opacity .5s ease}
 .stage.hl .kk{opacity:.42}
 .stage.hl .kk.on{opacity:1}
-.cap{min-height:50px;display:flex;align-items:center;justify-content:center;
-  padding:11px 22px;background:#0c1725;color:#eaf2fb;font-size:15px;line-height:1.55;
-  text-align:center;letter-spacing:.01em;border-top:1px solid rgba(255,255,255,.06)}
+.cap{min-height:56px;display:flex;align-items:center;justify-content:center;
+  padding:13px 22px;background:#0c1725;color:#f4f9ff;font-size:18px;font-weight:600;line-height:1.55;
+  text-align:center;letter-spacing:.02em;border-top:1px solid rgba(255,255,255,.06)}
 
 .pl-top{display:flex;align-items:center;gap:12px;padding:9px 14px 0}
 .pl-btn{width:42px;height:42px;flex:0 0 42px;border-radius:50%;background:#fff;color:#0f2338;
@@ -517,7 +554,7 @@ a{color:var(--pri);text-decoration:none}
 .pl-seg b{color:#7fa8c9;font-weight:600;margin-right:6px;font-size:11px}
 
 /* ---------- 认证 ---------- */
-.scoregrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.scoregrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(138px,1fr));gap:10px}
 .sgi{border:1px solid var(--line);border-radius:10px;padding:12px 12px 10px;background:var(--tint2)}
 .sgi b{display:block;font-size:26px;color:var(--pri);line-height:1.2;font-variant-numeric:tabular-nums}
 .sgi span{display:block;font-size:12px;color:var(--mid);margin-top:2px}
@@ -666,6 +703,16 @@ a{color:var(--pri);text-decoration:none}
   .player{padding:0}
   .pl-sub{font-size:13px;max-height:none}
   .pl-time{font-size:11px}
+  .pqh{flex-direction:column;gap:10px;padding:16px 15px 14px}
+  .pqh h3{font-size:15.5px}
+  .pqh p{font-size:12px}
+  .pqi{padding:16px 15px}
+  .pqq .qtx{font-size:14px}
+  .pqi .opt{padding:10px 11px}
+  .pqi .opt .ot{font-size:13px}
+  .pqf{padding:14px 15px;gap:10px}
+  .pqscore b{font-size:23px}
+  .pqscore em{margin-left:0;flex-basis:100%}
   .scoregrid{grid-template-columns:1fr 1fr}
   .dimrow .dn{width:88px;flex:0 0 88px;font-size:12px}
   .dimrow .dv{width:78px;flex:0 0 78px;font-size:11.5px}
@@ -2678,6 +2725,583 @@ window.SLIDES = {
 
 };
 
+/* 吉利《用户思维》随堂练习题库
+   每节 5 题，15 节 = 75 题。全部单选，四选一。
+   计分：随堂练习合计 5 分（占认证总分 5%），按 15 节答对率折算，每节取最好一次。
+   过线：单节答对 ≥3 题（60%）即记本节完成，可重做。
+   已做两件事：① 正确项位置均匀分布（各位置约 19 题）② 正确项长度不占优（最长项占比降到约三成） */
+window.PRACTICE = {
+'g_m1_1': [
+  { q: "某事业部提出「考勤系统补卡流程太麻烦」。以下哪个动作最接近「有判断顺序」的做法？",
+    o: ["直接评估把三步改成一步需要多少开发量",
+        "发一份满意度问卷，看大家打几分",
+        "先问上个月补了几次卡、当时人在哪、为什么没打上",
+        "参考同业系统，看别人做成几步"],
+    a: 2,
+    why: "先还原场景（谁、在什么条件下、为完成什么），再定义问题，最后才谈功能。评估开发量是先给方案，发问卷拿不到场景，抄同业系统是抄答案。" },
+  { q: "三种伪用户思维里，「调研走过场」最典型的表现是？",
+    o: ["没有访谈环节，直接按领导意见把功能定下来",
+        "问卷发了三百份、访谈十几场，结论是「希望更好用一点」",
+        "把功能做得很全，一线却越用越绕、越用越慢",
+        "上线之后没有做回访，不知道实际用得怎么样"],
+    a: 1,
+    why: "走过场不是没做调研，是做完了拿不出一个能改设计的结论。没有访谈环节的属于把领导当用户；把功能做全的属于态度好但判断错；上线后不回访是只关心交付不关心成果。" },
+  { q: "拿到「考勤补卡流程太麻烦」这个需求，按本课顺序正确的第一步是？",
+    o: ["先把「谁在用、在什么条件下用」还原成具体岗位和场景",
+        "先评估开发工作量和排期，看能不能赶上这个季度",
+        "先把同类系统的补卡流程找出来，照着抄一版再说",
+        "先出一个原型，找几个同事试用一下收集意见"],
+    a: 0,
+    why: "顺序是场景 → 问题 → 功能。评估开发量和照抄同业都是先给方案，先出原型属于先做功能再补场景，三者都会让功能反过来裁剪场景。" },
+  { q: "「顺序反了，功能就会裁剪场景」最准确的意思是？",
+    o: ["先定的功能越多，后面要补的场景描述就写得越细",
+        "场景要等功能上线以后，交给用户自己在使用中补全",
+        "先定功能再找场景，只能替已做的功能找理由",
+        "一个需求里的功能数量，应该始终少于场景数量"],
+    a: 2,
+    why: "每个功能都能找到一句当初的理由，于是系统只增不减。费控 26 个字段就是这么长出来的。" },
+  { q: "一个需求上线 3 个月，某字段使用率不到 20%，最该先补的动作是？",
+    o: ["加强培训，让一线知道这个字段是有用的",
+        "在制度里写清楚，这个字段必须填写才算提交",
+        "把字段挪到页面更显眼的位置，降低发现成本",
+        "回到需求阶段那一问：当初有没有问过「谁在用」"],
+    a: 3,
+    why: "低使用率的根因通常在需求阶段没还原场景。加强培训、规定必填、把字段挪到显眼位置，都在「功能已经做了」的前提下打补丁，成本高且不解决判断问题。" },
+],
+
+'g_m1_2': [
+  { q: "某内部系统月活 96%，管理层据此认为体验良好。以下哪个证据最能推翻这个结论？",
+    o: ["用户日均登录 3.2 次，活跃度一直很高",
+        "页面平均加载 1.8 秒，比上个版本快了 0.6 秒",
+        "用户把系统数据导出后，在 Excel 里完成核心分析",
+        "客服工单月均 40 单，主要是密码重置这类简单问题"],
+    a: 2,
+    why: "96% 是被制度推上去的。导出到 Excel 完成核心动作，说明系统只承担了「留痕」，真正的决策动作仍在系统外——这就是绕行。" },
+  { q: "判断「流程线上化」有没有真正改善体验，本课给的三条标准是？",
+    o: ["页面是否更好看、加载是否更快、是否支持移动端",
+        "使用率、日活、留存率是否比上线前有所提升",
+        "用户满意度问卷的评分是否比去年更高一些",
+        "字段有没有减少、审批环节有没有减少、等待时间有没有缩短"],
+    a: 3,
+    why: "三条一条都不占，你只是把写字换成了打字。界面好不好看、使用率高不高，都不能证明动作变少了。" },
+  { q: "「报表不等于决策支持」，本课对决策支持的定义是？",
+    o: ["报表维度足够多，业务方可以自己筛选组合",
+        "数据能一键导出成 Excel，方便二次加工",
+        "看完这张表，他能直接做出一个决定",
+        "报表能按日或按月定时自动推送到手机"],
+    a: 2,
+    why: "给出一堆数、不给结论，看的人还要自己算一遍——于是他继续用 Excel，绕行就是从这里开始的。" },
+  { q: "内部系统使用率天然很高，最能反映真实体验的一组指标是？",
+    o: ["绕行率、人均操作步数、二次修改率、单均耗时",
+        "登录次数、日均活跃用户数、月活覆盖率",
+        "页面停留时长、点击热力图、功能点击分布",
+        "满意度问卷得分、净推荐值、投诉工单数量"],
+    a: 0,
+    why: "使用率反映的是流程强制力。要看体验，得看行为痕迹：绕开了多少、多走了几步、改了几遍、卡了多久。" },
+  { q: "「把交付当成成果」在项目里最典型的表现是？",
+    o: ["上线满 30 天做了一次回访，看绕行率和求助量",
+        "立项时把验收标准写成「某个动作有没有改变」",
+        "复盘会上重点分析了单均耗时的前后对比数据",
+        "上线通知按计划发出，就认为这个项目成功了"],
+    a: 3,
+    why: "交付物可以按计划发出，成果（行为改变）不会按计划发生。回访看行为、把验收标准写成行为改变、复盘绕行率，都是在往「成果」那一侧靠。" },
+],
+
+'g_m1_3': [
+  { q: "复盘一个审批系统时，五问里哪一问最能暴露「设计假设错误」？",
+    o: ["现在怎么绕过",
+        "谁在用",
+        "在什么条件下",
+        "不做会怎样"],
+    a: 0,
+    why: "绕行路径是用户用行为投票的结果，它直接显示「系统没覆盖的那一段」，通常就是假设错的地方。其余三问指向范围与优先级。" },
+  { q: "五问第一问「谁在用」，下面哪种写法是合格的？",
+    o: ["全体财务人员，包括各基地与总部",
+        "财务部和采购部里跟报销相关的同事",
+        "某基地费用审核员，正式员工，2 人兼岗",
+        "所有需要提交或审批报销单的同事"],
+    a: 2,
+    why: "要写到岗位、职级、人数、是否外包或兼岗。写「全体财务人员」等于没写，因为外包和正式员工的权限与培训覆盖完全不同。" },
+  { q: "为什么说「同一个人在月底和月中是两个不同的用户」？",
+    o: ["因为他在不同月份的职级和权限会发生变化",
+        "因为时间压力、是否被打断会改变他能容忍的步骤数",
+        "因为系统在月底访问量大，响应会明显变慢",
+        "因为月底走的是加急流程，审批人不一样"],
+    a: 1,
+    why: "第二问「在什么条件下」最容易被跳过。月结前五天一天六十到八十单，他能容忍的步骤数和月中完全不是一回事。" },
+  { q: "五问里哪一问的证据最硬，说不出具体文件名和群名就说明没去过现场？",
+    o: ["谁在用",
+        "现在怎么绕过",
+        "为完成什么",
+        "不做会怎样"],
+    a: 1,
+    why: "绕行一定要落到载体：Excel 台账叫什么名字、群叫什么、纸质单谁在传。说不出具体载体，说明你只在会议室里理解用户。" },
+  { q: "五问中「不做会怎样」，除了判断紧迫性，还能判断什么？",
+    o: ["这个需求应该由哪个部门来牵头提出",
+        "这项功能大概需要多少人天才能做完",
+        "这件事到底该不该由系统来解决",
+        "用户对现有系统的整体满意程度"],
+    a: 2,
+    why: "有可能它根本不用改系统：是流程问题、培训问题，也可能压根没人承担后果。认清这一点比把工具用到底更重要。" },
+],
+
+'g_m1_4': [
+  { q: "费控系统拟新增 6 个成本维度字段。一线报销人反对，财务审核员支持。判断依据应是：",
+    o: ["报销人人数多，按人数决定",
+        "审核员是需求提出方，按提出方决定",
+        "出错时由谁承担解释与追责责任",
+        "上报分管领导裁决"],
+    a: 2,
+    why: "四层互斥时的判据是「谁承担后果」。若退单与稽查责任落在审核员，字段就有必要；但必须同时压缩填报代价（预填、默认值）。" },
+  { q: "四层用户里的「管理者」，真实诉求是什么？",
+    o: ["数据越多越好，维度越全越好",
+        "能对外解释清楚：这个数拿去回答谁的提问",
+        "每一步操作越少越好，最好一键完成",
+        "系统采购成本越低越好，能省就省"],
+    a: 1,
+    why: "他嘴上说「要一个报表」「要一个字段」，往下追一层是解释权。问用途，答不上来的那个维度就是可以砍的维度。" },
+  { q: "决策者评估一个项目时，本课建议你用哪三个数说话？",
+    o: ["省了多少人日、缩了多少天、少了多少差错",
+        "页面响应速度、交互步数、可用性评分",
+        "功能数量、上线准时率、缺陷密度",
+        "活跃用户数、使用频次、培训覆盖率"],
+    a: 0,
+    why: "他关心这个项目跟集团今年的重点对不对得上。跟他汇报不要讲交互细节，讲人日、天数、差错率这三个能换算成钱的指标。" },
+  { q: "监管者不在需求评审会上，为什么却有最大的否决权？",
+    o: ["因为监管岗位的行政职级通常最高",
+        "因为监管方掌握着这个项目的预算",
+        "因为一旦审计提出意见，前面的优化都要让路",
+        "因为监管方决定系统什么时候能上线"],
+    a: 2,
+    why: "留痕要求由制度规定。设计阶段就把「哪份制度定的、保存几年、谁有权查看」问清楚，能省掉后面大量返工。" },
+  { q: "使用者要「合同编号不必填」，管理者要「必须填」，正确做法是？",
+    o: ["按级别高的那一方定，避免会上争执",
+        "按人数多的那一方定，少数服从多数",
+        "维持现状，两边都不满足，等下次再说",
+        "摆后果、定补偿，急单走例外通道并限期补齐"],
+    a: 3,
+    why: "两边都承担后果时，不要在两种做法里选边，而是设计分支并明确补偿动作。补偿动作决定他下次还愿不愿意跟你说真话。" },
+],
+
+'g_m1_5': [
+  { q: "以下四条需求，哪一条最容易被直接判为「非第一优先级」？",
+    o: ["单据预填，减少 30% 填报时间",
+        "界面配色改为品牌蓝，提升一致性",
+        "审批超时自动提醒，平均缩短 1.2 天",
+        "三单自动匹配，减少人工核对 2 人日/月"],
+    a: 1,
+    why: "配色无法翻译成「少一个人 / 少一次返工 / 少一天关账」中的任何一项。它未必不做，但不能与前三者争同一批资源。" },
+  { q: "锚点一「少一个人」，下面哪种表述可以直接写进立项材料？",
+    o: ["这套系统上线以后，这个岗位可以裁掉一个人",
+        "同等业务量下，所需投入从 3 人降到 2 人",
+        "这套系统能替代掉一半以上的人工核对工作",
+        "一线员工可以因此少加一天班、轻松不少"],
+    a: 1,
+    why: "讲投入，不讲减员。说「可以裁一个人」会立刻让一线把你当成对手，后面所有访谈都拿不到真话。" },
+  { q: "「少一次返工」为什么是三锚点里最容易验证的一个？",
+    o: ["因为退单率、重填耗时都能从系统日志里直接取到",
+        "因为返工是用户最在意、最愿意主动反馈的",
+        "因为财务部门最支持用返工率来考核项目",
+        "因为返工不需要任何数据和样本就能讲清楚"],
+    a: 0,
+    why: "退单率、二次修改率是可量化的现成指标，例如从 34% 降到 15%，可以直接写进汇报，不需要额外做测算。" },
+  { q: "四个翻译动作的正确顺序是？",
+    o: ["挂指标 → 数频次 → 折时间 → 找动作",
+        "折时间 → 找动作 → 挂指标 → 数频次",
+        "数频次 → 挂指标 → 找动作 → 折时间",
+        "找动作 → 数频次 → 折时间 → 挂指标"],
+    a: 3,
+    why: "先找到那个动词（填、核、催、查、等），再数清频次，折算成时间，最后挂到组织指标。一天三次的动作改善 20%，价值远大于一年一次的动作改善 80%。" },
+  { q: "以下哪种情况说明你手上的需求需要「降级排队」？",
+    o: ["既省不了人、省不了时间、也降不了差错",
+        "能算出这个需求替下来多少人日",
+        "能算出关账周期因此提前了几天",
+        "能挂到退单率这个组织指标上去"],
+    a: 0,
+    why: "算不清的是体验优化，排在能算清的后面。如果手上全是这类需求，说明你在做需求搬运，不是在定价。" },
+],
+
+'g_m1_6': [
+  { q: "职能数字化系统的体验天花板，最先由什么决定？",
+    o: ["背后的管理制度与审批链",
+        "前端组件选型",
+        "服务器性能",
+        "培训是否到位"],
+    a: 0,
+    why: "字段、审批链、留痕要求都由制度规定。界面能优化的是「在制度内少走一步」，改不了「必须走这三步」。先改制度，再谈界面。" },
+  { q: "同样是「留存率」，用在下面哪一类系统上会变成假信号？",
+    o: ["职能数字化系统",
+        "车主 App 与车机",
+        "经销商与售后系统",
+        "供应链与采购平台"],
+    a: 0,
+    why: "车主 App 不好用就卸载，留存是真信号；职能系统不用就没法交差，使用率和留存都是制度推出来的，反映不了体验。" },
+  { q: "判断一个需求是「管理要求」还是「历史遗留」，本课给的方法是？",
+    o: ["看需求提出人的职级高低",
+        "看有多少人提过这条需求",
+        "问一句「这是谁定的」",
+        "看开发工作量有多大"],
+    a: 2,
+    why: "答不上来，可能是历史遗留——历史遗留可以谈；答得上来是现行制度——不能硬碰，要拉制度 owner 进来一起看执行成本。" },
+  { q: "用户地图这张纸，横轴和纵轴分别放什么？",
+    o: ["横轴部门，纵轴职级",
+        "横轴 4–6 个流程节点，纵轴四层用户",
+        "横轴时间，纵轴功能模块",
+        "横轴各个系统，纵轴具体岗位"],
+    a: 1,
+    why: "横轴流程节点、纵轴四层用户，格子里填具体岗位名而不是部门名。空格子就是你还没覆盖到的人。" },
+  { q: "用户地图上同一个名字同时出现在好几个格子里，说明什么？",
+    o: ["填错了，同一个人只应出现一次",
+        "他是关键用户，诉求优先级最高",
+        "他的行政职级比其他人更高",
+        "他的工作量不饱和，被安排了多岗"],
+    a: 1,
+    why: "出现在多格 = 他要同时承担多种角色，一个改动会同时影响他几处。排期时优先处理影响格子多的需求。" },
+],
+
+'g_m1_7': [
+  { q: "这次认证的作品集，两件必交件是什么？",
+    o: ["需求鉴真表 + 用户旅程地图",
+        "问卷自查表 + 需求优先级排序表",
+        "场景还原五问卡 + 深访提纲与观察记录",
+        "用户画像卡 + 反馈闭环 SOP 一页图"],
+    a: 2,
+    why: "阶段一作品集是场景还原五问卡（M1 第 3 节产出物）与深访提纲加观察记录（M2 第 3、6 节产出物），每件 20 分、按 4 维各 5 分评。" },
+  { q: "本课建议的学习节奏是？",
+    o: ["一周之内把八个模块听完，不做任何产出物",
+        "每天一节，做完一节算一节，不设提交节点",
+        "两周：第一周 M1–M4，第二周 M5–M8，设三个节点",
+        "按需跳听，只把作品集那几节看完就行"],
+    a: 2,
+    why: "节奏是为产出物服务的：周五交五问卡和深访提纲初稿，第二周做鉴真表和旅程图。三个节点卡住，作品集才不会拖到最后。" },
+  { q: "八个模块对学员的交付要求，本质上是什么？",
+    o: ["把音频完整听完，学习时长累计够就行",
+        "每个模块通过一次随堂小测，答对即算完成",
+        "每个模块都要写出来、发出去，交一张填满的表",
+        "参加一次线上直播答疑，跟老师确认理解"],
+    a: 2,
+    why: "听完八个小时，能力模型上的分数不会动。每个模块给的都不是「思考一下」，而是「写出来发出去」。" },
+  { q: "为什么本课强调「真正的交付不是听完」？",
+    o: ["因为能力模型只认填满的表，不认收听时长",
+        "因为听音频这种方式本身效率很低",
+        "因为老师需要看到足够多的作业才好评分",
+        "因为听完之后很容易忘，必须马上复习"],
+    a: 0,
+    why: "认证看的是作品集里那几张表。收听时长只影响 5 分的学习完成度，真正拉开差距的是能不能把表填满、填得可核验。" },
+  { q: "学完 M1+M2 之后下一步做什么最合适？",
+    o: ["先停一停，等公司统一安排下一期培训",
+        "直接去做阶段二的问卷和画像，跳过作品集",
+        "把两份作品集改到能通过评审，再进 M3 定量研究",
+        "重新从第 1 节听一遍，确保没有遗漏"],
+    a: 2,
+    why: "阶段一的门槛是作品集评审，不是听完。M3 讲定量、解决「有多少人这样」，建立在阶段一已经能独立做一次不诱导的深访之上。" },
+],
+
+'g_m2_1': [
+  { q: "以下哪一项是可以直接进入研究设计的题目？",
+    o: ["用户普遍希望报销系统更好用一些",
+        "新员工入职首周找不到导师联系方式",
+        "员工对 HR 系统的满意度到底如何",
+        "管理层希望整体提升数字化体验"],
+    a: 1,
+    why: "它有角色（新员工）、环节（入职首周）、缺失物（导师联系方式），可直接设计观察与访谈。其余三项都缺至少一个要素。" },
+  { q: "本课的改写公式是？",
+    o: ["谁 · 想要什么 · 愿意为此付多少钱",
+        "什么时候 · 在哪里 · 问题有多严重",
+        "现象 · 原因 · 对应的解决方案",
+        "谁 · 在哪一环 · 因为缺什么而放弃"],
+    a: 3,
+    why: "三个要素缺一不可：角色决定访谁，环节决定去哪看，缺失物决定问什么。" },
+  { q: "为什么公式最后落在「而放弃」，而不是「而不满」？",
+    o: ["因为「不满」这种情绪不容易被量化打分",
+        "因为用户通常不愿意承认自己对系统不满",
+        "因为不满无法被统计进满意度调查里",
+        "因为放弃是可观察的行为终点，不满只是情绪"],
+    a: 3,
+    why: "能被观察到，才可能被研究。放弃会留下痕迹：改用 Excel、转给别人、干脆不做了——这些都是可以去看、去问的。" },
+  { q: "「流程太麻烦」这句抱怨，按三要素衡量缺的是哪一样？",
+    o: ["缺预算：不知道这件事要花多少钱才能改",
+        "缺系统：不确定该在哪套系统里做这个改动",
+        "缺结论：还没有形成明确的改进建议",
+        "缺角色：一线嫌填得多，审批人嫌看不到关键信息"],
+    a: 3,
+    why: "两拨人的「麻烦」根本不是一回事。不定角色，一张提纲就想覆盖所有人，最后谁也没访透。" },
+  { q: "题目改写完之后，「回念一次」的目的是？",
+    o: ["让业务方在需求单上签字确认，避免后期扯皮",
+        "向直属领导汇报研究进度，争取更多时间",
+        "确认你理解的问题就是他关心的问题，否则换一个更准的",
+        "展示你对业务的理解深度，建立专业信任"],
+    a: 2,
+    why: "念给他听，问一句「如果我去看这件事，是你想解决的问题吗」。他如果说「不完全是，我更关心某某」，你就拿到了更准的题目。这只要五分钟。" },
+],
+
+'g_m2_2': [
+  { q: "一次内部系统调研只访谈了各部门指定的系统联络人，最可能出现的偏差是：",
+    o: ["样本量太小，结论不够显著，无法推广",
+        "受访者不愿说真话，事先串好了口径",
+        "系统性低估问题严重程度，因为联络人已适应系统",
+        "结论无法量化，进不了汇报材料"],
+    a: 2,
+    why: "联络人是系统的成功适应者，他们的问题已在日常中自行消化。真正的缺陷留在绕行者与边缘用户身上。" },
+  { q: "下面哪一条不是本课说的「接口人有偏差」的原因？",
+    o: ["他故意隐瞒真实情况，不想让项目顺利推进",
+        "他已经适应了系统，问题在他这里被消化掉",
+        "他会自我审查，哪些能说、哪些说了给自己添麻烦",
+        "他离操作用户有距离，听到的多是二手信息"],
+    a: 0,
+    why: "他不是不说，是真的不觉得是问题。所以接口人的价值是「给名单」，不是「给结论」。" },
+  { q: "「放弃者」这类样本为什么必须覆盖？",
+    o: ["因为他们在所有用户里人数占比最大",
+        "因为他们已彻底绕行，系统名单上根本抽不到",
+        "因为他们最好约，随时都能安排上时间",
+        "因为他们最熟悉系统，能指出设计问题"],
+    a: 1,
+    why: "得主动去找：问一句「这件事你们组谁还在用 Excel 做」，往往就能找到系统名单上没有的人。" },
+  { q: "访谈做到什么时候可以停？",
+    o: ["访够 8 个人就可以停，这是行业惯例",
+        "连续 2–3 个人不再带来新的问题类型",
+        "预定的访谈时间用完就停，不必延长",
+        "业务方开始催进度的时候就可以停"],
+    a: 1,
+    why: "看类型，不看细节。如果每个人都能开出新类别，说明样本不足或角色分层有问题，要继续加。" },
+  { q: "找到一位长期绕开系统的用户，最合适的开场是？",
+    o: ["问他「你为什么不用系统，是哪里不好用」",
+        "给他发一份问卷，请他把问题勾选出来",
+        "约他到会议室，正式做一次结构化访谈",
+        "直接说「你演示一下现在是怎么做的」"],
+    a: 3,
+    why: "一次演示的信息密度比一小时访谈还高。而且「演示」不像「评价」，没有说别人坏话的压力。" },
+],
+
+'g_m2_3': [
+  { q: "以下哪个提问方式最符合 BEI 行为事件访谈？",
+    o: ["你觉得现在的审批流程合理吗，哪里不合理",
+        "如果只能改一处，你会优先改哪一个地方",
+        "你希望系统接下来增加哪些功能",
+        "上一次审批被退回是什么情况？当时你先做了什么"],
+    a: 3,
+    why: "BEI 问具体事件中的行为。「上一次…当时…」锁定了情境与动作；其余三项分别是要评价、要方案、要功能清单。" },
+  { q: "BEI 的三段结构是？",
+    o: ["问题 → 原因 → 方案",
+        "评价 → 建议 → 优先级",
+        "背景 → 需求 → 预算",
+        "情境 → 行为 → 结果"],
+    a: 3,
+    why: "先锁定时间地点任务，再只要动作不要解释，最后拿代价与绕行路径。只问情境不问结果，知道了问题却不知道代价，就没法定价。" },
+  { q: "受访者说「系统太慢」，下面哪个接法是对的？",
+    o: ["最近一次觉得慢是哪天，当时在做什么，等了多久",
+        "你觉得慢在哪里，是页面还是查询",
+        "这个问题我们会反馈给技术团队优化性能",
+        "其他同事也反映过系统慢的问题吗"],
+    a: 0,
+    why: "「你觉得慢在哪」又回到观点。只有把话拉回某一次具体发生的事件，才拿得到时间、动作和代价。" },
+  { q: "下面哪类问题必须从提纲里删掉？",
+    o: ["上一次审批被退回是什么情况",
+        "当时你第一步做了什么，然后呢",
+        "最后这件事怎么解决的，花了多久",
+        "如果能自动填，你会不会用这个功能"],
+    a: 3,
+    why: "假设性提问所有人都说会用，零信息量。另外三类必须删的是引导性、评价性、未来性提问。" },
+  { q: "找同事做一次限时预访谈，主要能发现什么？",
+    o: ["能提前发现用户的真实需求和痛点",
+        "能验证这次的样本结构是否有代表性",
+        "能确定访谈应该安排在什么地点",
+        "能发现题目太长、术语太多、顺序不顺"],
+    a: 3,
+    why: "就是让他随时打断说「这句我没听懂」。念一遍花 30 分钟，能省掉两轮白做的访谈。" },
+],
+
+'g_m2_4': [
+  { q: "受访者反复说「系统挺好的，没什么问题」，最有效的下一步是：",
+    o: ["问他「有没有哪次干脆用 Excel 处理」",
+        "换一个更愿意开口的受访者，重新约一次",
+        "直接问「那你觉得哪里最需要改进」",
+        "结束访谈，把他的态度记录为满意"],
+    a: 0,
+    why: "用具体的绕行行为做切口，比继续问评价有效。绕行几乎人人都做过，承认绕行的心理成本远低于承认不满。" },
+  { q: "破冰 30 秒必须说清的三件事是？",
+    o: ["不是评估你的工作、系统哪里添麻烦、匿名汇总",
+        "你的姓名、所在部门、你的职级和工号",
+        "访谈多长、要不要录音、报告交给谁看",
+        "项目背景、预算规模、计划什么时候上线"],
+    a: 0,
+    why: "这个担心不解决，后面问什么都是「挺好的」。把主语从人换成系统，考核感才拿得掉。" },
+  { q: "「说完停住，数五秒」为什么有效？",
+    o: ["能让对方感到压力，从而尽快把答案说完",
+        "往往换来关键补充，「其实还有个事」",
+        "可以给记录员留出整理笔记的时间",
+        "有助于把访谈节奏控制在计划之内"],
+    a: 1,
+    why: "零成本，比任何追问句式都有效。所以在提纲最上面写一句提醒：停住就数五秒。" },
+  { q: "受访者开始给你出方案（「你们应该做个批量导入」），正确接法是？",
+    o: ["当场否定，告诉他这属于方案不是需求",
+        "立刻记下来，回去作为需求提给开发排期",
+        "保持沉默，等他自己把话说完再继续",
+        "先接住再还原，顺着方案回到最近那一次事件"],
+    a: 3,
+    why: "把方案当线索，顺着它回到事件。否定他会关上门，直接采纳又跳过了还原这一步。" },
+  { q: "对方说「我只有二十分钟」，怎么办？",
+    o: ["把 90 分钟的提纲压缩着快速问完，能问多少算多少",
+        "只问一个事件，把情境、行为、结果走完整",
+        "只做破冰和背景了解，剩下改天再约时间",
+        "发一份问卷给他，让他有空自己填一下"],
+    a: 1,
+    why: "40 分钟拿五个半截回答，不如 20 分钟把一个事件走透。走之前补一句「下次想看另一次的情况」，他就愿意让你再来。" },
+],
+
+'g_m2_5': [
+  { q: "以下哪个议题最适合用焦点小组，而不是深访？",
+    o: ["审核员核对发票时的具体判断顺序",
+        "各部门对「状态不透明」这个词的理解是否一致",
+        "某位用户上个月为什么放弃使用系统",
+        "高管对预算的真实态度"],
+    a: 1,
+    why: "焦点小组擅长探索群体共识边界。个体行为细节（判断顺序、某次放弃）和涉及敏感立场的态度，都应在私下深访中获取。" },
+  { q: "下面哪一项不是焦点小组擅长的事？",
+    o: ["挖出每个人自己真实的操作习惯和绕行方法",
+        "撑开一个词的边界，弄清大家说的到底是不是同一件事",
+        "备选方案有六七个时，快速淘汰明显不被接受的那些",
+        "让财务、采购、IT 坐一屋，彼此听见对方的硬约束"],
+    a: 0,
+    why: "没人会在一屋子同事面前说「我一直在用 Excel 偷偷做」。要研究真实行为必须一对一，而且在他工位旁。" },
+  { q: "把同部门、同层级的人放在一组，最大的问题是什么？",
+    o: ["人数不容易凑齐，很难约到同一时间",
+        "时间不好控制，很容易超过九十分钟",
+        "谁职级低谁闭嘴，讨论会被一两个人带走",
+        "场地不好找，会议室往往被占用"],
+    a: 2,
+    why: "跨层级坐一起就变成汇报会，大家开始说正确的废话。所以分组要按层级切开，或者干脆改成一对一。" },
+  { q: "主持人为避免「第一个发言者定调」，开场应该做什么？",
+    o: ["先请职级最高的人发言，定个基调",
+        "让每人先各自写三条，再轮流念出来",
+        "直接进入议题，边讨论边形成记录",
+        "先放一段演示视频，统一大家的认知"],
+    a: 1,
+    why: "一句「我觉得还行」，后面全沿着「还行」说。先写后说，能把每个人的第一反应留到纸面上。" },
+  { q: "焦点小组的产出应该是什么？",
+    o: ["一份可以直接立项的结论报告",
+        "一套完整的需求优先级排序",
+        "一组可以画图的满意度分数",
+        "议题清单加分歧地图"],
+    a: 3,
+    why: "共同关心的 3–5 件事，按被提及频次排；再加一张说明哪些问题意见分裂、分裂在哪一层。所以它应该放在研究前半段。" },
+],
+
+'g_m2_6': [
+  { q: "跟班观察时，以下哪条记录符合「只记行为」的要求？",
+    o: ["她显然还不熟悉这个界面的操作路径",
+        "她觉得系统太复杂，需要有人带着做",
+        "09:34 她切到 Excel 台账查历史付款",
+        "她对系统很不满意，一直在抱怨"],
+    a: 2,
+    why: "行为记录包含时间、动作、对象，可复盘。其余三项都是评价或推断，无法定位设计问题，也无法验证。" },
+  { q: "下面哪一条是能拿给设计师复盘的观察记录？",
+    o: ["她明显对这套系统不熟练，教了几次还是不会",
+        "她在第三步停留了两分十五秒，期间三次回到上一步",
+        "她今天状态不太好，可能跟月末加班有关系",
+        "她觉得系统设计得比较复杂，需要有人带"],
+    a: 1,
+    why: "不写「不熟练」，写停留多久、回退几次。评价词一旦写下，后面所有观察都会被这个结论解释。" },
+  { q: "跟班选时段的三个原则，不包括下面哪一条？",
+    o: ["覆盖忙时：月结、季末、月初、周五下午",
+        "挑他心情好、不忙的时候去，配合度更高",
+        "至少连续观察两小时，才能看到一次完整闭环",
+        "至少两个人，其中要含一个边缘用户"],
+    a: 1,
+    why: "忙时才暴露真实的取舍。闲时看到的是「理想流程」，不是「实际流程」。" },
+  { q: "看到他在 Excel 里做，为什么不能当场问「为什么不用系统」？",
+    o: ["一问就变成访谈，真实行为当场就消失了",
+        "会打扰他正在进行的工作，不太礼貌",
+        "他很可能自己也说不清楚原因",
+        "会让对方觉得你不了解业务，不够专业"],
+    a: 0,
+    why: "观察时忍住别问。记下来，等观察结束再问，而且要用「演示一下」的方式问。" },
+  { q: "观察结果有三个用法，是哪三个？",
+    o: ["打分、排名、在部门会上通报",
+        "拍照、录像、归档进项目文档",
+        "做访谈、发问卷、补工作日志",
+        "标断点、算时间账、几个人并排比"],
+    a: 3,
+    why: "把绕行和打断标到流程图上，折算成时间账，三到五个人并排看。一个人身上是个案，三个人身上都出现就是结构问题。" },
+],
+
+'g_m2_7': [
+  { q: "B 端内部访谈中「对方倾向说挺好」的根本原因是：",
+    o: ["对系统不了解",
+        "表达能力有限",
+        "系统确实没问题",
+        "担心反馈被用于考核自己"],
+    a: 3,
+    why: "内部访谈的受访者同时是同事与被考核对象。破冰阶段必须先解除「考核感」，否则后面拿到的都是安全答案。" },
+  { q: "B 端与 C 端的五处差异，不包括下面哪一项？",
+    o: ["界面设计规范不同，B 端要更朴素",
+        "样本可得性不同，B 端要一层层约人",
+        "表达意愿不同，B 端怕被考核",
+        "决策链不同，B 端四层互相否决"],
+    a: 0,
+    why: "五处差异是样本可得性、表达意愿、场景边界、决策链、采信标准。界面风格属于设计范畴，不是研究方法上的差异。" },
+  { q: "为什么 B 端研究结论必须分层给四层各说一遍？",
+    o: ["因为四层手里都握着项目预算",
+        "因为公司流程要求必须抄送全部相关方",
+        "因为这样报告显得更完整、更专业",
+        "因为不同层说的根本不是同一件事，冲突要显式裁决"],
+    a: 3,
+    why: "研究阶段就要分层抽样，不要研究完再补——补不出来。要给出「四层各要什么、冲突在哪、怎么裁决」。" },
+  { q: "「报告要写两套话」，分别写给谁？",
+    o: ["业务方要场景与代价，制度 owner 要合规与留痕",
+        "一套给领导看摘要，一套给同事看全文",
+        "一套给学员看，一套给管理员看",
+        "一套对内部公开，一套对外部脱敏"],
+    a: 0,
+    why: "只写一套，你的报告会在另一个会上被否掉。场景与代价打动业务方，留痕与合规打动制度 owner。" },
+  { q: "C 端的方法里，哪些可以直接搬到 B 端？",
+    o: ["样本的获取方式，比如公开招募和投放",
+        "指标的解读方式，比如留存和转化率",
+        "用户旅程地图、痛点排序、同理心地图、访谈技巧",
+        "结论的采信路径，比如用增长数据说话"],
+    a: 2,
+    why: "方法层面没有差别，不能直接搬的是样本获取方式、指标解读、结论采信路径这三样。替换掉这三样，剩下的都能复用。" },
+],
+
+'g_m2_8': [
+  { q: "关于定性结论，以下哪个表述最专业？",
+    o: ["用户普遍反映审批太慢，大家都这么说",
+        "8 人中 6 人提到卡在部门经理，与日志吻合",
+        "大家都觉得系统不好用，希望尽快改进",
+        "用户希望系统更快，最好点一下就出结果"],
+    a: 1,
+    why: "给出了样本量、具体环节、以及第二来源（日志）的互证。其余三项都是无来源、无强度分级的概括。" },
+  { q: "三角验证指的是哪三个来源？",
+    o: ["问卷、访谈、焦点小组",
+        "访谈、观察、系统日志",
+        "业务方、一线用户、分管领导",
+        "竞品做法、内部数据、行业报告"],
+    a: 1,
+    why: "一个来源是故事，两个来源是线索，三个来源指向同一个结论，这个结论才可以立项。" },
+  { q: "结论是「大家都需要批量导入」，反例搜寻应该去找谁？",
+    o: ["找从来不用批量功能的人，问他为什么不用",
+        "找用得最多、最熟练的那几位主力用户",
+        "找各部门的联络人，请他们确认一下",
+        "找系统管理员，调一下功能使用日志"],
+    a: 0,
+    why: "主动找反例，不是碰运气。对方可能是单量少（需求有边界）、单据类型不统一（先解决数据规范）、根本不知道有这功能（是推广问题）。" },
+  { q: "强度分级的三个档位是？",
+    o: ["高、中、低",
+        "强烈、一般、微弱",
+        "普遍、多见于、个别",
+        "一级、二级、三级"],
+    a: 2,
+    why: "普遍＝多数样本加多来源；多见于＝多来源但样本少，要注明样本量；个别＝只有个案，只能当线索。" },
+  { q: "写「个别反馈」和写「普遍认为」，在结论被证伪时的区别是？",
+    o: ["写个别属于正常的认知修正，写普遍是判断失误",
+        "没有区别，两种情况都算判断错误",
+        "写「普遍认为」更专业，承担的风险也更小",
+        "取决于样本量大小，样本够大都一样"],
+    a: 0,
+    why: "分级的价值不是学术严谨，是保护你自己。把不确定的结论标成确定的，出事时要付的是判断力的账。" },
+]
+
+};
 </script>
 <script>
 /* ============================================================
@@ -2781,7 +3405,8 @@ var Prog={
     if(extra)Object.assign(cur,extra);
     m[k]=cur; lsSet('prog',m);
     if(Me&&Me.role==='student')Cloud.upsert('gel_progress',[{id:Me.id+'__'+k,
-      doc:{userId:Me.id,course:mk,unitId:k,status:st,seconds:cur.seconds||0,visits:cur.visits,updatedAt:cur.updatedAt}}]).catch(function(){});
+      doc:{userId:Me.id,course:mk,unitId:k,status:st,seconds:cur.seconds||0,visits:cur.visits,
+        quiz:cur.quiz||null,updatedAt:cur.updatedAt}}]).catch(function(){});
   },
   // 累计有效收听时长（只计真实播放推进，拖动不计）
   addHeard:function(mk,n,delta){
@@ -2847,7 +3472,8 @@ var Prog={
           var loc=m[d.unitId], rAt=d.updatedAt||'';
           if(!loc||(rAt&&(!loc.updatedAt||rAt>loc.updatedAt))){
             m[d.unitId]={status:d.status||'none',seconds:d.seconds||0,
-              visits:d.visits||0,heard:d.heard||loc&&loc.heard||0,updatedAt:rAt};
+              visits:d.visits||0,heard:d.heard||loc&&loc.heard||0,
+              quiz:d.quiz||(loc&&loc.quiz)||null,updatedAt:rAt};
             ch++;
           }
         });
@@ -3091,7 +3717,7 @@ function renderMe(){
    +'<span class="tag '+(jr.passed?'good':'')+'">'+(jr.passed?'已通过':(jr.ready?'未通过':'进行中'))+'</span></div>'
    +'<div class="cb">'
    +'<div class="me-score"><b>'+jr.total+'</b><span>/ 100 分</span><div class="chiprow">'+condChip+'</div></div>'
-   +'<p class="me-note">学习 '+jr.learn.score+'/10　客观题 '+jr.obj.got+'/'+jr.obj.full+'　作品集 '+jr.port.got+'/'+jr.port.full+'</p>'
+   +'<p class="me-note">学习 '+jr.learn.score+'/5　随堂 '+jr.prac.score+'/5　客观题 '+jr.obj.got+'/'+jr.obj.full+'　作品集 '+jr.port.got+'/'+jr.port.full+'</p>'
    +'<button class="btn line sm" style="width:100%;margin-top:10px" onclick="location.hash=\'#cert\'">查看认证详情</button>'
    +'</div></div>'
    +'</div>'
@@ -3146,7 +3772,7 @@ function renderHome(){
    +'<span>认证方式 <b>分阶段 · 四条件判定</b></span></div></div>'
    +'<div class="cert-banner" onclick="location.hash=\'#cert\'">'
    +'<div class="cb1"><b>阶段 1 · '+(jr.ready?(jr.passed?'已通过 · '+jr.total+' 分':'未通过 · '+jr.total+' 分'):'认证进行中 · '+jr.total+' / '+jr.totalFull)
-   +'</b><p>学习完成度 '+jr.learn.score+'/10　客观题 '+jr.obj.got+'/'+jr.obj.full+'　作品集 '+jr.port.got+'/'+jr.port.full
+   +'</b><p>学习完成度 '+jr.learn.score+'/5　随堂练习 '+jr.prac.score+'/5　客观题 '+jr.obj.got+'/'+jr.obj.full+'　作品集 '+jr.port.got+'/'+jr.port.full
    +'　·　9 项能力已开评 3 项</p></div><div class="arr">→</div></div>'
    +'<div class="mod-grid">'+cards+'</div>'
    +'</div></div>';
@@ -3171,14 +3797,16 @@ function renderLearn(mk,n){
   var items=m.sections.map(function(s){
     var done=Prog.doneOf(mk,s.n);
     var lock=!(Me&&Me.role==='admin')&&!Prog.unlocked(mk,s.n);
-    return '<div class="sitem'+(s.n===n?' on':'')+(done?' done':'')+(lock?' lock':'')+'"'
+    return '<div class="sitem'+(s.n===n?' on':'')+(done?' done':'')+(lock?' lock':'')+'" data-n="'+s.n+'"'
       +(lock?' title="完成上一节后解锁"':' onclick="goSec(\''+mk+'\','+s.n+')"')+'>'
       +'<div class="sn">'+(done?'✓':(lock?'<span class="lk">🔒</span>':s.n))+'</div>'
       +'<div><div class="st">'+esc(s.t)+'</div><div class="sm">'+(lock?'完成上一节后解锁':s.m+' 分钟')+'</div></div></div>';
   }).join('');
 
-  // 页序列：封面 -> 内容页 -> 案例（最后）-> 小测
-  var body=pageHTML(sec,m,mk);
+  // 视频下方不再放图文版 PPT：讲解内容全部在画面层里，看完直接进随堂练习
+  // 每次进入本节都从空白答卷开始（历史最好成绩在区块右上角显示）
+  PQ.mk=mk;PQ.n=n;PQ.sel={};PQ.res=null;
+  var body=pqHTML(mk,n);
 
   var idx=m.sections.indexOf(sec);
   var prev=idx>0?m.sections[idx-1]:null;
@@ -3209,25 +3837,16 @@ function renderLearn(mk,n){
   document.getElementById('btn-next').onclick=function(){
     var st=Prog.get(mk,n);
     if(!st||(st.status!=='done'&&st.status!=='quizzed')){
-      toast('先完成本节的课后小测，才能进入下一节');
-      showQuiz(mk,n);
+      toast('先做完本节随堂练习，才能进入下一节');
+      var qb=document.getElementById('pq');
+      if(qb)qb.scrollIntoView({behavior:'smooth',block:'center'});
       return;
     }
     if(next)goSec(mk,next.n);else location.hash='#exam/'+mk;
   };
 
-  // 若本节未完成小测，底部提示
-  var st2=Prog.get(mk,n);
-  if(!st2||(st2.status!=='done'&&st2.status!=='quizzed')){
-    var isLast=idx===m.sections.length-1;
-    var tip=document.createElement('div');
-    tip.className='note';tip.style.background='#fff8e8';tip.style.borderColor='#f0e0b8';
-    tip.innerHTML='<div class="nl" style="color:#8a6d2f">本节随堂测</div>'
-      +'<p>学完这一节，做 1 道题检验一下（不占分，答错可重做）。答对后本节记为完成。'
-      +'<button class="btn sm" style="margin-left:8px;vertical-align:middle" onclick="showQuiz(\''+mk+'\','+n+')">开始作答</button></p>';
-    document.getElementById('pbody').appendChild(tip);
-  }
   initPlayer('g_m'+m.no+'_'+n);
+  pqInit(mk,n);
   window.scrollTo(0,0);
 }
 
@@ -3309,8 +3928,159 @@ function renderPage(p){
 }
 
 /* ============================================================
-   随堂小测（每节 1 题，答对算完成）
+   随堂练习（每节 5 题 · 15 节合计占认证总分 5%）
+   PQ 存本次作答态；成绩落进 Prog 记录的 quiz 字段，取最好一次
    ============================================================ */
+var PQ={mk:null,n:0,sel:{},res:null};
+var PQ_PASS=3;                 /* 答对 3 / 5 即过关 */
+var PQ_EACH=5;                 /* 每节 5 题 */
+
+function pracBank(mk,n){
+  var m=modByKey(mk);
+  var uid='g_m'+(m?m.no:1)+'_'+n;
+  return (window.PRACTICE&&window.PRACTICE[uid])||[];
+}
+function pqStat(mk,n){
+  var p=Prog.get(mk,n);
+  return (p&&p.quiz)||null;
+}
+
+function pqHTML(mk,n){
+  var qs=pracBank(mk,n);
+  if(!qs.length)return '';
+  var st=pqStat(mk,n);
+  var live=(PQ.mk===mk&&PQ.n===n);
+  var res=live?PQ.res:null;
+  var sel=live?PQ.sel:{};
+
+  var head='<div class="pqh"><div class="pqh-l">'
+    +'<div class="k">随堂练习 · 第 '+n+' 节</div>'
+    +'<h3>5 道选择题，检验这一节听懂了没有</h3>'
+    +'<p>单选。答对 '+PQ_PASS+' 题即记本节完成，可重做，成绩取最好一次。15 节随堂练习合计占认证总分 5%。</p>'
+    +'</div><div class="pqtag'+(st&&st.best>=PQ_PASS?' ok':'')+'">'
+    +(st?('最好 '+st.best+' / '+qs.length+'　已做 '+st.tries+' 次'):'占认证 5%')
+    +'</div></div>';
+
+  var items=qs.map(function(q,i){
+    var picked=sel[i];
+    var mk2='';
+    if(res){ mk2='<span class="pqm '+(res.detail[i]?'ok':'no')+'">'+(res.detail[i]?'✓':'✗')+'</span>'; }
+    var opts=q.o.map(function(o,j){
+      var cls='opt';
+      if(res){ cls+=' lock'; if(j===q.a)cls+=' right'; else if(j===picked)cls+=' wrong'; }
+      else if(picked===j)cls+=' sel';
+      return '<div class="'+cls+'" data-q="'+i+'" data-o="'+j+'"><div class="ol">'+'ABCD'[j]
+        +'</div><div class="ot">'+esc(o)+'</div></div>';
+    }).join('');
+    var ex=res?'<div class="pqx'+(res.detail[i]?'':' bad')+'"><b>'+(res.detail[i]?'答对了':'正确答案 '+'ABCD'[q.a])+'</b>'+esc(q.why)+'</div>':'';
+    return '<div class="pqi'+(res?(res.detail[i]?' ok':' no'):'')+'" data-i="'+i+'">'
+      +'<div class="pqq"><span class="qn">'+String(i+1).padStart(2,'0')+'</span>'+mk2
+      +'<div class="qtx">'+esc(q.q)+'</div></div>'
+      +'<div class="opts">'+opts+'</div>'+ex+'</div>';
+  }).join('');
+
+  var foot;
+  if(res){
+    var pass=res.got>=PQ_PASS, nextOne=pqNextOf(mk,n);
+    foot='<div class="pqf">'
+      +'<div class="pqscore '+(pass?'ok':'no')+'"><b>'+res.got+'</b><span>/ '+qs.length+' 题答对</span>'
+      +'<em>'+(pass?'本节完成'+(nextOne?'，可以进入下一节':'，全部章节已学完'):'还差 '+(PQ_PASS-res.got)+' 题，看完解析再重做一次')+'</em></div>'
+      +'<div class="spacer"></div>'
+      +'<button class="btn line sm" onclick="pqAgain()">重新作答</button>'
+      +(pass&&nextOne?'<button class="btn sm" onclick="pqGoNext()">下一节 →</button>':'')
+      +(pass&&!nextOne?'<button class="btn sm" onclick="location.hash=\'#exam/'+mk+'\'">进入模块测评 →</button>':'')
+      +'</div>';
+  }else{
+    foot='<div class="pqf"><div class="pqcnt" id="pq-cnt">已作答 '+Object.keys(sel).length+' / '+qs.length+'</div>'
+      +'<div class="spacer"></div><button class="btn" id="pq-sub">提交作答</button></div>';
+  }
+  return '<div class="pq" id="pq">'+head+items+foot+'</div>';
+}
+
+function pqNextOf(mk,n){
+  var m=modByKey(mk);
+  if(!m)return null;
+  var idx=-1;
+  m.sections.forEach(function(s,i){if(s.n===n)idx=i;});
+  return idx>=0&&idx<m.sections.length-1?m.sections[idx+1]:null;
+}
+
+function pqInit(mk,n){
+  if(PQ.mk!==mk||PQ.n!==n){PQ.mk=mk;PQ.n=n;PQ.sel={};PQ.res=null;}
+  var box=document.getElementById('pq');
+  if(!box)return;
+  box.onclick=function(e){
+    var el=e.target.closest?e.target.closest('.opt'):null;
+    if(!el)return;
+    if(PQ.res)return;
+    var i=+el.dataset.q, j=+el.dataset.o;
+    PQ.sel[i]=j;
+    var host=box.querySelector('.pqi[data-i="'+i+'"]');
+    if(host){
+      host.querySelectorAll('.opt').forEach(function(x){x.classList.remove('sel');});
+      el.classList.add('sel');
+    }
+    var c=document.getElementById('pq-cnt');
+    if(c)c.textContent='已作答 '+Object.keys(PQ.sel).length+' / '+pracBank(mk,n).length;
+  };
+  var sub=document.getElementById('pq-sub');
+  if(sub)sub.onclick=pqSubmit;
+}
+
+function pqSubmit(){
+  var mk=PQ.mk,n=PQ.n,qs=pracBank(mk,n);
+  if(!qs.length)return;
+  var miss=[];
+  for(var i=0;i<qs.length;i++)if(PQ.sel[i]===undefined)miss.push(i+1);
+  if(miss.length){toast('第 '+miss.join('、')+' 题还没作答');return;}
+  var got=0,detail=[];
+  qs.forEach(function(q,i){var ok=PQ.sel[i]===q.a;detail.push(ok);if(ok)got++;});
+  var old=pqStat(mk,n)||{best:0,tries:0};
+  var rec=Prog.get(mk,n)||{};
+  var quiz={best:Math.max(old.best||0,got),last:got,tries:(old.tries||0)+1,at:nowISO()};
+  if(got>=PQ_PASS){
+    Prog.set(mk,n,'quizzed',{quiz:quiz});
+  }else{
+    Prog.set(mk,n,rec.status&&rec.status!=='none'?rec.status:'reading',{quiz:quiz});
+  }
+  PQ.res={got:got,detail:detail};
+  pqPaint();
+  if(got>=PQ_PASS){
+    logEvent('practice_pass',mk+'_s'+n+'_'+got);
+    toast('随堂练习答对 '+got+' / '+qs.length+'，本节完成');
+    var si=document.querySelector('.sitem[data-n="'+n+'"]');
+    if(si){
+      si.classList.remove('lock');si.classList.add('done');
+      var sn=si.querySelector('.sn');
+      if(sn)sn.textContent='✓';
+    }
+  }else{
+    toast('答对 '+got+' / '+qs.length+'，看一遍解析再重做');
+  }
+}
+
+function pqPaint(){
+  var box=document.getElementById('pq');
+  if(!box)return;
+  var html=pqHTML(PQ.mk,PQ.n);
+  if(!html)return;
+  box.outerHTML=html;
+  pqInit(PQ.mk,PQ.n);
+}
+
+function pqAgain(){
+  PQ.sel={};PQ.res=null;
+  pqPaint();
+  var box=document.getElementById('pq');
+  if(box)box.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function pqGoNext(){
+  var nx=pqNextOf(PQ.mk,PQ.n);
+  if(nx)goSec(PQ.mk,nx.n);
+}
+
+
 function showQuiz(mk,n){
   var m=modByKey(mk),sec=m.sections.filter(function(s){return s.n===n;})[0];
   if(!sec||!sec.q){doneSection(mk,n);return;}
@@ -3366,6 +4136,8 @@ function doneSection(mk,n){
    音频播放器（分段续播 + 逐字稿联动 + 有效收听计时）
    ============================================================ */
 var Pl = { audio: null, uid: null, segs: null, i: 0, rate: 1, tot: 0, last: 0, start: 0 };
+/* 默认倍速：全站播放器统一 1.25×。时长显示一律按音频真实时长，不按倍速折算。 */
+var RATE_DEF = 1.25;
 
 function fmtT(s) {
   s = Math.max(0, Math.round(s));
@@ -3379,7 +4151,7 @@ function playerHTML(uid) {
   var tot = segs.reduce(function (a, x) { return a + x.d; }, 0);
   var rates = [0.9, 1, 1.1, 1.25].map(function (r) {
     var lab = r === 1 ? '1.0' : String(r);
-    return '<option value="' + r + '"' + (r === 1 ? ' selected' : '') + '>' + lab + '×</option>';
+    return '<option value="' + r + '"' + (r === RATE_DEF ? ' selected' : '') + '>' + lab + '×</option>';
   }).join('');
   var hasSlide = !!(window.SLIDES && window.SLIDES[uid]);
   return '<div class="player" id="pl">'
@@ -3393,7 +4165,7 @@ function playerHTML(uid) {
     + '<div class="pl-time" id="pl-time">00:00 / ' + fmtT(tot) + '</div>'
     + '<select class="pl-rate" id="pl-rate">' + rates + '</select>'
     + '</div>'
-    + '<div class="pl-tools"><button class="pl-tg" id="pl-tg">逐字稿 · ' + segs.length + ' 页 ▾</button>'
+    + '<div class="pl-tools">'
     + '<span class="pl-hint" id="pl-hint">本节 ' + Math.round(tot / 60) + ' 分钟 · 共 ' + segs.length + ' 页</span></div>'
     + '<div class="pl-text" id="pl-text">' + segs.map(function (x, k) {
       return '<div class="pl-seg' + (k === 0 ? ' on' : '') + '" data-k="' + k + '"><b>' + (k + 1) + '</b>'
@@ -3406,7 +4178,7 @@ function initPlayer(uid) {
   var segs = (window.NARR && window.NARR[uid]) || [];
   if (!segs.length) return;
   if (Pl.audio) { try { Pl.audio.pause(); } catch (e) { } Pl.audio = null; }
-  Pl.uid = uid; Pl.segs = segs; Pl.i = 0; Pl.rate = 1; Pl.last = 0;
+  Pl.uid = uid; Pl.segs = segs; Pl.i = 0; Pl.rate = RATE_DEF; Pl.last = 0;
   Pl.tot = segs.reduce(function (a, x) { return a + x.d; }, 0);
   STAGE.uid = uid; STAGE.i = -1; STAGE._lastHl = -2; STAGE.caps = []; STAGE.capAt = []; STAGE.hlEls = [];
 
@@ -3414,6 +4186,7 @@ function initPlayer(uid) {
   Pl.audio = a;
   a.preload = 'auto';
   a.src = segs[0].u;
+  a.playbackRate = RATE_DEF;
   a.onended = function () { plNext(); };
   a.ontimeupdate = function () {
     if (!a.paused) {
@@ -3440,12 +4213,6 @@ function initPlayer(uid) {
     plSeek(Pl.tot * pct);
   };
   stageShow(0);
-  var tgl = document.getElementById('pl-tg');
-  if (tgl) tgl.onclick = function () {
-    var t = document.getElementById('pl-text');
-    t.classList.toggle('open');
-    tgl.textContent = '逐字稿 · ' + segs.length + ' 段 ' + (t.classList.contains('open') ? '▴' : '▾');
-  };
   document.querySelectorAll('.pl-seg').forEach(function (el) {
     el.onclick = function () { plGo(+el.dataset.k, true); };
   });
@@ -3643,6 +4410,29 @@ function learnScoreOf(uid, sk) {
   });
   return { done: done, total: total, score: total ? Math.round(done / total * CERT_RULE.learnFull * 10) / 10 : 0 };
 }
+function pracOf(uid, sk) {
+  var S = sk ? stageOf(sk) : openStage();
+  var ps = ADM.prog.filter(function (x) { return x.userId === uid; });
+  var secs = 0, done = 0, got = 0, full = 0;
+  MODS.filter(function (m) { return !S || S.mods.indexOf(m.key) >= 0; }).forEach(function (m) {
+    m.sections.forEach(function (sec) {
+      var k = m.key + '__s' + sec.n;
+      var pr = ps.filter(function (x) { return x.unitId === k; })[0];
+      var uid2 = 'g_m' + m.no + '_' + sec.n;
+      var bank = (window.PRACTICE && window.PRACTICE[uid2]) || [];
+      var each = Math.max(bank.length, CERT_RULE.pracEach);
+      var qz = (pr && pr.quiz) || null;
+      var best = qz ? Math.min(each, qz.best || 0) : 0;
+      secs++; full += each; got += best;
+      if (qz && (qz.best || 0) >= CERT_RULE.pracPass) done++;
+    });
+  });
+  return {
+    secs: secs, done: done, got: got, full: full,
+    rate: full ? Math.round(got / full * 1000) / 10 : 0,
+    score: full ? Math.round(got / full * CERT_RULE.pracFull * 10) / 10 : 0
+  };
+}
 function objOf(uid, sk) {
   var S = sk ? stageOf(sk) : openStage();
   var c = certRec(uid), ex = c.exam;
@@ -3678,8 +4468,9 @@ function portOf(uid, sk) {
 function judgeOf(uid, sk) {
   var S = sk ? stageOf(sk) : openStage();
   var L = learnScoreOf(uid, S && S.k), O = objOf(uid, S && S.k), P = portOf(uid, S && S.k);
-  var totalFull = Math.round((CERT_RULE.learnFull + O.full + P.full) * 10) / 10;
-  var total = Math.round((L.score + O.got + P.got) * 10) / 10;
+  var PR = pracOf(uid, S && S.k);
+  var totalFull = Math.round((CERT_RULE.learnFull + CERT_RULE.pracFull + O.full + P.full) * 10) / 10;
+  var total = Math.round((L.score + PR.score + O.got + P.got) * 10) / 10;
   var weak = [];
   Object.keys(O.dims).forEach(function (k) {
     var d = O.dims[k], rate = d.full ? d.got / d.full : 0;
@@ -3692,7 +4483,7 @@ function judgeOf(uid, sk) {
   var c4 = O.done && weak.length === 0;
   var ready = O.done && P.reviewed;
   return {
-    stage: S, learn: L, obj: O, port: P, total: total, totalFull: totalFull,
+    stage: S, learn: L, prac: PR, obj: O, port: P, total: total, totalFull: totalFull,
     weak: weak, ready: ready,
     passed: ready && c1 && c2 && c3 && c4,
     conds: [c1, c2, c3, c4],
@@ -3972,6 +4763,7 @@ function admScores(){
       +'<td>'+esc(r.u.company||'—')+'</td>'
       +'<td style="white-space:nowrap">'+stageTxt+'</td>'
       +'<td>'+j.learn.score+'</td>'
+      +'<td>'+j.prac.score+'</td>'
       +'<td>'+j.obj.got+'</td>'
       +'<td>'+(j.port.reviewed?j.port.got:'<span style="color:var(--soft)">待评</span>')+'</td>'
       +'<td><b style="color:var(--pri);font-size:15px">'+j.total+'</b></td>'
@@ -4003,12 +4795,12 @@ function admScores(){
    +'<button class="btn sm line" onclick="admLoad(true).then(paintAdmin)">刷新</button></div>'
    +'<div class="cb p0">'
    +'<table class="dt"><thead><tr><th style="width:52px">名次</th><th>学员</th><th>部门</th><th>阶段状态</th>'
-   +'<th title="满分 10">学习</th><th title="满分 50">客观题</th><th title="满分 40">作品集</th>'
+   +'<th title="满分 5">学习</th><th title="满分 5">随堂</th><th title="满分 50">客观题</th><th title="满分 40">作品集</th>'
    +'<th>总分</th><th>四条件</th><th>结论</th><th>最近</th></tr></thead><tbody>'+rows+'</tbody></table>'
    +'</div><div class="cb" style="border-top:1px solid var(--line)">'
    +'<p style="font-size:12px;color:var(--muted);line-height:1.8">'
    +'四条件依次为：①总分≥75　②客观题≥70%　③作品集≥70%　④本阶段能力子项无一项低于60%（短板否决）。'
-   +'绿点为已满足。阶段 1 总分 = 学习完成度 10 + 客观题 50 + 作品集 40；'
+   +'绿点为已满足。阶段 1 总分 = 学习完成度 5 + 随堂练习 5 + 客观题 50 + 作品集 40；'
    +'阶段 2、3 上线后按同一规则独立判定，已通过阶段不受影响。</p></div></div>';
 }
 
@@ -4097,7 +4889,7 @@ function admCert(){
     if(P.reviewed)done++;else if(P.submitted)wait++;
     return '<tr><td class="nm">'+esc(u.name)+'</td><td>'+esc(u.loginId)+'</td>'
       +'<td>'+stt+'</td>'
-      +'<td>'+j.obj.got+'</td><td>'+j.learn.score+'</td><td><b>'+j.total+'</b></td>'
+      +'<td>'+j.obj.got+'</td><td>'+j.learn.score+'</td><td>'+j.prac.score+'</td><td><b>'+j.total+'</b></td>'
       +'<td style="white-space:nowrap">'
       +'<button class="btn sm line" onclick="openReview(\''+u.id+'\')">'+(P.reviewed?'查看/改分':'评审')+'</button>'
       +'</td></tr>';
@@ -4107,7 +4899,7 @@ function admCert(){
    +'<span class="pill">待评 '+wait+' 人 · 已评 '+done+' 人</span><div class="spacer"></div>'
    +'<button class="btn sm line" onclick="admLoad(true).then(paintAdmin)">刷新</button></div>'
    +'<div class="cb p0"><table class="dt"><thead><tr><th>学员</th><th>账号</th><th>作品集</th>'
-   +'<th>客观题</th><th>学习</th><th>总分</th><th>操作</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+   +'<th>客观题</th><th>学习</th><th>随堂</th><th>总分</th><th>操作</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
    +'<div class="cb" style="border-top:1px solid var(--line)"><p style="font-size:12px;color:var(--muted);line-height:1.8">'
    +'两件作品各 20 分，每件按 4 个维度评分，每维 0–5 分。评分提交后立即计入学员总分并更新排名。</p></div></div>';
 }
@@ -4463,12 +5255,14 @@ var QUIZ = {
 
 /* ============================================================
    四条件认证引擎
-   总分 = 学习完成度 10 + 客观题 50 + 作品集 40
+   总分 = 学习完成度 5 + 随堂练习 5 + 客观题 50 + 作品集 40
    通过 = 总分≥75 且 客观题≥70% 且 作品集≥70% 且 3 个子项无一项<60%
    ============================================================ */
 var CERT_RULE = {
-  learnFull: 10, objFull: 50, portFull: 40, totalFull: 100,
+  learnFull: 5, pracFull: 5, objFull: 50, portFull: 40, totalFull: 100,
   passTotal: 75, passObjRate: 0.70, passPortRate: 0.70, passDimRate: 0.60,
+  pracPass: 3,            /* 每节 5 题，答对 3 题过关 */
+  pracEach: 5,
   examMinutes: 60,
   /* 作品集两件，各 20 分，各 4 维 × 5 分 */
   portItems: [
@@ -4592,6 +5386,31 @@ var Cert = {
     });
     return { done: done, total: total, score: total ? Math.round(done / total * CERT_RULE.learnFull * 10) / 10 : 0, detail: detail };
   },
+  /* ---- 随堂练习：每节 5 题，按答对题数累计折算（只算本阶段模块） ----
+     记录在 Prog 的 quiz.best 里，取历史最好一次；未做记 0 分，不影响学习完成度 */
+  prac: function (sk) {
+    var S = sk ? stageOf(sk) : openStage();
+    var secs = 0, done = 0, got = 0, full = 0, detail = [];
+    MODS.filter(function (m) { return S.mods.indexOf(m.key) >= 0; }).forEach(function (m) {
+      m.sections.forEach(function (s) {
+        var p = Prog.get(m.key, s.n) || {};
+        var uid = 'g_m' + m.no + '_' + s.n;
+        var bank = (window.PRACTICE && window.PRACTICE[uid]) || [];
+        var each = Math.max(bank.length, CERT_RULE.pracEach);
+        var qz = p.quiz || null;
+        var best = qz ? Math.min(each, qz.best || 0) : 0;
+        secs++; full += each; got += best;
+        if (qz && (qz.best || 0) >= CERT_RULE.pracPass) done++;
+        detail.push({ uid: uid, t: s.t, best: best, each: each, tries: qz ? qz.tries : 0,
+          ok: !!(qz && (qz.best || 0) >= CERT_RULE.pracPass) });
+      });
+    });
+    return {
+      secs: secs, done: done, got: got, full: full,
+      rate: full ? Math.round(got / full * 1000) / 10 : 0,
+      score: full ? Math.round(got / full * CERT_RULE.pracFull * 10) / 10 : 0
+    };
+  },
   /* ---- 客观题：按本阶段子项汇总 ---- */
   obj: function (sk) {
     var S = sk ? stageOf(sk) : openStage();
@@ -4634,9 +5453,9 @@ var Cert = {
     var S = sk ? stageOf(sk) : openStage();
     if (!S) S = STAGES[0];
     if (!S.open) return { locked: true, stage: S };
-    var L = this.learn(S.k), O = this.obj(S.k), P = this.port(S.k);
-    var totalFull = Math.round((CERT_RULE.learnFull + O.full + P.full) * 10) / 10;
-    var total = Math.round((L.score + O.got + P.got) * 10) / 10;
+    var L = this.learn(S.k), O = this.obj(S.k), P = this.port(S.k), PR = this.prac(S.k);
+    var totalFull = Math.round((CERT_RULE.learnFull + CERT_RULE.pracFull + O.full + P.full) * 10) / 10;
+    var total = Math.round((L.score + PR.score + O.got + P.got) * 10) / 10;
     var weak = [];
     Object.keys(O.dims).forEach(function (k) {
       var d = O.dims[k];
@@ -4660,7 +5479,7 @@ var Cert = {
     var allReady = O.done && P.reviewed;
     return {
       locked: false, stage: S,
-      learn: L, obj: O, port: P, total: total, totalFull: totalFull,
+      learn: L, prac: PR, obj: O, port: P, total: total, totalFull: totalFull,
       conds: conds, weak: weak,
       passed: allReady && conds.every(function (c) { return c.ok; }),
       ready: allReady,
@@ -4841,7 +5660,8 @@ function paintCertStage(sk) {
 
     '<div class="card"><div class="ch2"><h3>本阶段成绩构成</h3><span class="tag">满分 ' + r.totalFull + '</span></div><div class="cb">' +
     '<div class="scoregrid">' +
-    '<div class="sgi"><b>' + r.learn.score + '</b><span>学习完成度 / 10</span><small>' + r.learn.done + ' / ' + r.learn.total + ' 节</small></div>' +
+    '<div class="sgi"><b>' + r.learn.score + '</b><span>学习完成度 / ' + CERT_RULE.learnFull + '</span><small>' + r.learn.done + ' / ' + r.learn.total + ' 节</small></div>' +
+    '<div class="sgi"><b>' + r.prac.score + '</b><span>随堂练习 / ' + CERT_RULE.pracFull + '</span><small>' + r.prac.done + '/' + r.prac.secs + ' 节过关 · ' + r.prac.got + '/' + r.prac.full + ' 题</small></div>' +
     '<div class="sgi"><b>' + r.obj.got + '</b><span>客观题 / ' + r.obj.full + '</span><small>' + (r.obj.done ? '已考，可重考取最高' : '未考试') + '</small></div>' +
     '<div class="sgi"><b>' + r.port.got + '</b><span>作品集 / ' + r.port.full + '</span><small>' + (r.port.reviewed ? '已评审' : r.port.submitted ? '待评审' : '未提交') + '</small></div>' +
     '<div class="sgi tot"><b>' + r.total + '</b><span>总分 / ' + r.totalFull + '</span><small>' + r.level + '</small></div>' +
