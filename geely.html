@@ -596,6 +596,8 @@ a{color:var(--pri);text-decoration:none}
 .ea-t span{display:block;font-size:12.5px;color:var(--muted);margin-top:4px}
 .ea-t.ok b{color:var(--ok)}
 .ea-b{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
+/* .btn 全局 width:100%（为了表单整行按钮），在横向按钮组里必须收回，否则每个按钮独占一行 */
+.ea-b .btn{width:auto;min-width:132px}
 
 /* ---- 测评页 ---- */
 .qz-page{max-width:880px;margin:0 auto}
@@ -629,12 +631,27 @@ a{color:var(--pri);text-decoration:none}
 .qz-foot{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fff;
   border:1px solid var(--line);border-radius:12px;padding:15px 18px;margin:8px 0 44px;
   position:sticky;bottom:12px;box-shadow:0 -2px 14px rgba(16,36,61,.07)}
+.qz-foot .btn{width:auto;min-width:120px}
+.qz-foot .spacer{flex:1}
 .qz-score b{font-size:27px;color:var(--pri);font-variant-numeric:tabular-nums;font-weight:800}
 .qz-score.ok b{color:var(--ok)}
 .qz-score.no b{color:var(--accent)}
 .qz-score span{font-size:12.5px;color:var(--muted);margin-left:5px}
 .qz-score em{display:block;font-style:normal;font-size:12px;color:var(--muted);margin-top:3px}
 .qz-cnt{font-size:13px;color:var(--muted)}
+
+/* 窄屏底部条：必须放在上面 .qz-foot .btn 之后才能覆盖，
+   目标是「计数/成绩 + 两个按钮」挤在一行，别把提交按钮挤到第二行 */
+@media (max-width:860px){
+  .qz-foot{flex-wrap:nowrap;padding:11px 12px;margin-bottom:26px}
+  .qz-foot .spacer{display:none}
+  .qz-foot .qz-cnt,.qz-foot .qz-score{flex:1;min-width:0;overflow:hidden}
+  .qz-foot .qz-cnt{font-size:12px;white-space:nowrap}
+  .qz-foot .qz-score b{font-size:20px}
+  .qz-foot .qz-score span{font-size:11px;margin-left:3px}
+  .qz-foot .qz-score em{display:none}
+  .qz-foot .btn{flex:0 0 auto;min-width:0;height:40px;padding:0 13px;font-size:13.5px}
+}
 
 .pl-top{display:flex;align-items:center;gap:12px;padding:9px 14px 0}
 .pl-btn{width:42px;height:42px;flex:0 0 42px;border-radius:50%;background:#fff;color:#0f2338;
@@ -4126,7 +4143,17 @@ function renderMe(){
   Object.keys(all).forEach(function(k){ heard+=(all[k].heard||0); });
   var totalSec=Object.keys(window.NARR||{}).reduce(function(a,k){
     return a+NARR[k].reduce(function(b,x){return b+x.d;},0);},0);
-  var leftMin=Math.max(0,Math.round((totalSec-heard)/60));
+  /* 剩余时长按「没完成的节」逐节累加，不再用 总时长-累计收听秒数：
+     收听秒数会被倍速、重听、测试数据拉偏，算出来常常是 0 */
+  var leftSec=0;
+  sq.forEach(function(x){
+    if(x.chap)return;
+    if(Prog.doneOf(x.mk,x.n))return;
+    var mm0=modByKey(x.mk);
+    var sg=(window.NARR||{})['g_m'+(mm0?mm0.no:1)+'_'+x.n]||[];
+    leftSec+=sg.reduce(function(b,y){return b+y.d;},0);
+  });
+  var leftMin=Math.round(leftSec/60);
   var pct=total?Math.round(done/total*100):0;
   var openTo=Prog.openCount();
   var jr=Cert.judge();
@@ -4155,8 +4182,9 @@ function renderMe(){
     var parts=x.k.split('__s'), mk=parts[0], n=+parts[1];
     var mm=modByKey(mk);
     var ss=mm?mm.sections.filter(function(y){return y.n===n;})[0]:null;
-    var st=x.p.status==='quizzed'?'已完成随堂测':(x.p.status==='done'?'已听完':'学习中');
-    var dot=(x.p.status==='quizzed'||x.p.status==='done')?'ok':'';
+    var qb=(x.p.quiz&&x.p.quiz.best)||0;
+    var st=qb>=PQ_PASS?'已完成随堂测':(x.p.status==='done'?'已听完':'学习中');
+    var dot=(qb>=PQ_PASS||x.p.status==='done')?'ok':'';
     return '<div class="rrow" onclick="goSec(\''+mk+'\','+n+')">'
       +'<span class="rdot '+dot+'"></span>'
       +'<span class="rt">'+(mm?'M'+mm.no:'')+'·'+n+'</span>'
@@ -4188,7 +4216,7 @@ function renderMe(){
    +'<div class="plan-grid">'
    +'<div><b>'+done+' / '+total+'</b><span>已完成节数</span></div>'
    +'<div><b>'+leftMin+' 分钟</b><span>预计剩余时长</span></div>'
-   +'<div><b>第 '+openTo+' 节</b><span>当前解锁到</span></div>'
+   +'<div><b>'+(isChap?('M'+(cm?cm.no:'')+' 章测'):('第 '+cur.n+' 节'))+'</b><span>当前解锁到</span></div>'
    +'<div><b>'+(isChap?10:(cs?cs.m:0))+' 分钟</b><span>'+(isChap?'章节测评时长':'下一节时长')+'</span></div>'
    +'</div>'
    +'<div class="plan-next"><div><b>'+(isChap?'章节测评':'下一节')
@@ -4248,7 +4276,9 @@ function renderHome(){
       +'<div class="prog-wrap"><div class="prog-bar"><i style="width:'+pct+'%"></i></div>'
       +'<div class="prog-txt"><span>已学 '+d+' / '+t+' 节</span><span>'+pct+'%</span></div></div>'
       +'<div class="mod-actions">'
-      +(allDone?'':'<button class="btn" onclick="goSec(\''+m.key+'\','+nx+')">'+(d?'继续学习':'开始学习')+'</button>')
+      +(allDone?'':(openN<1
+        ?'<button class="btn gray" disabled>上一章章测通过后解锁</button>'
+        :'<button class="btn" onclick="goSec(\''+m.key+'\','+nx+')">'+(d?'继续学习':'开始学习')+'</button>'))
       +(chOpen&&!chOk?'<button class="btn'+(allDone?'':' line')+'" onclick="location.hash=\'#chap/'+m.key+'\'">'
         +(allDone?'进入章节测评':'章节测评')+'</button>':'')
       +(chOk?'<button class="btn line" onclick="location.hash=\'#chap/'+m.key+'\'">章测重做</button>':'')
@@ -4662,7 +4692,7 @@ function qzSubmit(auto){
   var l2=document.getElementById('qz-list'); if(l2)l2.innerHTML=qzListHTML();
   var f2=document.getElementById('qz-foot'); if(f2)f2.innerHTML=qzFootHTML();
   qzBind();
-  toast(pass?('答对 '+got+' / '+qs.length+'，已通过'):('答对 '+got+' / '+qs.length+'，未通过'));
+  /* 成绩条就贴在手边（sticky），再弹 toast 会盖住底部按钮，这里不再弹 */
   window.scrollTo(0,0);
 }
 
@@ -4693,6 +4723,8 @@ function renderAssess(kind,mk,n){
   QZ={kind:kind,mk:mk,n:n,sel:{},res:null,endAt:qzEndAt(kind,mk,n),timer:null};
 
   var title=kind==='chap'?(m.name+' · 章节测评'):('第 '+n+' 节 · 随堂测评');
+  /* 面包屑已经写了节号，标题上方那行小字改为模块语境，避免同一句话出现两遍 */
+  var kicker='M'+m.no+' '+m.name+(kind==='chap'?'':' · 第 '+n+' 节');
   var sub=kind==='chap'
     ? ('覆盖 M'+m.no+' 全部 '+m.sections.length+' 节，共 '+qs.length+' 道选择题，答对 '+CH_PASS+' 道通过')
     : ('5 道选择题，答对 '+PQ_PASS+' 道记本节完成');
@@ -4702,7 +4734,7 @@ function renderAssess(kind,mk,n){
     +'<div class="wrap"><div class="crumb"><button onclick="location.hash=\''+back+'\'">'
     +(kind==='chap'?'返回课程':'返回本节')+'</button><span>/</span><span>'+esc(title)+'</span></div>'
     +'<div class="qz-page">'
-    +'<div class="qz-hd"><div class="qz-hl"><div class="k">'+esc(title)+'</div>'
+    +'<div class="qz-hd"><div class="qz-hl"><div class="k">'+esc(kicker)+'</div>'
     +'<h2>'+(kind==='chap'?'章节测评':'随堂测评')+'</h2><p>'+esc(sub)+'</p></div>'
     +'<div class="qz-clock" id="qz-clock">10:00</div></div>'
     +'<div class="qz-bar"><i id="qz-fill"></i></div>'
