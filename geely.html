@@ -649,9 +649,10 @@ a{color:var(--pri);text-decoration:none}
 .cv-pt b{font-size:22px;font-weight:800;color:#7db8f2;line-height:1.5;flex:0 0 auto}
 .cv-pt span{font-size:21px;font-weight:600;color:rgba(255,255,255,.92);line-height:1.55}
 .cv-foot{position:absolute;left:100px;right:100px;bottom:56px;display:flex;
-  align-items:flex-end;justify-content:space-between;padding-top:22px;
+  align-items:center;justify-content:space-between;padding-top:22px;
   border-top:1px solid rgba(255,255,255,.14)}
-.cv-credit{font-size:17px;line-height:1.75;color:rgba(255,255,255,.70);letter-spacing:.02em}
+.cv-credit{font-size:17px;line-height:1.6;color:rgba(255,255,255,.68);letter-spacing:.06em;
+  padding-bottom:5px}
 .cv-credit .cvl{color:rgba(255,255,255,.86);margin-bottom:4px;font-weight:600}
 .cv-no{font-size:34px;font-weight:800;color:rgba(255,255,255,.9);letter-spacing:.04em;flex:0 0 auto}
 .cv-no em{font-size:17px;font-style:normal;font-weight:600;color:rgba(255,255,255,.45);
@@ -1141,11 +1142,9 @@ function blkHTML(b) {
 }
 
 /* ---------- 章节封面 / 结束封面 ---------- */
+/* 封面右下角署名：只要一行「起点课堂企业服务」 */
 var CREDIT_HTML = '<div class="cv-credit">'
-  + '<div class="cvl">本课程由：</div>'
-  + '<div class="cvr">起点课程研发中心　设计开发</div>'
-  + '<div class="cvr">产品经理课程讲师团队　评审校验</div>'
-  + '<div class="cvr">陈观.AI老师声音　录制</div>'
+  + '<div class="cvr">起点课堂企业服务</div>'
   + '</div>';
 
 function pad2(n) { return (n < 10 ? '0' : '') + n; }
