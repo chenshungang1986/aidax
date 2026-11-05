@@ -408,6 +408,17 @@ a{color:var(--pri);text-decoration:none}
 .toast.on{opacity:1;bottom:40px}
 
 @media (max-width:860px){
+  .ea{flex-direction:column;align-items:stretch;gap:12px;padding:14px 14px}
+  .ea-b{margin-left:0}
+  .ea-b .btn{flex:1}
+  .qz-hd{flex-wrap:wrap;gap:10px}
+  .qz-hl h2{font-size:20px}
+  .qz-clock{font-size:19px;padding:8px 14px;margin-left:0}
+  .qzi{padding:15px 15px;border-radius:10px}
+  .qz-q .qtx{font-size:14.5px}
+  .qzi .ot{font-size:13.5px}
+  .qz-foot{position:static;padding:13px 14px;margin-bottom:30px}
+  .qz-foot .btn{flex:1}
   #login{padding:14px 11px;align-items:flex-start}
   .lg-wrap{grid-template-columns:1fr;border-radius:16px;max-width:460px;min-height:0}
   .lg-hero{padding:24px 22px 20px}
@@ -575,6 +586,55 @@ a{color:var(--pri);text-decoration:none}
 .cap{min-height:56px;display:flex;align-items:center;justify-content:center;
   padding:13px 22px;background:#0c1725;color:#f4f9ff;font-size:18px;font-weight:600;line-height:1.55;
   text-align:center;letter-spacing:.02em;border-top:1px solid rgba(255,255,255,.06)}
+
+/* ---- 看完分流条：再看一遍 / 马上测评 ---- */
+.ea{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:#fff;
+  border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:0 0 18px;
+  box-shadow:var(--sh)}
+.ea-t b{display:block;font-size:15.5px;color:var(--ink);font-weight:700}
+.ea-t b i{font-style:normal;font-variant-numeric:tabular-nums}
+.ea-t span{display:block;font-size:12.5px;color:var(--muted);margin-top:4px}
+.ea-t.ok b{color:var(--ok)}
+.ea-b{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
+
+/* ---- 测评页 ---- */
+.qz-page{max-width:880px;margin:0 auto}
+.qz-hd{display:flex;align-items:flex-start;gap:16px;margin:8px 0 12px}
+.qz-hl .k{font-size:11.5px;color:var(--soft);letter-spacing:.12em}
+.qz-hl h2{font-size:23px;margin:5px 0 7px;color:var(--deep);font-weight:800}
+.qz-hl p{font-size:13px;color:var(--muted);line-height:1.7}
+.qz-clock{margin-left:auto;flex:0 0 auto;background:var(--deep);color:#fff;border-radius:10px;
+  padding:11px 18px;font-size:23px;font-weight:800;font-variant-numeric:tabular-nums;
+  letter-spacing:.02em;transition:.2s}
+.qz-clock.warn{background:var(--accent)}
+.qz-bar{height:4px;background:#e6edf5;border-radius:2px;overflow:hidden;margin-bottom:14px}
+.qz-tip{font-size:12.5px;color:var(--muted);background:#f5f8fc;border-radius:8px;
+  padding:11px 14px;margin-bottom:16px;line-height:1.75}
+.qzi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;
+  margin-bottom:14px;box-shadow:0 1px 2px rgba(16,36,61,.04)}
+.qzi.ok{border-color:#c4e6d4}
+.qzi.no{border-color:#f2ccd1}
+.qz-q{display:flex;gap:10px;align-items:flex-start;margin-bottom:14px}
+.qz-q .qn{font-size:11.5px;font-weight:800;color:#9fb4cc;flex:0 0 auto;padding-top:4px}
+.qz-m{flex:0 0 auto;font-size:14px;font-weight:800;padding-top:1px}
+.qz-m.ok{color:var(--ok)}
+.qz-m.no{color:var(--accent)}
+.qz-q .qtx{font-size:15.5px;line-height:1.75;color:var(--ink);font-weight:600}
+.qzi .ot{font-size:14.5px;line-height:1.65}
+.qz-x{margin-top:13px;font-size:13px;line-height:1.8;color:var(--mid);
+  background:#f2f7fd;border-radius:8px;padding:12px 15px}
+.qz-x.bad{background:#fdf1f2}
+.qz-x b{display:block;font-size:12.5px;color:var(--pri);margin-bottom:4px;font-weight:700}
+.qz-x.bad b{color:var(--accent)}
+.qz-foot{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fff;
+  border:1px solid var(--line);border-radius:12px;padding:15px 18px;margin:8px 0 44px;
+  position:sticky;bottom:12px;box-shadow:0 -2px 14px rgba(16,36,61,.07)}
+.qz-score b{font-size:27px;color:var(--pri);font-variant-numeric:tabular-nums;font-weight:800}
+.qz-score.ok b{color:var(--ok)}
+.qz-score.no b{color:var(--accent)}
+.qz-score span{font-size:12.5px;color:var(--muted);margin-left:5px}
+.qz-score em{display:block;font-style:normal;font-size:12px;color:var(--muted);margin-top:3px}
+.qz-cnt{font-size:13px;color:var(--muted)}
 
 .pl-top{display:flex;align-items:center;gap:12px;padding:9px 14px 0}
 .pl-btn{width:42px;height:42px;flex:0 0 42px;border-radius:50%;background:#fff;color:#0f2338;
@@ -3538,6 +3598,162 @@ window.PRACTICE = {
 ]
 
 };
+/* ============================================================
+   章节测评题库（每个模块一次，10 题 / 10 分钟 / 答对 6 题过关）
+   —— 一半是场景题：给一段真实业务情境，问「下一步该做什么」
+   —— 通过后才能解锁下一章
+   —— 选项长度已对齐（差 ≤4 字），答案位置由脚本均衡，不要凭长度或位置猜
+   ============================================================ */
+
+window.CHAPTER = {
+
+  m1: [
+    { q: "某集团财务共享中心上线新的报销系统，三个月后使用率只有 30%，一线继续在 Excel 里维护台账。你是这个系统的产品经理，第一件事应该做：",
+      o: ["排查系统性能，把页面加载时间从 2 秒压到 1 秒",
+          "找到还在用 Excel 的那批人，问清他们绕开的原因",
+          "请管理层发文，把继续用 Excel 台账列为违规操作",
+          "把报销单的必填字段全部加满，逼一线只能线上提交"],
+      a: 1,
+      why: "使用率低的根因通常在需求阶段没还原场景。压性能、下禁令、加必填，都是在「功能已经做了」的前提下打补丁，只会让绕行更隐蔽。先去现场问清绕开的那一步是什么，才知道该改哪里。" },
+    { q: "场景还原五问里，最能暴露真实痛点的是哪一问？",
+      o: ["谁在用，在什么岗位、一共有几个人",
+          "在什么条件下用，时间压力来自哪里",
+          "如果不做这件事，后果会有多严重",
+          "现在怎么绕过系统，绕过时具体做了什么"],
+      a: 3,
+      why: "「怎么绕过」问的是已经发生的行为，不是观点。用户嘴上可以说满意，但手上用 Excel 就是事实。绕行路径写得越具体，要改的那一步就越清楚。" },
+    { q: "业务方要求给报销单加「预算预警」字段。你发现预算编制在财务、预算执行在业务部门。此时最合适的做法是：",
+      o: ["先把字段加上去，口径不一致的地方后面再对齐",
+          "让业务方把需求文档写清楚，写不明白就不开发",
+          "参照同业系统的预警规则，先照抄一套上线试试",
+          "分别找两侧的实际操作人，问清预警后各自做什么"],
+      a: 3,
+      why: "同一个字段，编制方和执行方的动作完全不同。不把两侧的真实动作问出来，做出来的只会是一个谁都不看的数字。字段是结果，两边的判断顺序才是需求。" },
+    { q: "B 端产品的四层用户里，往往能否决整个方案、却极少被访谈的是：",
+      o: ["一线使用者（各岗位具体操作的人）",
+          "监管与合规角色（法务、内控）",
+          "中层管理者（部门负责人与主管）",
+          "高层决策者（分管副总或总经理）"],
+      a: 1,
+      why: "监管角色不产生日常需求，但只要一句「不合规」就能让方案推倒重来。多数团队的四层名单里，缺的总是这一层。" },
+    { q: "验收会上业务方说「需求都按文档做了」，上线后一线却不用。最可能的根因是：",
+      o: ["培训没做到位，一线根本不会操作",
+          "验收标准写的是功能上线，不是行为改变",
+          "需求文档写得不够清楚，开发理解偏了",
+          "系统性能不达标，点一下要等好几秒"],
+      a: 1,
+      why: "按文档验收，验收的只是交付物。行为有没有改变、那一步是不是真的被替代了，要另设验收口径。文档写对了、功能也做了，一线照样可以不用。" },
+    { q: "从「用户满意」走到「组织绩效改善」，价值要一路翻译成：",
+      o: ["用户访谈里的原话，以及他们的满意度打分",
+          "功能点的数量、上线时间与交付进度",
+          "用户行为改变 → 业务指标 → 组织绩效",
+          "与竞品逐项对比，看他们还差哪些功能"],
+      a: 2,
+      why: "满意度是感受，绩效是数字，中间必须经过「行为改变」这一环。说不出哪一步动作变了、哪个指标跟着动，价值主张就还停在前一层。" },
+    { q: "领导说「这个功能同行都有，我们也得上」。作为产品经理，最该追问的是：",
+      o: ["谁会在什么场景下用它，替代掉现在的哪一步",
+          "同行是哪一家，能不能拿到他们的功能截图",
+          "预算够不够，工期能不能压缩到一个月内",
+          "能不能先做一个最小版本，上线试试反馈"],
+      a: 0,
+      why: "同行有，不代表你有同一个场景。先把使用者和被替代的那一步问清楚，否则做出来只是又多一个没人点开的入口。" },
+    { q: "「把领导当用户」这类错位的典型后果是：",
+      o: ["界面不符合一线的操作习惯，学习成本高",
+          "项目预算大幅超支，年底结不了账",
+          "功能越加越多，一线绕行越来越多",
+          "上线时间一再延后，错过考核节点"],
+      a: 2,
+      why: "领导的判断往往落在「要有这个能力」，而不是「这一步怎么走」。按这个口径加功能，一线用不上，就会自己找路绕开，绕行越积越多。" },
+    { q: "六类行业系统里，管控类系统（内控、法务、合规）的用户使用动机通常是：",
+      o: ["主动使用，因为能明显提升他自己的效率",
+          "被动使用，因为制度要求必须留痕",
+          "只在年底或审计前集中使用一次",
+          "由外部客户的要求被动驱动"],
+      a: 1,
+      why: "管控类系统的使用者是在完成制度动作，不是来解决自己的问题。设计时先想清楚「他要留什么痕、给谁看」，比优化效率更管用。" },
+    { q: "一份填得好的场景还原五问卡，第四问「现在怎么绕过」通常会写出：",
+      o: ["一句「目前没有绕行」，通常都没去过现场",
+          "用户对系统的满意度打分和推荐意愿",
+          "竞品的替代方案，以及他们的功能对比清单",
+          "具体的文件名、群名，以及谁在维护"],
+      a: 3,
+      why: "绕行路径要能落到可核对的东西上：哪个文件、哪个群、谁在更新。写不出这些，说明还没去过现场，这张卡就还不能拿去评审。" }
+  ],
+
+  m2: [
+    { q: "业务方说「用户对审批很不满意」，要你去做研究。第一步应该把它转成：",
+      o: ["一份满意度问卷，先把不满意的程度量化出来",
+          "直接访谈二十个人，先把所有抱怨都收集回来",
+          "一份竞品的审批流程对比，看差距在哪",
+          "一个可观察的现象：谁、在什么条件下、卡在哪一步"],
+      a: 3,
+      why: "「不满意」是情绪，不是研究问题。研究问题必须能被观察到：谁、在什么条件下、做了什么、卡在哪里。转不成这样的句子，访谈提纲也写不出来。" },
+    { q: "你访谈了 8 个人，都说「还行」。其中 6 位是各部门接口人。最该担心的是：",
+      o: ["样本量不够，需要从 8 人扩到 30 人以上",
+          "受访者不愿意说真话，需要改成匿名访谈",
+          "接口人已被系统驯化，痛点在没被选中的人身上",
+          "访谈时间太短，每个人只聊了二十分钟"],
+      a: 2,
+      why: "接口人是系统的长期合作者，早已适应了现有流程。只访他们，等于只听被驯化过的声音。抽样要覆盖不同处境，尤其是那个「不爱用」的人。" },
+    { q: "受访者说「我觉得加个搜索框就好了」。你接下来最该说的是：",
+      o: ["你上一次找不到东西是什么时候，当时怎么处理",
+          "「好的，这个需求我先记下来，排进下一版」",
+          "「你为什么想要一个搜索框？能说说原因吗」",
+          "「除了搜索框，你还想要哪些别的功能」"],
+      a: 0,
+      why: "用户给的是方案，不是问题。把话题拉回最近一次具体事件，才能知道他找不到的是哪类东西、当时是不是又去问了人。" },
+    { q: "访谈进行到 20 分钟，对方一直说「挺好的，没什么问题」。比较有效的做法是：",
+      o: ["直接问「那你觉得哪里最需要改进」",
+          "停几秒不说话，等他自己补充",
+          "结束访谈，把他的态度记成满意",
+          "换个话题，先聊聊公司整体业务"],
+      a: 1,
+      why: "「哪里需要改进」是评价性问题，对方只会给你场面话。留白几秒，多数人会自己补一句「其实还有个事」，那句往往是全场最有用的。" },
+    { q: "BEI 结构的关键是：",
+      o: ["问最近一次具体发生的事件，还原当时的行为",
+          "问对方对未来系统的期待，以及最想要的功能",
+          "问对方对系统的整体评价，请他们打个分",
+          "问对方认为系统接下来应该怎么改"],
+      a: 0,
+      why: "BEI 要的是已发生的行为，不是态度和设想。把「最近一次是什么时候」问出来，细节才会跟着出来。" },
+    { q: "下面哪一类提问必须从深访提纲里删掉？",
+      o: ["「上一次审批被退回是什么情况」",
+          "「当时你先做了什么，然后呢」",
+          "「如果系统支持语音输入，你会用吗」",
+          "「这个月你一共处理了多少单」"],
+      a: 2,
+      why: "假设性、引导性、评价性、未来性的提问都问不出真实行为。「如果支持……你会用吗」同时踩了假设和未来两条，答案没有参考价值。" },
+    { q: "你想了解不同基地对同一套流程的执行差异，比较合适的方法是：",
+      o: ["把各基地的人凑成一个焦点小组，看他们怎么争",
+          "每个基地找一个人做深访，然后拼接结论",
+          "发一份问卷，让大家给流程的合理性打分",
+          "只看系统日志，不再做访谈，也不去现场"],
+      a: 0,
+      why: "焦点小组擅长暴露群体之间的差异和共识边界。几个基地的人坐在一起，最容易在「我们那边不是这么干的」上吵起来，差异就在争吵里。" },
+    { q: "跟班观察一天，记录里最该留下的是：",
+      o: ["用户对系统的评价原话，以及满意度打分",
+          "系统目前已有的功能清单与操作手册",
+          "时间、地点、动作，以及他绕开系统的那几步",
+          "部门的组织架构、汇报关系与考核方式"],
+      a: 2,
+      why: "观察的价值在行为，不在评价。几点几分、在哪个界面、做了什么、哪一步切到了 Excel，这些才是能直接改设计的东西。" },
+    { q: "B 端定性研究与 C 端相比，最关键的差异之一是：",
+      o: ["B 端不能用问卷，只能靠深度访谈收集",
+          "B 端样本量必须比 C 端更大，结论才有效",
+          "B 端不需要现场观察，只看系统日志就够",
+          "内部用户换不了系统，动机来自制度而非偏好"],
+      a: 3,
+      why: "C 端用户不满意就走，B 端用户不满意还得天天用。动机来自制度约束，所以「他为什么必须用」比「他喜不喜欢」更能解释行为。" },
+    { q: "你要在报告里写「用户都说要这个功能」，最稳妥的处理是：",
+      o: ["标注提及人数，再补一条行为证据交叉验证",
+          "直接写就行，因为确实多位受访者都提到了",
+          "改成「部分用户提到」，把话说得软一点",
+          "删掉这条结论，避免在评审会上被质疑"],
+      a: 0,
+      why: "「都说」本身不是证据。写清几个人提到，再用观察或日志印证一次，结论才站得住；只有单点提及又拿不出行为证据的，要降级成假设。" }
+  ]
+
+};
 </script>
 <script>
 /* ============================================================
@@ -3661,22 +3877,38 @@ var Prog={
   heardOf:function(mk,n){
     var p=this.get(mk,n);return (p&&p.heard)||0;
   },
-  moduleDone:function(mk,total){var m=this.all(),c=0;
-    for(var i=1;i<=total;i++){var p=m[this.key(mk,i)];if(p&&(p.status==='done'||p.status==='quizzed'))c++;}
+  moduleDone:function(mk,total){var c=0;
+    for(var i=1;i<=total;i++){ if(this.doneOf(mk,i)) c++; }
     return c;},
-  /* ---- 逐步解锁：按 M1→M2 线性顺序，前一节完成才开下一节 ---- */
+  /* ---- 逐步解锁 ----
+     一节算完成 = 视频听完(≥80%) 且 节测过关(≥3/5)
+     一章算完成 = 章末的章节测评过关(≥6/10)，过关后才开下一章第 1 节 */
   seq:function(){
     var out=[];
-    MODS.forEach(function(m){m.sections.forEach(function(s){out.push({mk:m.key,n:s.n});});});
+    MODS.forEach(function(m){
+      m.sections.forEach(function(s){out.push({mk:m.key,n:s.n});});
+      out.push({mk:m.key,n:0,chap:true});
+    });
     return out;
   },
-  doneOf:function(mk,n){
-    var p=this.get(mk,n);
-    if(p&&(p.status==='done'||p.status==='quizzed'))return true;
-    var mm=modByKey(mk);
+  heardPct:function(mk,n){
+    var mm=modByKey(mk),p=this.get(mk,n);
+    if(p&&(p.status==='done'||p.status==='quizzed'))return 100;
     var segs=(window.NARR||{})['g_m'+(mm?mm.no:1)+'_'+n]||[];
     var full=segs.reduce(function(a,x){return a+x.d;},0);
-    return full>0&&(p&&p.heard||0)/full>=0.8;
+    if(!full)return 0;
+    return Math.min(100,Math.round(((p&&p.heard)||0)/full*100));
+  },
+  heardOk:function(mk,n){ return this.heardPct(mk,n)>=80; },
+  quizOk:function(mk,n){
+    var p=this.get(mk,n);
+    return !!(p&&p.quiz&&(p.quiz.best||0)>=PQ_PASS);
+  },
+  chapStat:function(mk){ return lsGet('chap',{})[mk]||null; },
+  chapOk:function(mk){ var c=this.chapStat(mk); return !!(c&&(c.best||0)>=CH_PASS); },
+  doneOf:function(mk,n){
+    if(!n)return this.chapOk(mk);
+    return this.heardOk(mk,n)&&this.quizOk(mk,n);
   },
   openTo:function(){
     var sq=this.seq();
@@ -3689,9 +3921,16 @@ var Prog={
     if(idx<0)return false;
     return idx<=this.openTo();
   },
+  /* 章节测评是否已解锁：本章所有节都完成，才开本章测评 */
+  chapOpen:function(mk){
+    var sq=this.seq(),idx=-1;
+    for(var i=0;i<sq.length;i++){ if(sq[i].mk===mk&&sq[i].chap){idx=i;break;} }
+    return idx>=0&&idx<=this.openTo();
+  },
   openCount:function(){
-    var sq=this.seq();
-    return Math.min(sq.length,this.openTo()+1);
+    var sq=this.seq(),lim=this.openTo(),c=0;
+    for(var i=0;i<=lim&&i<sq.length;i++)if(!sq[i].chap)c++;
+    return c;
   },
   /* 换设备 / 清缓存后本地进度为空，但云端有——不回灌就会出现
      「管理员看到 15/15，学员自己看到 0/15」，证书上的学习完成度也会失真。
@@ -3702,9 +3941,16 @@ var Prog={
     return Cloud.req('gel_progress',{qs:'?select=id,doc&id=like.'+encodeURIComponent(Me.id+'__%')+'&limit=2000'})
       .then(function(rows){
         if(!rows||!rows.length)return 0;
-        var m=lsGet('prog',{}),ch=0;
+        var m=lsGet('prog',{}),ch=0,cm=lsGet('chap',{});
         rows.forEach(function(r){
           var d=r.doc||{};if(!d.unitId)return;
+          /* 章节测评单独存在 chap 里，unitId 形如 <mk>__chap */
+          if(/__chap$/.test(d.unitId)){
+            var mk=d.unitId.replace(/__chap$/,'');
+            var oldc=cm[mk];
+            if(d.quiz&&(!oldc||(d.updatedAt||'')>(oldc.at||''))){ cm[mk]=d.quiz; ch++; }
+            return;
+          }
           var loc=m[d.unitId], rAt=d.updatedAt||'';
           if(!loc||(rAt&&(!loc.updatedAt||rAt>loc.updatedAt))){
             m[d.unitId]={status:d.status||'none',seconds:d.seconds||0,
@@ -3713,7 +3959,7 @@ var Prog={
             ch++;
           }
         });
-        if(ch)lsSet('prog',m);
+        if(ch){ lsSet('prog',m); lsSet('chap',cm); }
         return ch;
       }).catch(function(){return 0;});
   }
@@ -3837,9 +4083,12 @@ function route(){
   if(!Me){renderLogin();return;}
   var h=(location.hash||'').replace(/^#/,'');
   var p=h.split('/').filter(Boolean);
+  clearInterval(QZ.timer);          // 离开测评页就停表
   if(!p.length){Me.role==='admin'?renderAdmin('overview'):renderHome();return;}
   if(p[0]==='me')return renderMe();
   if(p[0]==='learn')return renderLearn(p[1],parseInt(p[2]||'1',10));
+  if(p[0]==='quiz')return renderQuiz(p[1]||'m1',parseInt(p[2]||'1',10));
+  if(p[0]==='chap')return renderChap(p[1]||'m1');
   if(p[0]==='exam')return location.hash='#cert/s1';
   if(p[0]==='cert')return p[1]?renderCertStage(p[1]):renderCert();
   if(p[0]==='certificate')return renderCertificate(p[1]||'s1');
@@ -3871,8 +4120,8 @@ function topbar(title){
    ============================================================ */
 function renderMe(){
   if(!Me){renderLogin();return;}
-  var sq=Prog.seq(), total=sq.length, done=0, heard=0;
-  sq.forEach(function(x){ if(Prog.doneOf(x.mk,x.n)) done++; });
+  var sq=Prog.seq(), total=0, done=0, heard=0;
+  sq.forEach(function(x){ if(x.chap)return; total++; if(Prog.doneOf(x.mk,x.n)) done++; });
   var all=Prog.all();
   Object.keys(all).forEach(function(k){ heard+=(all[k].heard||0); });
   var totalSec=Object.keys(window.NARR||{}).reduce(function(a,k){
@@ -3886,7 +4135,9 @@ function renderMe(){
   for(var i=0;i<sq.length;i++){ if(!Prog.doneOf(sq[i].mk,sq[i].n)){cur=sq[i];break;} }
   if(!cur) cur=sq[sq.length-1];
   var cm=modByKey(cur.mk);
-  var cs=cm?cm.sections.filter(function(x){return x.n===cur.n;})[0]:null;
+  var isChap=!!(cur&&cur.chap);
+  var cs=cm&&!isChap?cm.sections.filter(function(x){return x.n===cur.n;})[0]:null;
+  var curHash=isChap?('#chap/'+cur.mk):('#learn/'+cur.mk+'/'+cur.n);
 
   var mods=MODS.map(function(m){
     var d=Prog.moduleDone(m.key,m.sections.length),t=m.sections.length;
@@ -3928,7 +4179,7 @@ function renderMe(){
    +'<div class="me-av">'+esc((Me.name||'?').slice(0,1))+'</div>'
    +'<div class="me-id"><h2>'+esc(Me.name)+'</h2>'
    +'<p>'+esc(Me.company||'吉利汽车')+'　·　'+(Me.role==='admin'?'企业管理员':'学员')+'　·　已完成 '+done+' / '+total+' 节</p></div>'
-   +'<button class="btn sm me-go" onclick="goSec(\''+cur.mk+'\','+cur.n+')">继续学习</button>'
+   +'<button class="btn sm me-go" onclick="location.hash=\''+curHash+'\'">'+(isChap?'去章节测评':'继续学习')+'</button>'
    +'</div>'
 
    +'<div class="card"><div class="ch2"><h3>学习计划</h3>'
@@ -3938,11 +4189,12 @@ function renderMe(){
    +'<div><b>'+done+' / '+total+'</b><span>已完成节数</span></div>'
    +'<div><b>'+leftMin+' 分钟</b><span>预计剩余时长</span></div>'
    +'<div><b>第 '+openTo+' 节</b><span>当前解锁到</span></div>'
-   +'<div><b>'+(cs?cs.m:0)+' 分钟</b><span>下一节时长</span></div>'
+   +'<div><b>'+(isChap?10:(cs?cs.m:0))+' 分钟</b><span>'+(isChap?'章节测评时长':'下一节时长')+'</span></div>'
    +'</div>'
-   +'<div class="plan-next"><div><b>下一节　'+(cm?'M'+cm.no:'')+'·'+cur.n+'</b>'
-   +'<p>'+esc(cs?cs.t:'')+'</p></div>'
-   +'<button class="btn sm" onclick="goSec(\''+cur.mk+'\','+cur.n+')">进入</button></div>'
+   +'<div class="plan-next"><div><b>'+(isChap?'章节测评':'下一节')
+   +(isChap?('　'+(cm?'M'+cm.no:'')):('　'+(cm?'M'+cm.no:'')+'·'+cur.n))+'</b>'
+   +'<p>'+esc(isChap?((cm?cm.name:'')+' 全部内容，10 道题'):(cs?cs.t:''))+'</p></div>'
+   +'<button class="btn sm" onclick="location.hash=\''+curHash+'\'">进入</button></div>'
    +'</div></div>'
 
    +'<div class="me-two">'
@@ -3976,9 +4228,10 @@ function renderHome(){
     var pct=Math.round(d/t*100);
     var openN=0;
     m.sections.forEach(function(x){ if(Prog.unlocked(m.key,x.n)) openN++; });
-    var nx=1;
-    for(var i=1;i<=t;i++){ if(!Prog.doneOf(m.key,i)){ nx=i; break; } }
-    if(nx>openN) nx=openN;
+    var nx=1, allDone=true;
+    for(var i=1;i<=t;i++){ if(!Prog.doneOf(m.key,i)){ nx=i; allDone=false; break; } }
+    if(nx>openN) nx=Math.max(1,openN);
+    var chS=Prog.chapStat(m.key), chOk=Prog.chapOk(m.key), chOpen=Prog.chapOpen(m.key);
     var mins=Math.round(m.sections.reduce(function(a,s){
       var segs=window.NARR['g_m'+m.no+'_'+s.n]||[];
       return a+segs.reduce(function(b,x){return b+x.d;},0);},0)/60);
@@ -3989,11 +4242,16 @@ function renderHome(){
       +'<div class="tags"><span class="tag">'+m.sections.length+' 节</span>'
       +'<span class="tag gray">成片 '+mins+' 分钟</span>'
       +'<span class="tag'+(openN<t?' gray':'')+'">已解锁 '+openN+' / '+t+' 节</span>'
+      +(chOk?'<span class="tag good">章测 '+(chS?chS.best:0)+' / 10 已过</span>'
+        :(chOpen?'<span class="tag warn">章节测评待做</span>':''))
       +'</div>'
       +'<div class="prog-wrap"><div class="prog-bar"><i style="width:'+pct+'%"></i></div>'
       +'<div class="prog-txt"><span>已学 '+d+' / '+t+' 节</span><span>'+pct+'%</span></div></div>'
       +'<div class="mod-actions">'
-      +'<button class="btn" onclick="goSec(\''+m.key+'\','+nx+')">'+(d?'继续学习':'开始学习')+'</button>'
+      +(allDone?'':'<button class="btn" onclick="goSec(\''+m.key+'\','+nx+')">'+(d?'继续学习':'开始学习')+'</button>')
+      +(chOpen&&!chOk?'<button class="btn'+(allDone?'':' line')+'" onclick="location.hash=\'#chap/'+m.key+'\'">'
+        +(allDone?'进入章节测评':'章节测评')+'</button>':'')
+      +(chOk?'<button class="btn line" onclick="location.hash=\'#chap/'+m.key+'\'">章测重做</button>':'')
       +'</div></div>';
   }).join('');
 
@@ -4001,7 +4259,7 @@ function renderHome(){
    +'<div class="wrap">'
    +'<div class="hero"><h2>用户思维：从「态度好」到可验证的判断顺序</h2>'
    +'<p>面向人力、财务、采购等职能数字化系统的业务产品经理。两个模块 '+totalSec+' 节，全程真人语音讲解，'
-   +'每节配一段随堂测，学完可参加能力认证。</p>'
+   +'每节配 5 道随堂测评、每章配 10 道章节测评，全部通过后可参加能力认证。</p>'
    +'<div class="meta"><span>总进度 <b>'+doneSec+' / '+totalSec+' 节</b></span>'
    +'<span>已解锁 <b>'+Prog.openCount()+' / '+totalSec+' 节</b></span>'
    +'<span>讲解时长 <b>'+totalMin+' 分钟</b></span>'
@@ -4039,10 +4297,16 @@ function renderLearn(mk,n){
       +'<div><div class="st">'+esc(s.t)+'</div><div class="sm">'+(lock?'完成上一节后解锁':s.m+' 分钟')+'</div></div></div>';
   }).join('');
 
-  // 视频下方不再放图文版 PPT：讲解内容全部在画面层里，看完直接进随堂练习
-  // 每次进入本节都从空白答卷开始（历史最好成绩在区块右上角显示）
-  PQ.mk=mk;PQ.n=n;PQ.sel={};PQ.res=null;
-  var body=pqHTML(mk,n);
+  // 视频下方只放分流条：看完 → 再看一遍 / 马上测评（测评在独立页面做）
+  var body=actHTML(mk,n);
+
+  var chOk=Prog.chapOk(mk), chOpen=Prog.chapOpen(mk), chSt=Prog.chapStat(mk);
+  var chItem='<div class="sitem chap'+(chOk?' done':'')+(chOpen?'':' lock')+'"'
+    +(chOpen?' onclick="location.hash=\'#chap/'+mk+'\'"':' title="学完本章后解锁"')+'>'
+    +'<div class="sn">'+(chOk?'✓':(chOpen?'章':'<span class="lk">🔒</span>'))+'</div>'
+    +'<div><div class="st">章节测评</div><div class="sm">'
+    +(chOk?('已通过 '+(chSt?chSt.best:0)+' / 10'):(chOpen?'10 道题 · 10 分钟':'学完本章后解锁'))
+    +'</div></div></div>';
 
   var idx=m.sections.indexOf(sec);
   var prev=idx>0?m.sections[idx-1]:null;
@@ -4055,7 +4319,7 @@ function renderLearn(mk,n){
    +'<div class="sidelist" id="side"><div class="hd" onclick="toggleSide()"><span>M'+m.no+' '+esc(m.name)
    +'</span><small>'+Prog.moduleDone(mk,m.sections.length)+'/'+m.sections.length
    +' <span class="tg" id="sidetg">目录 ▾</span></small></div>'
-   +'<div class="list">'+items+'</div></div>'
+   +'<div class="list">'+items+chItem+'</div></div>'
    +'<div class="panel">'
    +'<div class="ph"><div class="k">第 '+n+' 节 · 讲解 '+Math.round((window.NARR['g_m'+m.no+'_'+n]||[]).reduce(function(a,x){return a+x.d;},0)/60*10)/10+' 分钟</div><h2>'+esc(sec.t)+'</h2></div>'
    +'<div class="pb" id="pbody">'+playerHTML('g_m'+m.no+'_'+n)+body+'</div>'
@@ -4071,18 +4335,18 @@ function renderLearn(mk,n){
   else Prog.set(mk,n,cur.status);
 
   document.getElementById('btn-next').onclick=function(){
-    var st=Prog.get(mk,n);
-    if(!st||(st.status!=='done'&&st.status!=='quizzed')){
-      toast('先做完本节随堂练习，才能进入下一节');
-      var qb=document.getElementById('pq');
-      if(qb)qb.scrollIntoView({behavior:'smooth',block:'center'});
+    if(!Prog.doneOf(mk,n)){
+      var pct=Prog.heardPct(mk,n);
+      if(pct<80){ toast('本节视频还没听完（已听 '+pct+'%），听完才能测评'); return; }
+      toast('先完成本节随堂测评，才能进入下一节');
+      location.hash='#quiz/'+mk+'/'+n;
       return;
     }
-    if(next)goSec(mk,next.n);else location.hash='#exam/'+mk;
+    if(next)goSec(mk,next.n);else location.hash='#chap/'+mk;
   };
 
   initPlayer('g_m'+m.no+'_'+n);
-  pqInit(mk,n);
+  paintAct._sig=null;
   window.scrollTo(0,0);
 }
 
@@ -4181,58 +4445,6 @@ function pqStat(mk,n){
   return (p&&p.quiz)||null;
 }
 
-function pqHTML(mk,n){
-  var qs=pracBank(mk,n);
-  if(!qs.length)return '';
-  var st=pqStat(mk,n);
-  var live=(PQ.mk===mk&&PQ.n===n);
-  var res=live?PQ.res:null;
-  var sel=live?PQ.sel:{};
-
-  var head='<div class="pqh"><div class="pqh-l">'
-    +'<div class="k">随堂练习 · 第 '+n+' 节</div>'
-    +'<h3>5 道选择题，检验这一节听懂了没有</h3>'
-    +'<p>单选。答对 '+PQ_PASS+' 题即记本节完成，可重做，成绩取最好一次。15 节随堂练习合计占认证总分 5%。</p>'
-    +'</div><div class="pqtag'+(st&&st.best>=PQ_PASS?' ok':'')+'">'
-    +(st?('最好 '+st.best+' / '+qs.length+'　已做 '+st.tries+' 次'):'占认证 5%')
-    +'</div></div>';
-
-  var items=qs.map(function(q,i){
-    var picked=sel[i];
-    var mk2='';
-    if(res){ mk2='<span class="pqm '+(res.detail[i]?'ok':'no')+'">'+(res.detail[i]?'✓':'✗')+'</span>'; }
-    var opts=q.o.map(function(o,j){
-      var cls='opt';
-      if(res){ cls+=' lock'; if(j===q.a)cls+=' right'; else if(j===picked)cls+=' wrong'; }
-      else if(picked===j)cls+=' sel';
-      return '<div class="'+cls+'" data-q="'+i+'" data-o="'+j+'"><div class="ol">'+'ABCD'[j]
-        +'</div><div class="ot">'+esc(o)+'</div></div>';
-    }).join('');
-    var ex=res?'<div class="pqx'+(res.detail[i]?'':' bad')+'"><b>'+(res.detail[i]?'答对了':'正确答案 '+'ABCD'[q.a])+'</b>'+esc(q.why)+'</div>':'';
-    return '<div class="pqi'+(res?(res.detail[i]?' ok':' no'):'')+'" data-i="'+i+'">'
-      +'<div class="pqq"><span class="qn">'+String(i+1).padStart(2,'0')+'</span>'+mk2
-      +'<div class="qtx">'+esc(q.q)+'</div></div>'
-      +'<div class="opts">'+opts+'</div>'+ex+'</div>';
-  }).join('');
-
-  var foot;
-  if(res){
-    var pass=res.got>=PQ_PASS, nextOne=pqNextOf(mk,n);
-    foot='<div class="pqf">'
-      +'<div class="pqscore '+(pass?'ok':'no')+'"><b>'+res.got+'</b><span>/ '+qs.length+' 题答对</span>'
-      +'<em>'+(pass?'本节完成'+(nextOne?'，可以进入下一节':'，全部章节已学完'):'还差 '+(PQ_PASS-res.got)+' 题，看完解析再重做一次')+'</em></div>'
-      +'<div class="spacer"></div>'
-      +'<button class="btn line sm" onclick="pqAgain()">重新作答</button>'
-      +(pass&&nextOne?'<button class="btn sm" onclick="pqGoNext()">下一节 →</button>':'')
-      +(pass&&!nextOne?'<button class="btn sm" onclick="location.hash=\'#exam/'+mk+'\'">进入模块测评 →</button>':'')
-      +'</div>';
-  }else{
-    foot='<div class="pqf"><div class="pqcnt" id="pq-cnt">已作答 '+Object.keys(sel).length+' / '+qs.length+'</div>'
-      +'<div class="spacer"></div><button class="btn" id="pq-sub">提交作答</button></div>';
-  }
-  return '<div class="pq" id="pq">'+head+items+foot+'</div>';
-}
-
 function pqNextOf(mk,n){
   var m=modByKey(mk);
   if(!m)return null;
@@ -4241,81 +4453,267 @@ function pqNextOf(mk,n){
   return idx>=0&&idx<m.sections.length-1?m.sections[idx+1]:null;
 }
 
-function pqInit(mk,n){
-  if(PQ.mk!==mk||PQ.n!==n){PQ.mk=mk;PQ.n=n;PQ.sel={};PQ.res=null;}
-  var box=document.getElementById('pq');
-  if(!box)return;
-  box.onclick=function(e){
-    var el=e.target.closest?e.target.closest('.opt'):null;
-    if(!el)return;
-    if(PQ.res)return;
-    var i=+el.dataset.q, j=+el.dataset.o;
-    PQ.sel[i]=j;
-    var host=box.querySelector('.pqi[data-i="'+i+'"]');
-    if(host){
-      host.querySelectorAll('.opt').forEach(function(x){x.classList.remove('sel');});
-      el.classList.add('sel');
-    }
-    var c=document.getElementById('pq-cnt');
-    if(c)c.textContent='已作答 '+Object.keys(PQ.sel).length+' / '+pracBank(mk,n).length;
-  };
-  var sub=document.getElementById('pq-sub');
-  if(sub)sub.onclick=pqSubmit;
+/* ============================================================
+   视频下方分流条：看完 → 再看一遍 / 马上测评
+   ============================================================ */
+function actBody(mk,n){
+  var pct=Prog.heardPct(mk,n);
+  var st=pqStat(mk,n), best=(st&&st.best)||0;
+  var pass=best>=PQ_PASS, nx=pqNextOf(mk,n);
+  var head,btns;
+  if(pct<80){
+    head='<div class="ea-t"><b>本节视频看到 <i id="ea-pct">'+pct+'</i>%</b>'
+      +'<span>听完后解锁随堂测评（5 道题，10 分钟内完成）</span></div>';
+    btns='<button class="btn line" onclick="plReplay()">从头播放</button>';
+  }else if(!pass){
+    head='<div class="ea-t"><b>本节已看完</b><span>'
+      +(st?('上次答对 '+best+' / '+PQ_EACH+'，可以再来一次'):'5 道随堂题，答对 '+PQ_PASS+' 道记本节完成')
+      +'</span></div>';
+    btns='<button class="btn line" onclick="plReplay()">再看一遍</button>'
+      +'<button class="btn" onclick="location.hash=\'#quiz/'+mk+'/'+n+'\'">马上测评</button>';
+  }else{
+    head='<div class="ea-t ok"><b>✓ 本节已完成</b><span>随堂测评 '+best+' / '+PQ_EACH
+      +'　·　视频已听完</span></div>';
+    btns='<button class="btn line" onclick="plReplay()">再看一遍</button>'
+      +'<button class="btn line" onclick="location.hash=\'#quiz/'+mk+'/'+n+'\'">重做测评</button>'
+      +(nx?'<button class="btn" onclick="goSec(\''+mk+'\','+nx.n+')">下一节 →</button>'
+        :'<button class="btn" onclick="location.hash=\'#chap/'+mk+'\'">章节测评 →</button>');
+  }
+  return head+'<div class="ea-b">'+btns+'</div>';
+}
+function actHTML(mk,n){
+  return '<div class="ea" id="ea">'+actBody(mk,n)+'</div>';
+}
+function paintAct(){
+  var box=document.getElementById('ea');
+  if(!box||!LS_.mk)return;
+  var pct=Prog.heardPct(LS_.mk,LS_.n);
+  var st=pqStat(LS_.mk,LS_.n), pass=!!(st&&st.best>=PQ_PASS);
+  var sig=(pct>=80?'h':'w')+'|'+(pass?1:0)+'|'+(st?st.best:0);
+  if(paintAct._sig===sig){
+    var lab=document.getElementById('ea-pct');
+    if(lab)lab.textContent=String(pct);
+    return;
+  }
+  paintAct._sig=sig;
+  box.innerHTML=actBody(LS_.mk,LS_.n);
+}
+function plReplay(){
+  if(!Pl.audio||!Pl.segs)return;
+  Pl.i=0;Pl.last=0;
+  Pl.audio.src=Pl.segs[0].u;
+  Pl.audio.playbackRate=Pl.rate;
+  if(window.SLIDES&&window.SLIDES[Pl.uid])stageShow(0);
+  Pl.audio.play().catch(function(){});
+  plPaint();
+  toast('从头播放本节');
 }
 
-function pqSubmit(){
-  var mk=PQ.mk,n=PQ.n,qs=pracBank(mk,n);
+/* ============================================================
+   测评页：随堂测评（每节 5 题）· 章节测评（每章 10 题）
+   10 分钟倒计时；提交前可随时改答案；提交即出成绩与逐题解析
+   ============================================================ */
+var QZ={kind:'quiz',mk:null,n:0,sel:{},res:null,endAt:0,timer:null};
+var QZ_MIN=10;
+var CH_PASS=6;
+var CH_EACH=10;
+
+function quizBank(kind,mk,n){
+  if(kind==='chap')return (window.CHAPTER&&window.CHAPTER[mk])||[];
+  return pracBank(mk,n);
+}
+function quizPass(kind){ return kind==='chap'?CH_PASS:PQ_PASS; }
+function qzKey(kind,mk,n){ return kind+':'+mk+':'+(n||0); }
+function qzEndAt(kind,mk,n){
+  var key=qzKey(kind,mk,n), t=lsGet('qz_time',null);
+  if(t&&t.key===key&&t.endAt>Date.now())return t.endAt;
+  var e=Date.now()+QZ_MIN*60000;
+  lsSet('qz_time',{key:key,endAt:e});
+  return e;
+}
+function qzDropTimer(){
+  var t=lsGet('qz_time',null);
+  if(t&&t.key===qzKey(QZ.kind,QZ.mk,QZ.n))lsSet('qz_time',null);
+}
+function qzBack(){
+  var m=modByKey(QZ.mk);
+  if(!m)return '';
+  if(QZ.kind==='chap')return '#learn/'+QZ.mk+'/'+m.sections[m.sections.length-1].n;
+  return '#learn/'+QZ.mk+'/'+QZ.n;
+}
+
+function qzListHTML(){
+  var qs=quizBank(QZ.kind,QZ.mk,QZ.n), res=QZ.res;
+  return qs.map(function(q,i){
+    var picked=QZ.sel[i], mark='';
+    if(res)mark='<span class="qz-m '+(res.detail[i]?'ok':'no')+'">'+(res.detail[i]?'✓':'✗')+'</span>';
+    var opts=q.o.map(function(o,j){
+      var cls='opt';
+      if(res){ cls+=' lock'; if(j===q.a)cls+=' right'; else if(j===picked)cls+=' wrong'; }
+      else if(picked===j)cls+=' sel';
+      return '<div class="'+cls+'" data-q="'+i+'" data-o="'+j+'"><div class="ol">'+'ABCD'[j]
+        +'</div><div class="ot">'+esc(o)+'</div></div>';
+    }).join('');
+    var ex=res?'<div class="qz-x'+(res.detail[i]?'':' bad')+'"><b>'
+      +(res.detail[i]?'答对了':'正确答案 '+'ABCD'[q.a])+'</b>'+esc(q.why)+'</div>':'';
+    return '<div class="qzi'+(res?(res.detail[i]?' ok':' no'):'')+'" data-i="'+i+'">'
+      +'<div class="qz-q"><span class="qn">'+String(i+1).padStart(2,'0')+'</span>'+mark
+      +'<div class="qtx">'+esc(q.q)+'</div></div>'
+      +'<div class="opts">'+opts+'</div>'+ex+'</div>';
+  }).join('');
+}
+
+function qzFootHTML(){
+  var qs=quizBank(QZ.kind,QZ.mk,QZ.n), res=QZ.res;
+  if(res){
+    var pass=res.pass, m=modByKey(QZ.mk), btns='';
+    btns+='<button class="btn line" onclick="qzAgain()">再做一次</button>';
+    if(QZ.kind==='chap'){
+      var nxm=MODS.filter(function(x){return x.no===m.no+1;})[0];
+      btns+='<button class="btn line" onclick="goSec(\''+QZ.mk+'\','+m.sections[m.sections.length-1].n+')">返回课程</button>';
+      if(pass&&nxm)btns+='<button class="btn" onclick="goSec(\''+nxm.key+'\',1)">进入下一章 →</button>';
+      else if(pass&&!nxm)btns+='<button class="btn" onclick="location.hash=\'#cert\'">进入阶段一认证 →</button>';
+    }else{
+      var nx=pqNextOf(QZ.mk,QZ.n);
+      btns+='<button class="btn line" onclick="location.hash=\''+qzBack()+'\'">返回本节</button>';
+      if(pass&&nx)btns+='<button class="btn" onclick="goSec(\''+QZ.mk+'\','+nx.n+')">下一节 →</button>';
+      else if(pass&&!nx)btns+='<button class="btn" onclick="location.hash=\'#chap/'+QZ.mk+'\'">章节测评 →</button>';
+    }
+    return '<div class="qz-score '+(pass?'ok':'no')+'"><b>'+res.got+'</b><span>/ '+qs.length
+      +' 题答对</span><em>'+(pass?'已通过':'未通过，答对 '+quizPass(QZ.kind)+' 题即可')+'</em></div>'
+      +'<div class="spacer"></div>'+btns;
+  }
+  return '<div class="qz-cnt" id="qz-cnt">已作答 '+Object.keys(QZ.sel).length+' / '+qs.length+'</div>'
+    +'<div class="spacer"></div>'
+    +'<button class="btn line" onclick="location.hash=\''+qzBack()+'\'">稍后再做</button>'
+    +'<button class="btn" id="qz-sub">提交测评</button>';
+}
+
+function qzBind(){
+  var list=document.getElementById('qz-list');
+  if(!list)return;
+  list.onclick=function(e){
+    var el=e.target.closest?e.target.closest('.opt'):null;
+    if(!el||QZ.res)return;
+    var i=+el.dataset.q, j=+el.dataset.o;
+    QZ.sel[i]=j;
+    var host=list.querySelector('.qzi[data-i="'+i+'"]');
+    if(host)host.querySelectorAll('.opt').forEach(function(x){x.classList.remove('sel');});
+    el.classList.add('sel');
+    var c=document.getElementById('qz-cnt');
+    if(c)c.textContent='已作答 '+Object.keys(QZ.sel).length+' / '+quizBank(QZ.kind,QZ.mk,QZ.n).length;
+  };
+  var sub=document.getElementById('qz-sub');
+  if(sub)sub.onclick=function(){qzSubmit(false);};
+}
+
+function qzTick(){
+  clearInterval(QZ.timer);
+  var draw=function(){
+    var left=Math.max(0,Math.round((QZ.endAt-Date.now())/1000));
+    var el=document.getElementById('qz-clock');
+    if(el){
+      el.textContent=Math.floor(left/60)+':'+String(left%60).padStart(2,'0');
+      el.classList.toggle('warn',left<=60);
+    }
+    if(left<=0&&!QZ.res){ clearInterval(QZ.timer); toast('时间到，自动提交'); qzSubmit(true); }
+  };
+  draw();
+  QZ.timer=setInterval(draw,500);
+}
+
+function qzAgain(){
+  QZ.sel={};QZ.res=null;
+  QZ.endAt=qzEndAt(QZ.kind,QZ.mk,QZ.n);
+  var l=document.getElementById('qz-list'); if(l)l.innerHTML=qzListHTML();
+  var f=document.getElementById('qz-foot'); if(f)f.innerHTML=qzFootHTML();
+  qzBind(); qzTick(); window.scrollTo(0,0);
+}
+
+function qzSubmit(auto){
+  if(QZ.res)return;
+  var qs=quizBank(QZ.kind,QZ.mk,QZ.n);
   if(!qs.length)return;
   var miss=[];
-  for(var i=0;i<qs.length;i++)if(PQ.sel[i]===undefined)miss.push(i+1);
-  if(miss.length){toast('第 '+miss.join('、')+' 题还没作答');return;}
+  for(var i=0;i<qs.length;i++)if(QZ.sel[i]===undefined)miss.push(i+1);
+  if(!auto&&miss.length){ toast('第 '+miss.join('、')+' 题还没作答'); return; }
   var got=0,detail=[];
-  qs.forEach(function(q,i){var ok=PQ.sel[i]===q.a;detail.push(ok);if(ok)got++;});
-  var old=pqStat(mk,n)||{best:0,tries:0};
-  var rec=Prog.get(mk,n)||{};
-  var quiz={best:Math.max(old.best||0,got),last:got,tries:(old.tries||0)+1,at:nowISO()};
-  if(got>=PQ_PASS){
-    Prog.set(mk,n,'quizzed',{quiz:quiz});
+  qs.forEach(function(q,i){ var ok=QZ.sel[i]===q.a; detail.push(ok); if(ok)got++; });
+  var pass=got>=quizPass(QZ.kind);
+  QZ.res={got:got,detail:detail,pass:pass};
+  clearInterval(QZ.timer);
+  qzDropTimer();
+
+  if(QZ.kind==='chap'){
+    var old=Prog.chapStat(QZ.mk)||{best:0,tries:0};
+    var rec={best:Math.max(old.best||0,got),last:got,tries:(old.tries||0)+1,at:nowISO()};
+    var cm=lsGet('chap',{}); cm[QZ.mk]=rec; lsSet('chap',cm);
+    if(Me&&Me.role==='student')Cloud.upsert('gel_progress',[{id:Me.id+'__'+QZ.mk+'__chap',
+      doc:{userId:Me.id,course:QZ.mk,unitId:QZ.mk+'__chap',status:'chap',quiz:rec,updatedAt:nowISO()}}]).catch(function(){});
+    logEvent('chapter_quiz',QZ.mk+'_'+got+'/'+qs.length);
   }else{
-    Prog.set(mk,n,rec.status&&rec.status!=='none'?rec.status:'reading',{quiz:quiz});
+    var pst=pqStat(QZ.mk,QZ.n)||{best:0,tries:0};
+    var p2=Prog.get(QZ.mk,QZ.n)||{};
+    var quiz={best:Math.max(pst.best||0,got),last:got,tries:(pst.tries||0)+1,at:nowISO()};
+    Prog.set(QZ.mk,QZ.n,pass?'quizzed':(p2.status&&p2.status!=='none'?p2.status:'reading'),{quiz:quiz});
+    logEvent('practice_submit',QZ.mk+'_s'+QZ.n+'_'+got);
   }
-  PQ.res={got:got,detail:detail};
-  pqPaint();
-  if(got>=PQ_PASS){
-    logEvent('practice_pass',mk+'_s'+n+'_'+got);
-    toast('随堂练习答对 '+got+' / '+qs.length+'，本节完成');
-    var si=document.querySelector('.sitem[data-n="'+n+'"]');
-    if(si){
-      si.classList.remove('lock');si.classList.add('done');
-      var sn=si.querySelector('.sn');
-      if(sn)sn.textContent='✓';
+
+  var l2=document.getElementById('qz-list'); if(l2)l2.innerHTML=qzListHTML();
+  var f2=document.getElementById('qz-foot'); if(f2)f2.innerHTML=qzFootHTML();
+  qzBind();
+  toast(pass?('答对 '+got+' / '+qs.length+'，已通过'):('答对 '+got+' / '+qs.length+'，未通过'));
+  window.scrollTo(0,0);
+}
+
+function renderQuiz(mk,n){ renderAssess('quiz',mk,n); }
+function renderChap(mk){ renderAssess('chap',mk,0); }
+
+function renderAssess(kind,mk,n){
+  var m=modByKey(mk);
+  if(!m){ renderHome(); return; }
+  var qs=quizBank(kind,mk,n);
+  if(!qs.length){ renderHome(); return; }
+
+  if(!(Me&&Me.role==='admin')){
+    if(kind==='chap'){
+      if(!Prog.chapOpen(mk)){
+        toast('本章还没学完，章节测评暂未开放');
+        location.hash='#learn/'+mk+'/'+m.sections[m.sections.length-1].n;
+        return;
+      }
+    }else if(!Prog.heardOk(mk,n)){
+      toast('先把本节视频听完，再来做测评');
+      location.hash='#learn/'+mk+'/'+n;
+      return;
     }
-  }else{
-    toast('答对 '+got+' / '+qs.length+'，看一遍解析再重做');
   }
-}
 
-function pqPaint(){
-  var box=document.getElementById('pq');
-  if(!box)return;
-  var html=pqHTML(PQ.mk,PQ.n);
-  if(!html)return;
-  box.outerHTML=html;
-  pqInit(PQ.mk,PQ.n);
-}
+  clearInterval(QZ.timer);
+  QZ={kind:kind,mk:mk,n:n,sel:{},res:null,endAt:qzEndAt(kind,mk,n),timer:null};
 
-function pqAgain(){
-  PQ.sel={};PQ.res=null;
-  pqPaint();
-  var box=document.getElementById('pq');
-  if(box)box.scrollIntoView({behavior:'smooth',block:'start'});
-}
+  var title=kind==='chap'?(m.name+' · 章节测评'):('第 '+n+' 节 · 随堂测评');
+  var sub=kind==='chap'
+    ? ('覆盖 M'+m.no+' 全部 '+m.sections.length+' 节，共 '+qs.length+' 道选择题，答对 '+CH_PASS+' 道通过')
+    : ('5 道选择题，答对 '+PQ_PASS+' 道记本节完成');
+  var back=kind==='chap'?('#learn/'+mk+'/'+m.sections[m.sections.length-1].n):('#learn/'+mk+'/'+n);
 
-function pqGoNext(){
-  var nx=pqNextOf(PQ.mk,PQ.n);
-  if(nx)goSec(PQ.mk,nx.n);
+  document.getElementById('app').innerHTML='<div class="shell">'+topbar('用户思维 · 在线测评')
+    +'<div class="wrap"><div class="crumb"><button onclick="location.hash=\''+back+'\'">'
+    +(kind==='chap'?'返回课程':'返回本节')+'</button><span>/</span><span>'+esc(title)+'</span></div>'
+    +'<div class="qz-page">'
+    +'<div class="qz-hd"><div class="qz-hl"><div class="k">'+esc(title)+'</div>'
+    +'<h2>'+(kind==='chap'?'章节测评':'随堂测评')+'</h2><p>'+esc(sub)+'</p></div>'
+    +'<div class="qz-clock" id="qz-clock">10:00</div></div>'
+    +'<div class="qz-bar"><i id="qz-fill"></i></div>'
+    +'<div class="qz-tip">提交前可以随时修改答案；提交后立即给出成绩与逐题解析，不能再改。</div>'
+    +'<div id="qz-list">'+qzListHTML()+'</div>'
+    +'<div class="qz-foot" id="qz-foot">'+qzFootHTML()+'</div>'
+    +'</div></div></div>';
+  qzBind();
+  qzTick();
+  window.scrollTo(0,0);
 }
-
 
 function showQuiz(mk,n){
   var m=modByKey(mk),sec=m.sections.filter(function(s){return s.n===n;})[0];
@@ -4515,7 +4913,7 @@ function plNext() {
     // 最后一页播完 → 停在本节结束封面
     if (window.SLIDES && window.SLIDES[Pl.uid]) stageShow(Pl.segs.length);
     var sb = document.getElementById('pl-sub');
-    if (sb) { sb.textContent = '本节已播完，可以进入下一节'; sb.classList.add('done'); }
+    if (sb) { sb.textContent = '本节已播完，可以做随堂测评'; sb.classList.add('done'); }
     toast('本节音频已播完');
   }
 }
@@ -4548,6 +4946,7 @@ function plPaint() {
   var seg = Pl.segs[Pl.i] || {};
   var frac = seg.d > 0 ? Math.min(1, Math.max(0, (Pl.audio.currentTime || 0) / seg.d)) : 0;
   stageSync(frac);
+  paintAct();
 }
 
 /* ============================================================
