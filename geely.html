@@ -5511,9 +5511,9 @@ function plFsToggle() {
     return;
   }
   var req = el.requestFullscreen || el.webkitRequestFullscreen;
-  if (!req) { toast('当前浏览器不支持元素全屏，可按 F11 全屏'); return; }
+  if (!req) { toast('当前浏览器不支持网页全屏，可横屏观看或按 F11'); return; }
   var r;
-  try { r = req.call(el); } catch (e) { toast('当前浏览器不支持元素全屏，可按 F11 全屏'); return; }
+  try { r = req.call(el); } catch (e) { toast('当前浏览器不支持网页全屏，可横屏观看或按 F11'); return; }
   if (r && r.catch) r.catch(function () { toast('全屏被浏览器拦截了，再点一次或按 F11'); });
 }
 
