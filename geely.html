@@ -4615,7 +4615,7 @@ function renderHome(){
       +'<div class="prog-txt"><span>已学 '+d+' / '+t+' 节</span><span>'+pct+'%</span></div></div>'
       +'<div class="mod-actions">'
       +(allDone?'':(openN<1
-        ?'<button class="btn gray" disabled>前置：上一章章节测评</button>'
+        ?'<button class="btn line" onclick="toast(\'先通过 M1 的章节测评，本章会自动解锁\')">M1 章测通过后开始</button>'
         :'<button class="btn" onclick="goSec(\''+m.key+'\','+nx+')">'+(d?'继续学习':'开始学习')+'</button>'))
       +(chOpen&&!chOk?'<button class="btn'+(allDone?'':' line')+'" onclick="location.hash=\'#chap/'+m.key+'\'">'
         +(allDone?'进入章节测评':'章节测评')+'</button>':'')
@@ -4630,7 +4630,7 @@ function renderHome(){
    +'每节配 5 道随堂测评、每章配 10 道章节测评，阶段一全部通过后可参加能力认证。</p>'
    +'<div class="meta"><span>总进度 <b>'+doneSec+' / '+totalSec+' 节</b></span>'
    +'<span>已解锁 <b>'+Prog.openCount()+' / '+totalSec+' 节</b></span>'
-   +'<span>已开讲解时长 <b>'+totalMin+' 分钟</b></span>'
+   +'<span>已开成片 <b>'+totalMin+' 分钟</b></span>'
    +'<span>全课规模 <b>8 模块 · 59 节 · 480 分钟</b></span></div></div>'
    +'<div class="cert-banner" onclick="location.hash=\'#cert\'">'
    +'<div class="cb1"><b>阶段 1 · '+(jr.ready?(jr.passed?'已通过 · '+jr.total+' 分':'未通过 · '+jr.total+' 分'):'认证进行中 · '+jr.total+' / '+jr.totalFull)
