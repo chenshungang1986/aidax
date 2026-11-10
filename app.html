@@ -2520,6 +2520,9 @@ function commitAnswer(step, answerIdx) {
     // 防御：该维此前已定级（理论仅回退后可达）→ 撤销定级重走流程
     if (t.d in S._quizDone) { delete S._quizDone[t.d]; delete S.quizAnswers[t.d]; S._quizAllDone = false; }
     ensureNextStep();   // 出第 2 题 / 定级开新维 / 置 _quizAllDone
+    // v147：只有下一题确实已加入 plan 才推进；否则停在当前题（由「查看结果」收口）。
+    // 云端算分是异步的，若在此之前调用 nextQuestion，plan 未追加会被误判为本部分结束。
+    if (S._quizPlan && S._quizPlan.length > step + 1) S.quizIdx = step + 1;
     render();
   }
   if (q && q.drawToken && CLOUD_QUIZ) {
@@ -9736,7 +9739,7 @@ function renderBaseQuestion() {
   });
   html += `</div>`;
   if (shown !== undefined) {
-    html += `<div style="margin-top:12px;font-size:12.5px;color:var(--text2);">已选 <b style="color:var(--accent);">${String.fromCharCode(65 + shown)}</b> · 可直接改选，改选即生效；对错与解析在本部分结束后统一展示</div>`;
+    html += `<div style="margin-top:12px;font-size:12.5px;color:var(--text2);">已选 <b style="color:var(--accent);">${String.fromCharCode(65 + shown)}</b> · 可改选，点「提交本题」后生效；对错与解析在本部分结束后统一展示</div>`;
   }
   const isLast = idx >= total - 1;
   const canSubmit = shown !== undefined;
@@ -9745,7 +9748,7 @@ function renderBaseQuestion() {
         <button class="btn btn-outline" data-action="goBack" onclick="if(typeof S!=='undefined'){S.goBack()}">← 退出</button>
         ${idx > 0 ? `<button class="btn btn-outline" data-action="basePrev" onclick="if(typeof S!=='undefined'){S.basePrev()}">← 上一题</button>` : ''}
       </div>
-      <span style="font-size:12px;color:var(--text3);">点选项即提交 · 自动进入下一题</span>
+      <button class="btn btn-primary" data-action="submitBaseOption" ${canSubmit ? '' : 'disabled'} onclick="if(typeof S!=='undefined'){S.submitBaseOption()}">${isLast ? '提交本部分 →' : '提交本题 →'}</button>
     </div></div>`;
   html += renderPauseOverlay();
   return html;
@@ -10029,7 +10032,7 @@ function renderQuiz() {
     </div>
     <div class="quiz-progress">${dots}</div>
     ${stemHtml(stemCtx, q.q)}
-    ${stepAnswered ? '' : '<div style="font-size:12px;color:var(--text3);margin:-2px 0 10px;">单选 · 点选后自动锁定并进入下一题</div>'}
+    ${stepAnswered ? '' : '<div style="font-size:12px;color:var(--text3);margin:-2px 0 10px;">单选 · 点选后可改选，点「提交本题」后进入下一题</div>'}
     <div style="display:flex;flex-direction:column;">`;
   const committed = stepAnswered;
   const pending = committed ? undefined : ((S._quizPending && S._quizPending[step] !== undefined) ? S._quizPending[step] : undefined);
@@ -10058,12 +10061,12 @@ function renderQuiz() {
   const canSubmit = !committed && pending !== undefined;
   html += `<div class="flex-between mt-4">
       <button class="btn btn-outline" data-action="prevQuestion" ${canBackToFirst ? '' : 'disabled'} onclick="if(typeof S!=='undefined'){S.prevQuestion()}">↺ 重答上一题</button>
-      <span style="font-size:13px;color:var(--text2);">${doneCount}/${totalDims} 已完成${committed ? '' : ' · 点选项即自动下一题'}</span>
+      <span style="font-size:13px;color:var(--text2);">${doneCount}/${totalDims} 已完成${committed ? '' : ' · 点选后可改选'}</span>
       ${committed
         ? (isLastPlan && S._quizAllDone
             ? '<button class="btn btn-primary" data-action="finishQuiz" onclick="if(typeof S!==\'undefined\'){S.finishQuiz()}">查看结果</button>'
             : '<button class="btn btn-primary" data-action="nextQuestion" onclick="if(typeof S!==\'undefined\'){S.nextQuestion()}">下一题 →</button>')
-        : '<span style="font-size:12px;color:var(--text3);">点选项即提交 · 自动进入下一题</span>'}
+        : `<button class="btn btn-primary" data-action="submitQuizOption" ${canSubmit ? '' : 'disabled'} onclick="if(typeof S!==\'undefined\'){S.submitQuizOption()}">提交本题 →</button>`}
     </div>
   </div>`;
   html += renderPauseOverlay();
@@ -15897,17 +15900,12 @@ S.answerQuiz = function(i) {
   if (S._basePhase === 'active') { S.selectBaseOption(i); return; }
   answerCurrentQuestion(i);
 };
-S.selectBaseOption = function(i) { // v140：点选即提交并自动进入下一题（保留 380ms 高亮反馈）
+S.selectBaseOption = function(i) { // v147：点选仅暂存高亮，须点「提交本题」才生效
   const idx = S._baseIdx || 0;
   if (!S._basePending) S._basePending = [];
   S._basePending[idx] = i;
+  cancelAutoAdvance();   // 清掉可能残留的旧自动推进计时器
   render();
-  cancelAutoAdvance();
-  S._autoAdvTimer = setTimeout(function(){
-    S._autoAdvTimer = null;
-    if (S.view !== 'quiz' || (S._baseIdx || 0) !== idx) return;   // 已离开本页或已回退
-    S.submitBaseOption();
-  }, QUIZ_AUTO_ADV_MS);
 };
 S.submitBaseOption = function() { // v83：记录选择并前进（不判对错），末题即「提交本部分」
   const idx = S._baseIdx || 0;
@@ -15928,33 +15926,26 @@ S.submitBaseOption = function() { // v83：记录选择并前进（不判对错�
 S.basePrev = function() { // v83：回看并修改上一题（本部分提交前均可改）
   if ((S._baseIdx || 0) > 0) { S._baseIdx--; render(); }
 };
-// v140：单击即提交 —— 点选项立刻锁定该题并自动进入下一题，
-// 不再要求学员「提交本题 → 下一题」点两次。先渲染出选中态给一次视觉反馈，
-// 再提交并推进；中途离开本页 / 回退 / 暂停都会取消自动推进。
-var QUIZ_AUTO_ADV_MS = 380;
+// v147：恢复「点选 → 显式提交」两步式。点选只暂存高亮，学员点「提交本题」才定稿。
+// 推进统一由 commitAnswer 的 afterScore 驱动（等下一题生成后再走），
+// 避免云端算分异步时 plan 尚未追加就被 nextQuestion 判为「本部分结束」。
+var QUIZ_AUTO_ADV_MS = 380;   // 保留：兼容旧会话残留计时器
 function cancelAutoAdvance(){ if (S._autoAdvTimer) { clearTimeout(S._autoAdvTimer); S._autoAdvTimer = null; } }
 S.selectQuizOption = function(i) {
   const step = S.quizIdx;
   if (S._quizSelectedStep && S._quizSelectedStep[step] !== undefined) return;
   if (!S._quizPending) S._quizPending = {};
   S._quizPending[step] = i;
-  render();
   cancelAutoAdvance();
-  S._autoAdvTimer = setTimeout(function(){
-    S._autoAdvTimer = null;
-    if (S.view !== 'quiz' || S.quizIdx !== step) return;       // 已离开本页或已回退
-    if (!S._quizPending || S._quizPending[step] === undefined) return;
-    S.submitQuizOption();
-    // 只有确认该题真的落库（_quizSelectedStep 写入）才推进，避免引擎拒收时跳过一题
-    if (S._quizSelectedStep && S._quizSelectedStep[step] !== undefined) S.nextQuestion();
-  }, QUIZ_AUTO_ADV_MS);
+  render();
 };
-S.submitQuizOption = function() { // v96：单次提交即定稿——提交前可自由改选，提交后引擎按答案推进（错则按规则出下一题），不再二次提交
+S.submitQuizOption = function() { // v147：显式提交入口——提交前可自由改选，提交后由引擎按答案推进
   const step = S.quizIdx;
   if (S._quizSelectedStep && S._quizSelectedStep[step] !== undefined) return; // 已提交锁定
   const pending = (S._quizPending && S._quizPending[step] !== undefined) ? S._quizPending[step] : undefined;
   if (pending === undefined) return;
-  answerCurrentQuestion(pending); // → commitAnswer：记录答案 + 引擎按表现升降级/定级，出下一题（错则按规则继续）
+  answerCurrentQuestion(pending); // → commitAnswer → afterScore：算分 + 生成下一题 + 推进
+  render();                       // 立即给出「已提交」反馈，云端算分慢时不会像卡住
 };
 S.togglePartTimer = function() {
   const t = S._timer; if (!t) return;
@@ -15980,10 +15971,11 @@ S.prevQuestion = function() { // v41: 回退一步（撤销上一题），v126: 
   S.quizIdx--;
   render();
 };
-S.nextQuestion = function() { // v41: 推进到计划中的下一题；计划出尽（已全部定级）则出结果
+S.nextQuestion = function() { // v41 推进；v147：计划出尽时只有全部定级完成才收口
   if (!S._quizPlan) return;
   if (S.quizIdx < S._quizPlan.length - 1) { S.quizIdx++; render(); }
-  else { finishAdaptiveQuiz(); }
+  else if (S._quizAllDone) { finishAdaptiveQuiz(); }
+  // 否则：仍在等算分 / 出题，不做动作（推进由 afterScore 接管）
 };
 S.finishQuiz = function() { finishAdaptiveQuiz(); };
 S.calcResults = function() {
@@ -16645,6 +16637,10 @@ function bindEvents() {
             case 'resetScenePair': S.resetScenePair(); break;
             case 'startQuiz': S.startQuiz(); break;
             case 'answerQuiz': S.answerQuiz(idx); break;
+            case 'selectBaseOption': S.selectBaseOption(idx); break;
+            case 'submitBaseOption': S.submitBaseOption(); break;
+            case 'selectQuizOption': S.selectQuizOption(idx); break;
+            case 'submitQuizOption': S.submitQuizOption(); break;
             case 'baseStart': S.baseStart(); break;
             case 'baseSkip': S.baseSkip(); break;
             case 'baseNext': S.baseNext(); break;
