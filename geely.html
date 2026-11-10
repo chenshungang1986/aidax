@@ -435,6 +435,32 @@ a{color:var(--pri);text-decoration:none}
 .pill.no{background:#fdeef0;color:var(--accent)}
 .pill.warn{background:#fdf4e3;color:var(--warn)}
 .pill.gray{background:#f0f2f5;color:var(--muted)}
+/* ---- 客户试听 · 题库查阅 ---- */
+.bk-hd{padding:6px 2px 18px}
+.bk-hd h2{font-size:22px;font-weight:600;color:var(--deep)}
+.bk-hd p{font-size:13.5px;color:var(--muted);margin-top:8px;line-height:1.8}
+.bk-stat{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.bk-stat span{font-size:12.5px;color:var(--mid);background:#fff;border:1px solid #edf1f6;border-radius:8px;padding:7px 13px}
+.bk-stat b{color:var(--pri);font-size:15px;margin-right:4px}
+details.bk-g{border-bottom:1px solid #eef1f5}
+details.bk-g:last-child{border-bottom:none}
+details.bk-g>summary{padding:15px 2px;cursor:pointer;font-size:14.5px;font-weight:600;color:var(--deep);
+  list-style:none;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+details.bk-g>summary::-webkit-details-marker{display:none}
+details.bk-g>summary .arw{color:var(--soft);font-size:12px;transition:transform .15s}
+details.bk-g[open]>summary .arw{transform:rotate(90deg)}
+.bk-body{padding:2px 0 12px}
+.bk-sec{font-size:12.5px;color:var(--soft);font-weight:600;margin:18px 0 4px;padding:6px 11px;background:#f5f8fb;border-radius:6px}
+.bk-q{padding:15px 2px;border-bottom:1px solid #f2f5f8}
+.bk-q:last-child{border-bottom:none}
+.bk-qt{display:flex;gap:8px;align-items:baseline;font-size:14px;color:var(--deep);line-height:1.7;margin-bottom:11px;font-weight:500}
+.bk-no{color:var(--soft);font-weight:400;flex:none;font-variant-numeric:tabular-nums}
+.bk-tag{font-size:10.5px;padding:1px 7px;border-radius:5px;background:#eef3fa;color:var(--pri);font-weight:500;flex:none}
+.bk-tag.judge{background:#fdf4e3;color:var(--warn)}
+.bk-key{color:var(--ok);font-weight:500;font-size:12px}
+.bk-why{font-size:12.5px;color:var(--muted);background:#fbfaf6;border-left:3px solid #d9c48a;
+  padding:9px 13px;border-radius:0 6px 6px 0;line-height:1.75;margin-top:10px}
+.bk-why b{color:var(--warn);margin-right:8px}
 .bar-mini{height:5px;background:#eef1f5;border-radius:3px;overflow:hidden;min-width:60px}
 .bar-mini i{display:block;height:100%;background:var(--pri);border-radius:3px}
 .sbar{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px dashed var(--line)}
@@ -4491,12 +4517,18 @@ async function saveUser(u){
 /* 管理员与学员共用同一套界面和流程，唯一差别是「不需要解锁」。
    所有门禁判断都走这一个入口，避免散落的 Me.role==='admin' 漏改。 */
 function isAdm(){ return !!(window.Me&&Me.role==='admin'); }
+/* 客户试听账号：与学员同一套界面和流程，只是不需要解锁；
+   不写云端进度、不写学员活动流、不进后台统计，避免污染正式学员数据。 */
+function isTrial(){ return !!(window.Me&&Me.role==='trial'); }
+/* 所有解锁门禁的统一入口：管理员与客户试听都不受解锁限制。
+   后台入口仍只认 isAdm()，题库查阅页仅 isFree() 可进。 */
+function isFree(){ return isAdm()||isTrial(); }
 var Prog={
   key:function(mk,n){return mk+'__s'+n;},
   get:function(mk,n){var m=lsGet('prog',{});return m[this.key(mk,n)]||null;},
   all:function(){return lsGet('prog',{});},
   set:function(mk,n,st,extra){
-    if(window.__pvOn)return;                 // 管理员预览播放器不写进度
+    if(window.__pvOn||isTrial())return;      // 管理员预览 / 客户试听不写进度
     var m=lsGet('prog',{});var k=this.key(mk,n);
     var cur=m[k]||{status:'none',seconds:0,visits:0};
     cur.status=st; cur.visits=(cur.visits||0)+1; cur.updatedAt=nowISO();
@@ -4508,7 +4540,7 @@ var Prog={
   },
   // 累计有效收听时长（只计真实播放推进，拖动不计）
   addHeard:function(mk,n,delta){
-    if(window.__pvOn)return;                 // 管理员预览不累计收听时长
+    if(window.__pvOn||isTrial())return;      // 管理员预览 / 客户试听不累计收听时长
     if(!(delta>0))return;
     var m=lsGet('prog',{}),k=this.key(mk,n);
     var cur=m[k]||{status:'reading',seconds:0,visits:0,heard:0};
@@ -4562,8 +4594,8 @@ var Prog={
     return Math.min(100,Math.round(((p&&p.heard)||0)/tot*100));
   },
   introDone:function(){ return this.introPct()>=80; },
-  /* 门禁只对学员生效：管理员与学员同一套观看流程，只是不需要解锁 */
-  needIntro:function(){ return !this.introDone() && !isAdm(); },
+  /* 门禁只对正式学员生效：管理员与客户试听同一套观看流程，只是不需要解锁 */
+  needIntro:function(){ return !this.introDone() && !isFree(); },
   quizOk:function(mk,n){
     var p=this.get(mk,n);
     return !!(p&&p.quiz&&(p.quiz.best||0)>=PQ_PASS);
@@ -4733,8 +4765,8 @@ function logout(){
 }
 
 function logEvent(type,ref){
-  /* 管理员也要走学员流程，但他的观看记录不算学员活动，不写进后台动态 */
-  if(!Me||isAdm())return;
+  /* 管理员与客户试听也走学员流程，但他们的操作不算学员活动，不写进后台动态 */
+  if(!Me||isFree())return;
   Cloud.upsert('gel_events',[{id:uid('ev_'),doc:{userId:Me.id,name:Me.name,type:type,ref:ref||'',
     at:nowISO(),ua:navigator.userAgent.slice(0,120)}}]).catch(function(){});
 }
@@ -4756,6 +4788,7 @@ function route(){
   if(p[0]==='exam')return location.hash='#cert/s1';
   if(p[0]==='cert')return p[1]?renderCertStage(p[1]):renderCert();
   if(p[0]==='certificate')return renderCertificate(p[1]||'s1');
+  if(p[0]==='bank')return renderBank();
   if(p[0]==='certexam')return renderCertExam();
   if(p[0]==='certresult')return renderCertResult();
   if(p[0]==='portfolio')return renderPortfolio();
@@ -4775,9 +4808,12 @@ function topbar(title){
   var inAdm=(location.hash||'').indexOf('#admin')===0;
   var admBtn=isAdm()?'<button class="btn sm line" title="'+(inAdm?'返回学员课程页':'进入管理后台')+'"'
     +' onclick="location.hash=\''+(inAdm?'':'#admin/overview')+'\'">'+(inAdm?'课程':'后台')+'</button>':'';
+  /* 客户试听：顶栏多一个「题库查阅」入口，可看全部随堂题/章测题/认证题及答案 */
+  var bankBtn=isTrial()?'<button class="btn sm line" title="查阅全部测评题目与答案"'
+    +' onclick="location.hash=\'#bank\'">题库查阅</button>':'';
   return '<div class="topbar"><div class="brand">'+title
     +'<span>吉利汽车 · 用户思维</span></div><div class="spacer"></div>'
-    +admBtn
+    +admBtn+bankBtn
     +'<div class="who" onclick="location.hash=\'#me\'" style="cursor:pointer" title="个人中心">'
     +'<div class="avatar">'+esc((Me.name||'?').slice(0,1))+'</div>'
     +'<span>'+esc(Me.name)+'</span></div>'
@@ -4824,14 +4860,14 @@ function renderMe(){
   var nextN=introNeed?'':(isChap?'　'+(cm?'M'+cm.no:''):('　'+(cm?'M'+cm.no:'')+'·'+cur.n));
   var nextP=introNeed?'学习规划、测评规则、三条注意事项'
     :esc(isChap?((cm?cm.name:'')+' 全部内容，10 道题'):(cs?cs.t:''));
-  var curLabel=isAdm()?('全部 '+total+' 节'):(introNeed?'开篇导学（必修）':(isChap?('M'+(cm?cm.no:'')+' 章测'):('第 '+cur.n+' 节')));
+  var curLabel=isFree()?('全部 '+total+' 节'):(introNeed?'开篇导学（必修）':(isChap?('M'+(cm?cm.no:'')+' 章测'):('第 '+cur.n+' 节')));
   var nextMin=introNeed?(Math.round(Prog.introTot()/60)+' 分钟'):(isChap?'10 分钟':((cs?secMin(cur.mk,cur.n):0)+' 分钟'));
   var nextMinTxt=introNeed?'必修时长':(isChap?'章节测评时长':'下一节时长');
 
   var mods=MODS.map(function(m){
     var d=Prog.moduleDone(m.key,m.sections.length),t=m.sections.length;
     var op=0; m.sections.forEach(function(x){ if(Prog.unlocked(m.key,x.n)) op++; });
-    if(isAdm())op=t;
+    if(isFree())op=t;
     return '<div class="mrow"><div class="mn">M'+m.no+'　'+esc(m.name)+'</div>'
       +'<div class="mb"><i style="width:'+Math.round(d/t*100)+'%"></i></div>'
       +'<div class="mv">'+d+' / '+t+' 节　·　解锁 '+op+'</div></div>';
@@ -4869,7 +4905,8 @@ function renderMe(){
    +'<div class="me-hd">'
    +'<div class="me-av">'+esc((Me.name||'?').slice(0,1))+'</div>'
    +'<div class="me-id"><h2>'+esc(Me.name)+'</h2>'
-   +'<p>'+esc(Me.company||'吉利汽车')+'　·　'+(Me.role==='admin'?'企业管理员':'学员')+'　·　已完成 '+done+' / '+total+' 节</p></div>'
+   +'<p>'+esc(Me.company||'吉利汽车')+'　·　'+(Me.role==='admin'?'企业管理员':(isTrial()?'客户试听（免解锁）':'学员'))
+   +'　·　'+(isTrial()?('全课 '+total+' 节均可看'):('已完成 '+done+' / '+total+' 节'))+'</p></div>'
    +'<button class="btn sm me-go" onclick="location.hash=\''+curHash+'\'">'+(introNeed?'去看导学':(isChap?'去章节测评':'继续学习'))+'</button>'
    +'</div>'
 
@@ -4933,11 +4970,11 @@ function renderHome(){
     var pct=Math.round(d/t*100);
     var openN=0;
     m.sections.forEach(function(x){ if(Prog.unlocked(m.key,x.n)) openN++; });
-    if(isAdm())openN=t;                       /* 管理员：已上线节全部可看 */
+    if(isFree())openN=t;                      /* 管理员 / 客户试听：已上线节全部可看 */
     var nx=1, allDone=true;
     for(var i=1;i<=t;i++){ if(!Prog.doneOf(m.key,i)){ nx=i; allDone=false; break; } }
     if(nx>openN) nx=Math.max(1,openN);
-    var chS=Prog.chapStat(m.key), chOk=Prog.chapOk(m.key), chOpen=isAdm()||Prog.chapOpen(m.key);
+    var chS=Prog.chapStat(m.key), chOk=Prog.chapOk(m.key), chOpen=isFree()||Prog.chapOpen(m.key);
     var mins=Math.round(m.sections.reduce(function(a,s){
       var segs=window.NARR['g_m'+m.no+'_'+s.n]||[];
       return a+segs.reduce(function(b,x){return b+x.d;},0);},0)/60);
@@ -4972,21 +5009,22 @@ function renderHome(){
    +'<p>面向人力、财务、采购等职能数字化系统的业务产品经理。全课 8 个模块 59 节，当前开放 M1–M4（'+totalSec+' 节）。'
    +'每节配 5 道随堂测评、每章配 10 道章节测评；阶段一（M1–M2）全部通过后可参加能力认证，M3–M4 已开放学习，阶段二认证待后续模块齐备后开评。</p>'
    +'<div class="meta"><span>总进度 <b>'+doneSec+' / '+totalSec+' 节</b></span>'
-   +'<span>已解锁 <b>'+(isAdm()?totalSec:Prog.openCount())+' / '+totalSec+' 节</b></span>'
+   +'<span>已解锁 <b>'+(isFree()?totalSec:Prog.openCount())+' / '+totalSec+' 节</b></span>'
    +'<span>已开成片 <b>'+totalMin+' 分钟</b></span>'
    +'<span>全课规模 <b>8 模块 · 59 节 · 480 分钟</b></span></div></div>'
    +'<div class="cert-banner" onclick="location.hash=\'#cert\'">'
    +'<div class="cb1"><b>阶段 1 · '+(jr.ready?(jr.passed?'已通过 · '+jr.total+' 分':'未通过 · '+jr.total+' 分'):'认证进行中 · '+jr.total+' / '+jr.totalFull)
    +'</b><p>学习完成度 '+jr.learn.score+'/5　随堂练习 '+jr.prac.score+'/5　客观题 '+jr.obj.got+'/'+jr.obj.full+'　作品集 '+jr.port.got+'/'+jr.port.full
    +'　·　9 项能力已开评 3 项</p></div><div class="arr">→</div></div>'
-   +'<div class="intro-bar'+((Prog.introDone()||isAdm())?' done':' need')+'" onclick="location.hash=\'#intro\'">'
+   +'<div class="intro-bar'+((Prog.introDone()||isFree())?' done':' need')+'" onclick="location.hash=\'#intro\'">'
    +'<div class="ib-ic">导</div>'
-   +'<div class="ib-t"><b>开篇导学 · '+(isAdm()?'建议先看':'必修')+' · '
+   +'<div class="ib-t"><b>开篇导学 · '+(isFree()?'建议先看':'必修')+' · '
    +Math.round(Prog.introTot()/60)+' 分钟 · '+((window.SLIDES&&SLIDES['g_m0_1']||[]).length)+' 页</b>'
    +'<p>'+(Prog.introDone()
       ?'已完成。学习规划、测评规则（随堂 5 题 / 章测 10 题 / 10 分钟倒计时）、三条注意事项'
       :(isAdm()?'管理员不设门禁，可直接进任一模块 · 已听 '+Prog.introPct()+'%'
-        :'学完这一章（听到 80% 以上）才会解锁模块一 · 已听 '+Prog.introPct()+'%'))+'</p></div>'
+        :(isTrial()?'试听账号不设门禁，可直接进任一模块 · 已听 '+Prog.introPct()+'%'
+        :'学完这一章（听到 80% 以上）才会解锁模块一 · 已听 '+Prog.introPct()+'%')))+'</p></div>'
    +'<div class="ib-go">'+(Prog.introDone()?'再看一遍':'看一遍')+' →</div></div>'
    +'<div class="mod-grid">'+cards+'</div>'
    +'</div></div>';
@@ -5009,8 +5047,8 @@ function renderIntro(){
   var modItems=(window.PLAN||[]).map(function(p){
     var has=!!modByKey(p.key);
     var d=has?Prog.moduleDone(p.key,modByKey(p.key).sections.length):0;
-    var can=has&&(isAdm()||(ok&&Prog.unlocked(p.key,1)));
-    var sub=!has?'暂未开放':(isAdm()?(d?'已学 '+d+'/'+p.secs:'未开始 · '+p.secs+' 节')
+    var can=has&&(isFree()||(ok&&Prog.unlocked(p.key,1)));
+    var sub=!has?'暂未开放':(isFree()?(d?'已学 '+d+'/'+p.secs:'未开始 · '+p.secs+' 节')
       :(!ok?'先看完开篇导学':(can?(d?'已学 '+d+'/'+p.secs:'未开始 · '+p.secs+' 节'):'完成上一章后解锁')));
     return '<div class="sitem'+(can?'':' lock')+'" data-n="'+p.no+'"'
       +(can?' onclick="goSec(\''+p.key+'\',1)"':' title="'+sub+'"')+'>'
@@ -5046,12 +5084,12 @@ function renderIntro(){
    +'</div></div>'
    +'<div class="pf"><button class="btn line sm" onclick="location.hash=\'\'">← 返回课程首页</button>'
    +'<div class="spacer"></div>'
-   +'<button class="btn sm'+((ok||isAdm())?'':' gray')+'" id="intro-go">'
-   +(ok?'进入模块一 →':(isAdm()?'直接进入模块一 →':'还差 '+(80-pct)+'%，看完再进 →'))+'</button></div>'
+   +'<button class="btn sm'+((ok||isFree())?'':' gray')+'" id="intro-go">'
+   +(ok?'进入模块一 →':(isFree()?'直接进入模块一 →':'还差 '+(80-pct)+'%，看完再进 →'))+'</button></div>'
    +'</div></div></div></div>';
 
   document.getElementById('intro-go').onclick=function(){
-    if(!Prog.introDone()&&!isAdm()){
+    if(!Prog.introDone()&&!isFree()){
       toast('导学是必修，听到 80% 才解锁模块一（当前 '+Prog.introPct()+'%）');
       return;
     }
@@ -5097,7 +5135,7 @@ function renderLearn(mk,n){
     location.hash='#intro';
     return;
   }
-  if(!isAdm()&&!Prog.unlocked(mk,n)){
+  if(!isFree()&&!Prog.unlocked(mk,n)){
     toast('这一节还没解锁，先完成上一节');
     location.hash='';
     return;
@@ -5106,7 +5144,7 @@ function renderLearn(mk,n){
 
   var items=m.sections.map(function(s){
     var done=Prog.doneOf(mk,s.n);
-    var lock=!isAdm()&&!Prog.unlocked(mk,s.n);
+    var lock=!isFree()&&!Prog.unlocked(mk,s.n);
     return '<div class="sitem'+(s.n===n?' on':'')+(done?' done':'')+(lock?' lock':'')+'" data-n="'+s.n+'"'
       +(lock?' title="完成上一节后解锁"':' onclick="goSec(\''+mk+'\','+s.n+')"')+'>'
       +'<div class="sn">'+(done?'✓':(lock?'<span class="lk">🔒</span>':s.n))+'</div>'
@@ -5116,7 +5154,7 @@ function renderLearn(mk,n){
   // 视频下方只放分流条：看完 → 再看一遍 / 马上测评（测评在独立页面做）
   var body=actHTML(mk,n);
 
-  var chOk=Prog.chapOk(mk), chOpen=isAdm()||Prog.chapOpen(mk), chSt=Prog.chapStat(mk);
+  var chOk=Prog.chapOk(mk), chOpen=isFree()||Prog.chapOpen(mk), chSt=Prog.chapStat(mk);
   var chItem='<div class="sitem chap'+(chOk?' done':'')+(chOpen?'':' lock')+'"'
     +(chOpen?' onclick="location.hash=\'#chap/'+mk+'\'"':' title="学完本章后解锁"')+'>'
     +'<div class="sn">'+(chOk?'✓':(chOpen?'章':'<span class="lk">🔒</span>'))+'</div>'
@@ -5151,8 +5189,8 @@ function renderLearn(mk,n){
   else Prog.set(mk,n,cur.status);
 
   document.getElementById('btn-next').onclick=function(){
-    /* 管理员不需要「听完 + 随堂过关」也能翻页，其余交互与学员一致 */
-    if(isAdm()){ if(next)goSec(mk,next.n);else location.hash='#chap/'+mk; return; }
+    /* 管理员 / 客户试听不需要「听完 + 随堂过关」也能翻页，其余交互与学员一致 */
+    if(isFree()){ if(next)goSec(mk,next.n);else location.hash='#chap/'+mk; return; }
     if(!Prog.doneOf(mk,n)){
       var pct=Prog.heardPct(mk,n);
       if(pct<80){ toast('本节视频还没听完（已听 '+pct+'%），听完才能测评'); return; }
@@ -5169,7 +5207,7 @@ function renderLearn(mk,n){
 }
 
 function goSec(mk,n){
-  if(!isAdm()){
+  if(!isFree()){
     if(!Prog.unlocked(mk,n)){ toast('这一节还没解锁，先完成上一节'); return; }
   }
   location.hash='#learn/'+mk+'/'+n;
@@ -5281,9 +5319,9 @@ function actBody(mk,n){
   var head,btns;
   if(pct<80){
     head='<div class="ea-t"><b>本节视频看到 <i id="ea-pct">'+pct+'</i>%</b>'
-      +'<span>'+(isAdm()?'管理员不受解锁限制，可直接测评或翻到下一节':'听完后解锁随堂测评（5 道题，10 分钟内完成）')+'</span></div>';
+      +'<span>'+(isFree()?(isTrial()?'试听账号不受解锁限制，可直接测评或翻到下一节':'管理员不受解锁限制，可直接测评或翻到下一节'):'听完后解锁随堂测评（5 道题，10 分钟内完成）')+'</span></div>';
     btns='<button class="btn line" onclick="plReplay()">从头播放</button>'
-      +(isAdm()?'<button class="btn line" onclick="location.hash=\'#quiz/'+mk+'/'+n+'\'">直接测评</button>':'');
+      +(isFree()?'<button class="btn line" onclick="location.hash=\'#quiz/'+mk+'/'+n+'\'">直接测评</button>':'');
   }else if(!pass){
     head='<div class="ea-t"><b>本节已看完</b><span>'
       +(st?('上次答对 '+best+' / '+PQ_EACH+'，可以再来一次'):'5 道随堂题，答对 '+PQ_PASS+' 道记本节完成')
@@ -5494,7 +5532,7 @@ function renderAssess(kind,mk,n){
   var qs=quizBank(kind,mk,n);
   if(!qs.length){ renderHome(); return; }
 
-  if(!isAdm()){
+  if(!isFree()){
     if(kind==='chap'){
       if(!Prog.chapOpen(mk)){
         toast('本章还没学完，章节测评暂未开放');
@@ -5533,6 +5571,103 @@ function renderAssess(kind,mk,n){
     +'</div></div></div>';
   qzBind();
   qzTick();
+  window.scrollTo(0,0);
+}
+
+/* ============================================================
+   客户试听：测评题目查阅
+   —— 覆盖三类：随堂 5 题/节、章测 10 题/章、阶段一认证客观题。
+   只读，不计时、不写成绩，答案与解析默认展开，方便客户评估课程内容。
+   ============================================================ */
+function bankQHTML(q,i,letters,showNo){
+  var multi=Array.isArray(q.a);
+  var letter=letters||'ABCD';
+  var right=multi?q.a.map(function(x){return letter[x];}).join(''):letter[q.a];
+  var opts=q.o.map(function(o,j){
+    var isA=multi?q.a.indexOf(j)>=0:j===q.a;
+    return '<div class="opt'+(isA?' right':'')+'" style="cursor:default">'
+      +'<div class="ol">'+letter[j]+'</div><div class="ot">'+esc(o)
+      +(isA?'　<span class="bk-key">✓ 正确答案</span>':'')+'</div></div>';
+  }).join('');
+  return '<div class="bk-q"><div class="bk-qt">'
+    +(showNo?'<span class="bk-no">'+String(i+1).padStart(2,'0')+'</span>':'')
+    +(multi?'<span class="bk-tag">多选</span>':'')
+    +(q.type==='judge'?'<span class="bk-tag judge">判断</span>':'')
+    +'<span>'+esc(q.q)+'</span></div>'
+    +'<div class="opts">'+opts+'</div>'
+    +'<div class="bk-why"><b>解析</b>'+esc(q.why)
+    +(q.s?'　<span style="color:var(--soft)">（'+q.s+' 分）</span>':'')+'</div></div>';
+}
+
+function renderBank(){
+  if(!Me){renderLogin();return;}
+  if(!isFree()){toast('题库查阅仅对客户试听开放');renderHome();location.hash='';return;}
+  var pracTotal=0, chapTotal=0;
+  MODS.forEach(function(m){
+    m.sections.forEach(function(s){ pracTotal+=(window.PRACTICE&&window.PRACTICE['g_m'+m.no+'_'+s.n]||[]).length; });
+    chapTotal+=(window.CHAPTER&&window.CHAPTER[m.key]||[]).length;
+  });
+  var certTotal=(window.QUIZ&&window.QUIZ.items||[]).length;
+
+  var h='<div class="shell">'+topbar('用户思维 · 题库查阅')
+    +'<div class="wrap"><div class="crumb"><button onclick="location.hash=\'\'">我的课程</button>'
+    +'<span>/</span><span>测评题目查阅</span></div>'
+    +'<div class="bk-hd"><h2>测评题目查阅</h2>'
+    +'<p>这是客户试听只读视图，可查看学员实际作答的全部题目、正确答案与解析。'
+    +'答案默认展开、不计时、不计分，也不会记录你的作答。正式学员端仍按「听完 → 测评 → 出分」的流程进行。</p>'
+    +'<div class="bk-stat"><span><b>'+pracTotal+'</b>随堂测评题（5 题/节）</span>'
+    +'<span><b>'+chapTotal+'</b>章节测评题（10 题/章）</span>'
+    +'<span><b>'+certTotal+'</b>阶段一认证客观题</span></div></div>';
+
+  /* ---- 随堂测评：按模块折叠，每节一组 ---- */
+  h+='<div class="card"><div class="ch2"><h3>随堂测评 · 每节 5 题</h3>'
+    +'<span class="pill gray">'+pracTotal+' 题 · 答对 3 题记本节完成</span></div><div class="cb">';
+  MODS.forEach(function(m,mi){
+    var secHTML=m.sections.map(function(s){
+      var arr=(window.PRACTICE&&window.PRACTICE['g_m'+m.no+'_'+s.n])||[];
+      if(!arr.length)return '';
+      return '<div class="bk-sec">第 '+s.n+' 节 · '+esc(s.t)+'（'+arr.length+' 题）</div>'
+        +arr.map(function(q,i){return bankQHTML(q,i,'ABCD',true);}).join('');
+    }).join('');
+    var cnt=m.sections.reduce(function(a,s){return a+((window.PRACTICE&&window.PRACTICE['g_m'+m.no+'_'+s.n]||[]).length);},0);
+    h+='<details class="bk-g"'+(mi===0?' open':'')+'><summary><span class="arw">▶</span>'
+      +'M'+m.no+' '+esc(m.name)+'<span class="pill gray">'+m.sections.length+' 节 · '+cnt+' 题</span></summary>'
+      +'<div class="bk-body">'+secHTML+'</div></details>';
+  });
+  h+='</div></div>';
+
+  /* ---- 章节测评：每章 10 题 ---- */
+  h+='<div class="card"><div class="ch2"><h3>章节测评 · 每章 10 题</h3>'
+    +'<span class="pill gray">'+chapTotal+' 题 · 答对 6 题通过</span></div><div class="cb">';
+  MODS.forEach(function(m,mi){
+    var arr=(window.CHAPTER&&window.CHAPTER[m.key])||[];
+    h+='<details class="bk-g"'+(mi===0?' open':'')+'><summary><span class="arw">▶</span>'
+      +'M'+m.no+' '+esc(m.name)+'<span class="pill gray">'+(arr.length?arr.length+' 题':'待建')+'</span></summary>'
+      +'<div class="bk-body">'+(arr.length?arr.map(function(q,i){return bankQHTML(q,i,'ABCD',true);}).join('')
+      :'<div class="empty">本章题库暂未配置</div>')+'</div></details>';
+  });
+  h+='</div></div>';
+
+  /* ---- 阶段一认证客观题：按 3 个能力子项分组 ---- */
+  if(window.QUIZ&&window.QUIZ.dims&&certTotal){
+    h+='<div class="card"><div class="ch2"><h3>阶段一认证 · 客观题</h3>'
+      +'<span class="pill">'+certTotal+' 题 · 50 分</span></div><div class="cb">';
+    Object.keys(window.QUIZ.dims).forEach(function(k,di){
+      var d=window.QUIZ.dims[k];
+      var items=window.QUIZ.items.filter(function(q){return q.dim===k;});
+      h+='<details class="bk-g"'+(di===0?' open':'')+'><summary><span class="arw">▶</span>'
+        +esc(d.name)+'<span class="pill gray">'+items.length+' 题 · '+d.full+' 分</span></summary>'
+        +'<div class="bk-body">'+items.map(function(q){
+          var gi=window.QUIZ.items.indexOf(q)+1;
+          return bankQHTML(q,gi-1,'ABCDE',true);
+        }).join('')+'</div></details>';
+    });
+    h+='</div></div>';
+  }
+
+  h+='<div style="padding:8px 2px 26px"><button class="btn line" onclick="location.hash=\'\'">← 返回课程首页</button></div>'
+    +'</div></div>';
+  document.getElementById('app').innerHTML=h;
   window.scrollTo(0,0);
 }
 
@@ -6042,7 +6177,9 @@ function judgeOf(uid, sk) {
   };
 }
 
-function students(){return ADM.users.filter(function(u){return u.role!=='admin';});}
+/* 客户试听账号不进正式学员池：不计进度、不计排名、不计平均成绩 */
+function students(){return ADM.users.filter(function(u){return u.role!=='admin'&&u.role!=='trial';});}
+function trialUsers(){return ADM.users.filter(function(u){return u.role==='trial';});}
 
 function examOf(uid,mk){
   return ADM.exams.filter(function(e){return e.userId===uid&&e.course===mk;})[0]||null;
@@ -6144,7 +6281,33 @@ function admStudents(){
    +'<span style="font-size:13px;color:var(--mid)">我的账号：<b>'+esc(Me.loginId)+'</b></span>'
    +'<div class="spacer"></div>'
    +'<button class="btn sm line" onclick="changeMyPwd()">修改我的密码</button>'
-   +'</div></div>';
+   +'</div>'
+   +admTrialBlock()
+   +'</div>';
+}
+
+/* 客户试听账号单独成块：可看、可停用、可重置密码，但不计入学员统计 */
+function admTrialBlock(){
+  var ts=trialUsers();
+  if(!ts.length)return '';
+  var rows=ts.map(function(u){
+    return '<tr><td class="nm">'+esc(u.name)+'</td>'
+      +'<td><code style="font-size:12px;color:var(--muted)">'+esc(u.loginId)+'</code></td>'
+      +'<td>'+(u.company?esc(u.company):'—')+'</td>'
+      +'<td><span class="pill">免解锁</span> <span class="pill gray">题库可查</span></td>'
+      +'<td><span class="pill '+(u.active===false?'no':'ok')+'">'+(u.active===false?'已停用':'正常')+'</span></td>'
+      +'<td style="white-space:nowrap">'
+      +'<button class="btn sm gray" onclick="resetPwd(\''+u.id+'\')" style="margin-right:6px">重置密码</button>'
+      +'<button class="btn sm '+(u.active===false?'line':'danger')+'" onclick="toggleUser(\''+u.id+'\','+(u.active===false)+')">'+(u.active===false?'启用':'停用')+'</button>'
+      +'</td></tr>';
+  }).join('');
+  return '<div class="ch2" style="border-top:1px solid var(--line);border-bottom:none">'
+    +'<h3 style="font-size:14px">客户试听账号</h3><span class="pill gray">共 '+ts.length+' 人 · 不计入学员统计</span></div>'
+    +'<div class="cb p0"><table class="dt"><thead><tr><th>名称</th><th>登录账号</th><th>归属</th><th>权限</th><th>状态</th><th>操作</th></tr></thead>'
+    +'<tbody>'+rows+'</tbody></table>'
+    +'<div style="padding:11px 16px;font-size:12px;color:var(--soft);line-height:1.7">'
+    +'试听账号与学员同一套界面，免解锁看全部已上线章节、可查阅全部测评题目与答案；'
+    +'不写学习进度、不写活动流、不计入成绩与排名。用于客户演示，请勿作正式考核账号。</div></div>';
 }
 
 function addStudent(pre){
