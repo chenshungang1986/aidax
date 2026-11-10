@@ -824,6 +824,26 @@
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 @keyframes modalSlideIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:560px){.plan-form{grid-template-columns:1fr;}.fb-type-grid{grid-template-columns:repeat(2,1fr);}}
+
+  /* v148 答题页紧凑布局：题干一行 + 标题收敛 + 一屏内看到选项与提交按钮 */
+  .topbar-compact { margin-bottom:6px !important; }
+  .header.header-compact { padding:4px 0 6px; margin-bottom:8px; }
+  .header.header-compact h1 { font-size:17px; line-height:1.3; margin-bottom:2px; font-weight:600; }
+  .header.header-compact h1 svg, .header.header-compact svg { width:17px; height:17px; }
+  .header.header-compact p { font-size:11.5px; }
+  .card.quiz-card { padding:16px 18px; }
+  .quiz-stem { padding:10px 14px; margin-bottom:10px; }
+  .quiz-stem .quiz-stem-ctx, .quiz-stem .quiz-stem-q { display:inline; margin:0; font-size:15px; line-height:1.6; color:var(--text1); }
+  .quiz-stem .quiz-stem-q { font-weight:700; }
+  .quiz-card .quiz-progress { margin-bottom:10px; }
+  .quiz-card .quiz-option { padding:8px 14px; margin-bottom:6px; line-height:1.5; }
+  .quiz-card .mt-4 { margin-top:10px; }
+  @media(max-width:600px){
+    .card.quiz-card { padding:12px 12px; }
+    .header.header-compact h1 { font-size:16px; }
+    .quiz-stem .quiz-stem-ctx, .quiz-stem .quiz-stem-q { font-size:14px; }
+  }
+
 </style>
 <script src="./vendor/supabase-js.umd.js"></script>
 <script id="aidaxCloudFallback">
@@ -9398,8 +9418,8 @@ function renderTimerBar() {
   const timeStr = (mm > 0 ? mm + '分' : '') + ss + '秒';
   const col = ratio < 0.2 ? 'linear-gradient(90deg,#ff3b30,#ff9500)' : 'linear-gradient(90deg,#0071e3,#42a5f5)';
   const label = t.part === 'base' ? '第一部分 · 限时作答' : t.part === 'self' ? '第三部分 · 限时作答' : '第二部分 · 限时作答';
-  return `<div style="margin-bottom:14px;">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+  return `<div style="margin-bottom:8px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
       <span style="font-size:12px;font-weight:600;color:var(--text2);">⏱️ ${label}</span>
       <span id="partTimerText" style="font-size:13px;font-weight:700;color:${ratio<0.2?'var(--red)':'var(--accent)'};margin-left:auto;">${timeStr}</span>
       <button type="button" id="partTimerPauseBtn" class="btn btn-sm btn-outline" onclick="if(typeof S!=='undefined'){S.togglePartTimer()}">${t.paused?'▶ 继续':'⏸ 暂停'}</button>
@@ -9498,13 +9518,13 @@ function render() {
 }
 
 // ---- HEADER ----
-function headerHtml(title, sub, showBack) {
+function headerHtml(title, sub, showBack, compact) {
   var session = JSON.parse(localStorage.getItem('ai_training_session') || '{}');
   var userName = session.user || '学员';
   var indText = S.industry ? (INDUSTRIES[S.industry]?.name||'') : '';
   var roleText = S.role ? (ROLES[S.role]?.name||'') : '';
   return `
-    <div class="flex-between mb-4">
+    <div class="flex-between mb-4${compact ? ' topbar-compact' : ''}">
       <div>${showBack ? '<button class="back-nav" data-action="goBack">← 返回</button>' : ''}</div>
       <div style="display:flex;gap:10px;align-items:center;">
         ${indText ? '<span class="tag tag-blue">'+indText+'</span>' : ''}
@@ -9515,7 +9535,7 @@ function headerHtml(title, sub, showBack) {
         <button class="btn btn-sm btn-outline" data-action="logout" style="color:#ef4444;border-color:#ef4444;">退出</button>
       </div>
     </div>
-    <div class="header">
+    <div class="header${compact ? ' header-compact' : ''}">
       <h1>${title}</h1>
       ${sub ? '<p>'+sub+'</p>' : ''}
     </div>`;
@@ -9675,7 +9695,7 @@ function renderBaseIntro() {
     </div>`).join('');
   let html = headerHtml('第一部分 · AI 基础素养测评', '先做 10 题基础认知自检（约 5 分钟）· 计入综合分（30%）', true);
   html += `<div class="card slide-up">
-    <div style="display:inline-block;background:linear-gradient(90deg,#0071e3,#42a5f5);color:#fff;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;margin-bottom:12px;">第一部分 · AI 基础素养（约 5 分钟）</div>
+    <div style="display:inline-block;background:linear-gradient(90deg,#0071e3,#42a5f5);color:#fff;font-size:12px;font-weight:600;padding:2px 10px;border-radius:20px;margin-bottom:6px;">第一部分 · AI 基础素养（约 5 分钟）</div>
     <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;">
       <div style="font-size:36px;line-height:1.2;">🧭</div>
       <div style="flex:1;min-width:240px;">
@@ -9717,15 +9737,15 @@ function renderBaseQuestion() {
   // 基础素养卷原先只渲染 q.q，导致屏幕上看起来「没有题干」。此处与岗位卷渲染口径对齐。
   // v140：情景与提问合并进同一题干块（stemHtml），避免只看到问句就作答。
   const stemCtx = q.scenario ? String(q.scenario).replace('场景：', '') : '';
-  let html = headerHtml(theme.icon + ' ' + theme.name + ' · AI 基础素养', '基础卷（计入综合分 · 30%）· ' + `第 ${idx + 1}/${total} 题`, true);
-  html += `<div class="card slide-up" style="position:relative;">
+  let html = headerHtml(theme.icon + ' ' + theme.name + ' · AI 基础素养', '基础卷（计入综合分 · 30%）· ' + `第 ${idx + 1}/${total} 题`, true, true);
+  html += `<div class="card slide-up quiz-card" style="position:relative;">
     ${renderTimerBar()}
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;">
       <span class="tag tag-blue">${theme.name}</span>
       <span style="font-size:12px;color:var(--text2);">${levelNames[q.level] || '通用'} · 难度 ${['低', '中', '高'][q.level] || '中'}</span>
       <span style="margin-left:auto;font-size:12px;color:var(--text2);">已答 ${answeredCount}/${total}</span>
     </div>
-    <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">${dots}</div>
+    <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">${dots}</div>
     ${stemHtml(stemCtx, q.q)}
     <div style="display:flex;flex-direction:column;">`;
   // v83：选项仅暂存高亮，不判对错；本部分提交前可随时回看修改
@@ -9789,7 +9809,7 @@ function renderBaseSummary() {
   }).join('');
   let html = headerHtml('第一部分 · 基础素养测评完成', '计入综合分（30%）· 与岗位能力合并', true);
   html += `<div class="card slide-up text-center">
-    <div style="text-align:center;margin:6px auto 2px;"><svg viewBox="0 0 120 120" width="132" height="132"><circle class="gauge-bg" cx="60" cy="60" r="52"/><circle class="gauge-fill" cx="60" cy="60" r="52" stroke-dasharray="326" stroke-dashoffset="${ringOffset}" stroke="${ringColor}"/></svg>
+    <div class="gauge" style="width:132px;height:132px;margin:6px auto 2px;"><svg viewBox="0 0 120 120" width="132" height="132" style="display:block;"><circle class="gauge-bg" cx="60" cy="60" r="52"/><circle class="gauge-fill" cx="60" cy="60" r="52" stroke-dasharray="326" stroke-dashoffset="${ringOffset}" stroke="${ringColor}"/></svg>
       <div class="gauge-text">${pct}%</div></div>
     <div class="gauge-label">AI 基础素养得分（${r.correct}/${r.total} 题）</div>
     <div class="alert ${pct >= 80 ? 'alert-success' : pct >= 60 ? 'alert-warning' : 'alert-info'}" style="margin-top:12px;">
@@ -9837,7 +9857,7 @@ function renderSelfIntro() {
   const n = SELF_ASSESS_QUIZ.length;
   let html = headerHtml('第三部分 · AI 能力自评', '最后，花 2 分钟说说你自己的 AI 工具使用现状', true);
   html += `<div class="card slide-up">
-    <div style="display:inline-block;background:linear-gradient(90deg,#0071e3,#42a5f5);color:#fff;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;margin-bottom:12px;">第三部分 · AI 能力自评（约 2 分钟）</div>
+    <div style="display:inline-block;background:linear-gradient(90deg,#0071e3,#42a5f5);color:#fff;font-size:12px;font-weight:600;padding:2px 10px;border-radius:20px;margin-bottom:6px;">第三部分 · AI 能力自评（约 2 分钟）</div>
     <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;">
       <div style="font-size:36px;line-height:1.2;">🪞</div>
       <div style="flex:1;min-width:240px;">
@@ -9875,14 +9895,14 @@ function renderSelfQuestion() {
     dots += `<div style="width:14px;height:14px;border-radius:50%;background:${bg};border:2px solid ${cur ? 'var(--accent)' : 'transparent'};transition:all .2s;"></div>`;
   }
 
-  let html = headerHtml('🪞 能力自评 · ' + (q.multi ? '可多选' : '单选'), '第 ' + (idx + 1) + '/' + total + ' 题 · 不计入综合分', true);
-  html += `<div class="card slide-up" style="position:relative;">
+  let html = headerHtml('🪞 能力自评 · ' + (q.multi ? '可多选' : '单选'), '第 ' + (idx + 1) + '/' + total + ' 题 · 不计入综合分', true, true);
+  html += `<div class="card slide-up quiz-card" style="position:relative;">
     ${renderTimerBar()}
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;">
       <span class="tag tag-blue">${q.multi ? '多选题' : '单选题'}</span>
       <span style="margin-left:auto;font-size:12px;color:var(--text2);">已答 ${ (S._selfAnswers||[]).filter(a=>!!a).length }/${total}</span>
     </div>
-    <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">${dots}</div>
+    <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">${dots}</div>
     <div class="quiz-question">${q.q}</div>
     <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px;">`;
 
@@ -10021,18 +10041,18 @@ function renderQuiz() {
     dots += `<div class="quiz-dot ${cls}" title="${(AI_DIMS[d] && AI_DIMS[d].name) || d}"></div>`;
   }
 
-  let html = headerHtml(dimInfo.icon + ' ' + dimInfo.name + ' · ' + levelName, `能力维度 ${dimPos+1}/${totalDims}`, true);
-  html += `<div class="card slide-up" style="position:relative;">
+  let html = headerHtml(dimInfo.icon + ' ' + dimInfo.name + ' · ' + levelName, `能力维度 ${dimPos+1}/${totalDims}`, true, true);
+  html += `<div class="card slide-up quiz-card" style="position:relative;">
     ${renderTimerBar()}
-    <div style="display:inline-block;background:linear-gradient(90deg,#0071e3,#42a5f5);color:#fff;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;margin-bottom:12px;">第二部分 · AI 业务场景应用（自适应测评）</div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+    <div style="display:inline-block;background:linear-gradient(90deg,#0071e3,#42a5f5);color:#fff;font-size:12px;font-weight:600;padding:2px 10px;border-radius:20px;margin-bottom:6px;">第二部分 · AI 业务场景应用（自适应测评）</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;">
       <span class="tag tag-blue">${dimInfo.short}</span>
       <span style="font-size:12px;color:var(--text2);">${levelName} · 难度 ${['低','中','高'][t.lv] || '中'} · 本维第 ${qNoInDim} 题${qNoInDim === 1 ? '（按你的作答动态加题，最多 3 题）' : ''}</span>
       <span style="margin-left:auto;font-size:12px;font-weight:600;color:${Object.keys(S._quizDone).length === totalDims ? 'var(--green)' : 'var(--text2)'};">已定级 ${Object.keys(S._quizDone).length}/${totalDims} 维</span>
     </div>
     <div class="quiz-progress">${dots}</div>
     ${stemHtml(stemCtx, q.q)}
-    ${stepAnswered ? '' : '<div style="font-size:12px;color:var(--text3);margin:-2px 0 10px;">单选 · 点选后可改选，点「提交本题」后进入下一题</div>'}
+    ${stepAnswered ? '' : '<div style="font-size:12px;color:var(--text3);margin:0 0 8px;">单选 · 点选后可改选，点「提交本题」后进入下一题</div>'}
     <div style="display:flex;flex-direction:column;">`;
   const committed = stepAnswered;
   const pending = committed ? undefined : ((S._quizPending && S._quizPending[step] !== undefined) ? S._quizPending[step] : undefined);
@@ -12428,8 +12448,8 @@ function stemHtml(ctx, question) {
   var c = ctx ? String(ctx).trim() : '';
   if (!c) return '<div class="quiz-question">' + question + '</div>';
   return '<div class="quiz-stem">'
-    + '<p class="quiz-stem-ctx">' + c + '</p>'
-    + '<p class="quiz-stem-q">' + question + '</p>'
+    + '<span class="quiz-stem-ctx">' + c + '</span> '
+    + '<span class="quiz-stem-q">' + question + '</span>'
     + '</div>';
 }
 
