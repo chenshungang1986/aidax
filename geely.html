@@ -5501,19 +5501,23 @@ function qzSubmit(auto){
   clearInterval(QZ.timer);
   qzDropTimer();
 
-  if(QZ.kind==='chap'){
-    var old=Prog.chapStat(QZ.mk)||{best:0,tries:0};
-    var rec={best:Math.max(old.best||0,got),last:got,tries:(old.tries||0)+1,at:nowISO()};
-    var cm=lsGet('chap',{}); cm[QZ.mk]=rec; lsSet('chap',cm);
-    if(Me&&Me.role==='student')Cloud.upsert('gel_progress',[{id:Me.id+'__'+QZ.mk+'__chap',
-      doc:{userId:Me.id,course:QZ.mk,unitId:QZ.mk+'__chap',status:'chap',quiz:rec,updatedAt:nowISO()}}]).catch(function(){});
-    logEvent('chapter_quiz',QZ.mk+'_'+got+'/'+qs.length);
-  }else{
-    var pst=pqStat(QZ.mk,QZ.n)||{best:0,tries:0};
-    var p2=Prog.get(QZ.mk,QZ.n)||{};
-    var quiz={best:Math.max(pst.best||0,got),last:got,tries:(pst.tries||0)+1,at:nowISO()};
-    Prog.set(QZ.mk,QZ.n,pass?'quizzed':(p2.status&&p2.status!=='none'?p2.status:'reading'),{quiz:quiz});
-    logEvent('practice_submit',QZ.mk+'_s'+QZ.n+'_'+got);
+  /* 管理员与客户试听照常看到成绩与逐题解析（QZ.res），但不留学习痕迹：
+     不写本地进度、不写云端、不写活动流，避免共享试听号之间串记录或污染统计。 */
+  if(!isFree()){
+    if(QZ.kind==='chap'){
+      var old=Prog.chapStat(QZ.mk)||{best:0,tries:0};
+      var rec={best:Math.max(old.best||0,got),last:got,tries:(old.tries||0)+1,at:nowISO()};
+      var cm=lsGet('chap',{}); cm[QZ.mk]=rec; lsSet('chap',cm);
+      if(Me&&Me.role==='student')Cloud.upsert('gel_progress',[{id:Me.id+'__'+QZ.mk+'__chap',
+        doc:{userId:Me.id,course:QZ.mk,unitId:QZ.mk+'__chap',status:'chap',quiz:rec,updatedAt:nowISO()}}]).catch(function(){});
+      logEvent('chapter_quiz',QZ.mk+'_'+got+'/'+qs.length);
+    }else{
+      var pst=pqStat(QZ.mk,QZ.n)||{best:0,tries:0};
+      var p2=Prog.get(QZ.mk,QZ.n)||{};
+      var quiz={best:Math.max(pst.best||0,got),last:got,tries:(pst.tries||0)+1,at:nowISO()};
+      Prog.set(QZ.mk,QZ.n,pass?'quizzed':(p2.status&&p2.status!=='none'?p2.status:'reading'),{quiz:quiz});
+      logEvent('practice_submit',QZ.mk+'_s'+QZ.n+'_'+got);
+    }
   }
 
   var l2=document.getElementById('qz-list'); if(l2)l2.innerHTML=qzListHTML();
