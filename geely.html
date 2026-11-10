@@ -6302,7 +6302,9 @@ function admTrialBlock(){
       +'</td></tr>';
   }).join('');
   return '<div class="ch2" style="border-top:1px solid var(--line);border-bottom:none">'
-    +'<h3 style="font-size:14px">客户试听账号</h3><span class="pill gray">共 '+ts.length+' 人 · 不计入学员统计</span></div>'
+    +'<h3 style="font-size:14px">客户试听账号</h3><span class="pill gray">共 '+ts.length+' 人 · 不计入学员统计</span>'
+    +'<div class="spacer"></div>'
+    +'<button class="btn sm" onclick="addTrial()">新增试听</button></div>'
     +'<div class="cb p0"><table class="dt"><thead><tr><th>名称</th><th>登录账号</th><th>归属</th><th>权限</th><th>状态</th><th>操作</th></tr></thead>'
     +'<tbody>'+rows+'</tbody></table>'
     +'<div style="padding:11px 16px;font-size:12px;color:var(--soft);line-height:1.7">'
@@ -6331,6 +6333,32 @@ function addStudent(pre){
       saveUser(u).then(function(){
         ADM.users.unshift(u);ADM.loaded=true;
         toast('已创建：'+lid+' / '+pw);
+        paintAdmin();
+      }).catch(function(e){toast('创建失败：'+e.message.slice(0,60));});
+    }}]);
+}
+
+function addTrial(){
+  dlg('新增客户试听账号','创建后把账号密码发给客户；试听号免解锁、可查题库，不计入学员统计',
+    '<div class="form-grid">'
+    +'<div class="fi"><label>名称</label><input class="inp" id="nt-name" value="" placeholder="如 试听客户F"></div>'
+    +'<div class="fi"><label>登录账号</label><input class="inp" id="nt-id" value="" placeholder="如 trial06"></div>'
+    +'<div class="fi"><label>归属 / 备注</label><input class="inp" id="nt-co" value="" placeholder="如 客户演示 · 采购"></div>'
+    +'<div class="fi"><label>初始密码</label><input class="inp" id="nt-pw" value="trial2026"></div>'
+    +'</div>',
+    [{t:'取消',fn:function(){return true;}},{t:'创建',p:1,fn:function(){
+      var name=document.getElementById('nt-name').value.trim();
+      var lid=document.getElementById('nt-id').value.trim();
+      var co=document.getElementById('nt-co').value.trim();
+      var pw=document.getElementById('nt-pw').value.trim()||'trial2026';
+      if(!name||!lid){toast('名称和登录账号必填');return false;}
+      if(ADM.users.some(function(u){return u.loginId===lid;})){toast('登录账号已存在');return false;}
+      var salt=mkSalt();
+      var u={id:uid('u_y'),loginId:lid,name:name,role:'trial',company:co,
+        salt:salt,pwd:hash(pw,salt),active:true,createdAt:nowISO()};
+      saveUser(u).then(function(){
+        ADM.users.unshift(u);ADM.loaded=true;
+        toast('已创建试听号：'+lid+' / '+pw);
         paintAdmin();
       }).catch(function(e){toast('创建失败：'+e.message.slice(0,60));});
     }}]);
