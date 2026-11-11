@@ -353,12 +353,12 @@ function applyCustom(){
 const STEP_LABEL={understand:'理解',demo:'演示',todo:'我要做',spar:'陪练'};
 
 /* ===================== 模型接入层 =====================
-   唯一通道：课程自有 AI 陪练服务（同源 /chat Worker，DeepSeek Key 只放服务端 Secret）。
-   探测顺序：localStorage 记住的地址 → 同源 /ping → https://chat.aidax.cn/ping
+   唯一通道：课程自有 AI 陪练服务（Supabase Edge Function aidax-chat，DeepSeek Key 只放服务端 Secret）。
+   探测顺序：localStorage 记住的地址 → 同源 /ping → Supabase aidax-chat → https://chat.aidax.cn/ping
    （本地 http 开发时再追加 127.0.0.1:3000）。/ping 必须返回 {ok:true,service:'aidax-llm-proxy'}，
    避免把 GitHub Pages 的 404 页面误判为服务可用。全部失败则降级本地规则引擎，学习不中断。
-   前端不保存、不展示任何 API Key；模型固定 deepseek-flash。 */
-const CHAT_CANDIDATES = ['', 'https://chat.aidax.cn'];
+   前端不保存、不展示任何 API Key；模型固定 deepseek-flash（服务端强制，忽略前端传值）。 */
+const CHAT_CANDIDATES = ['', 'https://nyqiwjwzbpnepamldqto.supabase.co/functions/v1/aidax-chat', 'https://chat.aidax.cn'];
 if(location.protocol==='http:' || location.hostname==='127.0.0.1' || location.hostname==='localhost'){
   CHAT_CANDIDATES.push('http://127.0.0.1:3000');
 }
@@ -378,7 +378,7 @@ function chatOrigin(){ return LLM.base ? LLM.base.replace(/\/$/,'') : ''; }
 const WORKER_FALLBACK_SYS='你是 AIDAX 企业 AI 实训课程的内嵌陪练教练。回答简洁具体、面向真实业务场景；需要真实数据的地方明确标出待填，绝不编造数字。';
 async function pingAt(base){
   try{
-    const ctl=new AbortController(); const t=setTimeout(()=>ctl.abort(),3500);
+    const ctl=new AbortController(); const t=setTimeout(()=>ctl.abort(),6000);
     let r;
     try{ r=await fetch((base?base.replace(/\/$/,''):'')+'/ping',{cache:'no-store',signal:ctl.signal}); }
     finally{ clearTimeout(t); }
