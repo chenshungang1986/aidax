@@ -5689,10 +5689,10 @@ const COURSES = {
     {id:'newbie_grad_m7', title:'M7 红线、合规与综合实战', desc:'数据安全红线、可追溯原则，拼出你的一周 AI 工作流', type:'video', dur:'8 单元', dims:['prompt','tools','data','content','dev','workflow','security','strategy'], requires:['newbie_grad_m1','newbie_grad_m2','newbie_grad_m3','newbie_grad_m4']}
   ],
   auto_pm: [
-    {id:'auto_pm_m0', title:'M0 导论：车企 PM 的 AI 机会与红线', desc:'整车规划·智能座舱/智驾·上市营销·数据合规等 6 类机会与 3 条不可越过的红线', type:'video', dur:'8 单元', dims:['strategy','security'], requires:[]},
+    {id:'auto_pm_m0', title:'M0 导论：AI 产品经理在车企的位置', desc:'三重身份（场景翻译官/需求守门人/签字人）、战略图拆需求清单、机会—红线对照表与 90 天路线', type:'video', dur:'8 单元', dims:['security','workflow'], requires:[]},
     {id:'auto_pm_m1', title:'M1 整车产品规划与市场洞察', desc:'竞品配置扫描、政策与供应链信号、细分市场机会判断——把外部信号变成车型决策', type:'video', dur:'8 单元', dims:['prompt','data'], requires:['auto_pm_m0']},
     {id:'auto_pm_m2', title:'M2 用户与场景研究（智能座舱深挖）', desc:'车主访谈→洞察、用车场景聚类、座舱功能优先级与旅程地图', type:'video', dur:'8 单元', dims:['prompt','tools','data'], requires:['auto_pm_m0']},
-    {id:'auto_pm_m3', title:'M3 配置定义、定价与车型生命周期', desc:'配置梯度、价格带与毛利测算、年款改款节奏与生命周期管理', type:'video', dur:'8 单元', dims:['content','tools','dev'], requires:['auto_pm_m0']},
+    {id:'auto_pm_m3', title:'M3 车端 PRD 与端云约束', desc:'车端 PRD 与互联网 PRD 的五处不同、端云分工与接口约定，含座舱 PRD 深度演示', type:'video', dur:'8 单元', dims:['content','dev','data'], requires:['auto_pm_m0']},
     {id:'auto_pm_m4', title:'M4 订单数据分析与上市决策', desc:'订单结构口径、NL2SQL 边界、上市节奏与产能-需求匹配', type:'video', dur:'8 单元', dims:['data','tools'], requires:['auto_pm_m0']},
     {id:'auto_pm_m5', title:'M5 供应链协同与研发交付', desc:'零部件需求→验收用例、变更影响评估、交付风险与监控看板', type:'video', dur:'8 单元', dims:['workflow','dev'], requires:['auto_pm_m0']},
     {id:'auto_pm_m6', title:'M6 车辆数据安全与合规下的 AI 用法', desc:'车联网数据分级、红线清单、可解释与审计追溯', type:'video', dur:'8 单元', dims:['security'], requires:['auto_pm_m0']},
@@ -5917,7 +5917,7 @@ function courseListFor(roleId, industryId) {
   // 否则会出现「地图列通用产品课、点进去却是金融 PM 课」的错位。
   // 注意：这里也刻意不追加通用「AI 工具指南」5 门——它们在丰富课内无法完成，会卡死「成果测验」解锁。
   if (industryId === 'finance' && roleId === 'pm') return (COURSES.finance_pm || []).slice();
-  // 智能汽车 × 产品经理：课程实体 = 64 单元丰富课（course_auto_pm_full.html）的 8 个模块。
+  // 智能汽车 × 产品经理：课程实体 = 深版 64 单元课（course_auto_ai_pm_deep.html）的 8 个模块。
   // 学习地图 / 课程列表 / 学习计划 / 后台统计须与该丰富课一一对应（点击带 ?m=Mx 深链定位模块），
   // 否则会出现「地图列通用产品课、点进去却是车企 PM 课」的错位；同样不追加通用 AI 工具指南。
   if (industryId === 'auto' && roleId === 'pm') return (COURSES.auto_pm || []).slice();
@@ -15404,13 +15404,14 @@ S.openCourse = function(idx) {
     window.open('course_finance_pm_full.html' + mparam + wparam + adminParam(mparam || wparam), '_blank', 'noopener');
     return;
   }
-  // 智能汽车 × 产品经理：进入完整 64 单元课程（course_auto_pm_full.html），
+  // 智能汽车 × 产品经理：进入深版 64 单元课程（course_auto_ai_pm_deep.html，2026-11-14 起），
   // 带 ?m=Mx 深链定位模块、&weak= 弱维做个性化高亮；管理员会话自动带 admin=1（跳过测验/考试直接看视频）。
+  // ⚠️ 与 COURSES.auto_pm 的 M0/M3 标题+desc+dims 是原子改动：只改这里不改地图（或反之）会造地图与落地页错位。
   if (S.industry === 'auto' && S.role === 'pm') {
     const mparam = (c && c.id && /auto_pm_m(\d+)/.test(c.id)) ? ('?m=M' + c.id.match(/auto_pm_m(\d+)/)[1]) : '';
     const weak = weakDimList();
     const wparam = weak.length ? ((mparam ? '&' : '?') + 'weak=' + encodeURIComponent(weak.join(','))) : '';
-    window.open('course_auto_pm_full.html' + mparam + wparam + adminParam(mparam || wparam), '_blank', 'noopener');
+    window.open('course_auto_ai_pm_deep.html' + mparam + wparam + adminParam(mparam || wparam), '_blank', 'noopener');
     return;
   }
   // 零售电商 × 产品经理：进入完整 64 单元课程（course_retail_pm_deep.html，2026-10-30 深版），
