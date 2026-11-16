@@ -607,7 +607,7 @@ function renderCheckpoint(){
       +'</div>';
     const aud=(AUDIO[uid]||null);
     const note=document.getElementById('p-note');
-    if(note) note.textContent = aud? '配音：火山引擎豆包真人声（'+aud.length+' 段）' : '配音：本机语音合成';
+    if(note){ note.textContent = aud? '' : '本节语音制作中，暂用系统朗读'; note.style.display = aud? 'none' : ''; }
     CUR=makePlayer(uid,u.vslides,aud);
   } else if(step.key==='task'){
     cp.className='cp';
