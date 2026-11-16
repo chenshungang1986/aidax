@@ -427,10 +427,12 @@
 </head>
 <body>
 <header>
+  <a class="lc-home" href="app.html" title="返回学习中心：学习地图 · 测评成绩 · 学习计划"><span class="lc-ar">←</span><span class="lc-tx">学习中心</span></a>
   <h1>零售电商 × 产品经理 AI 实战<span>完整学习课程 M0–M7 · 64 单元 · 每单元 3–4 分钟</span></h1>
   <div class="hp" title="学习进度"><i id="prog-bar"></i></div>
   <button class="sb-btn" onclick="toggleSb()" title="课程目录">☰ 目录</button>
   <button class="gear" onclick="openCfg()" title="设置">⚙</button>
+  <button class="lc-user" id="lc-user" onclick="lcOpen()" title="我的学习"><span class="lc-av" id="lc-av">游</span><span class="lc-nm" id="lc-nm">我的学习</span></button>
 </header>
 <div id="admin-banner" class="admin-banner" style="display:none">🔓 管理员预览模式已开启：可直接观看全部 <span id="admin-units">64</span> 单元视频，练习 / 陪练 / 测验均为可选，无需完成即可标记已观看。</div>
 <div class="layout">
@@ -3861,5 +3863,215 @@ llmProbe(true);
 /* 启动时补推上次未送达的反馈 */
 setTimeout(function(){ fbFlushOutbox(function(ok,total){ if(total&&ok<total) fbDiag('启动补推：'+ok+'/'+total); }); }, 1500);
 </script>
+
+
+
+
+<!--LC:BEGIN-->
+<style>
+/* ===== 学习中心（v156）：课程页不再是一座孤岛 ===== */
+header h1{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.lc-home{display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 10px;border:1px solid var(--line);border-radius:9px;background:#fff;color:#41527a;font-size:12.5px;font-weight:600;text-decoration:none;flex:none;transition:.15s}
+.lc-home:hover{border-color:var(--blue);color:var(--blue);background:#f7faff}
+.lc-user{display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 10px 0 5px;border:1px solid var(--line);border-radius:999px;background:#fff;cursor:pointer;flex:none;font-size:12.5px;font-weight:600;color:#41527a;transition:.15s}
+.lc-user:hover{border-color:var(--blue);color:var(--blue)}
+.lc-av{width:21px;height:21px;border-radius:50%;background:linear-gradient(135deg,#1a5cff,#7c3aed);color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;flex:none;font-weight:600}
+.lc-av.guest{background:#c7d0e0}
+.lc-mask{position:fixed;inset:0;background:rgba(8,16,40,.42);opacity:0;pointer-events:none;transition:opacity .2s;z-index:200}
+.lc-mask.on{opacity:1;pointer-events:auto}
+.lc-drawer{position:fixed;top:0;right:0;height:100%;width:394px;max-width:93vw;background:#fff;box-shadow:-18px 0 44px rgba(16,32,68,.16);transform:translateX(104%);transition:transform .26s cubic-bezier(.4,0,.2,1);z-index:201;display:flex;flex-direction:column}
+.lc-drawer.on{transform:none}
+.lc-top{display:flex;align-items:center;gap:11px;padding:18px 18px 14px;border-bottom:1px solid var(--line);flex:none}
+.lc-top .lc-av{width:36px;height:36px;font-size:14px}
+.lc-hn{font-size:15px;font-weight:700;line-height:1.3}
+.lc-hm{font-size:11.8px;color:var(--mut);margin-top:2px}
+.lc-x{margin-left:auto;width:28px;height:28px;border:none;background:#f2f5fb;border-radius:8px;color:var(--mut);cursor:pointer;font-size:13px;flex:none}
+.lc-x:hover{background:#e6ecf8;color:var(--txt)}
+#lc-body{flex:1;display:flex;flex-direction:column;min-height:0}
+.lc-bd{flex:1;overflow-y:auto;min-height:0;padding:14px 18px 8px}
+.lc-sec{margin-bottom:16px}
+.lc-st{display:flex;align-items:baseline;gap:7px;font-size:12px;font-weight:700;color:var(--blue-d);letter-spacing:.02em;margin-bottom:8px}
+.lc-st em{font-style:normal;font-weight:400;color:var(--mut);font-size:11.5px;margin-left:auto}
+.lc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.lc-num{background:#f7f9fe;border:1px solid var(--line);border-radius:10px;padding:9px 8px;text-align:center}
+.lc-num b{display:block;font-size:18px;line-height:1.25;color:var(--txt)}
+.lc-num b small{font-size:11px;font-weight:500;color:var(--mut)}
+.lc-num span{font-size:10.8px;color:var(--mut)}
+.lc-bar{height:7px;background:#e8eefb;border-radius:99px;overflow:hidden;margin:2px 0 7px}
+.lc-bar i{display:block;height:100%;background:linear-gradient(90deg,#1a5cff,#4f8bff);border-radius:99px}
+.lc-line{font-size:12.3px;color:var(--mut);line-height:1.7}
+.lc-line b{color:var(--txt)}
+.lc-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;margin-bottom:7px;cursor:pointer;background:#fff;transition:.14s}
+.lc-item:hover{border-color:#b9cdfb;background:#fafcff}
+.lc-item .u{font-size:10.5px;font-weight:700;color:#fff;background:var(--blue);border-radius:6px;padding:2px 6px;flex:none}
+.lc-item .u.next{background:#16a34a}
+.lc-item .t{font-size:12.6px;line-height:1.45;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.lc-item .d{font-size:10.8px;color:var(--mut);flex:none}
+.lc-weak{display:inline-block;font-size:11px;background:#fff1f2;border:1px solid #fecdd3;color:#be123c;border-radius:999px;padding:1px 8px;margin:0 5px 5px 0}
+.lc-empty{font-size:12.3px;color:var(--mut);background:#f7f9fe;border:1px dashed var(--line);border-radius:10px;padding:11px 12px;line-height:1.65}
+.lc-foot{flex:none;padding:12px 18px 16px;border-top:1px solid var(--line);display:flex;gap:8px}
+.lc-btn{flex:1;height:36px;border-radius:10px;border:1px solid var(--line);background:#fff;color:#41527a;font-size:12.8px;font-weight:600;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center}
+.lc-btn:hover{border-color:var(--blue);color:var(--blue)}
+.lc-btn.pri{background:var(--blue);border-color:var(--blue);color:#fff}
+.lc-btn.pri:hover{background:var(--blue-d);color:#fff}
+.lc-btn.danger{flex:none;padding:0 12px;color:var(--mut)}
+.lc-btn.danger:hover{border-color:#fecdd3;color:#be123c}
+@media (max-width:620px){
+  .lc-tx{display:none}
+  .lc-home{padding:0 9px}
+  .lc-nm{display:none}
+  .lc-user{padding:0 4px 0 4px}
+}
+</style>
+<div class="lc-mask" id="lc-mask" onclick="lcClose()"></div>
+<aside class="lc-drawer" id="lc-drawer" role="dialog" aria-label="我的学习" aria-modal="true"><div id="lc-body"></div></aside>
+<script>
+/* 学习中心抽屉：数据一律读主站写在同源的 localStorage，不新建第二套账本 */
+(function(){
+  var DIM={prompt:'提示词表达',tools:'工具使用',data:'数据与分析',content:'内容生成',dev:'产品与技术',workflow:'工作流自动化',security:'安全合规',strategy:'战略与规划'};
+  var ROLE={pm:'产品经理',dev:'研发',mkt:'市场营销',hr:'人资与组织',fc:'财务与采购',legal:'法务与合规',graduate:'应届生'};
+  /* 岗位能力项（与主站 ROLES[role].skills 逐项对齐；quizScores 的下标就是它） */
+  var SKILL={
+    pm:['AI需求分析','用户研究','数据分析与决策','原型设计辅助','竞品分析','产品策略评估'],
+    dev:['AI编程助手','代码审查与优化','自动化测试','提示词工程','技术文档生成','AI安全与合规'],
+    mkt:['AI内容与增长','数据运营分析','客户画像与转化','销售话术与跟进','活动与投放','自动化工作流'],
+    hr:['简历智能筛选','岗位JD撰写','人才数据分析','员工培训设计','绩效评估辅助','组织效能分析'],
+    fc:['AI预算与预测','核算与报税自动化','成本与比价分析','供应商评估与寻源','采购与税务合规','经营分析'],
+    legal:['AI合同审查','AI法律检索研究','AI合规管理','AI风险数据分析','AI知识产权管理','AI争议处理'],
+    graduate:['AI基础与工具入门','AI信息收集','AI工作PPT','AI数据处理','AI会议纪要','AI文生图','AI生视频','AI综合提效']
+  };
+  var IND={finance:'金融',auto:'智能汽车',mfg:'智能制造',internet:'互联网',retail:'零售与消费',mega:'能源基建与公共',healthcare:'医疗与生命科学',newbie:'新人通道'};
+  function J(k,d){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function sess(){ return J('ai_training_session',{})||{}; }
+  function myEmp(s){
+    var es=J('ai_training_employees',[]); if(!Array.isArray(es)||!es.length) return null;
+    var nm=(s&&(s.name||s.user))||'';
+    var mine=es.filter(function(e){ return e && nm && e.name===nm; });
+    var pool=mine.length?mine:es;
+    return pool[pool.length-1]||null;
+  }
+  function mods(){ try{ return (typeof COURSE!=='undefined'&&COURSE&&COURSE.modules)||[]; }catch(e){ return []; } }
+  function pg(){ try{ return (typeof prog!=='undefined'&&prog)||{units:{}}; }catch(e){ return {units:{}}; } }
+  function stOf(u){ var p=pg(); return (p.units&&p.units[u.id])||{}; }
+  function stat(){
+    var ms=mods(),total=0,done=0,sc=0,scn=0;
+    ms.forEach(function(m){ (m.units||[]).forEach(function(u){
+      total++; var st=stOf(u);
+      if(st.done) done++;
+      if(typeof st.score==='number'){ sc+=st.score; scn++; }
+    }); });
+    return {total:total,done:done,pct:total?Math.round(done/total*100):0,avg:scn?Math.round(sc/scn):null};
+  }
+  function mins(u){ var d=(u&&u.video&&u.video.dur)||''; var m=String(d).match(/([\d.]+)/); return m?parseFloat(m[1]):0; }
+  function plan(n){
+    var out=[]; mods().forEach(function(m){ (m.units||[]).forEach(function(u){
+      if(out.length>=n) return; if(!stOf(u).done) out.push({m:m,u:u});
+    }); }); return out;
+  }
+  function pctBar(p){ return '<div class="lc-bar"><i style="width:'+Math.min(100,Math.max(0,p))+'%"></i></div>'; }
+
+  function render(){
+    var s=sess(), nm=(s.name||s.user||''), co=s.company||'', emp=myEmp(s), st=stat();
+    var logged=!!(s&&(s.user||s.name));
+    var roleTxt=(emp&&ROLE[emp.role])||'', indTxt=(emp&&IND[emp.industry])||'';
+    var isGuest=(s&&s.loginType==='guest');
+    var who=logged?(isGuest?(s.company||nm||'游客'):(nm||'已登录')):'未登录';
+    var sub=!logged?'未登录 · 记录只存这台设备'
+      :(isGuest?'游客身份 · 记录只存这台设备'
+      :([co,roleTxt&&indTxt?(roleTxt+' × '+indTxt):(roleTxt||indTxt)].filter(Boolean).join(' · ')||'记录只存这台设备'));
+    var h='<div class="lc-top"><div class="lc-av'+(logged?'':' guest')+'">'+(logged?esc(who).slice(0,1):'游')+'</div>'
+      +'<div style="min-width:0"><div class="lc-hn">'+esc(who)+'</div><div class="lc-hm">'+esc(sub)+'</div></div>'
+      +'<button class="lc-x" onclick="lcClose()" aria-label="关闭">✕</button></div><div class="lc-bd">';
+
+    /* ① 最近测评 */
+    var emTxt=(!logged?'本机记录':'')+((emp&&emp.date)?((logged?'':' · ')+esc(emp.date)):'');
+    h+='<div class="lc-sec"><div class="lc-st">我的测评<em>'+emTxt+'</em></div>';
+    if(emp){
+      var qs=Array.isArray(emp.quizScores)?emp.quizScores:[];
+      var base=(emp._baseResult&&typeof emp._baseResult.pct==='number')?emp._baseResult.pct:null;
+      var skills=SKILL[emp.role]||[];
+      var avg=qs.length?Math.round(qs.reduce(function(a,b){return a+(+b||0);},0)/qs.length*10)/10:null;
+      h+='<div class="lc-grid">'
+        +'<div class="lc-num"><b>'+(base!=null?base+'<small>%</small>':'—')+'</b><span>基础素养</span></div>'
+        +'<div class="lc-num"><b>'+(avg!=null?avg+'<small>/4</small>':'—')+'</b><span>岗位能力均值</span></div>'
+        +'<div class="lc-num"><b>'+(typeof emp.finalScore==='number'?emp.finalScore:'—')+'</b><span>结课测验</span></div></div>';
+      var weak=[];
+      qs.forEach(function(v,i){ if(typeof v==='number' && v<=1 && skills[i]) weak.push(skills[i]); });
+      if(weak.length) h+='<div style="margin-top:9px">'+weak.slice(0,4).map(function(w){ return '<span class="lc-weak">短板 · '+esc(w)+'</span>'; }).join('')+'</div>';
+      h+='<div class="lc-line" style="margin-top:8px">测评用于定学习起点；短板项对应的课程在等你的学习地图里已前置。</div>';
+    } else {
+      h+='<div class="lc-empty">还没有测评记录。先花 8 分钟测一次，课程会按你的短板排顺序，而不是从头刷到尾。<a href="app.html" style="color:var(--blue);font-weight:700;text-decoration:none;white-space:nowrap">去测一测 →</a></div>';
+    }
+    h+='</div>';
+
+    /* ② 本课进度 */
+    h+='<div class="lc-sec"><div class="lc-st">本课进度<em>'+(st.total||'—')+' 单元</em></div>'
+      +pctBar(st.pct)
+      +'<div class="lc-line"><b>'+st.pct+'%</b> · 已完成 <b>'+st.done+'</b> / '+st.total+' 单元'
+      +(st.avg!=null?' · 练习均分 <b>'+st.avg+'</b>':'')+'</div></div>';
+
+    /* ③ 接下来学什么 */
+    var nx=plan(3), sum=0; nx.forEach(function(x){ sum+=mins(x.u); });
+    h+='<div class="lc-sec"><div class="lc-st">接下来学什么<em>'+(nx.length?'约 '+Math.max(1,Math.round(sum))+' 分钟':'')+'</em></div>';
+    if(nx.length){
+      nx.forEach(function(x,i){
+        h+='<div class="lc-item" onclick="lcGo(\''+x.u.id+'\')">'
+          +'<span class="u'+(i===0?' next':'')+'">'+(i===0?'下一步':x.u.id)+'</span>'
+          +'<span class="t">'+esc(x.u.title)+'</span>'
+          +'<span class="d">'+(mins(x.u)?Math.round(mins(x.u))+' 分':'')+'</span></div>';
+      });
+    } else {
+      h+='<div class="lc-empty">这门课的单元都过了。可以回学习地图看下一门，或重看任意一节的演示。</div>';
+    }
+    h+='</div></div>';
+
+    /* 底部出口 */
+    h+='<div class="lc-foot"><a class="lc-btn" href="app.html">学习地图 / 我的记录</a>'
+      +'<button class="lc-btn pri" onclick="lcNext()">继续学习</button>'
+      +(logged?'<button class="lc-btn danger" onclick="lcLogout()" title="退出登录">退出</button>':'')+'</div>';
+    return h;
+  }
+
+  window.lcOpen=function(){
+    document.getElementById('lc-body').innerHTML=render();
+    document.getElementById('lc-mask').classList.add('on');
+    document.getElementById('lc-drawer').classList.add('on');
+  };
+  window.lcClose=function(){
+    document.getElementById('lc-mask').classList.remove('on');
+    document.getElementById('lc-drawer').classList.remove('on');
+  };
+  window.lcGo=function(uid){
+    lcClose();
+    try{ if(typeof openUnit==='function'){ openUnit(uid); return; } }catch(e){}
+    try{ prog.cur=uid; openUnit(uid); }catch(e){}
+  };
+  window.lcNext=function(){
+    var nx=plan(1);
+    if(nx.length){ lcGo(nx[0].u.id); }
+    else { lcClose(); try{ if(typeof toast==='function') toast('这门课的单元都完成了'); }catch(e){} }
+  };
+  window.lcLogout=function(){
+    if(!confirm('退出后学习进度仍留在这台设备上，但下次要重新登录。确定退出？')) return;
+    try{ localStorage.removeItem('ai_training_session'); }catch(e){}
+    location.href='app.html';
+  };
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') lcClose(); });
+
+  /* 顶栏账号 chip 随登录态刷新（切号回来不用刷新页面） */
+  function paint(){
+    var s=sess(), nm=s.name||s.user||'';
+    var av=document.getElementById('lc-av'), tx=document.getElementById('lc-nm');
+    if(!av) return;
+    if(nm){ av.textContent=nm.slice(0,1); av.classList.remove('guest'); tx.textContent=nm.length>6?nm.slice(0,6)+'…':nm; }
+    else { av.textContent='游'; av.classList.add('guest'); tx.textContent='我的学习'; }
+  }
+  paint();
+  window.addEventListener('storage',function(e){ if(e.key==='ai_training_session') paint(); });
+  try{ new MutationObserver(paint).observe(document.body,{childList:true,subtree:false}); }catch(e){}
+})();
+</script>
+<!--LC:END-->
 </body>
 </html>
