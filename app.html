@@ -60,7 +60,9 @@
   .card-sm { padding:16px; }
 
   /* Grid layouts */
-  .role-grid, .industry-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:12px; }
+  /* v155：岗位网格固定 3 列 × 2 行（6 个在岗岗位）；行业网格仍按宽度自适应（7 张 4+3） */
+  .role-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; }
+  .industry-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:12px; }
   .role-card, .industry-card { background:var(--card); border:2px solid var(--border); border-radius:var(--radius); padding:20px 14px; text-align:center; cursor:pointer; transition:all .2s; box-shadow:var(--shadow); }
   .role-card:hover, .industry-card:hover { border-color:var(--blue); background:var(--card-hover); transform:translateY(-2px); box-shadow:var(--shadow-hover); }
   .role-card.selected { border-color:var(--blue); background:var(--blue-bg); box-shadow:0 0 0 3px rgba(99,102,241,.08); }
@@ -1059,22 +1061,15 @@ function roleLabel(id) {
 }
 
 // ==================== v140 场景-岗位配对锁 ====================
-// 「新人小白」场景只配套「应届生」岗位（反之亦然）：课程实体（course_newbie_deep.html）、
-// 题库（NEWBIE_QUIZ）、目标画像全部只按这一对建。任一侧被选中后，另一侧只留唯一选项，
-// 其余灰化不可选，避免出现「新人小白 × 产品」这类拿通用课顶替的错位组合。
+// 「新人通道」只配套「应届生」岗位（反之亦然）：课程实体（course_newbie_deep.html）、
+// 题库（NEWBIE_QUIZ）、目标画像全部只按这一对建。
+// v155：两个入口已归并成一条 —— 行业网格里没有 newbie 卡、岗位网格里没有 graduate 卡，
+// 唯一入口是「新人通道」通栏；PICK_LOCK 只作为 selectRole / selectIndustry / startQuiz
+// 的兜底约束（防历史残留组合或直接调 S 的路径带进错位组合），不再驱动任何灰化。
 const PICK_LOCK = {
   industry2role: { newbie: 'graduate' },   // 选了该行业 → 岗位只能是它
   role2industry: { graduate: 'newbie' }    // 选了该岗位 → 行业只能是它
 };
-// 行业与岗位是否互斥（任一为空不算冲突）
-function pickConflict(industryId, roleId) {
-  if (!industryId || !roleId) return false;
-  var onlyRole = PICK_LOCK.industry2role[industryId];
-  if (onlyRole) return roleId !== onlyRole;
-  var onlyInd = PICK_LOCK.role2industry[roleId];
-  if (onlyInd) return industryId !== onlyInd;
-  return false;
-}
 // 把旧版本可能残留的非法组合收敛到唯一合法组合
 function normalizeScenePair() {
   // v154：先把历史残留的旧行业 id 归一（elec → mfg、cpg → retail）。这一步不算配对冲突，
@@ -9127,8 +9122,7 @@ function renderRoleSelection() {
       </div>
       <div class="text-center mb-4">
         <svg viewBox="0 0 240 56" style="height:48px;width:auto;margin-bottom:10px"><defs><linearGradient id="ng1a" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6366f1"/><stop offset="50%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#a855f7"/></linearGradient><linearGradient id="ng2a" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#6366f1"/></linearGradient></defs><circle cx="16" cy="18" r="6" fill="url(#ng1a)"/><circle cx="32" cy="6" r="6" fill="url(#ng1a)"/><circle cx="48" cy="18" r="6" fill="url(#ng1a)"/><circle cx="32" cy="30" r="6" fill="url(#ng1a)"/><circle cx="32" cy="42" r="5" fill="url(#ng2a)"/><line x1="16" y1="18" x2="32" y2="6" stroke="url(#ng2a)" stroke-width="1.8" stroke-linecap="round" opacity=".7"/><line x1="32" y1="6" x2="48" y2="18" stroke="url(#ng2a)" stroke-width="1.8" stroke-linecap="round" opacity=".7"/><line x1="16" y1="18" x2="32" y2="30" stroke="url(#ng2a)" stroke-width="1.8" stroke-linecap="round" opacity=".7"/><line x1="48" y1="18" x2="32" y2="30" stroke="url(#ng2a)" stroke-width="1.8" stroke-linecap="round" opacity=".7"/><line x1="32" y1="30" x2="32" y2="42" stroke="url(#ng2a)" stroke-width="1.8" stroke-linecap="round" opacity=".7"/><circle cx="32" cy="18" r="21" fill="none" stroke="#818cf8" stroke-width=".8" stroke-dasharray="4 8" opacity=".3"/><circle cx="8" cy="8" r="3" fill="#c4b5fd" opacity=".6"/><circle cx="56" cy="8" r="3" fill="#c4b5fd" opacity=".6"/><circle cx="56" cy="28" r="2.5" fill="#c4b5fd" opacity=".5"/><circle cx="8" cy="28" r="2.5" fill="#c4b5fd" opacity=".5"/><circle cx="32" cy="50" r="2" fill="#ddd6fe" opacity=".4"/><line x1="16" y1="18" x2="8" y2="8" stroke="#c4b5fd" stroke-width="1" opacity=".35"/><line x1="48" y1="18" x2="56" y2="8" stroke="#c4b5fd" stroke-width="1" opacity=".35"/><line x1="32" y1="42" x2="32" y2="50" stroke="#ddd6fe" stroke-width="1" opacity=".3"/><text x="68" y="28" font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif" font-weight="800" font-size="22" fill="#1e293b" letter-spacing="-.5">AI达学</text></svg>
-        <h1 style="font-size:22px;font-weight:700;margin-bottom:4px;">AI达学 · AIDAX</h1>
-        <p style="color:var(--text2);font-size:12px;margin-bottom:12px;">企业AI学习一站式服务</p>
+        <p style="color:var(--text2);font-size:13px;margin-bottom:10px;">企业AI学习一站式服务</p>
         <p style="color:var(--text2);font-size:14px;">测评诊断 → 个性化课程 → 关卡陪练 → 成果验证</p>
       </div>
       <div class="card mb-3">
@@ -9170,13 +9164,15 @@ function renderRoleSelection() {
     html += `<div class="card${!S.industry?'':' selected'}">
         <p style="font-weight:600;font-size:15px;margin-bottom:16px;">Step 2: 选择你的岗位</p>
         <div class="role-grid">`;
+    // v155：岗位网格只列 6 个「在岗」岗位，「应届生」不再出现在这里。
+    // 它不是岗位（没有对应职能），且卡片点下去会反向改掉 Step 1 的行业选择 ——
+    // 唯一行为不一致的卡；选普通行业时它还永远是灰卡，等于在问「我选金融就不能是应届生？」。
+    // 应届生 / 转行新人 / 未定岗统一由上方「新人通道」承载（一键 newbie × graduate）。
     for (const id of Object.keys(ROLES)) {
+      if (id === 'graduate') continue;
       const r = ROLES[id];
-      // v140：已选「新人小白」场景时，只有「应届生」岗位可配，其余灰化
-      const lockOn = pickConflict(S.industry, id);
-      const lockTip = lockOn ? `当前场景「${(INDUSTRIES[S.industry]||{}).name}」只配套「${(ROLES[PICK_LOCK.industry2role[S.industry]]||{}).name}」岗位` : '';
       html += `
-          <div class="role-card${S.role===id?' selected':''}${lockOn?' pick-locked':''}" data-action="selectRole" data-id="${id}"${lockOn?' title="'+lockTip+'"':''}>
+          <div class="role-card${S.role===id?' selected':''}" data-action="selectRole" data-id="${id}">
             <div class="role-icon">${r.icon}</div>
             <div class="role-name">${r.name}</div>
             <div class="role-desc">${r.desc}</div>
