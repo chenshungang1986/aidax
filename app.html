@@ -8101,8 +8101,8 @@ const S = {
   industry:null, role:null,
   quizIdx:0, quizAnswers:{}, quizScores:null,
   _quizDone:{}, _quizLog:{}, _quizPlan:[], _quizSelectedStep:{}, _quizStartAt:{}, _quizTiming:{}, _quizAllDone:false,
-  courseIdx:null, courseTaskIdx:0, courseProgress: JSON.parse(localStorage.getItem('ai_training_progress') || '{}'),
-  questProg: JSON.parse(localStorage.getItem('ai_training_quest') || '{}'), quest:null, combo:0,
+  courseIdx:null, courseTaskIdx:0, courseProgress: loadOwnedJSON('ai_training_progress'), // v157 按账号分桶
+  questProg: loadOwnedJSON('ai_training_quest'), quest:null, combo:0,
   finalAnswers:[], finalSubjAnswers:{}, finalScore:null, finalSubmitted:false, finalShowHint:{},
   taskShowHint:{}, taskShowAnswer:{},
   quizShown:{}, quizActive:-1,
@@ -8162,7 +8162,7 @@ S.employees.forEach(function(e){ if (e && !e.id) e.id = uid('e_'); });
 saveEmployees();
 
 function saveProgress() {
-  localStorage.setItem('ai_training_progress', JSON.stringify(S.courseProgress));
+  localStorage.setItem(ownedKey('ai_training_progress'), JSON.stringify(S.courseProgress));
 }
 
 // ==================== IN-COURSE QUIZ ENGINE (P2.1) ====================
@@ -8382,6 +8382,42 @@ function currentOwnerKey(){
   if (s.loginId) return 'user:' + s.loginId;
   return '';
 }
+// v157：学习数据也要按账号分桶。
+// 原来 ai_training_progress / ai_training_quest 是「一台电脑一个键」，同一浏览器换个游客账号登录，
+// 新账号会直接继承上一个人的学习进度 —— 看起来就是「两个人有同一份记录」。
+// 这里只把键按 ownerKey 分桶，不动数据结构；课程页 tools/patch_owner_scope.py 用的是同一套规则。
+var _OWNED_KEYS = ['ai_training_progress', 'ai_training_quest'];
+// 这台机器上到底有没有「我」的痕迹：有本账号的档案，或存在更早版本留下的无主档案。
+// 认领旧数据必须过这一关 —— 否则任何一个新游客登录都能把上一个人的进度「抢」走。
+function deviceHasMyRecords(own){
+  try {
+    var es = JSON.parse(localStorage.getItem('ai_training_employees') || '[]') || [];
+    return es.some(function(e){ return e && ((e.ownerKey || '') === own || !e.ownerKey); });
+  } catch (e) { return false; }
+}
+function ownedKey(base){
+  var own = currentOwnerKey();
+  if (!own) return base;                       // 未登录：保持旧行为，匿名也能用
+  try {
+    var key = base + '::' + own;
+    // 存量数据（旧版本按设备存、没有归属）→ 只有确实属于这台机器的主人才认领一份
+    if (localStorage.getItem(key) == null && deviceHasMyRecords(own)) {
+      var legacy = localStorage.getItem(base);
+      if (legacy != null) localStorage.setItem(key, legacy);
+    }
+    return key;
+  } catch (e) { return base; }
+}
+function loadOwnedJSON(base){
+  try { return JSON.parse(localStorage.getItem(ownedKey(base)) || '{}') || {}; } catch (e) { return {}; }
+}
+// 切换账号后重新绑定本人数据（登录处统一调用，避免把上一个人的进度带进新会话）
+S.rebindOwned = function(){
+  S._scopeDone = false;
+  S.currentEmployee = null;
+  try { S.courseProgress = loadOwnedJSON('ai_training_progress'); } catch (e) {}
+  try { S.questProg = loadOwnedJSON('ai_training_quest'); } catch (e) {}
+};
 // 档案归属：v74 之前的历史记录无 ownerKey（视为无主档案，仅管理员可见）
 function empOwnerKey(e){ return (e && e.ownerKey) || ''; }
 function isManagerRole(){ var r = getSessionSafe().role; return r === 'admin' || r === 'ent'; }
@@ -8401,17 +8437,14 @@ function teamEmployees(){
   });
   return [];
 }
-// 非管理账号：本地档案中别人的记录移出到 hidden 暂存（管理员登录时自动恢复），避免越权数据驻留
+// v157：不再把别人的档案「搬走」，只做两件事——
+// ① 把老版本搬进 hidden 的记录合回本地（不回填就等于把上一个人的数据弄丢了）
+// ② 清掉运行时指向上一个人的引用
+// 谁能看到谁，一律由读取侧（myEmployees / teamEmployees / loadEmployee）按 ownerKey 判定；
+// 原来那种「换账号就把别人的记录移出 localStorage」的做法，会让本人再登回来时档案凭空消失。
 function scopeLocalEmployees(){
-  var s = getSessionSafe();
-  if (s.role === 'admin' || s.role === 'ent') { restoreHiddenEmployees(); return; }
-  var mine = currentOwnerKey();
-  var keep = [], hide = [];
-  S.employees.forEach(function(e){ (mine && empOwnerKey(e) === mine) ? keep.push(e) : hide.push(e); });
-  if (!hide.length) return;
-  S.employees = keep;
-  try { localStorage.setItem('aidax_employees_hidden', JSON.stringify(hide)); } catch(e){}
-  saveEmployees();
+  restoreHiddenEmployees();
+  S.currentEmployee = null;
 }
 function restoreHiddenEmployees(){
   var raw = null;
@@ -8471,6 +8504,7 @@ S.doLoginAdmin = function(){
   if (adminPwdHash(pwd) !== getAdminPwdHash()) { alert('管理员密码错误'); return; }
   var session = { user:'管理员', role:'admin', loginType:'admin' };
   localStorage.setItem('ai_training_session', JSON.stringify(session));
+  S.rebindOwned();
   if (sbClient()) { DB.hydrate(function(){ S.companies = DB.all('companies'); S.view='admin'; render(); }); }
   else { S.view='admin'; render(); }
 };
@@ -8763,7 +8797,7 @@ S.doLoginAccount = function(){
     var se = { user: co.name, name: co.name, role:'ent', company: co.name, companyId: co.id, loginType:'ent', verified:true };
     localStorage.setItem('ai_training_session', JSON.stringify(se));
     S.mintCloudToken({ type:'ent', loginId: id.trim(), password: pwd, companyId: co.id }); // v75b：企业租户 JWT（带 companyId → 后端 quiz-stats 按企业下钻，否则报"ent has no company"）
-    recordAccess('login'); S.view='admin'; render(); return;
+    S.rebindOwned(); recordAccess('login'); S.view='admin'; render(); return;
   }
   // 注册用户
   var u = (S.users||[]).find(function(x){ return x.id === id.trim(); });
@@ -8771,7 +8805,7 @@ S.doLoginAccount = function(){
     var su = { user: u.company || id.trim(), name: u.company || id.trim(), role:'learner', company: u.company || '', phone:'', loginId: u.id, loginType:'user', verified:true };
     localStorage.setItem('ai_training_session', JSON.stringify(su));
     S.mintCloudToken({ type:'user', loginId: id.trim(), password: pwd }); // v75b：注册用户租户 JWT
-    recordAccess('login'); S.view='role'; render(); return;
+    S.rebindOwned(); recordAccess('login'); S.view='role'; render(); return;
   }
   alert('账号或密码错误');
 };
@@ -8785,7 +8819,7 @@ S.doLoginGuest = function(){
   var s = { user: company.trim(), name: company.trim(), role:'learner', company: company.trim(), phone: phone, loginId: loginId.trim(), loginType:'guest', verified:true };
   localStorage.setItem('ai_training_session', JSON.stringify(s));
   S.mintCloudToken({ type:'guest', company: company.trim(), phone: phone, loginId: loginId.trim() }); // v75b：游客租户 JWT（无密码，限本人 ownerKey）
-  recordAccess('login'); S.view='role'; render();
+  S.rebindOwned(); recordAccess('login'); S.view='role'; render();
 };
 S.doRegister = function(){
   var company = (document.getElementById('regCompany')||{}).value || '';
@@ -8819,7 +8853,7 @@ S.doRegister = function(){
   if (inviteCompany) s.companyId = inviteCompany.id;
   localStorage.setItem('ai_training_session', JSON.stringify(s));
   S.mintCloudToken({ type:'user', loginId: id.trim(), password: pwd, companyId: inviteCompany ? inviteCompany.id : '' }); // v75b：注册用户租户 JWT（带企业归属→tenant 写入 quiz_score_log）
-  recordAccess('login'); showToast(inviteCompany ? ('注册成功，已绑定「'+compName+'」企业席位') : '注册成功，已自动登录'); S.view='role'; render();
+  S.rebindOwned(); recordAccess('login'); showToast(inviteCompany ? ('注册成功，已绑定「'+compName+'」企业席位') : '注册成功，已自动登录'); S.view='role'; render();
 };
 function renderLoginV2(){
   var mode = S._loginMode || 'account';
@@ -9103,6 +9137,7 @@ function renderNewbiePanel() {
       </div>
       <div class="nb-actions">
         <button class="btn btn-primary" data-action="startQuiz" onclick="if(typeof S!=='undefined'){S.startQuiz()}">测一测 AI 基础能力</button>
+        <button class="btn btn-outline" data-action="goSchedule" onclick="if(typeof S!=='undefined'){S.goSchedule()}">📅 查看 14 天计划</button>
         <button class="btn btn-outline" data-action="newbiePeek" onclick="if(typeof S!=='undefined'){S.newbiePeek()}">先看看课程讲什么</button>
         <button class="btn btn-outline btn-sm" data-action="resetScenePair" style="margin-left:auto;">换个行业</button>
       </div>
@@ -10647,7 +10682,97 @@ function renderLearningMap() {
 }
 
 // ---- SCHEDULE ----
+/* ==== v157 NEWBIE_14D BEGIN ==== */
+// 新人 14 天计划：把 8 模块 × 8 单元铺到 14 天。每天给出模块序号与主题；
+// 单元级明细从 COURSE 数据（课程页同源）不可得，这里按模块粒度组织，点进去即课程页对应模块。
+// 弱维 dims 命中的模块标「建议必修」并前置；「建议选修」只是建议，全套始终可点开。
+var NEWBIE_14D = [
+  {d:1,  mods:[0],       part:'M0U1–U4', title:'建立预期：AI 能做什么', note:'先把「能交 / 打草稿 / 不能交」分清'},
+  {d:2,  mods:[0],       part:'M0U5–U8', title:'分工与工具箱', note:'四象限分工、配齐工具、写下第一份使用清单'},
+  {d:3,  mods:[1],       part:'M1U1–U4', title:'写好第一句提示词', note:'四要素模板，从抱怨变成能复用的提示词'},
+  {d:4,  mods:[1],       part:'M1U5–U8', title:'让提示词稳定复用', note:'三类约束 + 变成团队资产'},
+  {d:5,  mods:[2],       part:'M2U1–U4', title:'收集信息不踩线', note:'信息分级、带来源的简报'},
+  {d:6,  mods:[2],       part:'M2U5–U8', title:'信息能用才写', note:'三条判断标准 + 经得起翻的底稿'},
+  {d:7,  mods:[3],       part:'M3U1–U4', title:'文档与 PPT：先搭骨架', note:'四段骨架、可编辑大纲、汇报版 PPT'},
+  {d:8,  mods:[3],       part:'M3U5–U8', title:'改写与模板库', note:'一份内容三版改写，建成个人模板库'},
+  {d:9,  mods:[4],       part:'M4U1–U4', title:'数据处理先洗干净', note:'四查、清洗方案、可复现的体检报告'},
+  {d:10, mods:[4],       part:'M4U5–U8', title:'从数字到建议', note:'洞察三问 + 一条能被执行的建议'},
+  {d:11, mods:[5],       part:'M5U1–U4', title:'纪要是行动清单', note:'四块纪要、到人到时、发出去有人认'},
+  {d:12, mods:[5],       part:'M5U5–U8', title:'把待办跟到底', note:'任务四态、周跟进节奏、三段式汇报'},
+  {d:13, mods:[6],       part:'M6U1–U8', title:'做图与做视频', note:'四要素配图 + 先脚本后画面的 30 秒视频'},
+  {d:14, mods:[7],       part:'M7U1–U8', title:'红线与结业实战', note:'数据分级、脱敏、个人手册与结业答辩'}
+];
+
+// 新人课程页每个模块的进度来自课程页 prog（同源 localStorage: aidax_newbie_grad_v1 等）；
+// 主站这里读不到课程页内部 prog，改用 S.courseProgress 里的模块课程 done + 测评弱维做建议。
+function newbiePlanWeakMods() {
+  var weak = (typeof weakDimList === 'function') ? weakDimList() : [];
+  var courses = (typeof COURSES !== 'undefined' && COURSES.newbie_graduate) || [];
+  var must = {};
+  courses.forEach(function(c, i) {
+    var dims = c.dims || [];
+    if (dims.some(function(d){ return weak.indexOf(d) >= 0; })) must[i] = true;
+  });
+  return must;
+}
+
+function renderNewbiePlanDay(day, must, doneMods) {
+  var mods = day.mods.map(function(mi) {
+    var courses = (typeof COURSES !== 'undefined' && COURSES.newbie_graduate) || [];
+    var c = courses[mi] || {};
+    var d = doneMods[mi] ? '<span class="tag tag-green" style="font-size:10px;">✓ 已学</span>'
+                         : (must[mi] ? '<span class="tag tag-red" style="font-size:10px;">建议必修</span>'
+                                     : '<span class="tag" style="font-size:10px;">建议选修</span>');
+    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 0;border-top:1px dashed var(--border);">'
+      + '<span style="font-size:13px;font-weight:600;">' + escHtml(c.title || ('M' + mi)) + '</span>' + d + '</div>';
+  }).join('');
+  return '<div class="card" style="margin-bottom:10px;">'
+    + '<div style="display:flex;align-items:center;gap:10px;">'
+      + '<div style="flex:0 0 40px;height:40px;border-radius:10px;background:var(--blue-bg);color:var(--blue);font-weight:800;display:flex;align-items:center;justify-content:center;">D' + day.d + '</div>'
+      + '<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;">' + escHtml(day.title) + '</div>'
+      + '<div style="font-size:11px;color:var(--text2);">' + escHtml(day.part) + ' · ' + escHtml(day.note) + '</div></div>'
+    + '</div>' + mods + '</div>';
+}
+
+function renderNewbie14Day() {
+  var must = newbiePlanWeakMods();
+  var doneMods = {};
+  var courses = (typeof COURSES !== 'undefined' && COURSES.newbie_graduate) || [];
+  courses.forEach(function(c, i) { doneMods[i] = !!(S.courseProgress && S.courseProgress[c.id] && S.courseProgress[c.id].done); });
+  var mustN = Object.keys(must).length;
+  var doneN = Object.keys(doneMods).filter(function(k){ return doneMods[k]; }).length;
+
+  var html = headerHtml('14 天学习计划', '🎓 职场新人通道', true);
+  html += '<div class="card slide-up">'
+    + '<div class="schedule-header"><p style="font-weight:700;font-size:15px;">📅 从零到能用 · 14 天</p>'
+    + '<span class="tag tag-green">全套 64 单元始终开放</span></div>'
+    + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">'
+    + '<div class="stat-card"><div class="stat-value" style="color:var(--blue);">14</div><div class="stat-label">学习天数</div></div>'
+    + '<div class="stat-card"><div class="stat-value" style="color:#dc2626;">' + mustN + '</div><div class="stat-label">建议必修模块</div></div>'
+    + '<div class="stat-card"><div class="stat-value" style="color:var(--green);">' + doneN + '/8</div><div class="stat-label">已完成模块</div></div>'
+    + '</div>'
+    + '<div class="schedule-tip">💡 <strong>关于必修 / 选修：</strong>「建议必修」是按你测评短板排的顺序，'
+    + '不是限制——<b>64 单元全套都可以学，也建议全部学完</b>。卡片顺序按你的弱维调整过，先补短板再补齐其余。</div>'
+    + '</div>';
+
+  // 按弱维重排：命中必修的模块所在日提前；同一天多模块保持原顺序。
+  var days = NEWBIE_14D.slice();
+  days.sort(function(a, b) {
+    var am = a.mods.some(function(mi){ return must[mi]; }) ? 1 : 0;
+    var bm = b.mods.some(function(mi){ return must[mi]; }) ? 1 : 0;
+    if (am !== bm) return bm - am;
+    return a.d - b.d;
+  });
+  html += '<div class="mt-3">' + days.map(function(day){ return renderNewbiePlanDay(day, must, doneMods); }).join('') + '</div>';
+  html += '<div style="display:flex;gap:10px;margin-top:16px;">'
+    + '<button class="btn btn-primary" style="flex:1;" data-action="newbiePeek">进入课程 · 从第一节开始</button>'
+    + '<button class="btn btn-outline" style="flex:1;" data-action="goBack">← 返回</button></div>';
+  return html;
+}
+/* ==== v157 NEWBIE_14D END ==== */
 function renderSchedule() {
+  // v157：新人通道走专属 14 天计划视图（弱维重排 + 必修/选修建议，全套始终开放）
+  if (S.industry === 'newbie' && S.role === 'graduate') return renderNewbie14Day();
   const role = ROLES[S.role];
   const courses = getRoleCourses();
   const scores = S.quizScores;
@@ -11322,7 +11447,7 @@ function renderTaskModal() {
 }
 
 // ---- QUEST 闯关模式 (v53)：多邻国式学练一体 ----
-function saveQuest() { localStorage.setItem('ai_training_quest', JSON.stringify(S.questProg)); }
+function saveQuest() { localStorage.setItem(ownedKey('ai_training_quest'), JSON.stringify(S.questProg)); }
 function totalQuestXP() { return Object.values(S.questProg||{}).reduce((a,p)=>a+(p.xp||0),0); }
 
 // 必修/选修分层：课程主维度掌握度 <70% → 必修（短板补齐），否则选修
@@ -16447,7 +16572,7 @@ function bindEvents() {
       if (S.view === 'admin') render();
     }
     // 丰富课（course_finance_pm_full.html）通关后写回 ai_training_progress → 学习地图实时刷新
-    if (e.key === 'ai_training_progress') {
+    if (e.key === ownedKey('ai_training_progress')) {
       try { S.courseProgress = JSON.parse(e.newValue || '{}'); } catch(_) {}
       if (S.view === 'map' || S.view === 'role') render();
     }
