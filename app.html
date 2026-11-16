@@ -60,7 +60,7 @@
   .card-sm { padding:16px; }
 
   /* Grid layouts */
-  .role-grid, .industry-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:12px; }
+  .role-grid, .industry-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:12px; }
   .role-card, .industry-card { background:var(--card); border:2px solid var(--border); border-radius:var(--radius); padding:20px 14px; text-align:center; cursor:pointer; transition:all .2s; box-shadow:var(--shadow); }
   .role-card:hover, .industry-card:hover { border-color:var(--blue); background:var(--card-hover); transform:translateY(-2px); box-shadow:var(--shadow-hover); }
   .role-card.selected { border-color:var(--blue); background:var(--blue-bg); box-shadow:0 0 0 3px rgba(99,102,241,.08); }
@@ -68,6 +68,26 @@
   /* v140 场景-岗位配对锁：「新人小白」↔「应届生」是唯一合法组合，另一侧不兼容项灰化不可选 */
   .role-card.pick-locked, .industry-card.pick-locked { opacity:.4; cursor:not-allowed; filter:grayscale(1); border-style:dashed; }
   .role-card.pick-locked:hover, .industry-card.pick-locked:hover { border-color:var(--border); background:var(--card); transform:none; box-shadow:var(--shadow); }
+  /* v154 入口重构：行业卡角标（筹备中）+ 新人通道 */
+  .ind-flag { display:inline-block; margin-top:6px; font-size:10px; line-height:1.5; padding:1px 7px; border-radius:20px; background:var(--bg); color:var(--text3); border:1px solid var(--border); }
+  .newbie-lane { display:flex; align-items:center; gap:13px; margin-top:14px; padding:13px 15px; border:1.5px dashed var(--border-active); border-radius:12px; background:linear-gradient(100deg, var(--green-bg), var(--card) 70%); cursor:pointer; transition:all .18s; }
+  .newbie-lane:hover { border-color:var(--green); border-style:solid; transform:translateY(-1px); box-shadow:var(--shadow-hover); }
+  .newbie-lane.on { border:1.5px solid var(--green); box-shadow:0 0 0 3px rgba(16,185,129,.08); }
+  .newbie-lane .nl-ico { flex:0 0 38px; height:38px; border-radius:11px; background:#d1fae5; color:#047857; display:flex; align-items:center; justify-content:center; }
+  .newbie-lane .nl-ico svg { width:20px; height:20px; stroke:#059669; }
+  .newbie-lane .nl-main { flex:1; min-width:0; }
+  .newbie-lane .nl-t { font-size:13.5px; font-weight:600; color:var(--text); margin-bottom:2px; }
+  .newbie-lane .nl-d { font-size:11.5px; color:var(--text2); line-height:1.55; }
+  .newbie-lane .nl-go { flex:0 0 auto; font-size:12px; font-weight:600; color:#047857; white-space:nowrap; }
+  .nb-panel { border:1.5px solid var(--green); border-radius:var(--radius); background:linear-gradient(150deg, var(--green-bg), var(--card) 55%); padding:18px; }
+  .nb-head { display:flex; align-items:center; gap:9px; flex-wrap:wrap; font-size:15px; font-weight:700; color:var(--text); margin-bottom:6px; }
+  .nb-sub { font-size:12.5px; color:var(--text2); line-height:1.7; margin-bottom:14px; }
+  .nb-steps { display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:10px; margin-bottom:16px; }
+  .nb-step { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:10px 11px; }
+  .nb-step b { display:block; font-size:12px; color:#047857; margin-bottom:3px; }
+  .nb-step span { font-size:11.5px; color:var(--text2); line-height:1.55; }
+  .nb-actions { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .nb-note { font-size:11px; color:var(--text3); margin-top:10px; }
   .pick-lock-note { display:flex; align-items:center; gap:8px; flex-wrap:wrap; background:var(--blue-bg); border:1px solid rgba(99,102,241,.22); border-radius:10px; padding:10px 12px; margin:0 0 14px; font-size:12.5px; line-height:1.6; color:var(--text2); }
   .pick-lock-note b { color:var(--blue); font-weight:600; }
   .pick-lock-note .pick-unlock { margin-left:auto; flex:0 0 auto; cursor:pointer; background:#fff; border:1px solid rgba(99,102,241,.45); color:var(--blue); border-radius:8px; padding:4px 10px; font-size:12px; font-weight:600; }
@@ -558,6 +578,7 @@
     .btn-sm { padding:4px 10px; font-size:12px; }
     .tag { padding:2px 8px; font-size:11px; }
     .role-grid { grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); }
+    .industry-grid { grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); }
     .stat-grid { grid-template-columns:repeat(2, 1fr); }
     .slideshow { min-height:240px; }
     .slideshow .slide { padding:24px; }
@@ -913,18 +934,57 @@ window.onerror = function(msg, url, line, col, err) {
 
 // ==================== DATA ====================
 
-// Industry scenarios
+// ==================== 行业场景（v154 重构：9 个入口 → 7 行业 + 1 人群通道）====================
+// 起因：原 9 个入口里有 3 个是「制造」（汽车 / 先进制造 / 消费电子）、3 个是「消费」（日化快消 /
+// 零售电商 / 互联网电商），重复门让学员在「选行业」这一步就卡住；同时「医疗与生命科学」是
+// B 端培训最大市场之一，原来完全没有入口。
+//
+// 本次只调「入口展示层」，不动题库与课程实体（后续按实际客户逐条补）：
+//   · elec（消费电子）→ 并入 mfg，hidden；ELEC_PM_QUIZ 池与 elec_* 课程数据原样保留
+//   · cpg（日化快消） → 并入 retail，hidden；CPG_PM_QUIZ 池与 cpg_* 课程数据原样保留
+//   · mega（大型项目）→ 重构为「能源基建与公共」，砍掉「什么都往里装」的混类语义
+//   · healthcare 新增（医疗与生命科学）——课程 / 题库尚未生产，入口标「筹备中」
+//   · newbie 从行业网格移出 → 独立「新人通道」：它不是行业，也不该和 8 个岗位并列双选
+//
+// ⚠️ hidden 项仍需保留定义，因为：① 历史 leads / quiz_results / 会话里存着 elec / cpg / newbie，
+// 读出来要能显示名字；② newbie 仍是合法 industry 值（新人通道 = newbie × graduate）；
+// ③ getWeights() / quizBankFor() 的行业权重表与抽池映射仍以这些 key 为准。
 const INDUSTRIES = {
-  finance: {id:'finance', name:'金融数字化', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="6" y1="8" x2="10" y2="8"/><line x1="6" y1="12" x2="14" y2="12"/><line x1="18" y1="12" x2="18.01" y2="12"/><line x1="6" y1="16" x2="10" y2="16"/></svg>', desc:'银行 · 保险 · 证券', color:'blue'},
-  auto:    {id:'auto', name:'智能汽车', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="18" r="2"/><path d="M2 12h3l3-9 4 18 3-9h3"/></svg>', desc:'整车 · 智驾 · 供应链', color:'cyan'},
-  mfg:     {id:'mfg', name:'先进制造', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>', desc:'半导体 · 精密制造 · IoT', color:'amber'},
-  elec:    {id:'elec', name:'消费电子', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>', desc:'手机 · 家电 · 可穿戴', color:'green'},
-  cpg:     {id:'cpg', name:'日化快消', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>', desc:'个护 · 食品 · 零售', color:'purple'},
-  internet: {id:'internet', name:'互联网', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>', desc:'电商 · 游戏 · 社交', subs:['电商','游戏','社交'], color:'cyan'},
-  retail:  {id:'retail', name:'零售电商', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>', desc:'平台 · 品牌 · 即时零售', color:'orange'},
-  mega:    {id:'mega', name:'大型项目', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/><path d="M9 10h.01"/><path d="M15 10h.01"/></svg>', desc:'能源 · 地产 · 政务', subs:['能源','地产','政务'], color:'amber'},
-  newbie:  {id:'newbie', name:'新人小白', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V11"/><path d="M12 11C12 8 9 6 5 6c0 4 3 6 7 5"/><path d="M12 13c0-3 3-5 7-5 0 4-3 6-7 5"/></svg>', desc:'应届新生 · 职前启蒙', color:'green'}
+  finance:  {id:'finance', name:'金融', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="6" y1="8" x2="10" y2="8"/><line x1="6" y1="12" x2="14" y2="12"/><line x1="18" y1="12" x2="18.01" y2="12"/><line x1="6" y1="16" x2="10" y2="16"/></svg>', desc:'银行 · 保险 · 证券', color:'blue'},
+  auto:     {id:'auto', name:'智能汽车', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="18" r="2"/><path d="M2 12h3l3-9 4 18 3-9h3"/></svg>', desc:'整车 · 智驾 · 供应链', color:'cyan'},
+  mfg:      {id:'mfg', name:'智能制造', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>', desc:'半导体 · 精密制造 · 消费电子', color:'amber'},
+  internet: {id:'internet', name:'互联网', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>', desc:'电商 · 游戏 · 社交', color:'cyan'},
+  retail:   {id:'retail', name:'零售与消费', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>', desc:'平台电商 · 品牌零售 · 快消日化', color:'orange'},
+  mega:     {id:'mega', name:'能源基建与公共', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 21v-4h6v4"/><path d="M9 10h.01"/><path d="M15 10h.01"/></svg>', desc:'电力能源 · 基建地产 · 政务公共', color:'amber'},
+  healthcare:{id:'healthcare', name:'医疗与生命科学', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/><path d="M8 12h2l1.5-3 2 6 1.5-3h2"/></svg>', desc:'医药 · 器械 · 医疗服务', color:'red', comingSoon:true},
+
+  // ——— 以下 3 项 hidden：不渲染成行业卡片，只作为合法数据 key 保留（见上方说明）———
+  elec:     {id:'elec', name:'消费电子', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>', desc:'手机 · 家电 · 可穿戴', color:'green', hidden:true, aliasOf:'mfg'},
+  cpg:      {id:'cpg', name:'日化快消', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>', desc:'个护 · 食品 · 零售', color:'purple', hidden:true, aliasOf:'retail'},
+  newbie:   {id:'newbie', name:'新人通道', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V11"/><path d="M12 11C12 8 9 6 5 6c0 4 3 6 7 5"/><path d="M12 13c0-3 3-5 7-5 0 4-3 6-7 5"/></svg>', desc:'应届生 · 转行新人 · 未定岗', color:'green', hidden:true, channel:true}
 };
+
+// 行业卡片只渲染「非 hidden」的 7 个；顺序即数组顺序（金融 → 汽车 → 制造 → 互联网 → 零售 → 能源 → 医疗）
+const IND_VISIBLE = Object.keys(INDUSTRIES).filter(function(k){ return !INDUSTRIES[k].hidden; });
+
+// 行业历史 id 兼容：elec → mfg、cpg → retail（与 v154 岗位合并的 ROLE_ALIAS 同一套思路）。
+// 只在「读」路径做归一，写入侧不产生旧 id；hidden 项的存在只为让历史数据还能读出名字。
+const INDUSTRY_ALIAS = { elec: 'mfg', cpg: 'retail' };
+const INDUSTRY_LEGACY_LABEL = {
+  elec: '智能制造（原消费电子）',
+  cpg:  '零售与消费（原日化快消）'
+};
+function resolveIndustry(id) {
+  if (!id) return id;
+  var k = INDUSTRY_ALIAS[id] || id;
+  return INDUSTRIES[k] ? k : id;
+}
+function industryLabel(id) {
+  if (!id) return '';
+  if (INDUSTRY_LEGACY_LABEL[id]) return INDUSTRY_LEGACY_LABEL[id];
+  var i = INDUSTRIES[id];
+  return i ? i.name : String(id);
+}
 
 const ROLES = {
   dev: {
@@ -937,33 +997,33 @@ const ROLES = {
     skills:['AI需求分析','用户研究','数据分析与决策','原型设计辅助','竞品分析','产品策略评估'],
     dimKeys:['prompt','data','data','content','strategy','strategy']
   },
-  ops: {
-    id:'ops', name:'运营', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>', color:'green', desc:'内容创作、数据运营、活动策划',
-    skills:['AI内容创作','数据分析运营','活动策划优化','用户洞察','自动化流程','社群运营'],
-    dimKeys:['content','data','content','data','workflow','content']
-  },
-  sales: {
-    id:'sales', name:'销售', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>', color:'amber', desc:'客户洞察、话术优化、CRM管理',
-    skills:['客户画像分析','销售话术优化','商机识别','CRM数据管理','会议纪要生成','客户跟进策略'],
-    dimKeys:['data','content','strategy','data','content','workflow']
+  // v154 岗位合并：运营 + 销售 → 市场营销。
+  // 两岗 8 维指纹高度重合（都是 内容 + 数据 打底），课程 10 门里 4 门主题重叠，
+  // 合并后保留「内容运营 / 增长投放 / 销售转化」三条技能方向，对外 1 个岗位、对内 3 条线。
+  // 题库不改数据：mkt 由 quizBankSources() 同时抽 OPS_QUIZ_V2 + SALES_QUIZ_V2 两池。
+  mkt: {
+    id:'mkt', name:'市场营销', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>', color:'amber', desc:'内容与增长、数据运营、客户转化',
+    skills:['AI内容与增长','数据运营分析','客户画像与转化','销售话术与跟进','活动与投放','自动化工作流'],
+    dimKeys:['content','data','data','content','strategy','workflow']
   },
   hr: {
-    id:'hr', name:'人资', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>', color:'red', desc:'简历筛选、人才分析、员工培训',
+    id:'hr', name:'人资与组织', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>', color:'red', desc:'招聘筛选、人才分析、组织效能',
     skills:['简历智能筛选','岗位JD撰写','人才数据分析','员工培训设计','绩效评估辅助','组织效能分析'],
     dimKeys:['tools','content','data','content','data','strategy']
   },
-  fin: {
-    id:'fin', name:'财务', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M7 14.5l2.5 2.5L14 13"/></svg>', color:'purple', desc:'预算预测、核算自动化、税务合规',
-    skills:['AI预算与预测','AI核算与报税自动化','AI报表与经营分析','AI税务合规','AI审计与风控','AI财务战略'],
-    dimKeys:['data','tools','data','security','workflow','strategy']
-  },
-  po: {
-    id:'po', name:'采购', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h3l2.5 10.5h11L21 7H6"/><circle cx="9" cy="19" r="1.8"/><circle cx="17" cy="19" r="1.8"/><path d="M9.5 17.5h7.5"/></svg>', color:'green', desc:'供应商分析、寻源比价、成本分析',
-    skills:['AI供应商画像','AI寻源与比价','AI谈判辅助','AI成本分析','AI采购合规','AI供应链协同'],
-    dimKeys:['data','data','content','tools','security','workflow']
+  // v154 岗位合并：财务 + 采购 → 财务与采购。
+  // 两者同属「钱与物的量化管理」，共享 数据口径 + 合规 + 流程 三层，
+  // 课程里「成本 / 比价 / 供应商评估」与「预算 / 核算」本就互相引用。
+  // 题库同样不动数据：fc 同时抽 FIN_QUIZ_V2 + PO_QUIZ_V2 两池。
+  // 注意：法务不并入此处 —— 法务重 security（其池内合规安全题占比 23%，为全部岗位池最高），
+  // 并入会被 avg 掉，且法务课的「不替法务定性、不引法条编号」红线在泛职能课里最容易写丢。
+  fc: {
+    id:'fc', name:'财务与采购', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M7 14.5l2.5 2.5L14 13"/></svg>', color:'purple', desc:'预算预测、成本与比价、供应商管理',
+    skills:['AI预算与预测','核算与报税自动化','成本与比价分析','供应商评估与寻源','采购与税务合规','经营分析'],
+    dimKeys:['data','tools','data','workflow','security','strategy']
   },
   legal: {
-    id:'legal', name:'法务', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 6v6c0 5 3.8 8.6 9 10 5.2-1.4 9-5 9-10V6l-9-4z"/><path d="M9 12l2 2 4-4"/></svg>', color:'red', desc:'合同审查、合规管理、风险防控',
+    id:'legal', name:'法务与合规', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 6v6c0 5 3.8 8.6 9 10 5.2-1.4 9-5 9-10V6l-9-4z"/><path d="M9 12l2 2 4-4"/></svg>', color:'red', desc:'合同审查、合规管理、风险防控',
     skills:['AI合同审查','AI法律检索研究','AI合规管理','AI风险数据分析','AI知识产权管理','AI争议处理'],
     dimKeys:['content','prompt','security','data','content','strategy']
   },
@@ -973,6 +1033,30 @@ const ROLES = {
     dimKeys:['prompt','data','content','data','content','content','tools','workflow']
   }
 };
+
+// ==================== v154 岗位合并：历史 id 兼容层 ====================
+// 8 岗位 → 6 岗位（运营+销售→市场营销，财务+采购→财务与采购）。
+// 旧会话、历史 leads / quiz_results / 访问日志里仍存着 ops / sales / fin / po 四个 id，
+// 所有「读历史」的路径都要能落到新岗位，否则会出现「名字显示 ops」「课程列表为空」。
+// 写入侧不产生旧 id；这里只做单向归一，不做反向映射（避免新旧混用）。
+const ROLE_ALIAS = { ops: 'mkt', sales: 'mkt', fin: 'fc', po: 'fc' };
+
+// 把任意来源的 role id 归一成当前有效 id（未登记的一律返回原值，交由调用方兜底）
+function resolveRole(id) {
+  if (!id) return id;
+  var r = ROLE_ALIAS[id] || id;
+  return ROLES[r] ? r : id;
+}
+
+// 显示用名称：历史数据里存的是旧 id，展示时按新岗位名 + 原细分职能标注，
+// 例如 ops → 「市场营销（原运营）」，让老客户的报告不至于看起来像换了岗位。
+const ROLE_LEGACY_LABEL = { ops: '市场营销（原运营）', sales: '市场营销（原销售）', fin: '财务与采购（原财务）', po: '财务与采购（原采购）' };
+function roleLabel(id) {
+  if (!id) return '';
+  if (ROLE_LEGACY_LABEL[id]) return ROLE_LEGACY_LABEL[id];
+  var r = ROLES[id];
+  return r ? r.name : String(id);
+}
 
 // ==================== v140 场景-岗位配对锁 ====================
 // 「新人小白」场景只配套「应届生」岗位（反之亦然）：课程实体（course_newbie_deep.html）、
@@ -993,6 +1077,9 @@ function pickConflict(industryId, roleId) {
 }
 // 把旧版本可能残留的非法组合收敛到唯一合法组合
 function normalizeScenePair() {
+  // v154：先把历史残留的旧行业 id 归一（elec → mfg、cpg → retail）。这一步不算配对冲突，
+  // 所以不返回 true，避免 startQuiz 弹出「配对已校正」的误导提示。
+  if (S.industry && INDUSTRY_ALIAS[S.industry]) S.industry = INDUSTRY_ALIAS[S.industry];
   if (S.role === 'graduate' && S.industry !== 'newbie') { S.industry = 'newbie'; return true; }
   if (S.industry === 'newbie' && S.role && S.role !== 'graduate') { S.role = 'graduate'; return true; }
   return false;
@@ -1024,13 +1111,19 @@ const AI_LEVELS = [
 const BASE_ROLE_WEIGHTS = {
   dev:   {prompt:18, tools:12, data:12, content: 5, dev:28, workflow:10, security:10, strategy: 5},
   pm:    {prompt:18, tools:12, data:20, content:12, dev: 5, workflow:13, security:10, strategy:10},
+  // v154 合并岗：mkt = ops/sales 两岗权重取均值再归一到 100；
+  // fc = fin/po 取均值。合并后 8 维分布仍保留原两岗的共同重心
+  // （mkt 偏 content+data，fc 偏 data+security），不是简单拉平。
+  mkt:   {prompt:17, tools:17, data:18, content:16, dev: 0, workflow:17, security: 7, strategy: 8},
+  fc:    {prompt:15, tools:16, data:20, content:10, dev: 0, workflow:15, security:14, strategy:10},
+  hr:    {prompt:15, tools:15, data:18, content:14, dev: 0, workflow:16, security:10, strategy:12},
+  legal: {prompt:15, tools:12, data:10, content:15, dev: 0, workflow:12, security:23, strategy:13},
+  graduate: {prompt:20, tools:18, data:16, content:18, dev: 4, workflow:14, security: 6, strategy: 4},
+  // ↓ 旧岗位权重仅保留给「历史记录回看」；新会话不会命中，getWeights 会先做 resolveRole 归一
   ops:   {prompt:20, tools:15, data:18, content:18, dev: 0, workflow:17, security: 7, strategy: 5},
   sales: {prompt:15, tools:18, data:18, content:15, dev: 0, workflow:17, security: 7, strategy:10},
-  hr:    {prompt:15, tools:15, data:18, content:14, dev: 0, workflow:16, security:10, strategy:12},
   fin:   {prompt:15, tools:15, data:22, content:10, dev: 0, workflow:13, security:15, strategy:10},
-  po:    {prompt:15, tools:17, data:18, content:10, dev: 0, workflow:18, security:12, strategy:10},
-  legal: {prompt:15, tools:12, data:10, content:15, dev: 0, workflow:12, security:23, strategy:13},
-  graduate: {prompt:20, tools:18, data:16, content:18, dev: 4, workflow:14, security: 6, strategy: 4}
+  po:    {prompt:15, tools:17, data:18, content:10, dev: 0, workflow:18, security:12, strategy:10}
 };
 
 // Industry modifiers: amplify certain dimensions per industry
@@ -1046,7 +1139,10 @@ const INDUSTRY_MODIFIERS = {
 };
 
 function getWeights(industryId, roleId) {
-  const base = BASE_ROLE_WEIGHTS[roleId];
+  // v154：先归一旧岗位 id；再兜底未登记 id（此前 BASE_ROLE_WEIGHTS 缺项会让
+  // Object.entries(undefined) 直接抛异常，把整个测评打挂）。
+  roleId = resolveRole(roleId);
+  const base = BASE_ROLE_WEIGHTS[roleId] || BASE_ROLE_WEIGHTS.dev;
   const mod = INDUSTRY_MODIFIERS[industryId] || {};
   let dims = {};
   let total = 0;
@@ -1948,7 +2044,8 @@ const ADAPTIVE_QUIZ = {
    "explain": "最高法AI纠纷意见与数字虚拟人办法明确肖像权、声音权与数字人标识义务；未经同意换脸克隆、冒用身份即便好玩也已构成侵权。"
   }
 ,
-{"q":"【安全合规】刷到一段看起来很真的「领导讲话」视频，但嘴型和声音有点不对劲，你怀疑是AI换脸伪造，会怎么做？","opts":["转发给同事提醒「领导说了这事」，反正看着像真的","凭感觉判断，觉得大概率是真的就信了","看一眼画面角落有没有AI生成标识，有标识就当是真的","打开「国家反诈中心」APP的AI内容鉴定功能把视频传上去做初步核验，同时向发布平台投诉并要求出具来源，或直接联系当事人本人核实真伪","先看画面角落的AI生成标识、再用官方鉴定工具核验、并向权威渠道或当事人本人多一次确认，不轻易转发或采信"],"dim":"security","level":1,"difficulty":0.55}]
+{"q":"【安全合规】刷到一段看起来很真的「领导讲话」视频，但嘴型和声音有点不对劲，你怀疑是AI换脸伪造，会怎么做？","opts":["转发给同事提醒「领导说了这事」，反正看着像真的","凭感觉判断，觉得大概率是真的就信了","看一眼画面角落有没有AI生成标识，有标识就当是真的","打开「国家反诈中心」APP的AI内容鉴定功能把视频传上去做初步核验，同时向发布平台投诉并要求出具来源，或直接联系当事人本人核实真伪","先看画面角落的AI生成标识、再用官方鉴定工具核验、并向权威渠道或当事人本人多一次确认，不轻易转发或采信"],"dim":"security","level":1,"difficulty":0.55},
+{"q":"【安全合规】你在群里看到一条\"某三甲医院专家\"的短视频，推荐一款\"特效药\"，口音和长相都很像，但你怀疑是AI换脸换声冒充。你会怎么做？","opts":["直接转发到家族群，还附一句\"连专家都这么说了你还不信\"，只要画面看着像真的就先转了再说，顺便提醒大家都看看","凭自己的感觉来判断，觉得大概率是真的就信了，顺手照着视频里的链接去下单把药给买了回来","只看一眼画面角落有没有AI生成标识，看到有标识就直接当成真专家推荐，放心地照着链接下单购买","先点开视频里的购买链接把药给下了，心里想着反正能退货，错了再退也不亏、反正不碍事","先查发布者资质与视频原始来源，用平台或官方工具核验是否为AI合成，不轻信、不转发、不盲目购买，必要时向平台举报"],"dim":"security","level":1,"difficulty":0.55}]
 };
 
 function getIndustryContext(roleId, industryId) {
@@ -2064,7 +2161,7 @@ function quizBankObjOf(name) {
 // 用途：同维 3 题信度改造，需要「同维同级」下的另一道题做稳定性验证。
 // 注意：getQuizQuestions 仍返回「每级一道」的旧结构，其它调用方零影响。
 function getQuizPools(roleId, industryId) {
-  var obj = quizBankObjOf(quizBankFor(roleId, industryId));
+  var obj = quizObjMerged(quizBankSources(roleId, industryId));
   var pools = {};
   var dims = ['prompt','tools','data','content','dev','workflow','security','strategy'];
   dims.forEach(function (d) { pools[d] = { 0: [], 1: [], 2: [] }; });
@@ -2083,9 +2180,10 @@ function getQuizPools(roleId, industryId) {
 }
 
 function getQuizQuestions(roleId, industryId) {
-  // 题库映射统一走 quizBankFor → quizBankObjOf（v126：去掉重复的 indMap/roleMap 双份映射）
-  var _bankName = quizBankFor(roleId, industryId);
-  var quizObj = quizBankObjOf(_bankName);
+  // 题库映射统一走 quizBankSources → quizObjMerged（v154：合并岗位抽多池）
+  var _srcs = quizBankSources(roleId, industryId);
+  var _bankName = _srcs[0];
+  var quizObj = quizObjMerged(_srcs);
   // v130 兜底：登记表漏项时不再静默返回空题目（此前 elec 抽不到题的根因）
   if (!quizObj) {
     if (typeof console !== 'undefined' && console.warn) console.warn('[quiz] 题库未登记，回退制造库:', _bankName);
@@ -2314,13 +2412,49 @@ function loadQuizQuestion(step, done) {
 }
 
 // 解析 role/industry → 题库名（与 getQuizQuestions 内部映射一致）
+// v154：ops/sales/fin/po 这四个旧 id 保留映射，仅用于「历史数据回看」；
+// 新会话不会产生这四个岗位，新岗位走 mkt / fc 的合并抽池（见 quizBankSources）。
 function quizBankFor(roleId, industryId) {
   if (roleId === 'pm') {
     var indMap = { mfg: 'MFG_PM_QUIZ', finance: 'FIN_PM_QUIZ', auto: 'AUTO_PM_QUIZ', cpg: 'CPG_PM_QUIZ', internet: 'INTERNET_PM_QUIZ', mega: 'MEGA_PM_QUIZ', retail: 'RETAIL_PM_QUIZ', elec: 'ELEC_PM_QUIZ' };
     return indMap[industryId] || 'MFG_PM_QUIZ';
   }
-  var roleMap = { dev: 'DEV_QUIZ_V2', ops: 'OPS_QUIZ_V2', sales: 'SALES_QUIZ_V2', hr: 'HR_QUIZ_V2', fin: 'FIN_QUIZ_V2', po: 'PO_QUIZ_V2', legal: 'LEGAL_QUIZ_V2', graduate: 'NEWBIE_QUIZ' };
+  var roleMap = {
+    dev: 'DEV_QUIZ_V2',
+    mkt: 'OPS_QUIZ_V2',          // 市场营销：主池 = 运营池（营销侧内容/数据题更多）
+    fc:  'FIN_QUIZ_V2',          // 财务与采购：主池 = 财务池
+    hr:  'HR_QUIZ_V2',
+    legal: 'LEGAL_QUIZ_V2',
+    graduate: 'NEWBIE_QUIZ',
+    // ↓ 旧 id 兼容（历史 quiz_results / 访问日志里仍可能出现）
+    ops: 'OPS_QUIZ_V2', sales: 'SALES_QUIZ_V2', fin: 'FIN_QUIZ_V2', po: 'PO_QUIZ_V2'
+  };
   return roleMap[roleId] || 'DEV_QUIZ_V2';
+}
+
+// v154：岗位合并后的「多池来源」。单岗位返回一个池，合并岗位返回多个池。
+// 设计意图：不动题库数据、不重写任何题目，只改抽取范围 —— 旧题 100% 保留，
+// 而合并岗位的实际可抽题量是两池之和（市场营销 109+112、财务与采购 80+77），
+// 反而比合并前单岗更不容易重复抽到同题。
+function quizBankSources(roleId, industryId) {
+  if (roleId === 'mkt') return ['OPS_QUIZ_V2', 'SALES_QUIZ_V2'];
+  if (roleId === 'fc')  return ['FIN_QUIZ_V2', 'PO_QUIZ_V2'];
+  return [quizBankFor(roleId, industryId)];
+}
+
+// 把多个池按维度合并成一个视图（供 getQuizQuestions / getQuizPools 复用）
+function quizObjMerged(sources) {
+  var dims = ['prompt','tools','data','content','dev','workflow','security','strategy'];
+  var out = {}, any = false;
+  (sources || []).forEach(function (n) {
+    var o = quizBankObjOf(n);
+    if (!o) return;
+    any = true;
+    dims.forEach(function (d) {
+      if (Array.isArray(o[d]) && o[d].length) out[d] = (out[d] || []).concat(o[d]);
+    });
+  });
+  return any ? out : null;
 }
 
 function startAdaptiveQuiz() {
@@ -2793,7 +2927,8 @@ const MFG_PM_QUIZ = {"prompt":[{"level":0,"difficulty":"初阶","scenario":"场�
    b:3,
    "explain": "制造端大量是分类与评分类结构化任务，用低成本决策模型替代大模型可大幅降本；复杂归因才上大模型，并做人工抽检校准。"
   }
-],"content":[{"level":0,"difficulty":"初阶","scenario":"场景：你要为新引进的CNC加工中心写标准作业指导书（SOP）。涉及：开机检查/装夹规范/程序调用/首件检验/日常保养。","q":"怎样用AI高效产出一份能直接指导现场作业的SOP？","opts":["把设备原厂手册交给AI翻译并重排成中文操作说明，整体要兼顾五个步骤，按手册章节顺序输出装夹、编程、维护与安全内容，排版校对后作为SOP文件直接下发到车间使用，按需","调出同系列老设备的SOP文档，请AI把设备型号、关键参数与工具清单替换成新设备的对应信息，其余结构与步骤保持不变，更新完毕后即可发布供车间执行","把设备手册与安全规范交给AI，按开机检查、装夹、程序调用、首件检验、日常保养五个环节整理作业步骤与安全要点，由工艺工程师对照车间实际流程审核修订后定稿下发","请老师傅按实际操作流程录制作业视频并配分步字幕，把视频链接整理成培训资料发给新员工，结合现场带教完成操作流程学习，新人通过现场考核后视为完成培训","请两位资深操作工分别口述各自的作业习惯与注意事项，把口述内容交给AI合并去重并整理成SOP初稿，返回操作工确认与实际操作一致后投入使用，再由班组长补充应急处理要求后定稿"],sc:"XCMvJyczPzM7O1o=",b:3,"explain":"SOP要以设备手册与安全规范为依据、按现场作业流程重组并保留工艺审核环节；口述因人而异缺乏依据、手册直译不合现场习惯、旧版套改有新机型差异、视频难检索与留痕。"},{"level":1,"difficulty":"中阶","scenario":"场景：公司要参加工业博览会，需要一份「智能工厂解决方案白皮书」。内容：行业趋势、技术架构、标杆案例、ROI分析。","q":"怎样用AI组织白皮书内容才能兼顾专业性与可信度？","opts":["收集西门子、博世等厂商公开发布的白皮书，需要跨两个要素配合，请AI提炼其章节框架与核心观点，结合自家解决方案的组织结构重新撰写，形成一份结构完整、观点有出处的行业白皮书，输出前统一术语并请市场部校对品牌表述","以公司解决方案为主体组织白皮书，整体要兼顾两个视角，请AI按产品架构逐模块介绍功能特点与客户价值，配以系统界面与实施流程示意图，重点突出方案的成熟度与交付能力","把白皮书的行业研究、内容撰写与版式设计整体委托咨询公司，公司提供产品资料与实施案例，按合同节点组织评审并验收咨询公司的交付成果，评审意见分两轮反馈给咨询方修改","调出去年发布的白皮书底稿，请AI更新其中的产品型号、交付数量与联系方式，原有章节框架与案例主体保持不变，核对数据与图片后重新排版印刷，转标准动作","请AI检索近两年行业报告提炼制造业数字化趋势并保留数据出处，收集头部标杆工厂的公开案例，按趋势、方案、案例、ROI框架成稿，公司真实数据由内部核对补入并统一校对引用，期间如出现口径分歧以业务方确认结果为准"],sc:"XCMvJyc3PzM7P1o=",b:5,"explain":"白皮书可信度来自可溯源趋势数据与真实实践的组合，需要内外素材分工核对；全外包偏模板且与公司实践脱节，对标改写缺一手内容，旧版更新会过时，产品手册式写法缺行业视角。"},{"level":2,"difficulty":"高阶","scenario":"场景：你要在行业峰会做「AI定义下一代制造」主题演讲。听众是制造业高管和投资人。需要兼具技术深度和商业洞察。","q":"怎样用AI准备这场演讲才能在两类听众中都建立说服力？","opts":["请AI梳理大模型与智能体在各行业应用的整体趋势、市场规模与典型场景，需要跨三个部分配合，组织成从宏观产业到具体案例的演讲结构，呈现AI技术浪潮的完整图景，回传修正路径，沉淀案例素材","以公司产品为主线组织演讲，请AI把AI质检、预测性维护等模块的技术指标、部署规模与客户反馈整理成演示文稿，按产品线逐一讲解能力亮点与落地成效，用基线衡收益，设红黄绿灯","请AI撰写一篇观点鲜明、节奏紧凑的演讲稿，自己通读熟悉后按稿演讲，开场用一组行业数据抓住注意，结尾以公司愿景收束，全程控制语速与时长","请AI整理行业近两年融资与规模化落地数据建立加速叙事，提炼自动化走向自主化的范式转变并配量化对比，用反向质疑检查论点漏洞，把公司实践嵌入对应范式并加入个人判断","把技术团队提供的平台架构作为演讲主体，请AI将算法框架、数据链路与边缘部署整理成层次分明的图示，向听众系统讲解平台的技术先进性与工程实现复杂度，并准备两张可回应投资人提问的技术壁垒示意页"],sc:"XCMvJyc3Pzc7O1o=",b:4,"explain":"面向高管与投资人需要市场数据叙事、范式转变与量化证据，并用公司实践锚点接受反向质疑；产品功能介绍偏广告、AI代讲缺可信度、纯技术不对听众、通用趋势缺公司连接。"},
+,
+{"level":2,"difficulty":"高阶","scenario":"场景：你是智能制造PM，工厂想把工艺参数、排产规则与质检标准沉淀成\"厂内专属大模型\"，但核心know-how与数据绝不能出厂。","q":"从数据与部署视角，最稳的选型是？","opts":["直接采购最强公有云大模型的API，把工艺与排产数据全部上传云端，认为模型越强效果越好","用可私有化、支持本地部署与微调的开源模型，数据不出厂，把工艺知识沉淀为厂内知识库并保留人工确认","等所有同行都用出成效了，再照搬同一套公有云方案，避免自己当第一个试错的人","把模型选型、数据治理与上线验收全部交给设备厂商，工厂只做接口对接，底层逻辑与数据一律不碰","先做一个接公网的炫酷Demo向高层汇报，至于能否接真实产线数据以后再说"],"sc":"XCMvIyc3PzM7O1o=","b":2,"explain":"制造核心壁垒在工艺与排产等专有知识，应优先选可私有化部署、支持本地微调的开源模型，数据不出厂、知识沉淀为厂内库并保留人工确认，比公有云或黑盒供应商更稳。"}],"content":[{"level":0,"difficulty":"初阶","scenario":"场景：你要为新引进的CNC加工中心写标准作业指导书（SOP）。涉及：开机检查/装夹规范/程序调用/首件检验/日常保养。","q":"怎样用AI高效产出一份能直接指导现场作业的SOP？","opts":["把设备原厂手册交给AI翻译并重排成中文操作说明，整体要兼顾五个步骤，按手册章节顺序输出装夹、编程、维护与安全内容，排版校对后作为SOP文件直接下发到车间使用，按需","调出同系列老设备的SOP文档，请AI把设备型号、关键参数与工具清单替换成新设备的对应信息，其余结构与步骤保持不变，更新完毕后即可发布供车间执行","把设备手册与安全规范交给AI，按开机检查、装夹、程序调用、首件检验、日常保养五个环节整理作业步骤与安全要点，由工艺工程师对照车间实际流程审核修订后定稿下发","请老师傅按实际操作流程录制作业视频并配分步字幕，把视频链接整理成培训资料发给新员工，结合现场带教完成操作流程学习，新人通过现场考核后视为完成培训","请两位资深操作工分别口述各自的作业习惯与注意事项，把口述内容交给AI合并去重并整理成SOP初稿，返回操作工确认与实际操作一致后投入使用，再由班组长补充应急处理要求后定稿"],sc:"XCMvJyczPzM7O1o=",b:3,"explain":"SOP要以设备手册与安全规范为依据、按现场作业流程重组并保留工艺审核环节；口述因人而异缺乏依据、手册直译不合现场习惯、旧版套改有新机型差异、视频难检索与留痕。"},{"level":1,"difficulty":"中阶","scenario":"场景：公司要参加工业博览会，需要一份「智能工厂解决方案白皮书」。内容：行业趋势、技术架构、标杆案例、ROI分析。","q":"怎样用AI组织白皮书内容才能兼顾专业性与可信度？","opts":["收集西门子、博世等厂商公开发布的白皮书，需要跨两个要素配合，请AI提炼其章节框架与核心观点，结合自家解决方案的组织结构重新撰写，形成一份结构完整、观点有出处的行业白皮书，输出前统一术语并请市场部校对品牌表述","以公司解决方案为主体组织白皮书，整体要兼顾两个视角，请AI按产品架构逐模块介绍功能特点与客户价值，配以系统界面与实施流程示意图，重点突出方案的成熟度与交付能力","把白皮书的行业研究、内容撰写与版式设计整体委托咨询公司，公司提供产品资料与实施案例，按合同节点组织评审并验收咨询公司的交付成果，评审意见分两轮反馈给咨询方修改","调出去年发布的白皮书底稿，请AI更新其中的产品型号、交付数量与联系方式，原有章节框架与案例主体保持不变，核对数据与图片后重新排版印刷，转标准动作","请AI检索近两年行业报告提炼制造业数字化趋势并保留数据出处，收集头部标杆工厂的公开案例，按趋势、方案、案例、ROI框架成稿，公司真实数据由内部核对补入并统一校对引用，期间如出现口径分歧以业务方确认结果为准"],sc:"XCMvJyc3PzM7P1o=",b:5,"explain":"白皮书可信度来自可溯源趋势数据与真实实践的组合，需要内外素材分工核对；全外包偏模板且与公司实践脱节，对标改写缺一手内容，旧版更新会过时，产品手册式写法缺行业视角。"},{"level":2,"difficulty":"高阶","scenario":"场景：你要在行业峰会做「AI定义下一代制造」主题演讲。听众是制造业高管和投资人。需要兼具技术深度和商业洞察。","q":"怎样用AI准备这场演讲才能在两类听众中都建立说服力？","opts":["请AI梳理大模型与智能体在各行业应用的整体趋势、市场规模与典型场景，需要跨三个部分配合，组织成从宏观产业到具体案例的演讲结构，呈现AI技术浪潮的完整图景，回传修正路径，沉淀案例素材","以公司产品为主线组织演讲，请AI把AI质检、预测性维护等模块的技术指标、部署规模与客户反馈整理成演示文稿，按产品线逐一讲解能力亮点与落地成效，用基线衡收益，设红黄绿灯","请AI撰写一篇观点鲜明、节奏紧凑的演讲稿，自己通读熟悉后按稿演讲，开场用一组行业数据抓住注意，结尾以公司愿景收束，全程控制语速与时长","请AI整理行业近两年融资与规模化落地数据建立加速叙事，提炼自动化走向自主化的范式转变并配量化对比，用反向质疑检查论点漏洞，把公司实践嵌入对应范式并加入个人判断","把技术团队提供的平台架构作为演讲主体，请AI将算法框架、数据链路与边缘部署整理成层次分明的图示，向听众系统讲解平台的技术先进性与工程实现复杂度，并准备两张可回应投资人提问的技术壁垒示意页"],sc:"XCMvJyc3Pzc7O1o=",b:4,"explain":"面向高管与投资人需要市场数据叙事、范式转变与量化证据，并用公司实践锚点接受反向质疑；产品功能介绍偏广告、AI代讲缺可信度、纯技术不对听众、通用趋势缺公司连接。"},
     {"level":0,"difficulty":"初阶","scenario":"场景：团队不知道产品往哪走。","q":"产品路线图怎么写？","opts":["A. 按时间线列目标/里程碑/依赖/价值，对齐各方预期","B. 只列功能","D. 只给老板，按需，并说明判断依据，并标注适用前提","E. 不写","C. 只画饼"],"sc":"XCcvJyc3PzM7O1o=","b":1},
     {"level":0,"difficulty":"初阶","scenario":"场景：新员工看不懂设备。","q":"培训手册怎么生成？","opts":["C. 只念参数","D. 只放视频","A. 场景化操作步骤+常见故障处理+安全红线，配图示","E. 不培训","B. 只发说明书，并说明判断依据，并标注适用前提"],"sc":"XCMvJyczPzM7O1o=","b":3},
     {"level":1,"difficulty":"中阶","scenario":"场景：研发要看清楚需求细节。","q":"需求规格怎么写？","opts":["E. 不写","B. 只写大意","A. 功能/输入/输出/约束/验收逐条可测，消除歧义","C. 只贴图","D. 只口头说，并说明判断依据，并标注适用前提"],"sc":"XCMvJyczPzM7O1o=","b":3},
@@ -3157,7 +3292,8 @@ const FIN_PM_QUIZ = {
     {"level":1,"difficulty":"中阶","scenario":"场景：测算 AI 投入产出时，业务方质疑数据来源。","q":"怎么补齐？","opts":["把测算交给财务，业务方不参与口径讨论","用试用期的最高效率乘以全员规模推算全年，旺季一过就崩","只报总收益，不拆分到岗位以免争议","按岗位列出现状工时与改造后工时，给出测算过程与假设","直接引用同业公开的提效比例作为参考基准"],"sc":"XCMvJyc3Pzc7O1o=","b":4,"explain":"按岗位列工时变化并公开假设，质疑者可以逐项挑战，这比引用外部基准更可信。"},
     {"level":1,"difficulty":"中阶","scenario":"场景：企业客户问 AIDAX 能带来什么改变。","q":"怎么讲最有效？","opts":["强调课程数量与视频时长，体量足够大","围绕他的岗位与场景讲三件具体事的做法与产出","先讲价格优势，用性价比打动决策人","对比竞品的功能清单，说明覆盖更全面","系统讲解平台的八维模型与题库设计原理"],"sc":"XCMvIyc3PzM7O1o=","b":2,"explain":"客户关心的是自己岗位上具体怎么变；模型原理与体量属于供给侧语言，不解决他的问题。"},
     {"level":2,"difficulty":"高阶","scenario":"场景：AI 能力建设要争取三年预算。","q":"论证主线怎么搭？","opts":["以技术先进性为主线，说明架构领先同业几年","以岗位能力地图为主线，逐年给出能力缺口与对应投入","以人力替代为主线，测算可减少的编制数量","以员工诉求为主线，强调大家希望有更好的工具","以合规要求为主线，强调不做将面临监管风险"],"sc":"XCMvIyc3PzM7O1o=","b":2,"explain":"能力地图能把投入与业务结果连起来，每年可验收；纯技术或纯合规主线难以持续获得预算。"},
-    {"level":2,"difficulty":"高阶","scenario":"场景：试点成功但推广停滞，各分行观望。","q":"关键动作是什么？","opts":["下发推广计划，规定各分行完成时间与覆盖比例","召开经验分享会，请试点分行介绍做法与心得","把试点做成可复制的标准包，配套种子团队驻场带教","等试点的系统更成熟稳定后再考虑全面推广","把预算直接下拨，由各分行自主决定怎么用"],"sc":"XCMvJyczPzM7O1o=","b":3,"explain":"推广的阻力在能力而非意愿，标准包加驻场带教能降低复制门槛；发文与分享会不解决落地问题。"}]
+    {"level":2,"difficulty":"高阶","scenario":"场景：试点成功但推广停滞，各分行观望。","q":"关键动作是什么？","opts":["下发推广计划，规定各分行完成时间与覆盖比例","召开经验分享会，请试点分行介绍做法与心得","把试点做成可复制的标准包，配套种子团队驻场带教","等试点的系统更成熟稳定后再考虑全面推广","把预算直接下拨，由各分行自主决定怎么用"],"sc":"XCMvJyczPzM7O1o=","b":3,"explain":"推广的阻力在能力而非意愿，标准包加驻场带教能降低复制门槛；发文与分享会不解决落地问题。"},
+{"level":2,"difficulty":"高阶","scenario":"场景：你是金融PM，监管与行业新规明确\"智能体须把关键决策留给人终裁、用户在回路\"。公司要上线信贷与理财场景的AI智能体，能自主完成初审、建议与部分执行。","q":"落地时最该守住的底线是什么？","opts":["把授信与拒贷完全交给AI自动决策，认为这样效率最高、体验最顺滑，人工全程不介入","只在官网放一个AI能力介绍页做营销，真实审批仍纯人工，智能体不碰任何实质业务","AI负责初审与风险建议，授信、拒贷与争议处理强制人工终裁，过程可解释、留痕并可申诉","把信贷决策的最终责任转嫁给外部模型厂商，合同里加一句\"由厂商负责\"就当作已经免责","先全量放开让客户自助操作，等出现坏账或监管来查的时候，再临时补一套人工复核流程"],"sc":"XCMvJyczPzM7O1o=","b":3,"explain":"金融智能体不能把授信、拒贷等关键决策完全交给AI；应让AI做初审与风险建议，关键决策强制人工终裁、全程可解释留痕并设申诉通道，这既是监管要求也是风险底线。"}]
 };
 
 // 智能汽车×PM 测评数据
@@ -3288,7 +3424,8 @@ const AUTO_PM_QUIZ = {
     {"level":1,"difficulty":"中阶","scenario":"场景：要把车联网数据与售后工单打通。","q":"打通要点是什么？","opts":["以车主手机号为主键关联，便于跨系统匹配","先汇总成日粒度指标，原始数据用完即删以节省成本，异常追溯断","先做一个简化版本，关键判断仍全部依赖人工","以 VIN 为主键、以事件时间为轴，保留原始报文与工单明细","按部门分别建表，需要时再人工导出比对"],"sc":"XCMvJyc3Pzc7O1o=","b":4,"explain":"VIN 加事件时间才能定位到具体车辆与故障时刻；日粒度汇总会抹掉故障前后的关键序列。"},
     {"level":1,"difficulty":"中阶","scenario":"场景：AI 给出的故障归因看起来合理但无法验证。","q":"怎么处理？","opts":["要求给出关联的工单号与报文片段，抽样回溯验证","既然逻辑自洽就直接采纳，验证成本太高","让 AI 再解释一遍，若前后一致即可采信","由 IT 部门单独推进，业务部门不参与需求定义","只在小范围试点，不做任何记录与验证"],"sc":"XCcvJyc3PzM7O1o=","b":1,"explain":"归因必须能落到具体工单与报文，抽样回溯是唯一能确认因果的方式。"},
     {"level":2,"difficulty":"高阶","scenario":"场景：要建整车数据资产目录并定可用性等级。","q":"定级维度怎么设？","opts":["按数据量大小排序，量大优先开放给模型使用，可复核","只区分是否已数字化，未数字化的暂不纳入","按完整度、时效性、敏感级别与责任部门四维定级并定期复核","按业务部门主观重要程度打分，一年评一次","按项目单独管理，不做跨项目的沉淀与复用"],"sc":"XCMvJyczPzM7O1o=","b":3,"explain":"四维定级同时回答可用性、新鲜度、合规与归属，才能支撑跨部门调用。"},
-    {"level":2,"difficulty":"高阶","scenario":"场景：智能座舱要接入大模型，数据怎么控？","q":"最关键的设计是？","opts":["车端做敏感信息过滤与最小化，云端只收必要上下文并留审计","只在单个车型上试点，暂不向其他车型推广","按用户是否同意来决定是否上传全部原始数据","只在高端车型上做数据采集，低端车型不采集","把车内录音与视频全量上传，便于后续优化模型，可复核"],"sc":"XCcvJyc3PzM7O1o=","b":1,"explain":"车端过滤加最小化上传是合规底线；用户同意不能替代技术上的最小必要原则。"}],
+    {"level":2,"difficulty":"高阶","scenario":"场景：智能座舱要接入大模型，数据怎么控？","q":"最关键的设计是？","opts":["车端做敏感信息过滤与最小化，云端只收必要上下文并留审计","只在单个车型上试点，暂不向其他车型推广","按用户是否同意来决定是否上传全部原始数据","只在高端车型上做数据采集，低端车型不采集","把车内录音与视频全量上传，便于后续优化模型，可复核"],"sc":"XCcvJyc3PzM7O1o=","b":1,"explain":"车端过滤加最小化上传是合规底线；用户同意不能替代技术上的最小必要原则。"},
+{"level":1,"difficulty":"中阶","scenario":"场景：你是智能汽车PM，要在座舱里引入多模态Agent（语音+视觉+车控），它能听懂指令、看懂路况并操作部分车机功能，同时会采集大量驾乘人员数据。","q":"在数据安全与责任边界上，最稳的做法是？","opts":["把所有座舱语音、人脸与行为数据实时上传公有云做推理，车端只留麦克风，云端越强体验越好","座舱敏感数据在车端本地处理，仅把非隐私的导航等请求上云，明确失效兜底与责任边界并留痕","完全不让Agent碰座舱数据，退回纯手机投屏，认为只要数据不出车就绝对安全","让供应商把整套座舱Agent打包成黑盒，车厂只接结果、不碰数据与逻辑，省心又规避责任","先把座舱Agent全功能开放给车主自由使用，等出安全事故或监管处罚再补数据治理"],"sc":"XCMvIyc3PzM7O1o=","b":2,"explain":"座舱数据高度敏感，应在车端本地处理生物与行为数据、仅把非隐私请求上云，并明确失效兜底与责任边界；全量上云或甩给黑盒供应商都会放大隐私与责任风险。"}],
  "content": [
   {
    "level": 0,
@@ -3747,7 +3884,8 @@ const CPG_PM_QUIZ = {
     {"level":1,"difficulty":"中阶","scenario":"场景：促销费用核销仍然靠人工审单据。","q":"流程怎么调？","opts":["按金额与风险分层，小额抽样审、大额全审并留痕","所有费用一律全量审核保证不遗漏","取消审核以系统匹配结果为准","沿用上一季度的做法，仅做小幅文字性调整","把审核工作转给经销商自行完成"],"sc":"XCcvJyc3PzM7O1o=","b":1,"explain":"按风险分层把审核资源集中到高风险费用，是效率的真正来源。"},
     {"level":1,"difficulty":"中阶","scenario":"场景：跨区域传递的活动方案在流转中失真。","q":"怎么解决？","opts":["所有人在同一文档里直接改不分版本","要求每个环节重新总结上一步内容","关键执行参数结构化为字段传递并附方案来源","增加一次线下对齐会当面讲清","交给经销商全权负责，内部不设对接人与验收标准"],"sc":"XCMvJyczPzM7O1o=","b":3,"explain":"结构化字段防损耗，来源链接可回溯。"},
     {"level":2,"difficulty":"高阶","scenario":"场景：要重排业务员与 AI 的分工。","q":"推进顺序怎么定？","opts":["先调整组织架构再考虑系统配合","先明确各角色对订单与费用的决策权，再调整流程","交给经销商全权负责，内部不设对接人与验收标准","先上线系统用效果推动职责演变","先按编制减员把节省人力作为收益"],"sc":"XCMvIyc3PzM7O1o=","b":2,"explain":"职责与决策权先定，流程才有依据。"},
-    {"level":2,"difficulty":"高阶","scenario":"场景：AI 建议的补货量与区域经验冲突。","q":"机制怎么设计？","opts":["保留区域调整权，冲突件记录并纳入模型改进样本","以区域经验为准，AI 只在缺位时兜底","以 AI 建议为准，区域意见仅作记录","沿用上一季度的做法，仅做小幅文字性调整","冲突件一律上报总部逐一裁定"],"sc":"XCcvJyc3PzM7O1o=","b":1,"explain":"保留调整权加冲突留样，兼顾当下判断与模型改进。"}],
+    {"level":2,"difficulty":"高阶","scenario":"场景：AI 建议的补货量与区域经验冲突。","q":"机制怎么设计？","opts":["保留区域调整权，冲突件记录并纳入模型改进样本","以区域经验为准，AI 只在缺位时兜底","以 AI 建议为准，区域意见仅作记录","沿用上一季度的做法，仅做小幅文字性调整","冲突件一律上报总部逐一裁定"],"sc":"XCcvJyc3PzM7O1o=","b":1,"explain":"保留调整权加冲突留样，兼顾当下判断与模型改进。"},
+{"level":1,"difficulty":"中阶","scenario":"场景：你是快消PM，团队引入生成式AI做营销：批量产出短视频与图文，还能基于客户行为\"主动交互\"——识别曾拒绝的用户并自动跟进。","q":"把\"主动交互\"用出效果又不踩雷，关键控制点是？","opts":["把所有曾拒绝的用户都自动标记为可跟进对象，AI按固定话术反复触达，用发送频次覆盖来代替人的判断","在品牌规范与频控约束下用AI生成多版本物料，主动跟进需人工确认时机与话术，避免骚扰与品牌稀释","完全不让AI做主动交互，退回纯人工客服跟进，认为机器触达用户一定惹人烦、没有任何价值","把主动跟进动作全权交给外部代运营团队，品牌方只负责付钱、不参与话术与节奏的任何审核","等AI进化到完全不需要人看就能自动跟进，现在绝不碰任何面向客户的主动触达动作"],"sc":"XCMvIyc3PzM7O1o=","b":2,"explain":"主动交互能提升转化，但必须在品牌规范与频控约束下生成多版本物料，且跟进的时机与话术要有人把关，避免骚扰用户、误触与稀释品牌调性。"}],
  "security": [
   {
    "level": 0,
@@ -4066,7 +4204,8 @@ const INTERNET_PM_QUIZ = {
     {"level":1,"difficulty":"中阶","scenario":"场景：需求评审仍然靠人工逐条追问细节。","q":"流程怎么调？","opts":["沿用上一版本的做法，仅做小幅文字性调整，新版本没验","把评审工作量转给研发自行把关","评审前由 AI 生成预审问题清单，会上只讨论争议项","取消评审以文档为准直接排期","所有需求一律走完整评审，保证不遗漏"],"sc":"XCMvJyczPzM7O1o=","b":3,"explain":"预审清单把会议时间集中到真正的分歧上。"},
     {"level":1,"difficulty":"中阶","scenario":"场景：跨团队协作时口径在流转中失真。","q":"怎么解决？","opts":["要求每个环节重新总结上一步","增加一次线下对齐会当面讲清","所有人在同一文档直接改不分版本","交给外部供应商全权负责，内部不设对接人与验收标准","关键指标与结论结构化为字段传递并附看板链接"],"sc":"XCMvJyc3PzM7P1o=","b":5,"explain":"结构化字段防损耗，链接可回溯。"},
     {"level":2,"difficulty":"高阶","scenario":"场景：要重排产品与 AI 的分工。","q":"推进顺序怎么定？","opts":["先上线工具用效果推动职责演变","先调整组织架构再考虑工具配合","先按编制减员把节省人力作为收益","交给外部供应商全权负责，内部不设对接人与验收标准","先明确各角色对需求取舍与上线的决策权，再调流程"],"sc":"XCMvJyc3PzM7P1o=","b":5,"explain":"决策权先定，流程才有依据。"},
-    {"level":2,"difficulty":"高阶","scenario":"场景：AI 建议与产品经理判断冲突。","q":"机制怎么设计？","opts":["以 AI 建议为准，产品意见仅作记录","沿用上一版本的做法，仅做小幅文字性调整","冲突件一律上报总监逐一裁定","以产品判断为准，AI 只在缺位时兜底","保留产品否决权，冲突件记录并纳入模型改进样本"],"sc":"XCMvJyc3PzM7P1o=","b":5,"explain":"否决权加冲突留样，兼顾判断质量与模型改进。"}],
+    {"level":2,"difficulty":"高阶","scenario":"场景：AI 建议与产品经理判断冲突。","q":"机制怎么设计？","opts":["以 AI 建议为准，产品意见仅作记录","沿用上一版本的做法，仅做小幅文字性调整","冲突件一律上报总监逐一裁定","以产品判断为准，AI 只在缺位时兜底","保留产品否决权，冲突件记录并纳入模型改进样本"],"sc":"XCMvJyc3PzM7P1o=","b":5,"explain":"否决权加冲突留样，兼顾判断质量与模型改进。"},
+{"level":1,"difficulty":"中阶","scenario":"场景：你是互联网PM，公司要把售前与客服接入\"认证Business Agent\"——它在公开平台直接应答客户的产品咨询与比价问题。","q":"让这类公域应答智能体可信又不翻车，最该补的能力是？","opts":["把全部售前咨询交给公域Agent自动应答，人不再介入，认为平台认证过就百分之百可靠","Agent须有明确知识边界与人工接管通道，错误可追溯到知识源，敏感与高风险问题自动转人工","只在官网放一份静态FAQ页面，公域平台完全不接任何Agent，怕答错影响品牌形象","把应答口径与责任全部甩给平台方，既然平台认证过就当作已经免责，自己不维护知识库","等平台规则完全成熟、Agent保证从不出错之后，再正式把客服接入公域平台"],"sc":"XCMvIyc3PzM7O1o=","b":2,"explain":"公域应答智能体代表品牌门面，须有知识边界与人工接管通道、错误可追溯到知识源，对敏感与高风险问题自动转人工，而非盲信平台认证。"}],
  "security": [
   {
    "level": 0,
@@ -4231,7 +4370,8 @@ const MEGA_PM_QUIZ = {"prompt":[{"level":0,"difficulty":"初阶","scenario":"场
     {"level":1,"difficulty":"中阶","scenario":"场景：想让用户越用越离不开。","q":"网络效应怎么养？","opts":["D. 只做功能，并说明判断依据，并标注适用前提","A. 设计同边/跨边正反馈与切换成本，跨过临界规模","B. 只补贴","C. 只锁用户","E. 不养"],"sc":"XCMvIyc3PzM7O1o=","b":2},
     {"level":2,"difficulty":"高阶","scenario":"场景：主业务见顶。","q":"第二曲线怎么找？","opts":["E. 不找","C. 只复制","D. 只并购","B. 只多元化，并说明判断依据，并标注适用前提","A. 沿能力外延找相邻市场或新模式，小步验证再加码"],"sc":"XCMvJyc3PzM7P1o=","b":5},
     {"level":2,"difficulty":"高阶","scenario":"场景：想走出本地市场。","q":"全球化怎么走？","opts":["B. 直接全球","A. 本地化需求+合规+伙伴+支付，选市场逐个验证","D. 只靠代理","E. 不全球化，并说明判断依据，并标注适用前提","C. 只翻译"],"sc":"XCMvIyc3PzM7O1o=","b":2},
-{"level":2,"difficulty":"高阶","scenario":"场景：你是大型项目PM，政府「人工智能+」行动提出到2027年智能体普及率超70%。你被要求给集团做一份智能体规模化落地规划。","q":"规划里最该提醒决策层的一点是什么？","opts":["把预算主要砸在采购最贵的旗舰模型上，认为算力到位转型就成功","先大张旗鼓地在全员范围铺开各类AI工具与插件，用工具覆盖率、账号活跃时长这类指标来证明转型已经初见成效","别被「高渗透、低回报」的落差带偏：优先选能嵌入核心流程、产出可核算结果的场景，设人工复核与效果度量，而不是停在文档总结这类浅层用法","等所有部门都自发用起来、形成规模后再统一做ROI核算与治理","把智能体转型整体外包给咨询公司，拿到一份包装漂亮的顶层路线图与汇报材料就直接对外宣布转型完成，至于是否真的嵌入业务、有没有产出可核算的结果，留给后面再说"],"sc":"XCMvJyczPzM7O1o=","b":3,"explain":"行业数据显示高渗透率与低回报率并存，规模化落地要选能嵌入核心流程、产出可核算结果的场景并设置人工复核与效果度量，而非停留在文档总结或覆盖率高但无实效的用法。"}]};
+{"level":2,"difficulty":"高阶","scenario":"场景：你是大型项目PM，政府「人工智能+」行动提出到2027年智能体普及率超70%。你被要求给集团做一份智能体规模化落地规划。","q":"规划里最该提醒决策层的一点是什么？","opts":["把预算主要砸在采购最贵的旗舰模型上，认为算力到位转型就成功","先大张旗鼓地在全员范围铺开各类AI工具与插件，用工具覆盖率、账号活跃时长这类指标来证明转型已经初见成效","别被「高渗透、低回报」的落差带偏：优先选能嵌入核心流程、产出可核算结果的场景，设人工复核与效果度量，而不是停在文档总结这类浅层用法","等所有部门都自发用起来、形成规模后再统一做ROI核算与治理","把智能体转型整体外包给咨询公司，拿到一份包装漂亮的顶层路线图与汇报材料就直接对外宣布转型完成，至于是否真的嵌入业务、有没有产出可核算的结果，留给后面再说"],"sc":"XCMvJyczPzM7O1o=","b":3,"explain":"行业数据显示高渗透率与低回报率并存，规模化落地要选能嵌入核心流程、产出可核算结果的场景并设置人工复核与效果度量，而非停留在文档总结或覆盖率高但无实效的用法。"},
+{"level":2,"difficulty":"高阶","scenario":"场景：你是大型集团PM，商务部等9部门发文培育\"商业智能体\"新业态并要求分级治理。你被要求给集团做智能体落地治理框架。","q":"分级治理框架里最该写清的一点是什么？","opts":["给所有智能体统一配置最高自主度，让业务一线自由发挥，用工具覆盖率与活跃度证明转型成效","按风险分级治理：核心场景强制人工终裁与熔断，一般与辅助场景配分级治理与问题召回机制","把智能体治理整体外包给咨询公司，拿到一份顶层框架就对外宣布转型完成，细节以后再说","只给辅助类场景配置智能体，核心业务系统一律不碰，认为这样风险最小、最稳妥","先在全员范围铺开各类Agent工具与插件，等真出问题了再按个案逐个补治理规则"],"sc":"XCMvIyc3PzM7O1o=","b":2,"explain":"智能体规模化落地要按风险分级：核心场景强制人工终裁与熔断，一般与辅助场景配分级治理与问题召回机制，而非一刀切给最高自主度或外包了事。"}]};
 
 const RETAIL_PM_QUIZ = {
  "prompt": [
@@ -4603,7 +4743,8 @@ const DEV_QUIZ_V2 = {
     {level:2,difficulty:"高阶",scenario:"场景：你的200万行单体应用需要拆分为微服务。评估过用绞杀者模式(Strangler Fig)，但需要大量分析工作来确定服务边界。",q:"AI辅助单体拆分微服务的边界识别？",opts:["按现有代码目录直接切成服务，目录本身就是历史遗留，切完发现两个服务共用一张核心表，跨服务事务无法处理，跨服务事务只能改成最终一致，业务方无法接受，方案推翻重来，前面按目录切分的工作全部作废","只按团队组织划分边界，谁的人多谁占一个服务，业务能力被割裂，一个完整流程要跨四个服务编排，任何一次调用超时都要人工介入，运维复杂度比单体时高出几倍，收益被协调成本吃掉","让AI一次性给出全部边界方案，不做数据库耦合分析，数据拆分方案在实施阶段推倒重来，工期延长两个月，数据拆分方案在实施阶段推倒重来，工期延长两个月，架构团队的提案此后更难通过评审","先从最边缘的模块拆起，把最容易拆的拆完就停止，核心耦合区域一直没动，拆分收益只拿到两成，真正的扩展性问题仍然存在，一年后还是要面对同一块硬骨头，前面的拆分只换来局部可维护性","让AI分析代码按业务能力聚类出限界上下文，分析数据库表间耦合度建议数据拆分方案，再分析API调用链路识别可独立部署的模块，最终输出服务边界、数据归属与通信协议，交由架构师Review确认"],sc:"XCMvJyc3PzM7P1o=",b:5,explain:"微服务拆分=代码聚类+数据耦合+调用链+方案输出。AI能从代码层面量化耦合度，避免凭感觉拆分。"},
     {level:2,difficulty:"高阶",scenario:"场景：CEO要求技术团队实现「AI驱动的自愈系统」——系统能在生产环境自动检测、诊断和修复80%的常见故障。",q:"自愈系统的AI技术方案设计？",opts:["直接让AI执行修复不做决策审批，一次误判把正常实例全部重启，故障范围从单点扩散到全站，恢复用了四十分钟，事后评审要求所有自动执行动作先过审批与熔断校验，能自动处理的比例降到不足两成，能自动处理的比例被压低","诊断层只看日志不看指标与调用链，给出的根因经常偏移，基于错误根因执行的修复动作把问题放大了，本来是单个接口超时，最后变成整个服务被重启，故障等级从三级升到一级，之后所有修复动作都要人工复核，等于回到人工运维","五层自愈：检测层用AI分析监控数据发现异常，诊断层关联日志指标与事件做根因分析，决策层从已知修复手段里选最优方案，执行层自动重启、切换、回滚或限流降级，复盘层把每次自愈的过程与结果沉淀成规则并校验误判","只做检测与告警，诊断与执行仍靠人，自愈比例不到一成，值班压力没有下降，夜里仍然要人盯着告警逐条判断，而且因为只报不治，平均恢复时间反而比人工处理时更长，团队对自愈的期待迅速降低，修复比例长期停在一成","五个层次都做了但没有复盘闭环，同样的故障反复自愈反复发生，规则半年没更新，误判率持续上升，运维开始不信任自动修复，把所有执行动作改成只建议不执行，自愈系统退化成一个提示工具，投入的建模与规则维护全部沉没"],sc:"XCMvJyczPzM7O1o=",b:3,explain:"自愈系统=检测+诊断+决策+执行+学习。不是简单的自动重启，而是从「发生了什么」到「为什么」到「怎么修」的完整闭环。"},
     {level:2,difficulty:"高阶",scenario:"场景：你是技术负责人，团队开始用编码Agent自主改代码、跑测试、提PR。有人主张「完全放手让它自己干」，你担心质量与成本失控。",q:"让编码Agent可靠地用进研发流程，最稳的做法是？",opts:["完全放手让它自己改代码跑测试提PR，只在合并前看一眼diff，一个月内两次误改了公共库的签名，下游三个服务编译失败，修复花了两天，之后团队再也不敢完全放手","只在本地用它写代码，不让它碰仓库与CI，提效有限，团队觉得麻烦逐渐弃用，回到手工写，团队觉得麻烦逐渐弃用，回到手工写，前期的接入与培训投入沉没，可靠性无从保障","定好规范但不设人工检查点，Agent按自己的理解改动了配置，测试通过但线上环境变量缺失，发布后接口全部503，回滚用了半小时，此后所有Agent改动都要人工复核配置","让它自主执行但保留全部提交记录，出问题后回滚，回滚三次之后仓库历史混乱，没人说得清哪次是有效的改动，出问题只能整段重来，可靠性没有提升反而增加了审计负担","采用Spec优先加Plan模式：先定规格与改动方案、经人确认再执行，关键改动设人工检查点，并保留可回滚的提交与完整的变更记录，让Agent的每一步都能追溯到具体规格"],sc:"XCMvJyc3PzM7P1o=",b:5,explain:"2026年自主编码Agent已成生产现实，但应通过Spec优先、Plan模式和人工检查点把人放在决策位，并保留可回滚提交；全放手或全禁止都走极端，前者失控、后者浪费能力。"},
-  ],
+  ,
+{"level":2,"difficulty":"高阶","scenario":"场景：你是技术负责人，团队开始用\"多智能体编排\"做大型研发任务：一个规划智能体拆任务，多个执行智能体并行改代码，外加独立验证智能体审查产物。","q":"让多智能体研发可靠落地，最关键的设计是？","opts":["让一个全能Agent一口气干完规划、编码与测试全流程，不让多个智能体互相协调，以减少沟通与上下文损耗","按职责分离：规划、执行、验证各司其职，独立验证智能体审查产物，关键改动设人工门禁与可回滚提交","完全禁止多智能体协作，退回单人纯手工开发，认为任何智能体协作都会失控或相互冲突","把验证智能体并入执行智能体，让模型自己审自己，省去独立审查环节来提速交付","让执行智能体把代码直接合入主干分支，靠上线后的监控与告警兜底，出故障再走回滚"],"sc":"XCMvIyc3PzM7O1o=","b":2,"explain":"多智能体研发的关键是职责分离：规划、执行、验证各司其职，由独立验证智能体审查产物，关键改动设人工门禁与可回滚提交，而非单Agent包办或自审自查。"}],
   workflow: [
     {level:0,difficulty:"初阶",scenario:"场景：每天站会后需要整理：昨日完成/今日计划/阻塞项。目前手动整理耗时30分钟。",q:"如何用AI优化每日工作流？",opts:["只用AI润色文字不做数据提取，Git提交与Jira状态仍要人工抄进模板，整理时间从半小时降到二十分钟，剩下的部分全靠手抄，一旦忙起来就退回原来做法，省下的时间又被补录吃掉","上一套复杂的自动化流水线，接口经常断，断一次就要手工补一周的日报，维护成本超过整理本身，三个月后团队整体放弃，回到手工整理，团队宁可按老办法手抄，自动化尝试一次就结束","让AI每天读一遍自己的笔记生成日报，笔记本身就记得零散，日报里昨日完成与今日计划经常对不上，站会上被问到具体进展还是要翻聊天记录，时间没省下来，成本比手工整理还高","搭建AI日报管线：自动提取Git提交生成昨日变更摘要，从Jira或TAPD拉取任务状态，由AI合并成日报草稿，人Review调整后一键发送，把站会整理从半小时压到三分钟","让AI自动生成并直接发到群里，不做人工复核，某天把未完成的提交写成已完成，团队按日报判断进度，站会上才发现两件事根本没做完，信任一次被消耗，此后日报每条都要人工确认才敢发"],sc:"XCMvJyc3Pzc7O1o=",b:4,explain:"日报自动化=工具集成+AI汇总+人工审核。从30分钟→3分钟。"},
     {level:1,difficulty:"中阶",scenario:"场景：你们团队在做Sprint Planning，需要评估5个用户故事的开发工作量。故事描述模糊，跨多个模块。",q:"AI辅助工作量评估的方式？",opts:["让AI拆完子任务就定稿，团队不再讨论，遇到技术风险没人提前识别，Sprint中期才发现其中一个故事需要引入新的中间件，排期整体往后挪了一周","让AI直接给出每个故事的点数，不拆子任务也不给依据，估点看起来有公式其实全靠模型揣测，Sprint结束发现实际工作量是最初估计的三倍","沿用上一个团队的历史点数直接套用，两个团队的技术栈与熟练度不同，估出来的点数一致但实际交付差了一倍，复盘时才发现两边能力的差距，估点体系要重建","让AI分析每个用户故事拆解为技术子任务，基于历史数据预估各子任务复杂度，标注技术风险与依赖，输出结构化评估供人调整确认，估点从玄学变有据可依","只让AI按故事描述估点，不看历史数据也没有风险标注，两个有外部依赖的故事被估成最小点，开发到一半被接口卡住一周，Sprint承诺的交付量当场落空"],sc:"XCMvJyc3Pzc7O1o=",b:4,explain:"AI辅助估点=任务拆解+历史参照+风险标注。AI让估点从玄学变得有据可依。"},
@@ -4805,7 +4946,8 @@ strategy: [
 {level:2,difficulty:"高阶",scenario:"场景：CEO要求每个部门制定「AI转型KPI」。需定义什么是成功的运营AI转型。",q:"运营团队AI转型的成功度量？",opts:["A. 五维度量：(1)「效率」→人均产出提升/重复工作占比下降 (2)「质量」→运营事故减少/用户投诉下降 (3)「能力」→AI工具覆盖率/AI成熟度 (4)「体验」→运营NPS提升 (5)「创新」→AI驱动的新增长方案数→AI转型Dashboard","E. 以运营效率是否提升为单一度量，效率提升可能是裁员或砍需求的结果，且未覆盖质量、体验与创新维度，单点度量撑不起转型评估，结论片面","D. 把AI生成内容的占比作为度量标准，为凑占比而用AI批量生产低质内容，内容质量与业务效果反而下滑，过程指标绑架了业务目标，动作变形","C. 涉及两个层次：把AI工具使用率作为转型成功的主要度量，使用率是过程指标，登录与点开不算价值，刷高的使用率无法反映业务结果的改善，度量失真，方向误导","B. 两步数字游戏：(1)度量AI转型成功只看两个数：AI工具使用率和AI生成内容占比，为把数字做上去，团队把无关紧要的内容也塞给AI生成，使用率与占比是上去了，业务指标纹丝不动 (2)效率、质量、体验、创新四个维度的度量全部缺失，运营事故率、用户投诉、NPS、AI驱动的新增长方案数都没有纳入看板，管理层看到漂亮的使用率误以为转型成功，真实的业务价值被过程指标掩盖，转型的资源投入与实际产出之间缺乏可信的度量桥梁，复盘时无法回答「AI到底带来了什么」，度量体系的设计被过程指标绑架"],sc:"XCcvJyc3PzM7O1o=",b:1,explain:"AI转型KPI=效率+质量+能力+体验+创新。不是单一指标而是平衡记分卡。"},
 {level:2,difficulty:"高阶",scenario:"场景：AI技术每月都有新工具/新范式。你需保持技术方向不因追逐热点而迷失。",q:"如何在AI快速迭代中保持战略定力？",opts:["C. 要求团队紧跟最新AI技术，模型与工具迭代频繁，追新消耗大量迁移与学习成本，沉淀被打断，业务目标为追新让路，战略持续漂移，团队疲于奔命","D. 涉及两个要素：选定一套自认为稳定的技术栈后不再关注外部变化，AI演进速度快，固守的栈可能半年就落后，错过能力跃迁窗口，定力变成了僵化，竞争力悄悄流失","E. 认为AI尚未成熟、等稳定后再投入，等待期间竞争对手已完成能力积累与流程改造，入场成本更高，战略定力变成了战略惰性，窗口期被白白错过","B. 两步追新摇摆：(1)团队被AI的快速迭代裹挟，哪个模型火就切哪个，工程师与运营反复迁移平台、重写Prompt，技术栈一年换好几轮，沉淀的模板与流程每次推倒重来 (2)新功能一出就全员试水，试了几天发现不成熟又弃用，团队精力被大量消耗在追新上，稳定的业务目标反而被搁置，战略锚点完全缺失，管理层既没有技术雷达的定期评估节奏，也没有「稳定大于新颖、实用大于炫酷」的原则约束，更没有20%实验时间的机制设计，AI投入在追新中不断漂移，组织长期处于浅层试错的空转状态，战略定力的机制从未被建立","A. 四步定力：(1)「技术雷达」→每周扫描/每月评估/每季调整 (2)「原则优先」→稳定>新颖/实用>炫酷/安全>效率 (3)「实验文化」→20%时间试新→验证后纳入 (4)「战略锚点」→技术选择服务业务目标"],sc:"XCMvJyc3PzM7P1o=",b:5,explain:"战略定力=技术雷达+原则优先+实验文化+战略锚点。用原则框架判断该不该跟新技术。"},
 {level:2,difficulty:"高阶",scenario:"场景：你要为未来3年运营组织设计「AI原生」架构。",q:"AI原生运营组织的架构设计？",opts:["A. 四层架构：(1)「AI平台团队」→建设内部AI运营平台 (2)「AI赋能团队」→嵌入各业务线的AI运营专家 (3)「角色升级」→运营→AI运营/内容→AI内容策略师 (4)「新角色」→Prompt工程师/AI运营工作流设计师→「金字塔」变「能力网络」","D. 要跨五个层面：只在现有组织基础上增加AI技能培训，培训提升的是个人技能，组织架构与协作方式没有改变，AI能力缺少嵌入业务的岗位与流程载体，升级无从落地","E. 把AI能力建设整体外包给外部服务商，整体涉及两项任务，服务商交付的是通用方案，核心能力与数据资产无法沉淀在内部，合同结束能力随之撤离，组织依旧空心化，受制于人","C. 涉及两个层次：在现有组织外增设一个AI部门统一承接AI能力建设，AI部门远离业务一线，需求理解滞后、交付水土不服，业务线协同成本高，能力难以渗透到日常运营","B. 两步加部门：(1)为拥抱AI，公司决定成立一个独立的AI部门，把AI能力建设集中到新部门，业务线运营需要AI支持时提需求给AI部门排队，AI部门不了解业务场景，交付的方案水土不服，业务线等不及就各自偷偷用公共AI (2)原有组织的角色升级（运营→AI运营、内容→AI内容策略师）没有任何动作，Prompt工程师与AI工作流设计师等新角色更是无人培养，金字塔式的科层架构原封不动，AI能力被锁在边缘部门，没有形成嵌入各业务线的赋能网络，AI原生组织的架构设计停留在「加一个部门」的简单加法，平台团队、赋能团队与角色升级的系统设计完全缺失"],sc:"XCcvJyc3PzM7O1o=",b:1,explain:"AI原生组织=平台团队+Champion+角色升级+新角色。不是加AI部门而是让AI渗透每个角色。"}
-]
+,
+{"level":1,"difficulty":"中阶","scenario":"场景：你是运营，团队用\"多智能体内容矩阵\"做选题、创作、分发与复盘，一条选题能自动裂变出多平台多版本内容。","q":"把多智能体内容矩阵用出效果，最该守住的是？","opts":["把选题到分发全交给多智能体自动跑，生成多少发多少，用发布数量覆盖来代替质量判断","多智能体分工（选题-创作-分发-复盘），人设与调性由人把关，用数据复盘而非纯堆量","只用单个Agent生成内容，不做矩阵也不做复盘，认为多智能体协作纯属噱头、没有用","把账号与发布权限全交给外部工具自动发，运营人员对任何成片与排期都不做审核","等工具进化到完全不需要人看就能直接发布，再考虑引入任何内容矩阵能力"],"sc":"XCMvIyc3PzM7O1o=","b":2,"explain":"多智能体内容矩阵的价值在分工与复盘，但人设与调性必须由人把关、用数据复盘而非纯堆量，放任自动分发会稀释品牌并引发账号风险。"}]
 };
 
 // 销售×AI能力测评数据 (8维度×3级×4-5题=107题)
@@ -4905,7 +5047,8 @@ const SALES_QUIZ_V2 = {
     {level:2,difficulty:"高阶",scenario:"建立「销售知识管理体系」→防止人员流动导致经验流失。",q:"AI驱动销售知识管理？",opts:["把资料全部堆进共享盘，按人名建文件夹，找一份方案要点进三层目录，关键词搜不到内容，最后大家还是去问人，关键词也搜不到内容，最后大家还是去问人，知识库无人打开","知识库建好但不做更新机制，一年后条目全部过期，销售照旧经验判断，反而因为用了旧知识出过一次错，一年后条目全部过期，销售照旧凭经验判断，反而出过一次错","搭建四层知识管理体系，自动捕获从复盘和周报里提取知识，结构化分成案例库、方法论库与避坑库，智能检索支持自然语言搜索，主动推送在出现类似商机时推荐相关知识","只做检索不做主动推送，销售想不到去查，遇到类似商机仍然从零开始，知识库的使用率长期低于百分之五，遇到类似商机仍然从零开始，知识库的使用率长期低于百分之五","让资深销售抽时间写经验文档，写了半年只交上来三篇，内容还是三年前的案例，人一走笔记也跟着走，新人无从查起，人一走笔记也跟着走，新人来了无从查起，只能重新踩坑"],sc:"XCMvJyczPzM7O1o=",b:3,explain:"知识管理=捕获+结构化+检索+推送。不是人写文档，是系统自动沉淀和推送。"},
     {level:1,difficulty:"中阶",scenario:"场景：你给销售团队配了AI Agent，能自动起草报价、生成跟进话术并初筛商机，但担心它擅自给客户承诺或错发价格。",q:"销售侧AI Agent的自主动作应如何设定边界与人工确认？",opts:["所有动作都要求人确认，包括日程与问候，销售每天点几十次确认，嫌麻烦干脆不用，Agent 上线一个月即被弃用，销售每天要点几十次确认，嫌麻烦干脆不用了","把Agent限制在起草与建议层面，报价与合同条款先由人确认再外发，客户沟通自动草稿经销售审阅后发送，涉及折扣授权与承诺的动作走审批，所有自动产出留痕可查","让Agent自主发出报价与跟进邮件，只在出问题后追责，一次把九折报成七折，客户拿着邮件要求履约，公司只能认下这笔亏损，客户拿着邮件要求履约，只能认亏","只限制报价不限制承诺，Agent在沟通中答应了三周上线，实施排期根本做不到，客户投诉到高层，关系与口碑同时受损，实施排期根本做不到，客户投诉到高层，关系受损","只给Agent设定禁止承诺的话术，不做审批也不留痕，出问题查不到是哪一版发出的，客户投诉时无从举证，团队对Agent的信任也一并消失，一个月后彻底弃用"],sc:"XCMvIyc3PzM7O1o=",b:2,explain:"销售Agent=起草建议+人工确认外发+折扣授权审批+留痕；自动承诺价格条款易引发纠纷，全人工重写则失去意义。"},
     {level:1,difficulty:"中阶",scenario:"场景：你是销售负责人，公司引入AI原生CRM，能自动抓取销售对话、识别商机与风险、跟进线索。团队希望借此少做手工录入。",q:"让这套系统真正提效又不踩雷，关键动作是？",opts:["先停掉手工录入，全面依赖AI抓取，认为数据会自动变全，结果漏抓的通话没人补，两周后Pipeline少了三成商机","因为担心合规干脆不启用，团队继续手工录入，AI原生CRM退化成一张普通表格，采购的钱没有产生任何效率，采购白花钱","在客户数据合规边界内（脱敏、权限、不出域）启用，让AI做商机识别与提醒，关键报价与承诺仍由人确认，并保留人工复核闭环","先全量放开所有数据让AI随便读，认为效果优先于合规，两个月后客户审计问到数据流向，项目被要求暂停整改，项目被暂停","只上AI识别不做人工复核，AI把两个已流失客户标成高意向，销售按提示投入两周，全部落空，销售按提示投入两周，全部落空"],sc:"XCMvJyczPzM7O1o=",b:3,explain:"销售智能体（如AI原生CRM）能大幅减少手工录入，但客户对话与合同属敏感数据，应在脱敏、权限与不出域边界内启用，关键报价与承诺由人确认并保留复核闭环。"},
-  ],
+  ,
+{"level":1,"difficulty":"中阶","scenario":"场景：你是销售负责人，公司接入\"对话式Agent购物入口\"——客户通过自然语言对话直接问价、下单甚至自动补货。","q":"让Agent购物入口真正提效又不翻车，关键动作是？","opts":["把报价、下单与支付全交给Agent自动完成，人只等最终结果，全程不介入任何一步确认","AI辅助报价与下单，但合同、支付与大额订单须人工确认，设防误下单与欺诈的留痕可溯闭环","只在演示环境试试Agent购物入口，真实客户的交易一律不接，怕出错了自己担责","把Agent购物入口完全交给平台方运营，自己不参与任何商品、库存与价格的审核","等Agent把销售全流程都跑顺、完全不需要人之后再正式启用购物入口"],"sc":"XCMvIyc3PzM7O1o=","b":2,"explain":"Agent购物入口可提效，但合同、支付与大额订单必须人工确认，并设防误下单与欺诈的留痕可溯闭环；全权托管易出现误单、欺诈与责任真空。"}],
   security: [
     {level:0,difficulty:"初阶",scenario:"在公共AI写销售方案时不小心把客户真实信息和报价输入了。",q:"销售中数据安全基本规则？",opts:["把客户信息先存到个人网盘再上传给AI，认为网盘属于私人空间就安全，账号被盗后资料连同一批报价全部外泄，半年之后才发现该账号仍能导出客户表","严守三条数据安全铁律，绝不把客户个人数据输入公共AI，敏感数据先脱敏再交给AI处理，并建立数据分级明确什么数据能用什么AI有清晰规则","公司没有分级规则，谁想用什么AI就用什么，销售各自开了四五个账号，数据散在个人账号里无人管，销售各自开了四五个账号，数据散在个人账号里","只把客户姓名换成字母代替，其余信息全部照原样输入，从公司名与项目金额就能反推出是谁，从公司名与项目金额就能反推出是谁，等于没脱敏","为省时间直接把客户名单和报价原文贴进公共AI，生成完再手工删掉对话记录，以为删了就安全了，以为删了对话记录就安全，实际平台侧还有备份"],sc:"XCMvIyc3PzM7O1o=",b:2,explain:"数据安全铁律=不泄露+脱敏+分级。一次疏忽可能导致数据泄露和法律风险。"},
     {level:0,difficulty:"初阶",scenario:"客户问竞品的价格和合同条款，能透露吗？",q:"竞品信息的合法边界？",opts:["客户一问就把知道的都说出来，包括通过朋友拿到的竞品报价，显得自己消息灵通，事后被竞品投诉，显得自己消息灵通，事后竞品追查泄露来源，朋友也被一并牵连","客户问竞品合同条款时，把从朋友那里拿到的照片发过去证明消息灵通，事后竞品追查泄露源，朋友也被牵连，客户发现后要求书面说明，采购流程被暂停两周","只讲公开信息，客户追问细节时一律说不清楚，显得不专业，客户转而去问另一家更懂行的供应商，客户转而去找另一家更懂行的供应商，这条线索就此断掉","划清三个边界，公开信息如官网、年报、新闻可以分析和讨论，非公开信息如通过关系拿到的竞品报价与合同不能透露，灰色地带如行业传闻不引用最好让法务确认","把行业群里听来的传闻当事实引用，客户拿去内部汇报后发现是假的，反过来质疑你们的专业度，客户拿去内部汇报后被同事指出是假的，反过来质疑你们的专业度"],sc:"XCMvJyc3Pzc7O1o=",b:4,explain:"竞品信息=公开可+非公开不可+灰色避。销售嘴上要有把门的。"},
@@ -5053,7 +5196,8 @@ const HR_QUIZ_V2 = {
     {level:2,difficulty:"高阶",scenario:"AI做出的「裁员建议」：算法说这些人应该被裁。HR应该怎么做？",q:"正确做法？",opts:["既然算法基于数据给出名单，就按建议直接执行裁员。算法训练用的是历史数据，历史里的偏差会被原样放大，被裁的人拿不到任何可解释的理由，一旦进入仲裁，公司几乎必输，一旦进入仲裁公司几乎必输","面对AI给出的裁员建议，HR应把算法输出仅作为参考输入而非唯一依据，裁员决策必须叠加管理者的评估与法律合规审查，若使用AI则要保证其逻辑能被解释且不由单一因素驱动，AI的角色是辅助而非替人做决","把AI建议和绩效排名对照，取交集作为最终裁员名单。两个都有偏差的来源取交集，偏差不会互相抵消而会叠加，交集之外的真实问题人员反而被漏掉，看起来严谨，实际只是换了种拍板方式，只是换了种拍板方式","让AI对所有员工打分排序，排在末位的按序裁减。单一分数排序把复杂的人简化成一个数字，不看岗位差异也不看具体情况，等同于把决策权完整交给模型，等同于把决策权完整交给了模型，人只负责执行","裁员是严肃决策，AI的结果一律不采纳，完全靠人工判断。完全不用AI看着稳妥，但人工判断同样有偏见且更难追溯，管理者凭印象定的名单缺少数据支撑，被质疑时也说不出依据，被质疑时根本说不出依据"],sc:"XCMvIyc3PzM7O1o=",b:2,explain:"AI裁员=参考输入+人做决策+可解释性。裁员是最严肃的HR决策，AI不能替人做。"},
     {level:1,difficulty:"中阶",scenario:"场景：公司要上AI陪练与数字人员工助手，员工会与拟人化AI大量倾诉，合规与未成年人保护被提上日程。",q:"企业引入AI拟人化互动服务应防范哪些合规风险？",opts:["对拟人化AI明确告知用户在与AI互动而非真人，对未成年人启用更强保护（时长、内容与监护人机制），互动数据按敏感信息管理并脱敏留存，禁止用深度合成冒充真实员工或管理者","只在被监管点名后才补未成年人保护与水印告知，日常放任。被动整改的窗口期里，问题一直在持续发生，补的时候还要面对历史数据的追溯处理，整改成本远高于事前设计，成本远高于事前","把员工与AI的互动语音与画像直接用于训练公开模型，不脱敏不告知。倾诉类内容敏感度最高，直接进训练集等于二次扩散，公开模型无法撤回，删除请求也无从执行，法律上既无授权也无告知","对未成年人不加区分地开放同样的AI互动功能，不启用额外保护。没有时长限制也没有内容分级，更没有监护人知情机制，未成年人在拟人化对话里更容易产生依赖，属于重点整治对象","把拟人化AI包装成真实员工或导师，认为这样更有粘性，不告知用户其为AI。用户以为在跟真人倾诉，实际对话被完整记录并用于模型优化，一旦被识破，信任崩塌且构成欺骗性告知"],sc:"XCcvJyc3PzM7O1o=",b:1,explain:"拟人化互动须明示AI身份、强化未成年人保护、敏感数据脱敏、禁止冒充真人；隐瞒身份或滥用互动数据都触碰新规红线。"},
     {level:1,difficulty:"中阶",scenario:"场景：公司要上数字人员工助手与AI陪练，2026年数字虚拟人信息服务管理办法征求意见稿与最高法AI纠纷意见相继出台。",q:"企业引入数字人，合规边界怎么划？",opts:["数字人须标识AI身份，守肖像声音权，强化未成年保护，敏感数据脱敏","对未成年人不加区分开放同样功能，不启用年龄校验与额外保护措施","等被监管点名后才补数字人标识与未成年保护，日常运营一直放任不管","把互动语音与画像直接用于训练公开模型，不脱敏也不做告知与授权","把数字人包装成真实员工，不告知其为AI生成，也不做身份提示与未成年保护"],sc:"XCcvJyc3PzM7O1o=",b:1,explain:"数字人须标识AI身份、守肖像声音权、强化未成年保护、敏感数据脱敏、禁冒真实员工；隐瞒身份或滥用数据都触红线。"},
-  ],
+  ,
+{"level":1,"difficulty":"中阶","scenario":"场景：你是HR，团队引入AI做简历解析、面试初筛与员工绩效分析，处理大量候选人与员工的敏感数据。","q":"用AI处理这类敏感人事数据，最该先立好的规矩是？","opts":["把所有简历、绩效与薪酬数据直接上传到公开AI网页对话框，图省事、出结果快、不担心留痕","在受控环境内处理，数据最小必要收集、透明告知候选人，AI做初筛、保留人工决策与留痕可审计","完全不让AI碰任何人事数据，退回纯人工翻阅与评估，避免任何算法偏见与数据泄露风险","把员工与候选人数据全权交给外部AI供应商，合同里写一句\"由厂商负责\"就当作已经合规","等AI在人事领域保证完全不出错、零偏见之后，再考虑把它用进任何含敏感数据的环节"],"sc":"XCMvIyc3PzM7O1o=","b":2,"explain":"人事数据高度敏感，应在受控环境内处理、遵循最小必要与透明告知，AI只做初筛、保留人工决策与可审计留痕，避免泄露与算法偏见。"}],
   strategy: [
     {level:0,difficulty:"初阶",scenario:"CEO问：AI对HR最大的改变是什么？",q:"最佳回答？",opts:["AI把HR从行政服务中心升级为人才战略中心，招聘从筛简历转向AI精准匹配，培训从统一课表转向个性化学习路径，绩效从年度考核转向持续反馈，核心转变是HR把七成时间从行政事务移到战略工作上。","主要体现在招聘环节提速，简历处理不再占用大量人力。只看到效率这一层，培训、绩效与组织设计的变化全没提，CEO听完认为这只是个工具升级，预算和支持力度都停留在试点级别，预算停在试点级别，一年没加","战略层面HR还是靠人，AI对核心工作帮助有限。低估了AI在人才决策上的作用，也没给出任何数据支撑，CEO当场反问那同行为什么都在投，HR被贴上保守的标签，HR被贴上保守标签，提案都要多走一道评审","基础HR岗位会被AI取代，团队规模可以相应缩减。把AI当成减人的理由，一开口就失了人心，团队开始消极应付，能自动化的也不配合，转型推进半年没有任何实质进展，推进半年没有任何进展，计划停摆","AI主要改变培训方式，让课程推荐更精准一些。把一场结构性变化说成推荐算法优化，错过了向CEO争取资源与授权的窗口，第二年再提战略议题已经排不上，第二年再提战略议题时资源早已排满，排不上队"],sc:"XCcvJyc3PzM7O1o=",b:1,explain:"HR战略转变：AI解放行政劳动力，让HR成为人才战略的设计者和推动者。"},
     {level:0,difficulty:"初阶",scenario:"向CHRO建议：今年在哪些HR领域优先引入AI？",q:"建议方案？",opts:["培训模块价值最直观，先从这里切入效果最好。培训见效周期最长，半年都拿不出可展示的结果，真正高频痛的简历筛选反而排在后面，第一批资源投错了方向，第一批资源投错了方向，等到想要调头时，预算和团队的信任都已经消耗完了","向CHRO建议引入AI的领域应按频率和敏感性排序，高频且低敏的简历筛选与HR问答优先引入，中频中敏的绩效反馈与培训推荐做AI辅助，低频高敏的薪酬与劳动关系谨慎引入，建议第一季度先从简历筛选和HR问答两个场景做出效果","一次性在所有HR模块部署AI，整体转型一步到位。六个模块同时上线，每个都只做到半成品，HR一天要应付五个系统的报错和培训，三个月后有三个模块被停用，三个月后有三个模块被停用，剩下的也只是勉强能用，用户怨声载道","先挑几个容易上手的工具用起来，再考虑其他。只看好不好上手，不看价值和敏感度，选的都是写文案、做PPT这类边缘场景，半年后管理层没看到任何业务收益，半年后管理层没看到任何业务收益，HR这块议题也因此被移出了年度重点","能排多少预算就上多少模块，不受优先级约束。预算成了唯一标准，敏感度与频率都没评估，薪酬这类高敏场景被仓促上线，一次数据事故让整个项目暂停，一次数据事故让整个项目暂停，六个模块不得不全部重新做了一遍敏感度评估"],sc:"XCMvIyc3PzM7O1o=",b:2,explain:"AI引入顺序=频率×敏感性矩阵。先做高频低敏跑通闭环，再逐步扩展到复杂场景。"},
@@ -5333,7 +5477,8 @@ const FIN_QUIZ_V2 = {
     {level:1,difficulty:"中阶",scenario:"设计「HR共享服务中心」的工作流AI化：工单分配/升级/满意度闭环。",q:"流程方案？",opts:["多增加几个坐席人手，按提交时间先后把工单平均分给几位专员，不做自动分类也不做智能路由，SLA靠专员自己盯，满意度只在年底做一次调查，人力成本随之上升，工单量一涨还是接不住，只能继续加人","分四步，先让AI自动分类工单让FAQ类自动回答，再智能路由按技能、负载与历史满意度分配专员，然后设定SLA超时自动升级，最后分析工单数据识别流程优化机会持续改进，把高频问题写进知识库","按提交顺序排队处理，先来先办，不区分FAQ类与复杂类，路由靠专员自己抢单，不设SLA也不做超时升级，工单数据只在月度报表里统计总量，重复问题每次重答，简单问题占掉大半产能，复杂问题反而排在队尾","把工单分散给各HR处理，按业务线分片，谁的员工谁来办，不做自动分类也不看负载与历史满意度，SLA不设，重复问题每次都从头答一遍，知识始终沉淀不下来，同一条制度问题一年被回答上百次，口径还各不相同","设一条服务热线接听，员工打电话说明问题，接线员记录后转给对应专员，不做自动分类与技能路由，SLA不设，满意度靠挂电话前问一句，问题积压时无人知晓，忙起来电话打不进来，员工只能直接找熟人"],sc:"XCMvIyc3PzM7O1o=",b:2,explain:"共享服务中心=自动分类+智能路由+SLA+持续改进。AI让HR服务像互联网产品一样迭代。"},
     {level:2,difficulty:"高阶",scenario:"设计「AI-Native HR组织」：HR团队自身的工作模式重构。",q:"模式方案？",opts:["按三支柱框架优化，把SSC、COE、BP的职责重新划清，但每个支柱各自用自己的工具与数据，自助服务不上线，专家方案仍靠经验输出，BP拿到的数据滞后一个月，员工仍要打电话问社保与年假，体验没有改善","完全去中心化扁平管理，取消三支柱设置，每个业务单元自配一名HR通才包办全部事务，AI只用于写通知，专家能力不再集中，复杂方案全靠外部顾问，成本反而上升，同一个问题在不同单元得到不同答复","保留现有的组织结构，只给每位HR配一个AI助手写文案、做表格，职责分工与汇报关系不变，基础事务仍走人工窗口，BP仍靠季度报表了解业务，团队能力没有实质变化，人力配置与三支柱职责一个都没动","融合几种模式，自助模式让员工通过AI自助完成八成基础HR事务，专家模式由COE专家加AI深度分析输出战略级方案，BP模式由HRBP加AI实时数据做精准业务伙伴，三模融合重构HR团队角色与能力结构","让AI替代基层HR岗位，把入离职、考勤、证明开具全部交给自助问答，裁掉事务岗，COE与BP人数不变也不做AI增强，复杂问题无接续，员工投诉与流失同步上升，半年后又要重新招人补岗位，来回折腾一遍"],sc:"XCMvJyc3Pzc7O1o=",b:4,explain:"AI-Native HR=自助+专家+BP三模融合。不是裁撤HR，是让每个HR升级为AI增强版。"},
     {level:2,difficulty:"高阶",scenario:"设计「AI驱动的组织变革」工作流：从诊断到落地全链路。",q:"流程方案？",opts:["逐步小范围调整，先在一个事业部试点改汇报线，跑半年看效果再推广，不做数据诊断也不做影响模拟，沟通只在小范围做，指标靠季度汇报手工统计，推广无依据，其他事业部观望不动，试点经验也说不清哪条起了作用","用多步闭环，AI诊断由数据分析识别组织问题，AI建模模拟不同组织方案影响，AI沟通生成分层变革沟通，AI执行做汇报线与审批链的自动化调整，AI监测实时追踪变革指标，AI迭代基于数据动态调整","各部门自行优化各自流程，谁觉得哪里堵就改哪里，HR只做备案不做统筹，不做组织诊断与方案建模，汇报线调整各自报批，变革效果无人统一衡量，重复调整反复返工，同一件事一年改三轮，员工已经不信任何调整","外聘咨询公司出方案，顾问访谈两周后交付一份组织设计报告，公司按报告调整汇报线，不做数据诊断也不做方案模拟，变革沟通靠全员大会一次宣讲，落地阻力无人预判，三个月后汇报线又按领导意见改回原样","靠高管自上而下推动，董事长在年度会上宣布调整方向，各部门按口头要求自行改汇报线，不做诊断与建模，沟通靠层层传达，执行到哪算哪，也没有指标追踪效果，一线听到的版本与宣布的版本往往不是一回事"],sc:"XCMvIyc3PzM7O1o=",b:2,explain:"组织变革=诊断+建模+沟通+执行+监测+迭代。AI让变革从「高层拍板」变为「数据导航」。"},
-  ],
+  ,
+{"level":1,"difficulty":"中阶","scenario":"场景：你是财务人员，财务共享中心引入AI Agent自动处理发票查验、对账与报销初审，涉及资金与税务数据。","q":"让财务Agent可靠用起来，最稳的分工是？","opts":["把发票支付与税务申报全部交给Agent自动执行，人只事后看一眼报表，全程不介入任何审批","AI做规则化初审与异常标记，资金支付与税务申报保留人工复核审批，敏感财务数据不出域","只在Excel里手工做对账与报销，AI碰都不碰，怕它算错数字或者把数据泄露出去","把财务Agent全流程托管给外部厂商运营，自己不保留任何原始凭证与审计轨迹记录","等AI在财务领域保证完全不出错之后，再正式启用任何自动化账务处理流程"],"sc":"XCMvIyc3PzM7O1o=","b":2,"explain":"财务Agent适合做规则化初审与异常标记，但资金支付与税务申报必须保留人工复核审批，敏感财务数据不出域并留存审计轨迹，避免幻觉导致错报。"}],
   security: [
     {level:0,difficulty:"初阶",scenario:"场景：你准备用 AI 处理包含客户名单、报价的 Excel 文件做分析。",q:"使用 AI 处理财务敏感数据的第一原则？",opts:["C. 覆盖两个层次：内部数据不外发原则：(1)认为客户名单与报价属于公司内部资料，只要不把文件发到公网就不算泄露 (2)把Excel上传到企业内部已部署的AI工具中直接分析 (3)为图省事偶尔也会用网页版AI处理去掉客户名后的版本，认为字段已打码即无风险 (4)全程不做数据分级登记、不核查工具的数据留存政策，也不保留处理日志备查","D. 把文件名改成不含客户信息的代号并压缩打包后再上传，认为这样就能避免AI识别出敏感内容","E. 只挑出金额、数量等非敏感的汇总字段交给AI分析，客户明细留在本地由人工处理","B. 直接用免费AI工具分析这份含客户名单与报价的Excel，整体要兼顾两个指标，认为工具方便快捷，处理内部数据不会有泄露风险","A. 先做数据分级和脱敏：(1)识别文件中的敏感字段（客户信息/价格/合同条款） (2)确认使用工具的数据政策（是否用于训练？数据是否出境？） (3)敏感数据脱敏（打码/假名化）或用私有化部署工具 (4)保留处理日志→再让AI分析"],sc:"XCMvJic3PzI7P1o=",b:5,explain:"财务数据安全=分级+工具政策审查+脱敏+留痕。免费工具处理客户数据可能构成泄露。"},
     {level:1,difficulty:"中阶",scenario:"场景：财务部要接入一个 AI 审单工具，所有报销单（含个人信息和金额）都会经过该工具处理。",q:"AI 财务工具的数据合规审查要点？",opts:["E. 先把工具接入用起来，等出现数据泄露事故或监管检查发现问题后，再补制度与整改流程","B. 看到工具由知名大厂提供就直接放心接入，整体要兼顾三个步骤，认为大厂产品默认合规，无需逐项核验协议与权限","C. 涉及两个模块：内部流转即安全论：(1)认为报销单数据都在公司内部系统里流转、并不对外公开，风险天然可控 (2)接入AI审单工具后直接上传含个人信息与金额的全量真实单据，不做脱敏处理 (3)相信工具服务商在合同中承诺的保密条款足以覆盖数据安全责任 (4)上线后不定期抽查AI处理结果是否准确，但对训练数据使用、存储位置与权限范围不做逐项核查","A. 四项审查：(1)数据处理协议→是否用于训练模型？存储位置（境内/境外）？ (2)权限控制→谁能看到哪些数据？ (3)审计留痕→AI操作可追溯 (4)应急预案→数据泄露时的响应流程→评估通过再接入，重要数据先脱敏","D. 涉及两个层次：认为报销数据都在公司内部系统流转、不外发就不算风险，接入后直接上传全量真实单据处理"],sc:"XCMvJic3Pzc7O1o=",b:4,explain:"数据合规审查=处理协议+权限+留痕+应急。工具再大牌也要逐项核对条款。"},
@@ -5450,7 +5595,8 @@ const PO_QUIZ_V2 = {
     {"level":1,"difficulty":"中阶","scenario":"场景：供应商系统被勒索，可能影响你方数据。","q":"供应链安全动作？","opts":["C. 立刻全换","B. 装作不知","D. 只催货","E. 只删联系人，期间如出现口径分歧以业务方确认结果为准，并说明判断依据","A. 查我方与该商数据/接口边界，隔离受影响链路，启用备选源，要求事件通报"],"sc":"XCMvJyc3PzM7P1o=","b":5,"explain":"供应链安全=查边界+隔离+备选源+事件通报，忽视会连累自身。"},
     {"level":1,"difficulty":"中阶","scenario":"场景：采购想用一款海外 AI 工具处理合同与报价。","q":"合规前置动作？","opts":["C. 只看工具名气，并标注适用前提，落地时再结合本团队的实际情况做一次取舍与校准","B. 直接全量上传","E. 等出事再补","D. 只问价格","A. 先做数据出境与隐私合规评估，确认合同/报价不在禁外发清单，签数据处理条款并限字段"],"sc":"XCMvJyc3PzM7P1o=","b":5,"explain":"海外工具先评估数据出境与隐私合规，限字段签条款，事后补救成本高。"},
     {"level":2,"difficulty":"高阶","scenario":"场景：建采购数据分类分级与权限。","q":"设计原则？","opts":["C. 只看职级","E. 只靠自觉","B. 全员可见","A. 按敏感度分级(公开/内部/机密/核心)+最小权限+访问留痕，AI 仅见授权域","D. 只加密不权限，并说明判断依据，具体口径与数据来源待与业务方二次核对后确认"],"sc":"XCMvJyc3Pzc7O1o=","b":4,"explain":"数据分级+最小权限+留痕，AI 仅见授权域，全可见是隐患。"},
-    {"level":2,"difficulty":"高阶","scenario":"场景：评估采购 AI 工具的安全合规。","q":"尽调重点？","opts":["D. 只看口碑","C. 只看界面","A. 看数据存储地/加密/权限模型/是否训练用我方数据/出网审计，签数据处理条款","E. 只看部署快，落地时再结合本团队的实际情况做一次取舍与校准，并说明判断依据","B. 只看价格"],"sc":"XCMvJyczPzM7O1o=","b":3,"explain":"工具尽调看存储/加密/权限/训练使用/审计+条款，价格次要。"}],
+    {"level":2,"difficulty":"高阶","scenario":"场景：评估采购 AI 工具的安全合规。","q":"尽调重点？","opts":["D. 只看口碑","C. 只看界面","A. 看数据存储地/加密/权限模型/是否训练用我方数据/出网审计，签数据处理条款","E. 只看部署快，落地时再结合本团队的实际情况做一次取舍与校准，并说明判断依据","B. 只看价格"],"sc":"XCMvJyczPzM7O1o=","b":3,"explain":"工具尽调看存储/加密/权限/训练使用/审计+条款，价格次要。"},
+{"level":1,"difficulty":"中阶","scenario":"场景：你是采购，团队用AI做供应商风险监控：自动抓取舆情、评级变动与合规预警，部分供应商数据涉及跨境。","q":"让采购AI风险监控可用又合规，关键是？","opts":["把所有供应商的资质、报价与合同无差别上传到外部公开AI，由它全程托管风险预警","在受控环境接入，AI做风险预警与初筛，供应商数据跨境须合规评估，最终定标与处置由人把关","只在Excel里手工登记供应商风险，AI一点不碰，怕它误判供应商或者把信息泄露出去","把风险监控全部权限交给外部厂商，自己不参与任何核实、预警确认与处置动作","等AI把供应链风险全都预测准了，一点不漏之后，再正式启用任何风险监控"],"sc":"XCMvIyc3PzM7O1o=","b":2,"explain":"采购AI风险监控应在受控环境接入、AI做预警与初筛，涉及跨境数据须做合规评估，最终定标与处置由人把关，避免敏感信息外泄与盲信模型。"}],
   strategy: [
     {level:0,difficulty:"初阶",scenario:"场景：老板问「AI 对采购到底有什么用」，请你用 3 句话讲清楚。",q:"AI 对采购的核心价值是什么？",opts:["C. AI未来能替代采购员完成与供应商的全部谈判，采购岗位将逐步缩减甚至消失","D. AI能帮公司直接降低采购成本，省钱是引入AI的最主要目的","A. 若干层价值：(1)省时→报价整理/月报/合同台账自动化省 60% 事务性工时 (2)省钱→行情监控/多维比价/TCO分析提升议价和降本能力 (3)控险→供应商风险预警/合规检查降低断供和舞弊风险→采购从「下单员」升级为「价值创造者」，期间如出现口径分歧以业务方确认结果为准，相关口径以最新版文档与业务方确认结果为准","E. AI能帮助减少供应商数量，整体要兼顾两个要素，把订单集中到少数几家以提升管理效率","B. 加班减少论：(1)认为AI对采购最直接的价值是把报价整理、月报编制与合同台账等繁琐事务自动化 (2)采购员从重复劳动中解脱后可以准点下班，前后要过两个要素，工作压力明显降低 (3)把省出的时间用于处理日常订单跟进与催货等事务性工作 (4)不把AI能力投入比价分析、风险预警与战略寻源等增值方向，采购部门的价值定位保持不变"],sc:"XCMvJiczPzM7O1o=",b:3,explain:"AI 采购价值=省时+省钱+控险。核心是让采购聚焦战略寻源而非事务操作。"},
     {level:1,difficulty:"中阶",scenario:"场景：公司要求「降本 8%」，你不能只压供应商价格，需要系统性方案。",q:"如何用 AI 设计系统性降本方案？",opts:["B. 统一压价方案：(1)把年降本8%的目标直接换算成对所有供应商统一降价8%的要求 (2)向全部供应商群发降价通知，大致覆盖五个部分，要求限期确认新的价格协议 (3)对拒不接受降价的供应商，以切换份额或终止合作为筹码施压 (4)认为压价幅度即降本成果，不开展技术、流程与需求侧的降本工作，把供应商关系恶化与断供风险全部留给后续处理","E. 把降本8%的指标分解给财务部门设定各品类目标价，需要跨三个要点配合，采购按目标价执行采购","A. 五维降本：(1)商务降本→AI多维比价+谈判策略（压价/账期/批量） (2)技术降本→AI分析规格优化/替代料/标准化（VE/VA） (3)流程降本→AI识别重复采购/紧急采购/过度定制 (4)供应链降本→AI优化物流/库存/交期 (5)需求降本→AI分析需求合理性（规格过度/频次异常）→每维量化目标，并同步相关方，按需","C. 在各品类重新招标比价一轮，整体涉及两个抓手，谁的报价低就把订单份额转给谁，靠竞价实现降本","D. 缩减采购品类数量，砍掉利润贡献低或管理复杂的物料品类来达成降本目标"],sc:"XCMvJiczPzI7O1o=",b:3,explain:"系统性降本=商务+技术+流程+供应链+需求五维。压价只是最容易被看穿的降本。"},
@@ -5578,7 +5724,8 @@ const LEGAL_QUIZ_V2 = {
    b:1,
    "explain": "数字人与AIGC合规要从单点走向全链条：标识告知加内容检测加数据合规加备案加边界复核加审计，并嵌入发布流程与风险分级。"
   }
-]
+,
+{"level":2,"difficulty":"高阶","scenario":"场景：你是法务，监管新规把\"智能体\"单列为治理对象：要求厘清用户保留、用户授权、智能体自决的决策边界，敏感领域强制标准、备案与问题产品召回。","q":"给公司智能体业务做合规治理，优先级最高的是？","opts":["先准备一份通用\"AI合规承诺书\"模板，让各部门负责人都签个字把流程走完，具体风险点等出了事再逐个补","按新规厘清用户保留、用户授权与智能体自决的决策边界，敏感场景强制人工终裁与召回机制，逐项留痕可追溯","把智能体合规责任整个转嫁给AI供应商，在采购合同里写一句\"由厂商承担\"就当作已经免责","只盯住已经明文处罚过的那几类行为，其他一概先不碰、不评估、不备案","等监管把规则完全统一、相关判例足够多之后，再启动任何智能体合规审查工作"],"sc":"XCMvIyc3PzM7O1o=","b":2,"explain":"智能体治理的核心是厘清\"用户保留/授权/自决\"三类决策边界，敏感场景强制人工终裁与召回机制并逐项留痕可追溯；形式化承诺书或转嫁供应商都扛不住实质责任。"}]
 };
 
 const ASSESSMENTS = ADAPTIVE_QUIZ;
@@ -5600,19 +5747,35 @@ const COURSES = {
     {id:'pm4', title:'AI原型与交互设计', desc:'用AI快速生成和迭代产品原型，提升设计效率', type:'text', dur:'30分钟', skills:[{s:3,w:0.55},{s:0,w:0.2},{s:2,w:0.15},{s:1,w:0.1}],requires:['pm1'], tasks:[{t:'AI生成线框图',h:'描述一个功能需求，让AI生成详细的线框图描述。'},{t:'AI优化交互流程',h:'用AI分析一个交互流程，提出优化建议。'},{t:'AI生成设计规范',h:'用AI辅助生成一份产品设计规范和组件库说明。'}] },
     {id:'pm5', title:'AI竞品深度分析', desc:'用AI持续监控和分析竞品，及时调整产品策略', type:'text', dur:'30分钟', skills:[{s:4,w:0.55},{s:1,w:0.2},{s:2,w:0.15},{s:3,w:0.1}],requires:['pm1'], tasks:[{t:'AI构建竞品分析框架',h:'用AI设计一个竞品分析框架，包含维度、指标和数据源。'},{t:'AI深度竞品拆解',h:'选一个竞品，用AI做全面的功能、策略和用户体验拆解。'},{t:'AI生成策略建议',h:'基于竞品分析用AI生成产品差异化策略建议。'}] }
   ],
-  ops: [
-    {id:'ops1', title:'AI内容创作工作流', desc:'从选题到发布，用AI打造高效的内容生产线', type:'video', dur:'45分钟', skills:[{s:0,w:0.5},{s:2,w:0.25},{s:4,w:0.15},{s:1,w:0.1}], tasks:[{t:'AI选题策划',h:'用AI分析热点和用户兴趣，生成本周内容选题方案。'},{t:'AI多平台内容生成',h:'将一个选题用AI生成适配小红书、公众号、抖音三种平台的内容。'},{t:'AI标题优化',h:'用AI为同一篇文章生成10个不同风格的标题并做A/B选择。'}], video:'https://player.bilibili.com/player.html?bvid=BV1...'},
-    {id:'ops2', title:'AI数据运营实战', desc:'用AI分析运营数据，建立数据驱动的运营闭环', type:'text', dur:'40分钟', skills:[{s:1,w:0.5},{s:0,w:0.2},{s:2,w:0.15},{s:4,w:0.15}], tasks:[{t:'AI构建运营数据看板',h:'用AI设计运营核心指标体系，并生成看板结构。'},{t:'AI用户增长分析',h:'用AI分析用户增长数据，识别增长瓶颈和机会点。'},{t:'AI运营报告生成',h:'用AI将运营数据自动生成周报/月报。'}] },
-    {id:'ops3', title:'AI活动策划与优化', desc:'用AI辅助活动创意、执行方案和效果预估', type:'video', dur:'35分钟', skills:[{s:2,w:0.45},{s:0,w:0.25},{s:1,w:0.15},{s:4,w:0.15}],requires:['ops1'], tasks:[{t:'AI活动创意生成',h:'用AI为一个节日生成5个活动创意，并评估可行性。'},{t:'AI活动方案撰写',h:'用AI撰写一份完整的活动执行方案（含时间线和资源需求）。'},{t:'AI活动复盘分析',h:'用AI分析活动数据并生成复盘报告。'}], video:'https://player.bilibili.com/player.html?bvid=BV1...'},
-    {id:'ops4', title:'AI用户洞察与分群运营', desc:'用AI精细化用户运营，实现千人千面', type:'text', dur:'30分钟', skills:[{s:3,w:0.5},{s:1,w:0.25},{s:0,w:0.15},{s:2,w:0.1}],requires:['ops2'], tasks:[{t:'AI用户标签体系',h:'用AI设计一套用户标签体系，覆盖行为、偏好、价值等维度。'},{t:'AI分群策略制定',h:'基于标签用AI设计用户分群运营策略。'},{t:'AI个性化推送',h:'用AI为不同用户群生成个性化推送内容。'}] },
-    {id:'ops5', title:'AI自动化运营流程', desc:'搭建自动化运营流程，释放重复劳动力', type:'text', dur:'30分钟', skills:[{s:4,w:0.55},{s:0,w:0.2},{s:1,w:0.15},{s:2,w:0.1}],requires:['ops1','ops2'], tasks:[{t:'AI流程诊断',h:'梳理现有运营流程，用AI识别可自动化的环节。'},{t:'AI自动化方案设计',h:'设计一个自动化运营流程方案（如自动化欢迎旅程）。'},{t:'AI触发规则设计',h:'用AI设计智能触发规则和条件分支逻辑。'}] }
-  ],
-  sales: [
-    {id:'sales1', title:'AI客户画像与洞察', desc:'用AI深度分析客户，精准识别需求和意向', type:'video', dur:'40分钟', skills:[{s:0,w:0.5},{s:3,w:0.25},{s:1,w:0.15},{s:2,w:0.1}], tasks:[{t:'AI客户画像构建',h:'用AI分析客户数据，生成一个详细的客户画像模板。'},{t:'AI客户意向评分',h:'设计一个AI辅助的客户意向评分模型。'},{t:'AI客户需求预判',h:'用AI分析客户历史行为，预判下一次需求点。'}], video:'https://player.bilibili.com/player.html?bvid=BV1...'},
-    {id:'sales2', title:'AI销售话术优化', desc:'用AI打磨销售话术，提升沟通转化率', type:'text', dur:'45分钟', skills:[{s:1,w:0.55},{s:4,w:0.2},{s:0,w:0.15},{s:2,w:0.1}],requires:['sales1'], tasks:[{t:'AI话术分析',h:'录入一段真实销售对话，让AI分析话术优缺点。'},{t:'AI话术生成',h:'针对不同客户类型，用AI生成2-3套个性化话术方案。'},{t:'AI异议处理',h:'收集常见客户异议，让AI生成最佳应对策略。'}] },
-    {id:'sales3', title:'AI商机识别与管理', desc:'用AI发现和评估商机，提高赢单率', type:'video', dur:'35分钟', skills:[{s:2,w:0.5},{s:0,w:0.2},{s:3,w:0.2},{s:5,w:0.1}],requires:['sales1'], tasks:[{t:'AI商机识别',h:'用AI分析线索数据，识别高价值潜在商机。'},{t:'AI成交预测',h:'基于历史数据用AI预测商机成交概率。'},{t:'AI商机管理策略',h:'用AI设计商机分级管理和跟进策略。'}], video:'https://player.bilibili.com/player.html?bvid=BV1...'},
-    {id:'sales4', title:'AI赋能CRM数据管理', desc:'用AI挖掘CRM数据价值，驱动精准销售决策', type:'text', dur:'30分钟', skills:[{s:3,w:0.5},{s:0,w:0.2},{s:2,w:0.15},{s:5,w:0.15}],requires:['sales1'], tasks:[{t:'AI数据清洗',h:'用AI辅助清理CRM中的重复和错误数据。'},{t:'AI客户分析报告',h:'用AI从CRM数据中生成客户分析报告。'},{t:'AI销售预测',h:'用AI基于CRM数据做季度销售预测。'}] },
-    {id:'sales5', title:'AI会议纪要与客户跟进', desc:'用AI高效管理销售会议和客户跟进全流程', type:'text', dur:'25分钟', skills:[{s:4,w:0.5},{s:5,w:0.2},{s:0,w:0.15},{s:1,w:0.15}],requires:['sales2'], tasks:[{t:'AI会议纪要生成',h:'模拟一场客户会议对话，让AI生成结构化会议纪要。'},{t:'AI行动项管理',h:'从纪要中让AI提取行动项并生成跟进计划。'},{t:'AI跟进策略优化',h:'用AI分析跟进节奏，给出优化建议。'}] }
+  // v154 岗位合并：市场营销 = 原「运营」5 门 + 原「销售」5 门 → 收敛为 6 门。
+  // 合并原则：能同时服务「内容运营 / 增长投放 / 销售转化」三条线的留下并改写，
+  // 只服务单条线的（社群运营、CRM 数据管理）并入相邻课，不再单独占位。
+  // 课程类型一律 text —— 原 ops/sales 的 video 链接是 `bvid=BV1...` 占位，不给新岗位继承假链接。
+  mkt: [
+    {id:'mkt1', title:'AI 内容生产与多平台分发', desc:'从一个选题到多平台成稿，用 AI 搭出可复用、可归因的内容生产线', type:'text', dur:'45分钟', skills:[{s:0,w:0.5},{s:2,w:0.2},{s:4,w:0.2},{s:1,w:0.1}], tasks:[
+      {t:'建选题池',h:'把近 30 天目标人群讨论、竞品内容、站内搜索词一起给 AI，产出 10 个选题，每个标注目标人群、主卖点、预估点击理由，并说明为什么现在做。'},
+      {t:'一稿多平台改写',h:'挑其中 1 个选题，让 AI 改写成小红书、公众号、短视频脚本三版。要求三版在结构、开头钩子、行动号召上明确不同，不能只换标题。'},
+      {t:'内容效果归因',h:'三版上线后把曝光/点击/转化拉出来，让 AI 归因到「标题」「首图」「开头三句」三层，并给出下一轮具体改法。'}]},
+    {id:'mkt2', title:'数据运营与增长分析', desc:'用 AI 拆漏斗、做归因，把运营数据变成可执行的调整动作', type:'text', dur:'40分钟', skills:[{s:1,w:0.5},{s:0,w:0.2},{s:2,w:0.15},{s:5,w:0.15}], tasks:[
+      {t:'漏斗定位',h:'给定注册→激活→付费的漏斗数据，让 AI 找出流失最大的环节，并给出 3 个可验证假设，写明每个假设用什么数据能证伪。'},
+      {t:'归因反证',h:'拿一份现有的渠道归因结论给 AI，让它做反证：哪些结论只是相关、不是因果，哪些数据缺失导致结论不可信。'},
+      {t:'周报自动化',h:'把指标口径写进固定模板，让 AI 按同一口径产出周报。要求它主动标出异常项，人只复核异常，不重算全表。'}]},
+    {id:'mkt3', title:'客户画像与用户洞察', desc:'从访谈与行为数据提炼真实需求，产出销售能直接用的画像', type:'text', dur:'40分钟', skills:[{s:2,w:0.5},{s:1,w:0.2},{s:3,w:0.2},{s:0,w:0.1}], tasks:[
+      {t:'访谈洞察提炼',h:'把 8 份真实访谈记录给 AI，产出「高频场景 / 真实动机 / 反对意见」三类结论，每条结论必须附受访者原话作为出处。'},
+      {t:'画像成稿',h:'基于洞察产出 3 个客户画像，每个包含决策链角色、核心关注点、最常见的 3 条异议。'},
+      {t:'画像校验',h:'拿画像去比对真实成单客户和流失客户，让 AI 指出画像哪里与事实不符，并说明该改哪一条假设。'}]},
+    {id:'mkt4', title:'活动策划与投放', desc:'从创意到复盘，AI 覆盖全流程但关键判断留在人手上', type:'text', dur:'35分钟', skills:[{s:4,w:0.45},{s:0,w:0.25},{s:1,w:0.15},{s:5,w:0.15}], tasks:[
+      {t:'创意与可行性',h:'让 AI 出 5 个活动创意，逐条标注「预算 / 资源 / 合规」三项可行性，明确哪些创意在小预算下做不了。'},
+      {t:'执行方案',h:'产出含时间线、资源清单、风险预案的执行方案。风险预案必须写明触发条件和止损动作。'},
+      {t:'投放复盘',h:'把投放数据给 AI，让它区分问题出在「创意 / 渠道 / 人群」，并给出下一轮优先验证哪一项。'}]},
+    {id:'mkt5', title:'销售话术与转化', desc:'把优秀销售的经验变成团队资产，让 AI 参与打磨但不代答', type:'text', dur:'45分钟', skills:[{s:3,w:0.55},{s:2,w:0.2},{s:0,w:0.15},{s:1,w:0.1}], tasks:[
+      {t:'话术库建设',h:'把 Top 销售的 10 段真实对话给 AI，提炼「开场 / 挖需 / 报价 / 收口」四段式话术库，每段写明适用客户类型。'},
+      {t:'异议处理',h:'收集最常见的 10 条异议，让 AI 产出「共情 → 澄清 → 证据 → 推进」四步应对，并标注哪一步最容易翻车。'},
+      {t:'话术 A/B',h:'同一场景写两版话术，用真实通话结果对比转化率。要求说明差异是否显著，样本不够就明说不够。'}]},
+    {id:'mkt6', title:'营销自动化工作流', desc:'把重复动作串成自动化流程，把人的时间留给判断和创意', type:'text', dur:'35分钟', skills:[{s:5,w:0.55},{s:0,w:0.2},{s:1,w:0.15},{s:2,w:0.1}], requires:['mkt1','mkt2'], tasks:[
+      {t:'流程诊断',h:'梳理现有营销动作，标出「高频 / 规则明确 / 可自动化」三段，说明哪一段不该自动化（涉及判断或客户情绪）。'},
+      {t:'触发规则设计',h:'设计分层触发条件（行为 / 时间 / 标签三类），每条规则必须写明止损条件，避免打扰过度。'},
+      {t:'上线监控',h:'自动化上线后盯触达量、转化率、退订率三个指标，让 AI 设定异常阈值并给出回滚判断。'}]}
   ],
   hr: [
     {id:'hr1', title:'AI简历智能筛选', desc:'用AI高效筛选和评估候选人，缩短招聘周期', type:'video', dur:'40分钟', skills:[{s:0,w:0.5},{s:2,w:0.25},{s:3,w:0.15},{s:4,w:0.1}], tasks:[{t:'AI简历匹配度评分',h:'用AI根据JD对10份简历进行打分和排序。'},{t:'AI候选人画像生成',h:'用AI从简历中提取候选人关键画像信息。'},{t:'AI筛选标准优化',h:'用AI分析历史招聘数据，优化简历筛选标准。'}], video:'https://player.bilibili.com/player.html?bvid=BV1...'},
@@ -5621,19 +5784,33 @@ const COURSES = {
     {id:'hr4', title:'AI培训方案设计', desc:'用AI个性化设计员工培训方案，提升培训效果', type:'text', dur:'35分钟', skills:[{s:3,w:0.5},{s:2,w:0.2},{s:4,w:0.2},{s:1,w:0.1}],requires:['hr3'], tasks:[{t:'AI培训需求分析',h:'用AI分析员工能力数据和业务需求，生成培训需求报告。'},{t:'AI个性化培训方案',h:'为不同岗位设计个性化AI技能培训方案。'},{t:'AI培训效果评估',h:'设计一套AI辅助的培训效果评估体系。'}] },
     {id:'hr5', title:'AI组织效能分析与优化', desc:'用AI诊断组织效能，推动持续优化', type:'text', dur:'30分钟', skills:[{s:5,w:0.5},{s:2,w:0.25},{s:4,w:0.15},{s:0,w:0.1}],requires:['hr3'], tasks:[{t:'AI组织效能诊断',h:'用AI分析组织流程效率，找出瓶颈环节。'},{t:'AI组织优化建议',h:'基于诊断结果，让AI生成组织优化建议方案。'},{t:'AI人力效能看板',h:'设计一个人力效能数据看板的指标体系。'}] }
   ],
-  fin: [
-    {id:'fin1', title:'AI预算与预测实战', desc:'用AI编制预算、构建预测模型，从经验预算到数据驱动', type:'video', dur:'40分钟', skills:[{s:0,w:0.5},{s:1,w:0.3},{s:2,w:0.2}], tasks:[{t:'AI预算归因分析',h:'给AI一份模拟的经营数据（收入/成本/费用），让它按产品线/渠道/月份拆解毛利变化并输出归因结论。'},{t:'AI预算编制',h:'用AI按「收入预测→成本测算→三表汇总」三步链编制一份部门年度预算初稿。'},{t:'AI现金流预测',h:'用AI构建12个月现金流预测（含乐观/基准/悲观情景），输出资金缺口预警。'}], video:'https://player.bilibili.com/player.html?bvid=BV1...'},
-    {id:'fin2', title:'AI核算与报税自动化', desc:'用AI+RPA实现对账、制单、报税自动化，解放重复劳动', type:'text', dur:'35分钟', skills:[{s:1,w:0.5},{s:0,w:0.3},{s:4,w:0.2}],requires:['fin1'], tasks:[{t:'AI银行对账',h:'用AI对一份银行流水与账面记录做自动匹配，输出差异分类清单。'},{t:'AI报表自动化',h:'让AI生成Excel/VBA脚本，把ERP导出数据自动加工成固定格式报表。'},{t:'RPA+AI汇总流程设计',h:'设计RPA抓取子公司报表+AI字段映射+自动填集团模板的自动化流程。'}] },
-    {id:'fin3', title:'AI报表与经营分析', desc:'用AI生成财报摘要与经营分析报告，让财务成为业务洞察者', type:'video', dur:'40分钟', skills:[{s:2,w:0.5},{s:0,w:0.3},{s:5,w:0.2}],requires:['fin2'], tasks:[{t:'AI财报摘要',h:'给AI一组关键财务数据，让它按「管理层关心的5个问题」生成2页摘要。'},{t:'AI经营分析报告',h:'用AI按框架（概览→业务线→成本→现金流→风险→规划）撰写年度经营分析报告初稿。'},{t:'AI路演问答库',h:'用AI预测投资机构可能提问并生成应答要点，再让AI反向挑战补漏。'}], video:'https://player.bilibili.com/player.html?bvid=BV1...'},
-    {id:'fin4', title:'AI税务合规与风控', desc:'用AI应对税务政策变化，识别税务风险，守住合规底线', type:'text', dur:'30分钟', skills:[{s:3,w:0.5},{s:2,w:0.3},{s:0,w:0.2}],requires:['fin1'], tasks:[{t:'AI税务风险扫描',h:'让AI按「发票/申报/优惠政策适用」维度扫描公司税务合规风险点。'},{t:'AI新政策解读',h:'上传一份最新税收政策文件，用AI梳理适用范围、义务和影响。'},{t:'AI税务筹划建议',h:'描述公司业务模式，让AI在合规前提下给出税务优化建议并标注风险。'}] },
-    {id:'fin5', title:'AI审计与财务风控', desc:'用AI开展内部审计、费用异常侦测与反舞弊，筑牢内控防线', type:'text', dur:'35分钟', skills:[{s:4,w:0.5},{s:3,w:0.3},{s:2,w:0.2}],requires:['fin3'], tasks:[{t:'AI费用异常分析',h:'给AI一份报销明细，让它按部门/城市/职级拆解并标记异常样本。'},{t:'AI审计抽样',h:'让AI基于风险维度设计审计抽样方案并生成底稿框架。'},{t:'AI内控流程诊断',h:'描述财务关键流程（付款/报销/对账），让AI识别内控薄弱环节。'}] }
-  ],
-  po: [
-    {id:'po1', title:'AI供应商画像与开发', desc:'用AI多维评估供应商，构建供应商主数据与绩效体系', type:'video', dur:'40分钟', skills:[{s:0,w:0.5},{s:1,w:0.3},{s:4,w:0.2}], tasks:[{t:'AI供应商五维评估',h:'给AI一家新供应商信息，让它按质量/交付/成本/技术/风险五维评估并生成尽调问题清单。'},{t:'AI供应商绩效分析',h:'用AI整合质量/交付/价格数据，加权评分给供应商分级并输出改善建议。'},{t:'AI供应商风险监控',h:'设计一套AI监控供应商经营风险（诉讼/股权/舆情）的预警规则。'}], video:'https://player.bilibili.com/player.html?bvid=BV1...'},
-    {id:'po2', title:'AI寻源与多维比价', desc:'用AI统一报价口径、计算TCO、输出决策矩阵，理性寻源', type:'text', dur:'35分钟', skills:[{s:1,w:0.5},{s:0,w:0.3},{s:2,w:0.2}],requires:['po1'], tasks:[{t:'AI报价整理',h:'给AI 3份不同格式的报价单，让它提取要素、统一口径并生成比价表。'},{t:'AI多维比价',h:'用AI把含税/运费/账期/质保换算成TCO对比，输出决策矩阵。'},{t:'AI行情监控设计',h:'设计一套AI监控大宗原料行情（趋势+预警+采购时机建议）的方案。'}] },
-    {id:'po3', title:'AI谈判与成本分析', desc:'用AI构建谈判策略、开展系统性降本，从压价到价值创造', type:'video', dur:'35分钟', skills:[{s:2,w:0.5},{s:3,w:0.3},{s:0,w:0.2}],requires:['po1'], tasks:[{t:'AI谈判策略设计',h:'基于比价结果，让AI设计谈判剧本（压价空间/让步底线/替代方案）。'},{t:'AI成本归因分析',h:'给AI一份物料成本构成，让它拆解涨价原因并判断周期/趋势。'},{t:'AI系统性降本方案',h:'用AI从商务/技术/流程/供应链/需求五维设计降本方案并量化目标。'}], video:'https://player.bilibili.com/player.html?bvid=BV1...'},
-    {id:'po4', title:'AI采购合规与风险', desc:'用AI守护采购数据安全、防止舞弊，构建合规防线', type:'text', dur:'30分钟', skills:[{s:4,w:0.5},{s:2,w:0.3},{s:0,w:0.2}],requires:['po2'], tasks:[{t:'AI采购数据安全检查',h:'列出采购场景的敏感数据清单，设计脱敏与权限分级方案。'},{t:'AI合规流程设计',h:'设计AI嵌入采购审批的流程（完整性检查+预审+异常人工审）。'},{t:'AI舞弊风险识别',h:'让AI分析采购数据中的异常模式（供应商集中/价格偏离/审批绕过）。'}] },
-    {id:'po5', title:'AI供应链协同与自动化', desc:'用AI搭建供应商协同平台、需求预测与供应链韧性体系', type:'text', dur:'35分钟', skills:[{s:5,w:0.5},{s:4,w:0.3},{s:1,w:0.2}],requires:['po2','po3'], tasks:[{t:'AI需求预测建模',h:'用AI整合历史用量+BOM推算+安全库存，输出分物料预测区间。'},{t:'AI供应商协同方案',h:'设计供应商在线接单/报交期/对账的协同平台+AI预警方案。'},{t:'AI供应链韧性体系',h:'用AI从可视化/预警/替代/演练四层设计供应链韧性方案。'}] }
+  // v154 岗位合并：财务与采购 = 原「财务」5 门 + 原「采购」5 门 → 收敛为 6 门。
+  // 两者共享「数据口径 + 合规 + 流程」三层，「成本 / 比价 / 供应商评估」与「预算 / 核算」本就互相引用。
+  fc: [
+    {id:'fc1', title:'预算编制与滚动预测', desc:'用 AI 加速预算与预测，但口径和关键假设必须人来定', type:'text', dur:'40分钟', skills:[{s:0,w:0.5},{s:5,w:0.2},{s:1,w:0.2},{s:4,w:0.1}], tasks:[
+      {t:'口径先行',h:'先写清收入、成本、费用的口径与关键假设，再让 AI 按该口径产出预算底稿。禁止跳过口径直接要数。'},
+      {t:'多情景预测',h:'让 AI 产出乐观 / 中性 / 悲观三档预测，标注每一档的关键假设差异，说明哪一项假设最敏感。'},
+      {t:'差异归因',h:'实际 vs 预算的差异，让 AI 归因到「量 / 价 / 结构」三类，人复核归因是否成立。'}]},
+    {id:'fc2', title:'核算与报税自动化', desc:'把重复核算交给 AI，合规判断绝不外包', type:'text', dur:'40分钟', skills:[{s:1,w:0.5},{s:0,w:0.2},{s:4,w:0.2},{s:2,w:0.1}], tasks:[
+      {t:'凭证与科目归类',h:'让 AI 按既定科目表做凭证归类，人工抽查 10%。要求它把「拿不准」的单据单独列出，不要硬猜。'},
+      {t:'报税资料准备',h:'整理进项/销项与差异说明，AI 起草说明稿，税务判断由人确认。AI 不得给出申报结论。'},
+      {t:'异常检测',h:'让 AI 找出「金额跳变 / 科目错配 / 重复入账」三类异常，每条附上定位到的原始凭证号。'}]},
+    {id:'fc3', title:'成本与比价分析', desc:'用 AI 做多维比价与成本拆解，把「便宜」变成「算得清」', type:'text', dur:'35分钟', skills:[{s:2,w:0.5},{s:3,w:0.2},{s:5,w:0.2},{s:0,w:0.1}], requires:['fc1'], tasks:[
+      {t:'成本拆解',h:'把供应商报价拆到「材料 / 人工 / 制造费用 / 物流」四层，指出哪一层有谈判空间，并说明依据。'},
+      {t:'多维比价',h:'同一物料 5 家供应商，按价格、账期、良率、交期四维打分。要求给出权重设置理由。'},
+      {t:'总拥有成本',h:'让 AI 算 TCO，指出只看单价会导致什么误判，并举一个具体数字例子。'}]},
+    {id:'fc4', title:'供应商评估与寻源', desc:'用 AI 建供应商画像与寻源清单，评估结论要能复核', type:'text', dur:'35分钟', skills:[{s:3,w:0.5},{s:2,w:0.25},{s:4,w:0.15},{s:5,w:0.1}], requires:['fc3'], tasks:[
+      {t:'供应商画像',h:'基于公开信息和历史交付记录，产出「能力 / 风险 / 依赖度」三维画像，每条结论标注信息来源。'},
+      {t:'寻源长名单',h:'按品类产出候选清单，标注每家的一票否决项（资质、产能、地域等）。'},
+      {t:'风险评估',h:'让 AI 指出单一来源、产能集中、地缘风险三类隐患，并给出备选方案的方向。'}]},
+    {id:'fc5', title:'采购与税务合规', desc:'让 AI 做合规初筛与疑点标注，不定性、不替代专业判断', type:'text', dur:'35分钟', skills:[{s:4,w:0.5},{s:3,w:0.2},{s:1,w:0.2},{s:0,w:0.1}], tasks:[
+      {t:'合同条款初筛',h:'标出付款、交付、违约、知识产权四类条款的疑点。只标疑点，不给出「合法/违法」结论。'},
+      {t:'三流一致核对',h:'让 AI 核对合同、发票、物流三流是否一致，列出所有不一致项及涉及的金额。'},
+      {t:'疑点清单',h:'产出待专业确认的疑点清单，每条写明「为什么可疑」，不写「是否违规」。定性权在法务与税务。'}]},
+    {id:'fc6', title:'经营分析与决策支持', desc:'从财务数据到经营建议，结论要能被业务听懂并执行', type:'text', dur:'40分钟', skills:[{s:5,w:0.5},{s:0,w:0.25},{s:2,w:0.15},{s:1,w:0.1}], requires:['fc1','fc2'], tasks:[
+      {t:'指标口径统一',h:'定义 6 个核心经营指标的口径与计算方式，避免同名不同义（如「毛利率」是否含运费）。'},
+      {t:'异常归因',h:'毛利下滑时，让 AI 拆成「售价 / 成本 / 产品结构」三项贡献度，用数字说明各占多少。'},
+      {t:'决策建议',h:'把分析转成 3 条可执行建议，每条写明预期收益、需要谁配合、以及怎么验证是否奏效。'}]}
   ],
   legal: [
     {id:'legal1', title:'AI合同审查实战', desc:'用AI批量审查合同、定位风险条款、生成修改建议', type:'video', dur:'40分钟', skills:[{s:0,w:0.5},{s:1,w:0.3},{s:4,w:0.2}], tasks:[{t:'AI合同风险扫描',h:'给AI一份模拟合同，让它提取要素并按「对己方不利条款」清单逐项审查。'},{t:'AI批量合同检查',h:'设计AI批量扫描存量合同风险（知产归属/违约上限/自动续期）的方案。'},{t:'AI标准合同库构建',h:'用AI起草一份销售合同标准模板（含可配置条款）和使用说明。'}], video:'https://player.bilibili.com/player.html?bvid=BV1...'},
@@ -5912,6 +6089,8 @@ const COURSES = {
 // Industry-aware course getter — tries role_industry key first, falls back to role
 // 按 岗位×行业 取课程集合（学习地图 / 课程列表 / 学习计划 / 后台统计共用同一口径）
 function courseListFor(roleId, industryId) {
+  // v154：旧岗位 id 归一（ops→mkt / sales→mkt / fin→fc / po→fc），否则历史深链会拿到空课表
+  roleId = resolveRole(roleId);
   // 金融 × 产品经理：课程实体 = 64 单元丰富课（course_finance_pm_full.html）的 8 个模块。
   // 学习地图 / 课程列表 / 学习计划必须与该丰富课一一对应（点击带 ?m=Mx 深链定位模块），
   // 否则会出现「地图列通用产品课、点进去却是金融 PM 课」的错位。
@@ -8693,7 +8872,7 @@ function renderLoginV2(){
   html += '<div class="login-hero">'
     + '<div class="lh-logo"><span class="lh-badge">🎓</span>AI达学 · AIDAX</div>'
     + '<h1>企业 AI 能力测评与训战<br>一站式学习平台</h1>'
-    + '<p>面向 8 大岗位、7 大行业的 AI 素养评测、个性化课程与关卡陪练，帮助企业快速摸清团队 AI 能力短板并补齐。</p>'
+    + '<p>面向 6 大岗位、7 大行业的 AI 素养评测、个性化课程与关卡陪练，帮助企业快速摸清团队 AI 能力短板并补齐。</p>'
     + '<div class="lh-feats">'
     + '<div class="lh-feat"><span class="dot">📊</span>千人千面自适应测评，8 维 AI 能力精准画像</div>'
     + '<div class="lh-feat"><span class="dot">🎯</span>按短板自动生成个性化课程与陪练</div>'
@@ -8893,7 +9072,7 @@ function render() {
 function headerHtml(title, sub, showBack, compact) {
   var session = JSON.parse(localStorage.getItem('ai_training_session') || '{}');
   var userName = session.user || '学员';
-  var indText = S.industry ? (INDUSTRIES[S.industry]?.name||'') : '';
+  var indText = S.industry ? industryLabel(S.industry) : '';
   var roleText = S.role ? (ROLES[S.role]?.name||'') : '';
   return `
     <div class="flex-between mb-4${compact ? ' topbar-compact' : ''}">
@@ -8910,6 +9089,29 @@ function headerHtml(title, sub, showBack, compact) {
     <div class="header${compact ? ' header-compact' : ''}">
       <h1>${title}</h1>
       ${sub ? '<p>'+sub+'</p>' : ''}
+    </div>`;
+}
+
+// ---- 新人通道面板（v154：替代 Step 2 的岗位双选）----
+// 为什么单独一块：新人没有任何行业经验，8 个岗位对他都是「还没定」；硬塞进岗位网格会让
+// 另外 7 张卡灰掉，像「你选错了」。改成一条独立通道后，语义是「这里有一条不用选行业的路」。
+function renderNewbiePanel() {
+  return `<div class="nb-panel">
+      <div class="nb-head">🎓 职场新人通道
+        <span class="tag tag-green" style="font-size:10px;">已锁定 · 应届生 / 职场新人</span>
+      </div>
+      <p class="nb-sub">这条通道不按行业出题 —— 新人还没有行业经验，出行业题只会测出「不会」。它按「从零到能用」排：先建预期，再练六项基本功，最后拼成一整周可复用的 AI 工作流。</p>
+      <div class="nb-steps">
+        <div class="nb-step"><b>M0 建立预期</b><span>AI 能做什么、不能做什么，三条底线</span></div>
+        <div class="nb-step"><b>M1–M6 六项基本功</b><span>提示词、找资料、写文档做 PPT、处理数据、开会记纪要、做图做视频</span></div>
+        <div class="nb-step"><b>M7 合规与实战</b><span>数据安全红线、可追溯原则，拼出一周工作流</span></div>
+      </div>
+      <div class="nb-actions">
+        <button class="btn btn-primary" data-action="startQuiz" onclick="if(typeof S!=='undefined'){S.startQuiz()}">测一测 AI 基础能力</button>
+        <button class="btn btn-outline" data-action="newbiePeek" onclick="if(typeof S!=='undefined'){S.newbiePeek()}">先看看课程讲什么</button>
+        <button class="btn btn-outline btn-sm" data-action="resetScenePair" style="margin-left:auto;">换个行业</button>
+      </div>
+      <p class="nb-note">测评只有一套新人题库，不分行业 · 8 个模块 64 单元 · 192 段真人配音</p>
     </div>`;
 }
 
@@ -8932,44 +9134,58 @@ function renderRoleSelection() {
       <div class="card mb-3">
         <p style="font-weight:600;font-size:15px;margin-bottom:16px;">Step 1: 选择行业场景</p>
         <div class="industry-grid">`;
-  for (const [id, ind] of Object.entries(INDUSTRIES)) {
+  // v154：只渲染 7 个行业（hidden 的 elec / cpg / newbie 不进网格）
+  for (const id of IND_VISIBLE) {
+    const ind = INDUSTRIES[id];
     const subs = ind.subs ? ind.subs.map(s => `<span class="tag tag-blue" style="font-size:10px;padding:1px 7px;margin:2px 2px 0;">${s}</span>`).join('') : '';
-    // v140：已选「应届生」岗位时，只有「新人小白」场景可配，其余场景灰化
-    const lockOn = pickConflict(id, S.role);
-    const lockTip = lockOn ? `当前岗位「${(ROLES[S.role]||{}).name}」只配套「${(INDUSTRIES[PICK_LOCK.role2industry[S.role]]||{}).name}」场景` : '';
+    // v154：行业卡不再灰化。新人通道已移出网格，唯一的配对约束（应届生 ↔ 新人通道）
+    // 由 selectIndustry 的「点别的行业即解绑岗位」处理；灰化只会让人误以为点不动。
     html += `
-          <div class="industry-card${S.industry===id?' selected':''}${lockOn?' pick-locked':''}" data-action="selectIndustry" data-id="${id}"${lockOn?' title="'+lockTip+'"':''}>
+          <div class="industry-card${S.industry===id?' selected':''}" data-action="selectIndustry" data-id="${id}">
             <div class="industry-icon">${ind.icon}</div>
             <div class="industry-name">${ind.name}</div>
             <div class="industry-desc">${ind.desc}</div>
             ${subs ? `<div style="margin-top:6px;">${subs}</div>` : ''}
+            ${ind.comingSoon ? '<div class="ind-flag">课程筹备中</div>' : ''}
           </div>`;
   }
-  // v140：配对锁生效时给出说明条 + 一键解绑出口，避免学员被灰化卡片困住
-  const lockActive = !!PICK_LOCK.industry2role[S.industry] || !!PICK_LOCK.role2industry[S.role];
-  const lockNote = lockActive ? `<div class="pick-lock-note">
-      <span>🔒 已锁定配对 <b>${(INDUSTRIES[S.industry]||{}).name || '—'}</b> × <b>${(ROLES[S.role]||{}).name || '待选'}</b> · 「新人小白」与「应届生」是唯一绑定组合，课程与题库只按这一对交付，其余选项已灰化。</span>
-      <button class="pick-unlock" data-action="resetScenePair" onclick="if(typeof S!=='undefined'){S.resetScenePair()}">换个组合</button>
-    </div>` : '';
-  html += `</div></div>
-      <div class="card${!S.industry?'':' selected'}">
+  // v154：新人通道 —— 它不属于任何行业，所以不占行业格子，单独一条通栏入口。
+  // 放在网格下方而不是顶部：先给「有行业的人」走主路径，找不到自己行业的再往下走这一步。
+  html += `
+        </div>
+        <div class="newbie-lane${S.industry==='newbie'?' on':''}" data-action="enterNewbieLane">
+          <div class="nl-ico">${INDUSTRIES.newbie.icon}</div>
+          <div class="nl-main">
+            <div class="nl-t">不在上面这些行业里？走「新人通道」</div>
+            <div class="nl-d">应届生、转行新人、还没定岗 —— 不用先选行业和岗位。8 个模块 64 单元，从第一句提示词到一周 AI 工作流，按「从零到能用」排。</div>
+          </div>
+          <div class="nl-go">${S.industry==='newbie'?'已进入 ✓':'进入 →'}</div>
+        </div>
+      </div>`;
+
+  if (S.industry === 'newbie') {
+    // 新人通道：跳过「选岗位」。它不是 8 个岗位之一，硬塞进岗位网格只会让另外 7 张卡灰掉。
+    html += renderNewbiePanel();
+  } else {
+    html += `<div class="card${!S.industry?'':' selected'}">
         <p style="font-weight:600;font-size:15px;margin-bottom:16px;">Step 2: 选择你的岗位</p>
-        ${lockNote}
         <div class="role-grid">`;
-  for (const [id, r] of Object.entries(ROLES)) {
-    // v140：已选「新人小白」场景时，只有「应届生」岗位可配，其余灰化
-    const lockOn = pickConflict(S.industry, id);
-    const lockTip = lockOn ? `当前场景「${(INDUSTRIES[S.industry]||{}).name}」只配套「${(ROLES[PICK_LOCK.industry2role[S.industry]]||{}).name}」岗位` : '';
-    html += `
+    for (const id of Object.keys(ROLES)) {
+      const r = ROLES[id];
+      // v140：已选「新人小白」场景时，只有「应届生」岗位可配，其余灰化
+      const lockOn = pickConflict(S.industry, id);
+      const lockTip = lockOn ? `当前场景「${(INDUSTRIES[S.industry]||{}).name}」只配套「${(ROLES[PICK_LOCK.industry2role[S.industry]]||{}).name}」岗位` : '';
+      html += `
           <div class="role-card${S.role===id?' selected':''}${lockOn?' pick-locked':''}" data-action="selectRole" data-id="${id}"${lockOn?' title="'+lockTip+'"':''}>
             <div class="role-icon">${r.icon}</div>
             <div class="role-name">${r.name}</div>
             <div class="role-desc">${r.desc}</div>
           </div>`;
-  }
-  html += `</div>
+    }
+    html += `</div>
         <div class="text-center mt-4"><button class="btn btn-primary" data-action="startQuiz" ${!S.industry||!S.role?'disabled':''} onclick="if(typeof S!=='undefined'){S.startQuiz()}">测一测AI能力</button></div>
       </div>`;
+  }
 
   // 可见测评记录（v74：管理员=全部；企业账号=本企业；其他账号=仅自己）
   const _visEmps = myEmployees();
@@ -12072,15 +12288,19 @@ function dimBarsHtml(dimAvg){
 // ---- #4 销售：培训陪跑方案生成 ----
 function buildSalesPlan(o){
   var ind = INDUSTRIES[o.industry] || {name:o.industry, desc:''};
-  var role = ROLES[o.role] || {name:o.role, skills:[]};
+  // v154：历史记录里可能是旧岗位 id（ops/sales/fin/po），显示按「新岗位名（原细分）」，
+  // 读课程按归一后的 id，保证老报告不出现「岗位 ops / 课表为空」。
+  var _rid = resolveRole(o.role);
+  var role = ROLES[_rid] || {name: roleLabel(o.role), skills:[]};
+  var _roleName = roleLabel(o.role);
   var groups = aggregateBy(function(e){ return e.industry; });
   var g = null;
   groups.forEach(function(x){ if (x.key === o.industry) g = x; });
-  var clist = COURSES[o.role + '_' + o.industry] || COURSES[o.industry + '_' + o.role] || COURSES[o.role] || [];
+  var clist = COURSES[_rid + '_' + o.industry] || COURSES[o.industry + '_' + _rid] || COURSES[_rid] || [];
   var weak = (g && g.weak && g.weak.length) ? g.weak : [];
   var weakNames = weak.map(function(d){ return AI_DIMS[d].name; });
   if (!weakNames.length) { // 无实测数据时用岗位能力基线兜底
-    var w = BASE_ROLE_WEIGHTS[o.role] || {};
+    var w = BASE_ROLE_WEIGHTS[_rid] || {};
     weakNames = Object.keys(w).sort(function(a,b){ return w[a] - w[b]; }).slice(0, 2).map(function(k){ return AI_DIMS[k].name; });
   }
   function dimOf(cid){
@@ -12095,7 +12315,7 @@ function buildSalesPlan(o){
   var wks = Math.max(2, o.weeks || 4);
   var midEnd = Math.max(2, Math.round(wks / 2));
   var t = [];
-  t.push('# ' + ind.name + ' × ' + role.name + ' 岗位 · AI 能力训战陪跑方案');
+  t.push('# ' + ind.name + ' × ' + _roleName + ' 岗位 · AI 能力训战陪跑方案');
   t.push('> 规模 ' + o.size + ' 人 ｜ 周期 ' + wks + ' 周 ｜ 生成于 ' + fmtTs(Date.now()));
   t.push('');
   t.push('## 一、现状诊断' + (g ? '（基于本地 ' + g.n + ' 条实测数据）' : '（暂无实测数据，按岗位基线推断）'));
@@ -13458,9 +13678,11 @@ function renderAdminSales() {
     <p style="font-size:12.5px;color:var(--text2);margin-bottom:14px">按行业 / 岗位 / 测评与学习数据，自动生成可交付给客户的训战陪跑方案（含现状诊断、目标验收、分阶段路径、推荐课程、服务节奏）。</p>
     <div class="plan-form">
       <div><label>行业</label><select id="spInd">`;
-  Object.keys(INDUSTRIES).forEach(function(k){
+  // v154：下拉只给 7 个现行行业 + 新人通道（elec / cpg 已并入，不再单独出现）
+  IND_VISIBLE.forEach(function(k){
     html += `<option value="${k}"${f.industry===k?' selected':''}>${INDUSTRIES[k].name}</option>`;
   });
+  html += `<option value="newbie"${f.industry==='newbie'?' selected':''}>新人通道（职场新人 / 应届生）</option>`;
   html += `</select></div>
       <div><label>岗位</label><select id="spRole">`;
   Object.keys(ROLES).forEach(function(k){
@@ -15133,6 +15355,18 @@ S.reportExportCsv = function(){
 };
 
 // ==================== ACTIONS ====================
+// v154：新人通道一键进入 —— 行业与岗位同时定成唯一合法组合（newbie × graduate），
+// 之后不再让学员在行业/岗位两块里来回点。
+S.enterNewbieLane = function() {
+  S.industry = 'newbie';
+  S.role = 'graduate';
+  render();
+  showToast('已进入新人通道，不用再选行业和岗位');
+};
+// 新人通道「先看看课程讲什么」：直接开深版新人课（64 单元），不依赖测评状态
+S.newbiePeek = function() {
+  window.open('course_newbie_deep.html', '_blank', 'noopener');
+};
 S.selectIndustry = function(id) {
   // v140：若当前岗位只属于特定场景（应届生 → 新人小白），点其他场景＝以本次点击为准，
   // 自动解除岗位选择并提示重选，而不是让灰卡点了没反应。
@@ -16037,6 +16271,8 @@ function bindEvents() {
           const idx = parseInt(el.getAttribute('data-idx'));
           switch (action) {
             case 'selectIndustry': S.selectIndustry(id); break;
+            case 'enterNewbieLane': S.enterNewbieLane(); break;
+            case 'newbiePeek': S.newbiePeek(); break;
             case 'selectRole': S.selectRole(id); break;
             case 'resetScenePair': S.resetScenePair(); break;
             case 'startQuiz': S.startQuiz(); break;
