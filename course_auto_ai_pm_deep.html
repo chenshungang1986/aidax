@@ -473,7 +473,41 @@ function audLocal(p){
 const QUIZ   = {"M0": [{"q": "车企 AI 产品经理要签字的三样东西是什么？", "opts": ["场景定义、需求验收、上线放行", "预算审批、招聘计划、年度述职", "代码评审、模型训练、服务器采购", "竞品分析、渠道投放、售后回访"], "a": 0, "why": "铁三角里 AI 产品经理对「做的东西对不对、能不能验、敢不敢发」负责，其余由算法、软件、安全各自主责。"}, {"q": "三增长曲线里，「卖软件」这条曲线靠什么回收投入？", "opts": ["订阅与生态分成", "新车溢价比竞品高", "售后维修单价", "政府补贴"], "a": 0, "why": "卖好车靠溢价、用好数据靠服务、卖软件靠订阅与生态分成，三者的回收周期和考核方式都不同。"}, {"q": "下面哪一项不属于 AI 产品经理的判断范围？", "opts": ["功能失效后如何降级", "这条需求是否值得做", "该功能的功能安全等级定级", "验收口径怎么定"], "a": 2, "why": "功能安全等级由安全工程师按 ISO 26262 流程判定，产品在 PRD 里只能写「待定级」，不能自己填 QM 或「应该没问题」。"}, {"q": "把战略图拆成本域需求时，要过哪三道筛？", "opts": ["挂曲线、落业务环节、看能力底座", "看预算、看人力、看时间", "问领导、问研发、问销售", "先做原型、再做测试、最后上线"], "a": 0, "why": "三样答不齐的需求就是「为 AI 而 AI」，上线没人用，复盘也说不清价值。"}], "M3": [{"q": "车端 PRD 与互联网 PRD 最根本的差别是？", "opts": ["资源与时延约束是写死的，不能靠扩容解决", "车端文档要求更长的篇幅", "车端不需要写验收口径", "车端不需要考虑异常"], "a": 0, "why": "算力买车时就定死、网络在隧道里会断、版本发出去要召回才能改，所以约束必须写进 PRD。"}, {"q": "降级链的正确写法是？", "opts": ["按层级给出动作与提示话术，至少三层", "写「异常时提示用户」", "只写云端失败切端侧", "交给开发自己决定"], "a": 0, "why": "云端不行切端侧、端侧不行降规则、规则不行明示不可用并保留物理入口；只写一层的方案遇到第二层失效就抓瞎。"}, {"q": "判断一个功能该端侧做还是云端做，三个判据是？", "opts": ["实时性、隐私、成本", "开发人数、代码量、框架选择", "领导偏好、竞品做法、供应商关系", "界面美观、动画流畅、音效质量"], "a": 0, "why": "三个判据加一条反向校验：能上端不等于该上端——迭代频繁的模型放端侧会让每次更新都变成整车发版。"}, {"q": "设计数据回流策略时，下面哪一项不该承诺？", "opts": ["弱网缓存上限与丢弃规则", "回流字段清单与保留期限", "「一条数据都不丢」", "脱敏方式与用途限定"], "a": 2, "why": "弱网、断电、休眠都会丢数据，承诺不丢就要做重传，流量不可控；正确做法是给上限加丢弃规则。"}], "M1": [{"q": "扫竞品配置时，价格带 price_band 应该按什么口径切分？", "opts": ["按终端成交价五万一档切分，指导价只做对照", "按官方指导价切分，方便归档", "按配置项数量切分，配置越多价格带越高", "按竞品品牌国别切分"], "a": 0, "why": "指导价是标价、终端普遍有优惠，用指导价会把一款实际卖 22 万的车错划进 25 万带，走量款与渗透率分母全跟着错；必须用成交价，指导价只留做优惠幅度对照。"}, {"q": "关于车端算力与配置变更，下面哪一项是对的？", "opts": ["车端算力买车时定死不可扩容，配置变更须在配置冻结日前定、OTA 发出去要召回才能改", "算力不够可以后期像手机一样 OTA 扩容", "扫到对手用了更高算力座舱芯片，直接全系对标顶配即可", "配置过了冻结日也能随时改，不影响 SOP"], "a": 0, "why": "车端算力买车时定死、不可扩容，配置过了冻结日改不了、OTA 发出去要召回才能改，所以外部信号必须倒推到配置冻结日前变成配置决定；高算力档先查自家芯片定点与 NPU 余量，不能一看对手上就全系跟风。"}, {"q": "一条「以旧换新补贴加码」还处于征求意见阶段，正确处置是？", "opts": ["只进观察清单，标需我补证拟生效日与是否有正式文件，不写进定价依据", "当成已生效政策，提前把置换权益写进上市权益包", "直接据此压低起售价抢窗口", "写进对外宣传口径，先行发布"], "a": 0, "why": "政策信号分已生效 / 征求意见 / 传闻三态，只有已生效能进决策；征求意见与传闻只进观察清单，合规一问文号就整版作废，还会错过配置冻结日。"}, {"q": "高算力座舱 SoC 月产能 8 万片、给本项目配额 20%，判断产能够不够的正确做法是？", "opts": ["按 8 万 × 20% = 1.6 万片/月，结合交付周期、二供与 SOP 前爬坡曲线核算，未核回标需我补证", "月产能 8 万片，一句「产能充足」即可全系标配排产", "只报总量，配额和交付周期不用看", "由 AI 估算一个够用的数直接排产"], "a": 0, "why": "产能量级要按配额折到本项目、乘进交付周期并对照 SOP 前爬坡曲线；只看总量会忽略配额两成、十四周交付周期和二供未定点的单点风险，未核回的必须标需我补证，不许写「充足」或替产品拍全系排产。"}], "M2": [{"q": "座舱激活率 61%，28 人访谈全从已激活车机车主里招募，最大的问题是什么？", "opts": ["漏掉 39% 未激活人群，结论只对高频用户成立，不能外推到全部车主", "样本量不够，应该扩到 200 人以上才有统计意义", "访谈提问设计得不好，应该换成问卷", "分层维度太多，应该只按城市等级分"], "a": 0, "why": "定性访谈按饱和度取 24–32 人，不按置信区间扩样；真正的偏差是招募池只覆盖已激活车机（激活率 61%），等于 39% 的人一个没访到，而这批恰是觉得座舱没用的人。正确做法是按未激活名单补访 6–8 人、结论单列，不折算不外推。"}, {"q": "给「地库找车」写场景卡，下面哪一种触发条件串和频次口径才合格？", "opts": ["写满车速、挡位、乘员、网络状态、位置类型五项，频次标需我补证、以后用端侧埋点日均次每人回填", "写「停车时，每天约一次」，频次取问卷自报均值", "只写「地下停车场、断网」，其余等开发补", "写「高频场景」，频次让 AI 估一个 1.2 次每人每天"], "a": 0, "why": "触发条件串必须落满五项字段，缺项标需我补证；隧道与地库断网是硬物理约束，不写进去，功能上线就偏偏在这两类地方失效。频次口径只能是端侧埋点日均次每人，问卷自报和 AI 估计值都不能进表，材料没给的一律先标需我补证。"}, {"q": "聚类表里「行驶中后排儿童照看」这条，失败代价档该怎么写？", "opts": ["标安全相关、只写待定级，交安全工程师按 ISO 26262 流程判定", "判为 QM 级，行车中可开放，直接进本版", "归到可撤销档，切错了重来就行", "归到有感知代价档，按误触发率 1 次每百小时设门槛"], "a": 0, "why": "误触发代价三档里，安全相关档不由产品定级，也不判断行车中可否开放——功能安全等级由安全工程师按 ISO 26262 流程判定，产品在文档里只能写「待定级」；交互类「1 次每百小时」门槛也不适用，安全相关随定级结论回填。"}, {"q": "功能优先级评分里，下面哪一项命中「一票否决」，分数再高也不能进本版？", "opts": ["安全相关未定级、且需要出域数据或算力超余量的功能", "日均频次排第一、改动量最小的功能", "覆盖缺口 100%、但走端侧离线兜底的功能", "误触发代价可撤销、配了三层降级链的功能"], "a": 0, "why": "四条一票否决是安全相关未定级、需出域数据、算力超余量、不可撤销且无降级链；踩中任一条，分值再高也移出本版。其余三项恰好价值侧高、约束可控，正是该进本版的类型；旅程地图还得在行驶中、到达两步标断网并写三层降级链。"}], "M4": [{"q": "{{company}} 统计「进排产、可对应 VIN」的订单，应该取哪一层口径？", "opts": ["锁单（LOCKED）——配置冻结、生成排产任务、基本不可退", "小定（SMALL）——500 元意向金即可，量最大最好看", "大定（BIG）——权益锁定，直接拿来排产", "留资意向——线索最多，覆盖范围最全"], "a": 0, "why": "产能排的是锁单那一层：order_status=LOCKED、config_frozen=1、locked_at 非空，才生成排产任务并对应 vin_hash。小定 7 天内可退、不锁配置，大定只进预售口径，两者都不进排产；留资连订单都不算。"}, {"q": "审一条 AI 生成的订单类 SQL，下面哪一项属于产品必须拦下的「越权」？", "opts": ["它把 7 天可退小定并入有效订单分母，还用 customer_phone 去重统计真实人数", "它给 JOIN fact_dealer 补了 ON o.dealer_id = d.dealer_id", "它在 WHERE 里加了 AND o.refund_at IS NULL", "它把未确认的关联键标注为「需我补证」"], "a": 0, "why": "哪一层算有效订单是业务口径，由销售、财务、产品签字，AI 不能自定；customer_phone 属个人信息，能否出域由合规判，不能拿来做去重或聚合。补 ON 键、排 refund_at、标「需我补证」都是该保留的正确动作，不是越权。"}, {"q": "算上市首月交付周期，下面哪种算法是对的？", "opts": ["按 ramp_stage 逐周取实际产能，交付周期 = backlog ÷ 当周 actual_qty", "拿达产 2500 台/周直线外推，backlog 一除就得出周数", "用累计锁单直接除以达产产能，不减已交付", "按 created_at 自然月把分子分母混着切"], "a": 0, "why": "产能是一条爬坡曲线（W1 200、W4 800、W8 1500、W12 才达产 2500），不是常量；backlog 要等于累计锁单减累计交付、只取 LOCKED 层；转化率时间窗按状态流转算，不能混切。把爬坡拉直会算出「7 周交完」这种幻觉，前四周实际只爬到几百台。"}, {"q": "智驾包选装率 62%、域控芯片周节拍上限 900 套，W12 整车产能 2400 台，含智驾包的锁单当周最多排多少？", "opts": ["按 900 套封顶扣减，整车可交付被压到约 1812 台", "2400 台全排，选装件不影响整车产能", "按 100% 备料，1488 台智驾包全部下线", "把智驾包锁单全推迟到下季度，不占本周产能"], "a": 0, "why": "高选装率配置要按 dim_option 的零件节拍单独扣减：含该配置的当周可交付 = min(整车余量, 节拍上限)。2400 台里智驾包约 1488 台，超过 900 套节拍，故封顶 900，整车可交付压到约 1812 台。这个数必须单列，混进整车产能就会排出配不齐 BOM、下不了线的车。"}], "M5": [{"q": "把一句「支持多轮 Agent 对话」的需求变成可验收用例，必须拆出的三样是什么？", "opts": ["触发条件、通过门槛、测法归属", "功能描述、界面原型、开发排期", "竞品对比、用户访谈、销量预估", "模型选型、算力预算、采购单价"], "a": 0, "why": "需求到用例隔着一步可测化：条件说清谁在什么状态下用，门槛给数（唤醒率、误触发、首字响应 P90），测法归属写死台架回放、实车还是埋点；缺一样，验收时就会出现「测了但不是这么测的」，且台架数字不能直接当实车结论。"}, {"q": "一份能进评审会的《座舱 Agent 方案》，为什么改一颗 ECU 料号会顶到整车发版？", "opts": ["要沿料号→端侧重适配→台架回归→固件版本→整车集成→OTA 灰度六步重走验证", "因为换料号必须重新做用户调研", "因为供应商报价会随料号翻倍", "因为换料号就要重做整车的市场定位"], "a": 0, "why": "车端算力买车时定死、端侧模型按这块 SoC 调过，料号一变要重适配、重回归、重签固件版本、重排集成窗口、灰度从 1% 重新爬；台架回归与整车集成是排队资源且不能并行，因为集成要拿台架通过结论才能排。"}, {"q": "搭供应商交付风险监控看板时，台架通过率与实车通过率为什么要分列？", "opts": ["两者测法与口径不同，台架基线不并入实车验收结论，混用会让数字不可比", "因为实车数据要晚一周才出", "因为台架由测试做、实车由采购做", "因为实车通过率一律高于台架"], "a": 0, "why": "台架是理想供电、理想温度、可灌样本，实车带 60km/h 噪声、温度与真实 ECU 并发，两个通过率能差十几个点；并成一列既不能定位问题，也不能当验收结论，看板必须分开报、并在验收里写明各自测法。"}, {"q": "交付评审上，关于 OTA 灰度与回滚，下面哪一条是产品该给的正确口径？", "opts": ["给 1%→5%→20% 三档、每档 72 小时观察期与「严重故障码 > 0 即回滚」的条件", "承诺本版零故障，不必设计回滚", "灰度比例由供应商口头确认即可", "产品自己判定功能安全等级后再放量"], "a": 0, "why": "灰度本就是用来发现问题的，承诺零故障等于承诺不灰度；正确做法给分档、观察期、回滚触发与响应时限，且严重故障码由质量定义。功能安全等级写「待定级、由安全工程师按 ISO 26262 流程判」，数据出域写待合规判定，产品不越权。"}], "M6": [{"q": "在 M6 的口径里，AI 产品经理对车辆数据能做什么？", "opts": ["只标内部级别与疑点，出域与定性交合规、法务判断", "引用法律条文编号给字段定性并判定可否出域", "替运营环节认定责任并给出整改结论", "把数据全部脱敏后自行决定回传范围"], "a": 0, "why": "M6 全模块只标级别与疑点，不引条文编号、不替法务定性、不追责运营；数据能否出域由合规判、产品不越权，功能安全等级由安全工程师按流程判定、产品只写「待定级」。后三项分别踩了定性、判出域、追责三条越权红线。"}, {"q": "红线清单里，车架号、精确定位这类三档字段的「出域」一栏该怎么写？", "opts": ["统一写「待合规判定」，由合规判断是否可出域", "直接写「禁止出域」，省去评估", "写「脱敏后可出域」", "留空，等上线后再补"], "a": 0, "why": "脱敏不等于可以出域，能否出域由合规判、产品不越权，出域一栏一律写「待合规判定」。写「禁止出域」或「脱敏后可出域」都是替合规下结论；留空则让合规无从核对，都不合格。"}, {"q": "涉及行车中可用性的功能安全相关项，在 M6 文档里该怎么标？", "opts": ["写「待定级」，由安全工程师按流程判定", "按 AI 建议直接填一个等级", "写「不影响安全」并签字", "引用条文编号自行定级"], "a": 0, "why": "功能安全等级由安全工程师按流程判定，产品只能写「待定级」。自己填等级、写「不影响安全」或引条文编号自行定级，都是替安全工程师下结论，把没有判定依据的责任揽到产品身上。"}, {"q": "一份能追溯的审计日志，下面哪一项是必须的？", "opts": ["记级别变更前后、操作主体、时间、审批单号与人工改动三处，形成事实链", "只存最终结论，前后档位不必留", "只记 AI 初稿，人工改动不用单独留痕", "定期清空日志，避免占存储"], "a": 0, "why": "可追溯要求把一次改动完整还原：级别变更前后成对存、审批单号能对上、AI 初稿到人工改了哪几处及理由都要留，日志记的是事实链而非责任认定。只存结果、不留人工改动或清空日志，都会让追溯链断在中间。"}], "M7": [{"q": "M7 把三十二份模块级交付物收敛成两份文件，正确分工是？", "opts": ["《产品立项书》回答做不做、谁签字，《端到端产品方案》回答怎么落地、怎么退", "两份都放全部过程文档，评审自己翻", "《产品立项书》只放技术 PRD，《端到端产品方案》只放财务报表", "把三十二份全塞进附件，另写一份摘要即可"], "a": 0, "why": "一份文件只替一类人做一类决定：立项书读者是车型总监与财务，方案读者是架构、质量、项目；混着写谁的责都追不到，全部塞附件等于没取舍。"}, {"q": "《综合部署方案》的三层约束链，以及「一处改、三处动」指的是？", "opts": ["车型节点 / 算力与 OTA / 合规与降级互相咬，配置一改，算力、灰度、数据级别都要回写", "只有算力一条约束，其余是参考", "云端、端侧、本地规则三层降级就是三层约束链", "立项、定价、交付三个阶段按顺序走完即可"], "a": 0, "why": "三层约束链贯穿全案，任一处改另两处必须跟着回写；三层降级链是第五节里的一个组成部分，不是约束链本身，别混为一谈。"}, {"q": "配置与定价一节里，订单结构的正确口径做法是？", "opts": ["订金/大定/锁单/交付统一到一条取数 SQL，订阅与买断分别计数并写去重键", "哪份材料方便就用哪份口径，数值差不多", "订阅与买断合并计入开通率，显得更高", "转化率直接按行业最高的数写进立项决议"], "a": 0, "why": "四个口径不统一会出现同一开通率差九个百分点；合并计数会把同一笔订单算两次；转化率、营收一律标待 A/B 验证、需我补证，不能写确定值。"}, {"q": "终审会上合规疑点还没闭环，对方让「先放一版，下个 OTA 补」，正确应答是？", "opts": ["引放行门槛：疑点未闭环不放行、不进灰度，赶不上 SOP 就首批只上不涉及疑点的功能", "先放一版，OTA 再补，反正能召回", "由产品先判定数据可出域，先发再说", "写进会议纪要「应该没风险」即可放行"], "a": 0, "why": "OTA 发出去要召回才能改，未闭环疑点放出去等于把合规风险写进已交付车辆；数据能否出域、功能安全等级由合规与安全工程师判，产品只写待判定/待定级，绝不替法务定性或说「应该没问题」。"}]};
 const QUIZ_BANK = {};   /* 单元练习：每个『理解』单元 5 道场景选择题 */
 
-const STORE='aidax_auto_ai_pm_v1';
+/* v157 账号级隔离 BEGIN */
+function _axSession(){ try{ return JSON.parse(localStorage.getItem('ai_training_session')||'{}')||{}; }catch(e){ return {}; } }
+function _axOwnerKey(){
+  var s=_axSession();
+  if(!s||(!s.user&&!s.name)) return '';
+  if(s.role==='admin') return 'admin';
+  if(s.role==='ent') return 'ent:'+(s.companyId||s.company||'');
+  if(s.loginType==='user'&&s.loginId) return 'user:'+s.loginId;
+  if(s.loginType==='guest'&&s.loginId) return 'guest:'+(s.company||'')+':'+(s.phone||'')+':'+s.loginId;
+  if(s.phone) return 'guest:'+(s.company||'')+':'+s.phone;
+  if(s.loginId) return 'user:'+s.loginId;
+  return '';
+}
+/* 这台机器上有没有「我」的痕迹：有本账号档案，或存在旧版本留下的无主档案。
+   认领旧数据必须过这一关，否则新游客一登录就把上一个人的进度抢走。 */
+function _axHasMyRecords(own){
+  try{
+    var es=JSON.parse(localStorage.getItem('ai_training_employees')||'[]')||[];
+    for(var i=0;i<es.length;i++){ var e=es[i]; if(e && ((e.ownerKey||'')===own || !e.ownerKey)) return true; }
+    return false;
+  }catch(e){ return false; }
+}
+function _axClaim(base){
+  var own=_axOwnerKey(); if(!own) return;
+  try{
+    var key=base+'::'+own;
+    if(localStorage.getItem(key)!=null) return;
+    if(!_axHasMyRecords(own)) return;
+    var legacy=localStorage.getItem(base);
+    if(legacy!=null) localStorage.setItem(key, legacy);
+  }catch(e){}
+}
+function _axKey(base){ var own=_axOwnerKey(); if(own) _axClaim(base); return own? base+'::'+own : base; }
+/* v157 账号级隔离 END */
+const STORE=_axKey('aidax_auto_ai_pm_v1');
 let prog = loadProg();
 function loadProg(){ try{ return JSON.parse(localStorage.getItem(STORE))||{units:{},quizzes:{}}; }catch(e){ return {units:{},quizzes:{}}; } }
 function saveProg(){ try{ localStorage.setItem(STORE, JSON.stringify(prog)); }catch(e){} syncMapProgress(); }
@@ -488,7 +522,7 @@ const DEEP_MODULE=UP.get('m')||'';
 // 主站学习地图才能显示「做了几单元、得了多少分」，而不是要么 0% 要么 100%。
 function syncMapProgress(){
   try{
-    const key='ai_training_progress';
+    const key=_axKey('ai_training_progress');
     let cp={}; try{ cp=JSON.parse(localStorage.getItem(key))||{}; }catch(_){}
     const xp=totalXP();
     COURSE.modules.forEach((m,mi)=>{
@@ -636,7 +670,7 @@ try{
    只在本机 localStorage，不上传；仅随本人主动提交的反馈一起发送。 */
 var IDENT=(function(){
   var d={name:'',company:'',role:'',contact:''};
-  try{ var s=localStorage.getItem('aidax_ident_v1'); if(s) d=Object.assign(d,JSON.parse(s)||{}); }catch(e){}
+  try{ var s=localStorage.getItem(_axKey('aidax_ident_v1')); if(s) d=Object.assign(d,JSON.parse(s)||{}); }catch(e){}
   if(!d.role) d.role=META.roleLabel;
   return d;
 })();
@@ -648,7 +682,7 @@ function identLabel(){
 function saveIdent(close){
   var v=function(id){ var e=document.getElementById(id); return e? e.value.trim() : ''; };
   IDENT={name:v('id-name'),company:v('id-company'),role:v('id-role')||META.roleLabel,contact:v('id-contact')};
-  try{ localStorage.setItem('aidax_ident_v1',JSON.stringify(IDENT)); }catch(e){}
+  try{ localStorage.setItem(_axKey('aidax_ident_v1'),JSON.stringify(IDENT)); }catch(e){}
   if(close) closeCfg();
   toast(IDENT.name? ('已保存身份：'+identLabel()) : '已保存（未填姓名，反馈会记为匿名学员）');
   var chip=document.getElementById('fb-ident-chip');
@@ -825,8 +859,22 @@ function renderSidebar(){
   const markAll = WEAK.length <= 4;
   const topIdx = new Set(hitCnt.map((n,i)=>({n:n,i:i})).filter(x=>x.n>0)
     .sort((a,b)=>b.n-a.n).slice(0,3).map(x=>x.i));
-  COURSE.modules.forEach((m,mi)=>{
-    const mod=document.createElement('div'); mod.className='mod'+(mi===openIdx?' open':'');
+  /* v157 weak-reorder：按弱维命中数把模块重排到前面（测评「建议必修」），
+     但全套模块照常全部渲染，不 filter、不锁 —— 必修/选修只是建议。
+     展开态改用模块 id 判断：排序后遍历序号已不是原始模块序号，用 mi 会错位。 */
+  const openModId = (COURSE.modules[openIdx]||{}).id;
+  const DISPLAY = COURSE.modules.map((m,i)=>({m:m, i:i, hit:hitCnt[i]||0}))
+    .map(function(e){
+      /* 教学约束：M0 导论（边界预期）恒定第一、M7 合规与结业恒定最后，
+         只重排中间 M1–M6 —— 没建立「什么不能交」就先学提示词有数据外泄风险。 */
+      const L=COURSE.modules.length-1;
+      e.rank = e.i===0 ? -1 : (e.i===L ? 2 : (e.hit>0 ? 0 : 1));
+      return e;
+    })
+    .sort((a,b)=> a.rank-b.rank || a.i-b.i);
+  DISPLAY.forEach(function(entry){
+    const m=entry.m, mi=entry.i;
+    const mod=document.createElement('div'); mod.className='mod'+(m.id===openModId?' open':'');
     const done=m.units.filter(u=>prog.units[u.id]&&prog.units[u.id].done).length;
     const allDone=done===m.units.length;
     const passed=!!prog.quizzes[m.id];
@@ -1066,7 +1114,7 @@ function renderCheckpoint(){
       +'</div>';
     const aud=(AUDIO[uid]||null);
     const note=document.getElementById('p-note');
-    if(note) note.textContent = aud? '配音：火山引擎豆包真人声（'+aud.length+' 段）' : '配音：本节语音制作中（临时用本机朗读）';
+    if(note){ note.textContent = aud? '' : '本节语音制作中，暂用系统朗读'; note.style.display = aud? 'none' : ''; }
     CUR=makePlayer(uid,u.vslides,aud);
   } else if(step.key==='task'){
     cp.className='cp';
@@ -1384,7 +1432,7 @@ function inlinePractice(u,uid){
   const rub = (u.rubric&&u.rubric.length)? ('<details><summary>\uD83C\uDFAF 评分要点（做完自检一遍）</summary><ul class="rub">'+u.rubric.map(r=>'<li>'+esc(r)+'</li>').join('')+'</ul></details>') : '';
   return '<div class="card ip"><h3>\uD83D\uDCDD 看完就练 · 本单元题目 <span class="bd">'+STEP_LABEL[u.step]+'环节</span></h3>'
     + '<div class="ip-task">'+esc(sub(u.task||'完成本单元练习'))+'</div>'
-    + '<div class="brief">'+esc(sub(u.brief||''))+'</div>'
+    + '<details class="brief-fold" style="margin:8px 0"><summary style="cursor:pointer;font-size:12.5px;color:var(--mut)">场景背景 / 硬约束（视频里已演示怎么读懂与产出，需要时点开看文字版）</summary><div class="brief" style="margin-top:8px">'+esc(sub(u.brief||''))+'</div></details>'
     + tpl + rub
     + '<button class="btn" onclick="gotoAct()">开始作答 \u2193</button>'
     + '<button class="btn ghost" onclick="document.getElementById(\'p-play\').click()">先看视频再答</button>'
@@ -1980,7 +2028,7 @@ function renderActivity(u,uid){
     box.innerHTML=adminNote+'<div class="card"><h3>\u270D 我要做 · 产出你的交付物</h3>'
       + taskBox
       + delivStrip(u)
-      + '<div class="brief">'+esc(sub(u.brief||''))+'</div>'
+      + '<details class="brief-fold" style="margin:8px 0"><summary style="cursor:pointer;font-size:12.5px;color:var(--mut)">场景背景 / 硬约束（视频里已演示怎么读懂与产出，需要时点开看文字版）</summary><div class="brief" style="margin-top:8px">'+esc(sub(u.brief||''))+'</div></details>'
       + '<details open><summary>\uD83D\uDCCB 填写模板（照着每一节填，别从零开始）</summary><div class="tpl">'+esc(TP.skel)+'</div></details>'
       + ((u.rubric&&u.rubric.length)?'<details><summary>\uD83C\uDFAF 评分要点</summary><ul class="rub">'+u.rubric.map(r=>'<li>'+esc(r)+'</li>').join('')+'</ul></details>':'')
       + (exTxt?('<details><summary>\uD83D\uDC1B 看一份合格范例（照这个颗粒度写，别照抄内容）</summary><div class="tpl">'+esc(exTxt)+'</div></details>'):'')
@@ -1993,7 +2041,7 @@ function renderActivity(u,uid){
   } else if(u.step==='spar'){
     box.innerHTML=adminNote+'<div class="card"><h3>\uD83E\uDD4A 陪练环节 · '+esc(sub(u.spar.role))+'</h3>'
       + taskBox
-      + '<div class="brief">'+esc(sub(u.brief||''))+'</div>'
+      + '<details class="brief-fold" style="margin:8px 0"><summary style="cursor:pointer;font-size:12.5px;color:var(--mut)">场景背景 / 硬约束（视频里已演示怎么读懂与产出，需要时点开看文字版）</summary><div class="brief" style="margin-top:8px">'+esc(sub(u.brief||''))+'</div></details>'
       + '<div id="mat-host">'+matBoxHtml(uid)+'</div>'
       + '<details><summary>\uD83D\uDCCB 展开回答结构模板</summary><div class="tpl">'+esc(sub(u.template||''))+'</div></details>'
       + (artTexts(u).ex?('<details><summary>\uD83D\uDC1B 看一段合格回答（照这个结构答，别背内容）</summary><div class="tpl">'+esc(artTexts(u).ex)+'</div></details>'):'')
@@ -3607,7 +3655,7 @@ function fbSaveEditor(){
            company:(cp?cp.value.trim():IDENT.company),
            role:IDENT.role||META.roleLabel,
            contact:(ct?ct.value.trim():IDENT.contact)};
-    try{ localStorage.setItem('aidax_ident_v1',JSON.stringify(IDENT)); }catch(e){}
+    try{ localStorage.setItem(_axKey('aidax_ident_v1'),JSON.stringify(IDENT)); }catch(e){}
   }
   if(ct) FB.contact=ct.value.trim();
 }
@@ -3975,6 +4023,7 @@ setTimeout(function(){ fbFlushOutbox(function(ok,total){ if(total&&ok<total) fbD
 
 
 
+
 <!--LC:BEGIN-->
 <style>
 /* ===== 学习中心（v156）：课程页不再是一座孤岛 ===== */
@@ -4052,12 +4101,28 @@ header h1{min-width:0;overflow:hidden;text-overflow:ellipsis}
   function J(k,d){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
   function sess(){ return J('ai_training_session',{})||{}; }
+  /* v157：档案归属按 ownerKey 精确匹配，与主站 currentOwnerKey() 同一套规则。
+     旧写法拿「姓名」比对，游客的 name 就是公司名 → 同公司两个游客会看到对方测评；
+     更糟的是匹配不到时兜底取整个数组的最后一条，等于把上一个人的成绩直接展示给新账号。 */
+  function ownerKeyOf(s){
+    s=s||{};
+    if(!s.user&&!s.name) return '';
+    if(s.role==='admin') return 'admin';
+    if(s.role==='ent') return 'ent:'+(s.companyId||s.company||'');
+    if(s.loginType==='user'&&s.loginId) return 'user:'+s.loginId;
+    if(s.loginType==='guest'&&s.loginId) return 'guest:'+(s.company||'')+':'+(s.phone||'')+':'+s.loginId;
+    if(s.phone) return 'guest:'+(s.company||'')+':'+s.phone;
+    if(s.loginId) return 'user:'+s.loginId;
+    return '';
+  }
   function myEmp(s){
     var es=J('ai_training_employees',[]); if(!Array.isArray(es)||!es.length) return null;
-    var nm=(s&&(s.name||s.user))||'';
-    var mine=es.filter(function(e){ return e && nm && e.name===nm; });
-    var pool=mine.length?mine:es;
-    return pool[pool.length-1]||null;
+    var k=ownerKeyOf(s); if(!k) return null;
+    var mine=es.filter(function(e){ return e && (e.ownerKey||'')===k; });
+    if(mine.length) return mine[mine.length-1];
+    /* 管理员本就可见全部档案，兜底给他最近一条；其他账号一律返回 null（显示空态，不泄漏） */
+    if(s&&s.role==='admin') return es[es.length-1]||null;
+    return null;
   }
   function mods(){ try{ return (typeof COURSE!=='undefined'&&COURSE&&COURSE.modules)||[]; }catch(e){ return []; } }
   function pg(){ try{ return (typeof prog!=='undefined'&&prog)||{units:{}}; }catch(e){ return {units:{}}; } }
