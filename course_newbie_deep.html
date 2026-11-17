@@ -88,11 +88,92 @@
   .vwrap{position:relative}
   .vp{position:relative;background:#0c1430;border-radius:14px;overflow:hidden;aspect-ratio:16/9}
   /* 底部留出字幕条的高度：字幕是「占位」而不是「盖住」PPT 最后一行 */
-  .vp .stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px 16px 60px;pointer-events:none}
-  .slide{display:none;width:100%;height:100%;align-items:center;justify-content:center;flex-direction:column;text-align:center;color:#eaf0ff}
+  .vp .stage{position:absolute;inset:0;overflow:hidden;background:#eef2f7;pointer-events:none;--k:1}
+  /* ===== v161 吉利式 PPT 版式：1600×900 画布，所有尺寸乘 --k 等比缩放 ===== */
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;text-align:left;color:#1a2430;
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif}
   .slide.on{display:flex}
-  .slide h4{font-size:16px;margin:0 0 6px;color:#fff;flex:none}
-  .slide svg{width:100%;height:100%;max-width:100%;max-height:100%;min-height:0}
+  /* ---- 内页：白底 + 顶栏色条 + 左上定位 + 大标题 + 画面 + 右下署名 ---- */
+  .slide.sl{background:#fff;padding:calc(52px*var(--k)) calc(74px*var(--k)) calc(92px*var(--k))}
+  .slide.sl:before{content:'';position:absolute;left:0;top:0;right:0;height:calc(6px*var(--k));
+    background:linear-gradient(90deg,#0a3d91,#3b7bff 62%,rgba(59,123,255,0))}
+  .sl-kick{flex:none;font-size:calc(19px*var(--k));letter-spacing:.14em;color:#4c6d99;font-weight:600}
+  .sl-h{flex:none;margin:calc(14px*var(--k)) 0 0;font-size:calc(42px*var(--k));line-height:1.3;
+    font-weight:800;color:#0a3d91;letter-spacing:.01em;max-width:calc(1420px*var(--k))}
+  .sl-h b{position:relative;z-index:0;font-weight:800}
+  .sl-h b:after{content:'';position:absolute;left:-3px;right:-3px;bottom:calc(4px*var(--k));
+    height:calc(12px*var(--k));background:rgba(120,175,235,.40);z-index:-1}
+  .sl-band{flex:none;margin-top:calc(18px*var(--k));background:#eef4fb;
+    border-left:calc(5px*var(--k)) solid #0a3d91;padding:calc(13px*var(--k)) calc(20px*var(--k));
+    font-size:calc(25px*var(--k));font-weight:600;color:#12406f;line-height:1.5;
+    border-radius:0 calc(8px*var(--k)) calc(8px*var(--k)) 0;max-width:calc(1452px*var(--k))}
+  .sl-body{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;
+    margin-top:calc(10px*var(--k))}
+  .sl-body svg{width:100%;height:100%;max-width:100%;max-height:100%;min-height:0}
+  .sl-tag{position:absolute;right:calc(74px*var(--k));bottom:calc(100px*var(--k));background:#0a3d91;color:#fff;
+    font-size:calc(15px*var(--k));letter-spacing:.04em;padding:calc(5px*var(--k)) calc(13px*var(--k));
+    border-radius:calc(3px*var(--k))}
+  /* ---- 封面 / 结束页：深蓝渐变 + 右下圆环 ---- */
+  .slide.cv{background:linear-gradient(122deg,#07182b 0%,#0d2c4e 46%,#1a4b84 100%);color:#fff;overflow:hidden;
+    justify-content:flex-start;padding:calc(104px*var(--k)) calc(100px*var(--k)) calc(96px*var(--k))}
+  .slide.cv:after{content:'';position:absolute;right:calc(-190px*var(--k));top:calc(150px*var(--k));
+    width:calc(780px*var(--k));height:calc(780px*var(--k));border:1px solid rgba(255,255,255,.10);
+    border-radius:50%;pointer-events:none}
+  .cv-main{position:relative;z-index:1;display:flex;flex-direction:column;align-items:flex-start;width:100%}
+  .cv-kick{flex:none;display:flex;align-items:center;font-size:calc(21px*var(--k));font-weight:600;
+    letter-spacing:.06em;color:#9dc4ee}
+  .cv-kick i{display:block;width:calc(34px*var(--k));height:calc(2px*var(--k));
+    background:rgba(157,196,238,.55);margin:0 calc(16px*var(--k))}
+  .cv-h{flex:none;margin:calc(26px*var(--k)) 0 0;font-weight:800;line-height:1.26;letter-spacing:.01em;
+    color:#fff;max-width:calc(1300px*var(--k))}
+  .cv-h b{font-weight:800;color:#8ec5ff}
+  .cv-sub{flex:none;margin:calc(26px*var(--k)) 0 0;font-size:calc(25px*var(--k));
+    color:rgba(255,255,255,.74);font-weight:500;line-height:1.6;max-width:calc(1180px*var(--k))}
+  .cv-pts{flex:none;margin-top:calc(46px*var(--k));display:grid;grid-template-columns:repeat(3,1fr);
+    gap:calc(18px*var(--k));width:100%;max-width:calc(1400px*var(--k))}
+  .cv-pt{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);
+    border-radius:calc(10px*var(--k));padding:calc(20px*var(--k)) calc(22px*var(--k));
+    display:flex;gap:calc(14px*var(--k));align-items:flex-start}
+  .cv-pt b{font-size:calc(20px*var(--k));font-weight:800;color:#7db8f2;line-height:1.5;flex:0 0 auto}
+  .cv-pt span{font-size:calc(21px*var(--k));font-weight:600;color:rgba(255,255,255,.92);line-height:1.5}
+  /* 封面左下署名块：补住下半部留白，与吉利封面同位置同信息量 */
+  .cv-note{position:absolute;left:calc(100px*var(--k));bottom:calc(150px*var(--k));z-index:1;
+    font-size:calc(17px*var(--k));line-height:1.75;color:rgba(255,255,255,.55);letter-spacing:.04em}
+  .cv-note i{display:block;font-style:normal;color:rgba(255,255,255,.8);font-weight:600;
+    letter-spacing:.12em;margin-bottom:calc(8px*var(--k))}
+  .cv-note div{display:flex;gap:calc(16px*var(--k))}
+  .cv-note b{font-weight:600;color:rgba(255,255,255,.42);min-width:calc(74px*var(--k))}
+  .cv-note span{color:rgba(255,255,255,.7)}
+  .cv-foot{position:absolute;left:calc(100px*var(--k));right:calc(100px*var(--k));bottom:calc(70px*var(--k));
+    z-index:2;display:flex;align-items:center;justify-content:space-between;
+    padding-top:calc(18px*var(--k));border-top:1px solid rgba(255,255,255,.14)}
+  .cv-credit{font-size:calc(17px*var(--k));color:rgba(255,255,255,.68);letter-spacing:.06em}
+  .cv-no{font-size:calc(32px*var(--k));font-weight:800;color:rgba(255,255,255,.9);letter-spacing:.04em}
+  .cv-no em{font-size:calc(17px*var(--k));font-style:normal;font-weight:600;
+    color:rgba(255,255,255,.45);margin-left:calc(7px*var(--k))}
+  /* ---- 结束页 ---- */
+  .ce-mark{flex:none;display:flex;align-items:center;font-size:calc(21px*var(--k));
+    font-weight:700;letter-spacing:.14em;color:#8ec5ff}
+  .ce-mark:before{content:'';width:calc(46px*var(--k));height:calc(2px*var(--k));
+    background:#8ec5ff;margin-right:calc(16px*var(--k))}
+  .cv-end .cv-h{margin-top:calc(18px*var(--k))}
+  .ce-pts{flex:none;margin-top:calc(28px*var(--k));width:calc(940px*var(--k))}
+  .ce-lab{font-size:calc(18px*var(--k));font-weight:600;color:rgba(255,255,255,.45);
+    letter-spacing:.14em;margin-bottom:calc(10px*var(--k))}
+  .ce-pt{display:flex;gap:calc(16px*var(--k));align-items:flex-start;padding:calc(12px*var(--k)) 0;
+    border-bottom:1px solid rgba(255,255,255,.09)}
+  .ce-pt b{font-size:calc(19px*var(--k));font-weight:800;color:#7db8f2;flex:0 0 auto;line-height:1.6}
+  .ce-pt span{font-size:calc(24px*var(--k));font-weight:600;color:rgba(255,255,255,.94);line-height:1.5}
+  .ce-nx{flex:none;margin-top:calc(26px*var(--k));display:inline-flex;align-items:center;
+    gap:calc(14px*var(--k));max-width:calc(1240px*var(--k))}
+  .ce-nx i{font-style:normal;background:rgba(142,197,255,.18);color:#8ec5ff;font-size:calc(17px*var(--k));
+    font-weight:700;padding:calc(6px*var(--k)) calc(14px*var(--k));border-radius:calc(4px*var(--k));flex:0 0 auto}
+  .ce-nx-t{min-width:0}
+  .ce-nx-t b{display:block;font-size:calc(22px*var(--k));color:rgba(255,255,255,.9);font-weight:600;line-height:1.45}
+  .ce-wm{position:absolute;right:calc(64px*var(--k));bottom:calc(150px*var(--k));z-index:0;
+    font-size:calc(300px*var(--k));font-weight:800;line-height:1;letter-spacing:-.05em;
+    color:rgba(255,255,255,.055);pointer-events:none}
+  /* ---- 段圆点：加深色胶囊底，深色封面和白底内页上都看得见 ---- */
   @keyframes pulse{0%,100%{filter:none}50%{filter:drop-shadow(0 0 11px #ffd84d)}}
   .pulse{animation:pulse .78s ease-in-out 3 both}
   /* 高亮跟讲解走：未讲到的条目压暗，讲到的那一项亮起（.k-on 由播放器逐项切换） */
@@ -103,7 +184,7 @@
   @keyframes capin{from{opacity:.25;transform:translateY(3px)}to{opacity:1;transform:none}}
   .cap.swap{animation:capin .16s ease-out}
   @media (max-width:620px){
-    .vp .stage{padding:8px 8px 46px}
+    .vp .stage{padding:0}
     .cap{font-size:13.5px;padding:8px 10px 6px;letter-spacing:0}
     .vbar{gap:7px}.play{padding:7px 12px;font-size:12.5px}.time{font-size:11.5px}
     /* 答案行在窄屏上改成自然折行：flex 会把「→ 标准答案」整体挤到下一行，读起来断得莫名其妙 */
@@ -111,7 +192,23 @@
     .anshit{margin-left:0;display:block;margin-top:3px}
     .opb{margin-right:5px}
   }
-  .dots{position:absolute;top:9px;left:12px;display:flex;gap:5px;justify-content:flex-start}
+  /* 窄屏：1600 画布缩到手机上字会糊，这里把字号放大、次要元素让位 */
+  @media (max-width:620px){
+    .cv-pts,.cv-note,.sl-tag{display:none}
+    .cv-kick,.sl-kick{font-size:calc(30px*var(--k))}
+    .cv-sub{font-size:calc(34px*var(--k))}
+    .cv-h{font-size:calc(104px*var(--k))!important}
+    .sl-h{font-size:calc(52px*var(--k))}
+    .sl-band{font-size:calc(34px*var(--k));padding:calc(16px*var(--k)) calc(24px*var(--k))}
+    .ce-pts{width:100%}
+    .ce-pt span{font-size:calc(34px*var(--k))}
+    .ce-nx-t b{font-size:calc(32px*var(--k))}
+    .ce-wm{font-size:calc(420px*var(--k))}
+    .cv-foot{bottom:calc(58px*var(--k))}
+    .cv-credit,.cv-no em{font-size:calc(24px*var(--k))}
+    .cv-no{font-size:calc(42px*var(--k))}
+  }
+  .dots{position:absolute;top:calc(11px*var(--k));left:calc(14px*var(--k));display:flex;gap:calc(5px*var(--k));justify-content:flex-start;z-index:5;padding:calc(5px*var(--k)) calc(9px*var(--k));background:rgba(8,16,40,.42);border-radius:99px}
   /* 缓冲反馈：点播放后立刻给「在加载」的确定感，别让人以为按钮坏了。
      配音约 200–350KB，慢网下要 2–18 秒才能出第一声。 */
   .pbuf{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:none;align-items:center;gap:9px;
@@ -122,7 +219,7 @@
           animation:pbspin .8s linear infinite;flex:none}
   @keyframes pbspin{to{transform:rotate(360deg)}}
   @media (max-width:620px){.pbuf{font-size:12px;padding:8px 13px;gap:7px}}
-  .dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.35)}
+  .dots i{width:calc(7px*var(--k));height:calc(7px*var(--k));border-radius:50%;background:rgba(255,255,255,.38)}
   .dots i.on{background:#fff}
   .vbar{display:flex;align-items:center;gap:10px;margin-top:9px;flex-wrap:wrap}
   .play{background:var(--blue);color:#fff;border:none;padding:8px 17px;border-radius:9px;font-size:13.5px;cursor:pointer;font-weight:600;white-space:nowrap}
@@ -1727,14 +1824,142 @@ function makePlayer(uid, slides, aud){
     }, Math.round((dur[i]+1.5)*1000));
   }
 
+  /* ===================== v161 吉利式 PPT 版式 =====================
+     照吉利《用户思维》的画面层：固定 1600×900 画布等比缩放（--k），
+     首段出章节封面、末段出结束封面、中间出白底内页。
+     只换版式：COURSE 数据、旁白、音频、字幕、高亮一律不动。 */
+  const PPT_SHAPE={'#16204a':'#ffffff','#0e1530':'#f4f7fb','#0f1a3a':'#e3eaf3','#1a5cff':'#0a3d91',
+                   '#3b7bff':'#9fb4cc','#3a1a0c':'#fdf1e8','#0f3d24':'#e8f5ee'};
+  const PPT_TEXT ={'#fff':'#0a3d91','#eaf0ff':'#33455a','#7aa2ff':'#4c6d99','#cfe0ff':'#7086a0',
+                   '#ff9bb0':'#c8102e','#9be8b0':'#1a7f4b','#9bb4e8':'#7086a0'};
+  const PPT_STROKE={'#3b7bff':'#d2dcea','#16a34a':'#a7d8bb','#1a5cff':'#b9cde4','#e11d48':'#f3b8c3','#0e1530':'#e3eaf3'};
+  /* 深色卡片图 → 白底卡片图：形状填色、文字色、描边各走一张映射表 */
+  function svgLight(h){
+    h=String(h||'');
+    h=h.replace(/<(rect|circle|ellipse|path|polygon|line)\b[^>]*>/g,function(t){
+      return t.replace(/fill="([^"]+)"/g,function(m,c){ return 'fill="'+(PPT_SHAPE[c]||c)+'"'; });
+    });
+    h=h.replace(/<text\b[^>]*>/g,function(t){
+      return t.replace(/fill="([^"]+)"/g,function(m,c){ return 'fill="'+(PPT_TEXT[c]||c)+'"'; });
+    });
+    return h.replace(/stroke="([^"]+)"/g,function(m,c){ return 'stroke="'+(PPT_STROKE[c]||c)+'"'; });
+  }
+  function pptLabels(s){ var o=[],re=/<g data-k="([^"]*)"/g,m; while((m=re.exec(String(s||'')))) o.push(m[1]); return o; }
+  /* 模块短名：模块标题里冒号/顿号前那一段，够 cikeker 用 */
+  function pptModShort(m){
+    var t=modTitle(m)||'';
+    var i=t.search(/[：:·—－]/);
+    if(i>1) t=t.slice(0,i);
+    return t.trim();
+  }
+  /* 单元在课程里的位置：模块名 / 第几节 / 共几节 / 下一节 */
+  function pptMeta(id){
+    var M=(typeof COURSE!=='undefined'&&COURSE.modules)||[],i,j,o={mod:'',modName:'',no:1,total:1,next:null,u:null};
+    for(i=0;i<M.length;i++){ for(j=0;j<M[i].units.length;j++){
+      if(M[i].units[j].id!==id) continue;
+      o.mod=M[i].id; o.modName=pptModShort(M[i]); o.no=j+1; o.total=M[i].units.length; o.u=M[i].units[j];
+      var nx=M[i].units[j+1]; if(nx) o.next={mod:M[i].id,modName:o.modName,no:j+2,u:nx};
+      return o;
+    }}
+    return o;
+  }
+  /* 封面大标题字号：按最长一行字数分档，长标题不撑破画面 */
+  function cvSize(t){
+    var L=String(t||'').split(/<br\s*\/?>/i),mx=0,i,x;
+    for(i=0;i<L.length;i++){ x=L[i].replace(/<[^>]+>/g,'').replace(/\s+/g,'').length; if(x>mx) mx=x; }
+    if(mx<=10) return 80; if(mx<=13) return 72; if(mx<=17) return 64;
+    if(mx<=22) return 54; if(mx<=28) return 46; return 38;
+  }
+  function pad2(n){ return (n<10?'0':'')+n; }
+  /* 封面署名：与吉利封面左下角同位置，只写实际参与的三方 */
+  function cvNote(){
+    return '<div class="cv-note"><i>本课程由</i>'
+      + '<div><b>研发设计</b><span>起点课堂企业服务</span></div>'
+      + '<div><b>内容校验</b><span>产品与 AI 应用讲师团队</span></div>'
+      + '<div><b>声音录制</b><span>陈观 AI 老师</span></div></div>';
+  }
+  function pptCover(pm,s){
+    var u=pm.u||{}, pts=pptLabels(s.s).slice(0,3);
+    var title=String(u.title||s.t||'');
+    var hook=sub(String((u.ppt&&u.ppt.case)||(u.video&&u.video.script&&u.video.script[0])||''));
+    return '<div class="cv-main">'
+      + '<div class="cv-kick">'+esc(pm.mod)+' '+esc(pm.modName)+'<i></i>第 '+pm.no+' 节</div>'
+      + '<h2 class="cv-h" style="font-size:calc('+cvSize(title)+'px*var(--k))">'+esc(sub(title))+'</h2>'
+      + (hook?'<p class="cv-sub">'+esc(hook)+'</p>':'')
+      + (pts.length?'<div class="cv-pts">'+pts.map(function(p,k){
+          return '<div class="cv-pt"><b>'+pad2(k+1)+'</b><span>'+esc(p)+'</span></div>';
+        }).join('')+'</div>':'')
+      + '</div>'
+      + cvNote()
+      + '<div class="cv-foot"><div class="cv-credit">起点课堂企业服务</div>'
+      + '<div class="cv-no">'+pad2(pm.no)+'<em>/ '+pad2(pm.total)+'</em></div></div>';
+  }
+  /* 结论条：取旁白首句，压到 34 字内并在标点处收口。画面写的和嘴里念的是同一句，
+     不新造文案，也不跟字幕打架。 */
+  function leadOf(n){
+    var t=String(n||'').replace(/[\s\u3000]+/g,'');
+    var m=t.match(/^[^。！？]+[。！？]?/), s=m?m[0]:t;
+    s=s.replace(/[。！？]$/,'');
+    if(s.length>34){
+      var cut=s.slice(0,32), p=Math.max(cut.lastIndexOf('，'),cut.lastIndexOf('；'),cut.lastIndexOf('、'));
+      s=(p>=16? cut.slice(0,p): cut)+'…';
+    }
+    return s;
+  }
+  function pptInner(pm,s){
+    var lead=leadOf(sub(String(s.n||'')));
+    return '<div class="sl-kick">'+esc(pm.mod)+' '+esc(pm.modName)+' · 第 '+pm.no+' 节</div>'
+      + '<h2 class="sl-h">'+esc(sub(s.t))+'</h2>'
+      + (lead?'<div class="sl-band">'+esc(lead)+'</div>':'')
+      + '<div class="sl-body">'+sub(svgLight(s.s))+'</div>'
+      + '<div class="sl-tag">起点课堂企业服务</div>';
+  }
+  function pptEnd(pm,s){
+    var u=pm.u||{}, lab=pptLabels(s.s), pts=lab.slice(0,3);
+    var title=String(u.title||s.t||'');
+    var nxTxt, nxLab;
+    if(pm.next){
+      nxLab='下一节';
+      nxTxt=pm.next.mod+' 第 '+pm.next.no+' 节 · '+sub(String((pm.next.u&&pm.next.u.title)||''));
+    }else{
+      nxLab='本模块';
+      nxTxt='已学完，回学习地图进入下一个模块';
+    }
+    return '<div class="ce-wm">'+pad2(pm.no)+'</div>'
+      + '<div class="cv-main">'
+      + '<div class="ce-mark">'+esc(pm.mod)+' '+esc(pm.modName)+' · 第 '+pm.no+' 节完</div>'
+      + '<h2 class="cv-h" style="font-size:calc('+cvSize(title)+'px*var(--k))">'+esc(sub(title))+'</h2>'
+      + (pts.length?'<div class="ce-pts"><div class="ce-lab">带走三句话</div>'+pts.map(function(p,k){
+          return '<div class="ce-pt"><b>'+pad2(k+1)+'</b><span>'+esc(p)+'</span></div>';
+        }).join('')+'</div>':'')
+      + '<div class="ce-nx"><i>'+nxLab+'</i><div class="ce-nx-t"><b>'+esc(nxTxt)+'</b></div></div>'
+      + '</div>'
+      + '<div class="cv-foot"><div class="cv-credit">起点课堂企业服务</div>'
+      + '<div class="cv-no">END<em>'+pad2(pm.no)+' / '+pad2(pm.total)+'</em></div></div>';
+  }
+  function stageFit(){
+    if(!stage) return;
+    var w=stage.clientWidth||0;
+    stage.style.setProperty('--k', (w>40? w/1600 : 0.5));
+  }
   function render(){
     stage.innerHTML=''; dots.innerHTML='';
+    var pm=pptMeta(uid);
     slides.forEach(function(s,i){
-      const d=document.createElement('div'); d.className='slide'+(i===cur?' on':'');
-      d.innerHTML='<h4>'+sub(s.t)+'</h4>'+sub(s.s);
+      const d=document.createElement('div');
+      var kind=(i===0?' cv':(i===slides.length-1?' cv cv-end':' sl'));
+      d.className='slide'+kind+(i===cur?' on':'');
+      d.innerHTML=(i===0? pptCover(pm,s) : (i===slides.length-1? pptEnd(pm,s) : pptInner(pm,s)));
       stage.appendChild(d);
       const dot=document.createElement('i'); if(i===cur)dot.className='on'; dots.appendChild(dot);
     });
+    stageFit();
+    if(!window.__PPT_FIT){
+      window.__PPT_FIT=1;
+      window.addEventListener('resize',function(){
+        var st=document.getElementById('p-stage'); if(st) stageFit();
+      });
+    }
   }
 
   function playSlide(i, autoplay){
