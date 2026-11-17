@@ -579,9 +579,9 @@ function _axOwnerKey(){
   if(!s||(!s.user&&!s.name)) return '';
   if(s.role==='admin') return 'admin';
   if(s.role==='ent'){
-    /* v163：企业账号下常有多人共用同一个 CO-XXXX，学习数据必须按人分桶 */
-    var _co=s.companyId||s.company||'', _pid=s.personId||s.phone||((s.name&&s.company&&s.name!==s.company)?s.name:'');
-    return _pid? 'ent:'+_co+':'+_pid : 'ent:'+_co;
+    /* v164：企业学习数据按登录账号分桶 —— 一个 CO 账号一份记录，不再按姓名区分 */
+    if(s.loginId) return 'ent:acct:'+s.loginId;
+    return 'ent:'+(s.companyId||s.company||'');
   }
   if(s.loginType==='user'&&s.loginId) return 'user:'+s.loginId;
   if(s.loginType==='guest'&&s.loginId) return 'guest:'+(s.company||'')+':'+(s.phone||'')+':'+s.loginId;
@@ -622,7 +622,44 @@ function _axClaim(base){
     if(legacy!=null){ localStorage.setItem(key, legacy); localStorage.setItem(mark, own); }
   }catch(e){}
 }
-function _axKey(base){ var own=_axOwnerKey(); if(own) _axClaim(base); return own? base+'::'+own : base; }
+/* v164：本机老桶（ent:<公司> 或 v163 的 ent:<公司>:姓名）在账号首次打开时接管到 ent:acct:<登录账号>，
+   否则换成分桶规则后进度会「归零」。一台设备每个账号只结算一次。 */
+function _axMergeBucket(nk, ov){
+  try{
+    var nv=localStorage.getItem(nk); if(nv==null){ localStorage.setItem(nk, ov); return; }
+    var a=JSON.parse(nv), b=JSON.parse(ov);
+    if(!a||!b||typeof a!=='object'||typeof b!=='object'||a instanceof Array) return;
+    for(var k in b){ if(!Object.prototype.hasOwnProperty.call(b,k)) continue;
+      if(a[k]===undefined){ a[k]=b[k]; continue; }
+      if(a[k]&&b[k]&&typeof a[k]==='object'&&typeof b[k]==='object'&&!(a[k] instanceof Array)){
+        for(var k2 in b[k]){ if(Object.prototype.hasOwnProperty.call(b[k],k2)&&a[k][k2]===undefined) a[k][k2]=b[k][k2]; }
+      }
+    }
+    localStorage.setItem(nk, JSON.stringify(a));
+  }catch(e){}
+}
+function _axMigrate(){
+  var s=_axSession()||{};
+  if(s.role!=='ent'||!s.loginId) return;
+  var mark='aidax_ent_migr_kv:'+s.loginId;
+  try{ if(localStorage.getItem(mark)) return; }catch(e){ return; }
+  var target='ent:acct:'+s.loginId, pref='ent:'+(s.companyId||s.company||'');
+  try{
+    var keys=[];
+    for(var i=0;i<localStorage.length;i++){ var kk=localStorage.key(i); if(kk) keys.push(kk); }
+    for(var j=0;j<keys.length;j++){
+      var k=keys[j], idx=k.lastIndexOf('::'); if(idx<0) continue;
+      var own=k.slice(idx+2);
+      if(own!==pref && own.indexOf(pref+':')!==0) continue;
+      var nk=k.slice(0,idx+2)+target, ov=localStorage.getItem(k)||'';
+      if(localStorage.getItem(nk)==null){ localStorage.setItem(nk, ov); }
+      else { _axMergeBucket(nk, ov); }
+      localStorage.removeItem(k);
+    }
+    localStorage.setItem(mark,'1');
+  }catch(e){}
+}
+function _axKey(base){ var own=_axOwnerKey(); if(own){ _axMigrate(); _axClaim(base); } return own? base+'::'+own : base; }
 /* v162：换账号必须整页换账本。STORE / prog 都是加载时按当时的账号算好的，
    在别的标签页切号后只重画顶栏，进度仍读写上一个账号 —— 看起来就是「还是同一个人的记录」。 */
 var _axBound=_axOwnerKey();
@@ -4271,8 +4308,9 @@ header h1{min-width:0;overflow:hidden;text-overflow:ellipsis}
     if(s.role==='admin') return 'admin';
     /* v163：与企业账号同一套规则 —— 同一个 CO 账号多人用时按人分桶 */
     if(s.role==='ent'){
-      var _co=s.companyId||s.company||'', _pid=s.personId||s.phone||((s.name&&s.company&&s.name!==s.company)?s.name:'');
-      return _pid?'ent:'+_co+':'+_pid:'ent:'+_co;
+      /* v164：与企业账号同一套规则 —— 一个登录账号一份记录 */
+      if(s.loginId) return 'ent:acct:'+s.loginId;
+      return 'ent:'+(s.companyId||s.company||'');
     }
     if(s.loginType==='user'&&s.loginId) return 'user:'+s.loginId;
     if(s.loginType==='guest'&&s.loginId) return 'guest:'+(s.company||'')+':'+(s.phone||'')+':'+s.loginId;
