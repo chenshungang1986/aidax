@@ -486,26 +486,56 @@ function _axOwnerKey(){
   if(s.loginId) return 'user:'+s.loginId;
   return '';
 }
-/* 这台机器上有没有「我」的痕迹：有本账号档案，或存在旧版本留下的无主档案。
-   认领旧数据必须过这一关，否则新游客一登录就把上一个人的进度抢走。 */
+/* v162：老数据要认领，得先证明「是我的」，而且一台设备只结算一次。
+   v157 的写法是「本机存在任何无主档案就允许认领」—— 只要留着一条 v157 之前的数据，
+   之后每个新账号都会把同一份老进度复制到自己名下，换谁都看到同一个人的记录。 */
+function _axLegacyIsMine(){
+  var s=_axSession()||{}, es=[];
+  try{ es=JSON.parse(localStorage.getItem('ai_training_employees')||'[]')||[]; }catch(e){ return false; }
+  for(var i=0;i<es.length;i++){
+    var e=es[i]; if(!e||e.ownerKey) continue;      // 有归属的走精确匹配，不算老证物
+    if(s.loginId&&e.loginId&&String(e.loginId)===String(s.loginId)) return true;
+    if(s.phone&&e.phone&&String(e.phone)===String(s.phone)) return true;
+    if(s.name&&e.name&&s.company&&e.company&&e.name===s.name&&e.company===s.company) return true;
+  }
+  return false;
+}
 function _axHasMyRecords(own){
   try{
     var es=JSON.parse(localStorage.getItem('ai_training_employees')||'[]')||[];
-    for(var i=0;i<es.length;i++){ var e=es[i]; if(e && ((e.ownerKey||'')===own || !e.ownerKey)) return true; }
-    return false;
-  }catch(e){ return false; }
+    for(var i=0;i<es.length;i++){ if(es[i]&&(es[i].ownerKey||'')===own) return true; }
+  }catch(e){}
+  return _axLegacyIsMine();
 }
 function _axClaim(base){
   var own=_axOwnerKey(); if(!own) return;
   try{
     var key=base+'::'+own;
     if(localStorage.getItem(key)!=null) return;
+    var mark='aidax_claim_'+base;
+    if(localStorage.getItem(mark)) return;         // 这台设备的老数据已经结算过
     if(!_axHasMyRecords(own)) return;
     var legacy=localStorage.getItem(base);
-    if(legacy!=null) localStorage.setItem(key, legacy);
+    if(legacy!=null){ localStorage.setItem(key, legacy); localStorage.setItem(mark, own); }
   }catch(e){}
 }
 function _axKey(base){ var own=_axOwnerKey(); if(own) _axClaim(base); return own? base+'::'+own : base; }
+/* v162：换账号必须整页换账本。STORE / prog 都是加载时按当时的账号算好的，
+   在别的标签页切号后只重画顶栏，进度仍读写上一个账号 —— 看起来就是「还是同一个人的记录」。 */
+var _axBound=_axOwnerKey();
+var _axReloading=false;
+function _axWatch(){
+  var now=_axOwnerKey();
+  if(now===_axBound||_axReloading) return false;
+  _axReloading=true;
+  _axBound=now;
+  location.reload();                 // 按新账号整页重载，避免半新半旧
+  return true;
+}
+window.addEventListener('storage',function(e){ if(e.key==='ai_training_session') _axWatch(); });
+window.addEventListener('focus',_axWatch);
+window.addEventListener('pageshow',function(e){ if(e.persisted) _axWatch(); });
+document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible') _axWatch(); });
 /* v157 账号级隔离 END */
 const STORE=_axKey('aidax_auto_ai_pm_v1');
 let prog = loadProg();
@@ -4207,6 +4237,7 @@ header h1{min-width:0;overflow:hidden;text-overflow:ellipsis}
   }
 
   window.lcOpen=function(){
+    if(typeof _axWatch==='function'&&_axWatch()) return;   // v162：换人了，等重载完再说
     document.getElementById('lc-body').innerHTML=render();
     document.getElementById('lc-mask').classList.add('on');
     document.getElementById('lc-drawer').classList.add('on');
