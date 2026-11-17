@@ -8387,12 +8387,22 @@ function currentOwnerKey(){
 // 新账号会直接继承上一个人的学习进度 —— 看起来就是「两个人有同一份记录」。
 // 这里只把键按 ownerKey 分桶，不动数据结构；课程页 tools/patch_owner_scope.py 用的是同一套规则。
 var _OWNED_KEYS = ['ai_training_progress', 'ai_training_quest'];
-// 这台机器上到底有没有「我」的痕迹：有本账号的档案，或存在更早版本留下的无主档案。
-// 认领旧数据必须过这一关 —— 否则任何一个新游客登录都能把上一个人的进度「抢」走。
+// 这台机器上到底有没有「我」的痕迹：有本账号的档案，或有一条能对上我的老档案。
+// v162：原来只要存在**任何**无主档案就允许认领 —— 本机留着一条 v157 之前的数据，
+// 之后每个新账号都会把同一份老进度认领走，换谁看到的都是同一个人的记录。
+// 现在要求老档案能对上我的登录ID / 手机号 / 姓名+公司，并且一台设备每类数据只结算一次。
+function legacyLooksLikeMe(e){
+  var s = getSessionSafe() || {};
+  if (!e || e.ownerKey) return false;
+  if (s.loginId && e.loginId && String(e.loginId) === String(s.loginId)) return true;
+  if (s.phone && e.phone && String(e.phone) === String(s.phone)) return true;
+  if (s.name && e.name && s.company && e.company && e.name === s.name && e.company === s.company) return true;
+  return false;
+}
 function deviceHasMyRecords(own){
   try {
     var es = JSON.parse(localStorage.getItem('ai_training_employees') || '[]') || [];
-    return es.some(function(e){ return e && ((e.ownerKey || '') === own || !e.ownerKey); });
+    return es.some(function(e){ return e && (e.ownerKey || '') === own; }) || es.some(legacyLooksLikeMe);
   } catch (e) { return false; }
 }
 function ownedKey(base){
@@ -8400,10 +8410,12 @@ function ownedKey(base){
   if (!own) return base;                       // 未登录：保持旧行为，匿名也能用
   try {
     var key = base + '::' + own;
-    // 存量数据（旧版本按设备存、没有归属）→ 只有确实属于这台机器的主人才认领一份
-    if (localStorage.getItem(key) == null && deviceHasMyRecords(own)) {
-      var legacy = localStorage.getItem(base);
-      if (legacy != null) localStorage.setItem(key, legacy);
+    if (localStorage.getItem(key) == null) {
+      var mark = 'aidax_claim_' + base;
+      if (!localStorage.getItem(mark) && deviceHasMyRecords(own)) {
+        var legacy = localStorage.getItem(base);
+        if (legacy != null) { localStorage.setItem(key, legacy); localStorage.setItem(mark, own); }
+      }
     }
     return key;
   } catch (e) { return base; }
@@ -8479,6 +8491,7 @@ S.doLoginPersonal = function(){
   if (!S.verifyCode(phone, code)) { alert('验证码错误或已过期，请重新获取'); return; }
   var session = { user: name.trim(), name: name.trim(), role:'learner', company: company.trim(), phone: phone, loginType:'learner', verified:true };
   localStorage.setItem('ai_training_session', JSON.stringify(session));
+  S.rebindOwned();                  // v162：切人就要切断上一个人的进度引用
   recordAccess('login');
   S.view = 'role'; render();
 };
@@ -8496,6 +8509,7 @@ S.doLoginEnt = function(){
   if (!S.verifyCode(phone, code)) { alert('验证码错误或已过期，请重新获取'); return; }
   var session = { user: name.trim(), name: name.trim(), role:'ent', company: co.name, companyId: co.id, phone: phone, loginType:'ent', verified:true };
   localStorage.setItem('ai_training_session', JSON.stringify(session));
+  S.rebindOwned();                  // v162：切人就要切断上一个人的进度引用
   recordAccess('login');
   S.view = 'role'; render();
 };
@@ -12144,8 +12158,17 @@ function cloudHydrateEmployees(cb){
   cl.from('employees').select('*').then(function(res){
     if (res.data && res.data.length) {
       var map = {};
+      var _s = getSessionSafe(), _own = currentOwnerKey();
+      var _wide = (_s.role === 'admin' || _s.role === 'ent');   // 只有管理端需要看别人的档案
       S.employees.forEach(function(e){ if (e && e.id) map[e.id] = e; });
-      res.data.forEach(function(x){ if (x && x.id) map[x.id] = x.doc; });
+      res.data.forEach(function(x){
+        if (!x || !x.id || !x.doc) return;
+        // v162：普通学员只收自己的档案。原来无过滤全量灌进本机，
+        // 配合「认领老数据」就把别人的进度/成绩带进了新账号。
+        if (!_wide && _own && (x.doc.ownerKey || '') !== _own) return;
+        if (!_wide && !_own) return;
+        map[x.id] = x.doc;
+      });
       S.employees = Object.keys(map).map(function(k){ return map[k]; });
       localStorage.setItem('ai_training_employees', JSON.stringify(S.employees));
       // v74：云端拉回后再次收敛（普通账号只留自己的，别人的移入 hidden 暂存）
@@ -15884,18 +15907,23 @@ S.submitFinal = function() {
 };
 S.saveAndFinish = function() {
   var _sess = getSessionSafe();
-  const name = prompt('请输入你的姓名（用于管理看板）：', (S.currentEmployee && S.currentEmployee.name) || _sess.name || '');
+  // v162：只认「当前账号自己的」那份档案。旧写法直接继承 S.currentEmployee 的 id / ownerKey，
+  // 只要它还指着上一个人的档案，这次成绩就写进了别人的记录里 —— 两个账号从此共用一条。
+  var _own = (typeof currentOwnerKey === 'function') ? currentOwnerKey() : '';
+  var _cur = (S.currentEmployee && (!_own || (S.currentEmployee.ownerKey || '') === _own)) ? S.currentEmployee : null;
+  const name = prompt('请输入你的姓名（用于管理看板）：', (_cur && _cur.name) || _sess.name || '');
   if (!name) return;
   // #3 企业维度分析：登记所属企业（登录账号已带公司则默认填入）
-  let company = prompt('请输入所属企业/公司名称（用于企业维度汇总分析，可留空）：', (S.currentEmployee && S.currentEmployee.company) || _sess.company || '');
+  let company = prompt('请输入所属企业/公司名称（用于企业维度汇总分析，可留空）：', (_cur && _cur.company) || _sess.company || '');
   if (company === null) company = '';
   const emp = {
-    id: (S.currentEmployee && S.currentEmployee.id) || uid('e_'),
+    id: (_cur && _cur.id) || uid('e_'),
     name, role: S.role,
     industry: S.industry,
     company: company.trim() || '未填写',
     // v74 账号归属：非管理员仅能在首页看到 ownerKey 与本人一致的记录
-    ownerKey: (S.currentEmployee && S.currentEmployee.ownerKey) || currentOwnerKey(),
+    // v162：归属一律以当前会话为准，不再从别人的档案上继承
+    ownerKey: _own || (_cur && _cur.ownerKey) || '',
     companyId: _sess.companyId || '',
     loginId: _sess.loginId || '',
     phone: _sess.phone || '',
@@ -15911,11 +15939,11 @@ S.saveAndFinish = function() {
     finalScore: S.finalScore,
     doneCourses: Object.values(S.courseProgress).filter(p=>p.done).length
   };
-  if (S.currentEmployee) {
-    const idx = S.employees.findIndex(e => e===S.currentEmployee);
-    if (idx>=0) S.employees[idx] = emp;
+  if (_cur) {
+    const idx = S.employees.findIndex(e => e===_cur);
+    if (idx>=0) S.employees[idx] = emp; else S.employees.push(emp);
   } else {
-    S.employees.push(emp);
+    S.employees.push(emp);          // v162：绝不去改别人的档案
   }
   S.currentEmployee = emp;
   saveEmployees();
