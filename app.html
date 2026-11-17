@@ -8389,40 +8389,77 @@ function currentOwnerKey(){
 function personOwnerKey(){
   var s = getSessionSafe() || {};
   if (s.role !== 'ent') return currentOwnerKey();
+  /* v164：企业学习数据按「登录账号」分桶 —— 一个 CO 账号就是一份记录。
+     同一企业要多人各自独立，就在后台给每人增发一个账号（同公司、不同登录 ID）。 */
+  if (s.loginId) return 'ent:acct:' + s.loginId;
   var co = s.companyId || s.company || '';
-  var pid = s.personId || s.phone || ((s.name && s.company && s.name !== s.company) ? s.name : '');
-  return pid ? ('ent:' + co + ':' + pid) : ('ent:' + co);   // 拿不到个人身份时退回企业级，不制造空桶
+  return 'ent:' + co;   // 拿不到登录账号时退回企业级，不制造空桶
 }
-// v163：v162 之前企业档案的 ownerKey 是 'ent:<company>'（全公司一份）。
-// 本人第一次登录时，姓名/手机号能对上的那条就地改归属，避免「我的记录凭空消失」。
-function adoptEntLegacy(){
+// v164：老会话没记登录账号（v163 及更早的会话），能唯一确定就补上 —— 否则学习数据仍按公司共享。
+function backfillEntLoginId(){
   var s = getSessionSafe() || {};
-  if (s.role !== 'ent') return;
-  var oldKey = 'ent:' + (s.companyId || s.company || '');
-  var mine = personOwnerKey();
-  if (!mine || mine === oldKey) return;
-  var pn = s.personId || s.name || '', ph = s.phone || '';
-  var changed = 0;
-  (S.employees || []).forEach(function(e){
-    if (!e || (e.ownerKey || '') !== oldKey) return;
-    var hit = (ph && e.phone && String(e.phone) === String(ph)) || (pn && e.name && e.name === pn);
-    if (hit) { e.ownerKey = mine; changed++; }
+  if (s.role !== 'ent' || s.loginId) return;
+  var cid = s.companyId || '';
+  var accs = (S.companies || []).filter(function(c){
+    return c && c.active !== false && ((c.companyId || c.id) === cid) && !c.isSub;
   });
-  if (changed) saveEmployees();
+  if (accs.length !== 1) return;              // 一个公司多个账号时无法判断是谁，按账号旧行为兜底
+  s.loginId = accs[0].loginId;
+  try { localStorage.setItem('ai_training_session', JSON.stringify(s)); } catch(e){}
 }
-// v163：老的企业账号会话没有 personId（都还指着公司级桶），进来补问一次「你是哪位」
-function ensureEntPerson(){
+// v164：本机老桶（v163 的 'ent:<公司>:姓名' / 更早的 'ent:<公司>'）在账号首次登录时整体接管到
+// 'ent:acct:<登录账号>'。一台设备每个账号只结算一次，后来的账号不会再拿一遍别人的老数据。
+// v164b：老桶与当前账号桶同名时合并（当前账号的键优先，老桶只补缺；units/quizzes 这类子表逐项补）
+function mergeBucket(nk, ov){
+  try {
+    var nv = localStorage.getItem(nk); if (nv == null) { localStorage.setItem(nk, ov); return; }
+    var a = JSON.parse(nv), b = JSON.parse(ov);
+    if (!a || !b || typeof a !== 'object' || typeof b !== 'object' || Array.isArray(a)) return;
+    Object.keys(b).forEach(function(k){
+      if (a[k] === undefined) { a[k] = b[k]; return; }
+      if (a[k] && b[k] && typeof a[k] === 'object' && typeof b[k] === 'object' && !Array.isArray(a[k])) {
+        Object.keys(b[k]).forEach(function(k2){ if (a[k2] === undefined) a[k][k2] = b[k][k2]; });
+      }
+    });
+    localStorage.setItem(nk, JSON.stringify(a));
+  } catch (e) {}
+}
+function migrateEntBuckets(){
   var s = getSessionSafe() || {};
-  if (s.role !== 'ent' || s.personId) return;
-  if (S._entPersonAsked) return;
-  S._entPersonAsked = true;
-  var last = '';
-  try { last = localStorage.getItem('aidax_ent_lastname') || ''; } catch(e){}
-  var pn = (prompt('你是哪位？企业账号下的学习进度按人分开记录（填一次，本机会记住）', last || s.name || '') || '').trim();
-  if (!pn) return;
-  s.personId = pn; s.name = pn; s.user = pn;
-  try { localStorage.setItem('ai_training_session', JSON.stringify(s)); localStorage.setItem('aidax_ent_lastname', pn); } catch(e){}
-  S.rebindOwned();
+  if (s.role !== 'ent' || !s.loginId) return;
+  var target = 'ent:acct:' + s.loginId;
+  var pref = 'ent:' + (s.companyId || s.company || '');
+  var kEmp = 'aidax_ent_migr_emp:' + s.loginId;
+  var kKv  = 'aidax_ent_migr_kv:' + s.loginId;
+  // ① 测评档案里的归属
+  try {
+    if (!localStorage.getItem(kEmp)) {
+      var changed = 0;
+      (S.employees || []).forEach(function(e){
+        var k = (e && e.ownerKey) || '';
+        if (k === pref || k.indexOf(pref + ':') === 0) { e.ownerKey = target; changed++; }
+      });
+      if (changed) saveEmployees();
+      localStorage.setItem(kEmp, '1');
+    }
+  } catch (e) {}
+  // ② 学习进度 / 任务等按 ownerKey 分桶的本地键
+  try {
+    if (!localStorage.getItem(kKv)) {
+      var keys = [];
+      for (var i = 0; i < localStorage.length; i++) { var kk = localStorage.key(i); if (kk) keys.push(kk); }
+      keys.forEach(function(k){
+        var idx = k.lastIndexOf('::'); if (idx < 0) return;
+        var own = k.slice(idx + 2);
+        if (own !== pref && own.indexOf(pref + ':') !== 0) return;
+        var nk = k.slice(0, idx + 2) + target, ov = localStorage.getItem(k) || '';
+        if (localStorage.getItem(nk) == null) { localStorage.setItem(nk, ov); }
+        else { mergeBucket(nk, ov); }
+        localStorage.removeItem(k);
+      });
+      localStorage.setItem(kKv, '1');
+    }
+  } catch (e) {}
 }
 // v157：学习数据也要按账号分桶。
 // 原来 ai_training_progress / ai_training_quest 是「一台电脑一个键」，同一浏览器换个游客账号登录，
@@ -8469,7 +8506,8 @@ function loadOwnedJSON(base){
 S.rebindOwned = function(){
   S._scopeDone = false;
   S.currentEmployee = null;
-  try { adoptEntLegacy(); } catch (e) {}      // v163：老的企业档案改归属到本人
+  try { backfillEntLoginId(); } catch (e) {}  // v164：老会话补上登录账号
+  try { migrateEntBuckets(); } catch (e) {}   // v164：老桶接管到本账号（档案 + 本地键）
   try { S.courseProgress = loadOwnedJSON('ai_training_progress'); } catch (e) {}
   try { S.questProg = loadOwnedJSON('ai_training_quest'); } catch (e) {}
 };
@@ -8550,7 +8588,7 @@ S.doLoginEnt = function(){
   if (!name.trim()) { alert('请填写姓名'); return; }
   if (!/^1[3-9]\d{9}$/.test(phone)) { alert('请输入有效的 11 位手机号'); return; }
   if (!S.verifyCode(phone, code)) { alert('验证码错误或已过期，请重新获取'); return; }
-  var session = { user: name.trim(), name: name.trim(), personId: name.trim(), role:'ent', company: co.name, companyId: co.id, phone: phone, loginType:'ent', verified:true }; // v163：个人身份
+  var session = { user: name.trim(), name: name.trim(), personId: name.trim(), role:'ent', company: co.name, companyId: (co.companyId || co.id), loginId: co.loginId, phone: phone, loginType:'ent', verified:true }; // v164：学习数据按登录账号分桶
   localStorage.setItem('ai_training_session', JSON.stringify(session));
   S.rebindOwned();                  // v162：切人就要切断上一个人的进度引用
   recordAccess('login');
@@ -8586,6 +8624,25 @@ S.regenCompanyPwd = function(id){
 S.toggleCompany = function(id){
   var co = (S.companies||[]).find(function(c){ return c.id===id; }); if (!co) return;
   co.active = !co.active; DB.put('companies', co); S.companies = DB.all('companies'); render();
+};
+// v164：给同一企业增发一个学员账号（同公司、不同登录 ID）→ 每人一份学习记录
+S.addSubAccount = function(id){
+  var co = (S.companies||[]).find(function(c){ return c.id === id; }); if (!co) return;
+  var label = (prompt('这个学员的姓名（用于后台识别，可留空）', '') || '').trim();
+  var c = genCompanyCreds();
+  var tail = String(((S.companies||[]).filter(function(x){ return (x.companyId||'') === co.id; }).length + 1));
+  if (tail.length < 2) tail = '0' + tail;
+  var rec = { id: uid('c_'), loginId: c.loginId + '-' + tail, pwdHash: adminPwdHash(c.pwd), name: co.name,
+              label: label, active: true, createdAt: Date.now(), companyId: co.id, isSub: true };
+  DB.put('companies', rec); S.companies = DB.all('companies');
+  S._lastCompanyCreds = { loginId: rec.loginId, pwd: c.pwd, name: co.name + (label ? ' · ' + label : '') };
+  showToast('已生成学员账号：' + rec.loginId + ' / ' + c.pwd);
+  render();
+};
+S.delSubAccount = function(id){
+  var co = (S.companies||[]).find(function(c){ return c.id === id; }); if (!co) return;
+  if (!confirm('删除学员账号 ' + co.loginId + '？该账号的学习记录会留在本机，换号后不再显示。')) return;
+  DB.del('companies', id); S.companies = DB.all('companies'); render();
 };
 S.delCompany = function(id){
   if (!confirm('确认删除该企业账号？')) return;
@@ -8775,7 +8832,9 @@ S._csv_logs = function(){
 
 // ---- 渲染：企业管理（管理员生成企业专属登录ID+密码）----
 function renderAdminCompanies(){
-  var list = S.companies || [];
+  var all = S.companies || [];
+  // v164：学员子账号（同公司不同登录ID）归到主企业那一行里展示，不单独占一行
+  var list = all.filter(function(c){ return !c.companyId || c.companyId === c.id; });
   var html = '<div class="card slide-up"><div class="section-title"><span class="st-ico">🏢</span>企业管理（生成企业专属登录ID + 密码）</div>';
   html += '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px">'
     + '<input id="newCompanyName" placeholder="企业名称（如：某某科技）" style="flex:1;min-width:160px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px">'
@@ -8788,10 +8847,28 @@ function renderAdminCompanies(){
   else {
     html += '<div style="overflow-x:auto"><table class="log-table"><thead><tr><th>企业名称</th><th>登录ID</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead><tbody>';
     list.forEach(function(c){
-      html += '<tr><td>'+escapeHtml(c.name)+'</td><td><code>'+c.loginId+'</code></td><td>'+(c.active?'<span style="color:var(--green)">启用</span>':'<span style="color:var(--red)">停用</span>')+'</td><td>'+fmtTs(c.createdAt)+'</td>'
-        + '<td style="white-space:nowrap"><button class="btn btn-sm btn-outline" data-action="regenCompanyPwd" data-id="'+c.id+'">重置密码</button> '
+      var subs = all.filter(function(x){ return x && x.id !== c.id && ((x.companyId || '') === c.id); });
+      html += '<tr><td>'+escapeHtml(c.name)+'</td><td><code>'+c.loginId+'</code>'
+        + (subs.length ? ' <span style="color:var(--text3);font-size:12px">+' + subs.length + ' 个学员账号</span>' : '')
+        + '</td><td>'+(c.active?'<span style="color:var(--green)">启用</span>':'<span style="color:var(--red)">停用</span>')+'</td><td>'+fmtTs(c.createdAt)+'</td>'
+        + '<td style="white-space:nowrap"><button class="btn btn-sm btn-primary" data-action="addSubAccount" data-id="'+c.id+'">+ 学员账号</button> '
+        + '<button class="btn btn-sm btn-outline" data-action="regenCompanyPwd" data-id="'+c.id+'">重置密码</button> '
         + '<button class="btn btn-sm btn-outline" data-action="toggleCompany" data-id="'+c.id+'">'+(c.active?'停用':'启用')+'</button> '
         + '<button class="btn btn-sm btn-outline" data-action="delCompany" data-id="'+c.id+'" style="color:var(--red)">删除</button></td></tr>';
+      if (subs.length) {
+        html += '<tr><td colspan="5" style="background:rgba(0,0,0,.02);padding:8px 12px 10px 26px">'
+          + '<div style="font-size:12px;color:var(--text3);margin-bottom:5px">学员账号 · 每个账号各自一份学习记录</div>';
+        subs.forEach(function(x){
+          html += '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px;padding:3px 0">'
+            + '<code>'+escapeHtml(x.loginId)+'</code>'
+            + (x.label ? '<span style="color:var(--text2)">'+escapeHtml(x.label)+'</span>' : '')
+            + '<span>'+(x.active?'<span style="color:var(--green)">启用</span>':'<span style="color:var(--red)">停用</span>')+'</span>'
+            + '<button class="btn btn-sm btn-outline" data-action="regenCompanyPwd" data-id="'+x.id+'">重置密码</button>'
+            + '<button class="btn btn-sm btn-outline" data-action="delSubAccount" data-id="'+x.id+'" style="color:var(--red)">删除</button>'
+            + '</div>';
+        });
+        html += '</td></tr>';
+      }
     });
     html += '</tbody></table></div>';
   }
@@ -8851,15 +8928,11 @@ S.doLoginAccount = function(){
   // 企业专属账号（管理员生成的 CO-XXXX）
   var co = companyByLoginId(id.trim());
   if (co && co.active && co.pwdHash === adminPwdHash(pwd)) {
-    // v163：一个 CO-XXXX 往往全公司共用，学习进度必须按人分开 —— 登录时收一个姓名当个人身份
+    // v164：一个登录账号 = 一份学习记录。姓名只用于显示，可以留空
     var pn = ((document.getElementById('accName') || {}).value || '').trim();
-    if (!pn) {
-      var _last = ''; try { _last = localStorage.getItem('aidax_ent_lastname') || ''; } catch(e){}
-      pn = (prompt('请输入你的姓名（同一企业账号下，学习记录按人分开）', _last) || '').trim();
-    }
-    if (!pn) { alert('企业账号需要填写姓名：同一个 CO 账号可能多人使用，学习记录要按人区分'); return; }
-    try { localStorage.setItem('aidax_ent_lastname', pn); } catch(e){}
-    var se = { user: pn, name: pn, personId: pn, role:'ent', company: co.name, companyId: co.id, loginType:'ent', verified:true };
+    if (pn) { try { localStorage.setItem('aidax_ent_lastname', pn); } catch(e){} }
+    var _mainId = co.companyId || co.id;   // 学员子账号归到主企业，企业看板/席位统计不分裂
+    var se = { user: pn || co.name, name: pn || co.name, personId: pn, role:'ent', company: co.name, companyId: _mainId, loginId: co.loginId, loginType:'ent', verified:true };
     localStorage.setItem('ai_training_session', JSON.stringify(se));
     S.mintCloudToken({ type:'ent', loginId: id.trim(), password: pwd, companyId: co.id }); // v75b：企业租户 JWT（带 companyId → 后端 quiz-stats 按企业下钻，否则报"ent has no company"）
     S.rebindOwned(); recordAccess('login'); S.view='admin'; render(); return;
@@ -8980,9 +9053,9 @@ function renderLoginV2(){
   if (mode === 'account') {
     html += '<div class="login-field"><label>账号ID</label><input id="accId" placeholder="企业ID / 注册ID / admin" autocomplete="username"></div>';
     html += '<div class="login-field"><label>密码</label><div class="login-pwd-wrap"><input id="accPwd" type="password" placeholder="请输入密码" autocomplete="current-password"><span class="login-pwd-eye" data-action="togglePwd" data-id="accPwd">👁️</span></div></div>';
-    html += '<div class="login-field"><label>你的姓名 <span style="color:#94a3b8;font-weight:400">（企业账号必填）</span></label><input id="accName" placeholder="同一个企业账号下，每人各自记录学习进度" autocomplete="name"></div>';
+    html += '<div class="login-field"><label>你的姓名 <span style="color:#94a3b8;font-weight:400">（选填，用于记录显示）</span></label><input id="accName" placeholder="留空则显示企业名称" autocomplete="name"></div>';
     html += '<button class="login-submit" data-action="doLoginAccount">登 录</button>';
-    html += '<div class="login-hint">管理员：ID 填 <b>admin</b> + 管理员密码；企业账号：管理员分配的 CO-XXXX + 密码 <b>+ 你的姓名</b>（多人共用一个 CO 账号时，学习记录按人分开）；注册用户：注册时的 ID + 密码。</div>';
+    html += '<div class="login-hint">管理员：ID 填 <b>admin</b> + 管理员密码；企业账号：管理员分配的 CO-XXXX + 密码（<b>一个账号一份学习记录</b>，同一家企业多人各自学习，请找管理员给每人开一个账号）；注册用户：注册时的 ID + 密码。</div>';
   } else if (mode === 'guest') {
     html += '<div class="login-field"><label>公司名称</label><input id="guestCompany" placeholder="请输入公司名称"></div>';
     html += '<div class="login-field"><label>个人登录ID</label><input id="guestLoginId" placeholder="3-20位字母/数字/下划线（用于识别您的身份）"></div>';
@@ -16527,6 +16600,8 @@ function bindEvents() {
             case 'regenCompanyPwd': S.regenCompanyPwd(el.getAttribute('data-id')); break;
             case 'toggleCompany': S.toggleCompany(el.getAttribute('data-id')); break;
             case 'delCompany': S.delCompany(el.getAttribute('data-id')); break;
+            case 'addSubAccount': S.addSubAccount(el.getAttribute('data-id')); break;
+            case 'delSubAccount': S.delSubAccount(el.getAttribute('data-id')); break;
             case 'seatSave': S.seatSave(el.getAttribute('data-id')); break;
             case 'seatRenew': S.seatRenew(el.getAttribute('data-id')); break;
             case 'seatToggle': S.seatToggle(el.getAttribute('data-id')); break;
@@ -16661,7 +16736,7 @@ function bindEvents() {
 })();
 
 try {
-  ensureEntPerson();   // v163：老的企业账号会话补一个「我是哪位」，否则学习数据仍按公司共享
+  // v164：不再追问姓名 —— 学习数据按登录账号区分（见 migrateEntBuckets）
   render();
 } catch(e) {
   console.error('Render error:', e);
