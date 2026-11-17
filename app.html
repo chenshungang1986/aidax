@@ -868,7 +868,9 @@
   }
 
 </style>
-<script src="./vendor/supabase-js.umd.js"></script>
+<!-- v165b：由同域改为 CDN 优先（GitHub Pages 国内 55KB 要 3 秒），失败立刻回退同域 -->
+<script src="https://cdn.jsdelivr.net/gh/chenshungang1986/aidax@main/vendor/supabase-js.umd.js"></script>
+<script>if(typeof supabase==='undefined'){document.write('<scr'+'ipt src="./vendor/supabase-js.umd.js"><\/scr'+'ipt>');}</script>
 <script id="aidaxCloudFallback">
   // 主用同源自托管：避免 jsdelivr 国内不可达导致 window.supabase 缺失，
   // 进而 sbClient() 恒为 null、反馈/访问日志/企业账号等全部无法同步云端（管理员收不到）。
