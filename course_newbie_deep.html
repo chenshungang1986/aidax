@@ -578,7 +578,11 @@ function _axOwnerKey(){
   var s=_axSession();
   if(!s||(!s.user&&!s.name)) return '';
   if(s.role==='admin') return 'admin';
-  if(s.role==='ent') return 'ent:'+(s.companyId||s.company||'');
+  if(s.role==='ent'){
+    /* v163：企业账号下常有多人共用同一个 CO-XXXX，学习数据必须按人分桶 */
+    var _co=s.companyId||s.company||'', _pid=s.personId||s.phone||((s.name&&s.company&&s.name!==s.company)?s.name:'');
+    return _pid? 'ent:'+_co+':'+_pid : 'ent:'+_co;
+  }
   if(s.loginType==='user'&&s.loginId) return 'user:'+s.loginId;
   if(s.loginType==='guest'&&s.loginId) return 'guest:'+(s.company||'')+':'+(s.phone||'')+':'+s.loginId;
   if(s.phone) return 'guest:'+(s.company||'')+':'+s.phone;
@@ -4265,7 +4269,11 @@ header h1{min-width:0;overflow:hidden;text-overflow:ellipsis}
     s=s||{};
     if(!s.user&&!s.name) return '';
     if(s.role==='admin') return 'admin';
-    if(s.role==='ent') return 'ent:'+(s.companyId||s.company||'');
+    /* v163：与企业账号同一套规则 —— 同一个 CO 账号多人用时按人分桶 */
+    if(s.role==='ent'){
+      var _co=s.companyId||s.company||'', _pid=s.personId||s.phone||((s.name&&s.company&&s.name!==s.company)?s.name:'');
+      return _pid?'ent:'+_co+':'+_pid:'ent:'+_co;
+    }
     if(s.loginType==='user'&&s.loginId) return 'user:'+s.loginId;
     if(s.loginType==='guest'&&s.loginId) return 'guest:'+(s.company||'')+':'+(s.phone||'')+':'+s.loginId;
     if(s.phone) return 'guest:'+(s.company||'')+':'+s.phone;
