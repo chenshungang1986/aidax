@@ -8382,6 +8382,48 @@ function currentOwnerKey(){
   if (s.loginId) return 'user:' + s.loginId;
   return '';
 }
+// v163：学习数据按「人」分桶。
+// currentOwnerKey 是「租户归属」（云端 RLS、企业看板按公司聚合），不能再兼做学习数据归属：
+// 企业账号（role=ent）在它眼里永远是 'ent:<companyId>'，同公司所有人共用一份测评档案与进度。
+// personOwnerKey 只在 ent 上做加细，其余角色与 currentOwnerKey 完全一致。
+function personOwnerKey(){
+  var s = getSessionSafe() || {};
+  if (s.role !== 'ent') return currentOwnerKey();
+  var co = s.companyId || s.company || '';
+  var pid = s.personId || s.phone || ((s.name && s.company && s.name !== s.company) ? s.name : '');
+  return pid ? ('ent:' + co + ':' + pid) : ('ent:' + co);   // 拿不到个人身份时退回企业级，不制造空桶
+}
+// v163：v162 之前企业档案的 ownerKey 是 'ent:<company>'（全公司一份）。
+// 本人第一次登录时，姓名/手机号能对上的那条就地改归属，避免「我的记录凭空消失」。
+function adoptEntLegacy(){
+  var s = getSessionSafe() || {};
+  if (s.role !== 'ent') return;
+  var oldKey = 'ent:' + (s.companyId || s.company || '');
+  var mine = personOwnerKey();
+  if (!mine || mine === oldKey) return;
+  var pn = s.personId || s.name || '', ph = s.phone || '';
+  var changed = 0;
+  (S.employees || []).forEach(function(e){
+    if (!e || (e.ownerKey || '') !== oldKey) return;
+    var hit = (ph && e.phone && String(e.phone) === String(ph)) || (pn && e.name && e.name === pn);
+    if (hit) { e.ownerKey = mine; changed++; }
+  });
+  if (changed) saveEmployees();
+}
+// v163：老的企业账号会话没有 personId（都还指着公司级桶），进来补问一次「你是哪位」
+function ensureEntPerson(){
+  var s = getSessionSafe() || {};
+  if (s.role !== 'ent' || s.personId) return;
+  if (S._entPersonAsked) return;
+  S._entPersonAsked = true;
+  var last = '';
+  try { last = localStorage.getItem('aidax_ent_lastname') || ''; } catch(e){}
+  var pn = (prompt('你是哪位？企业账号下的学习进度按人分开记录（填一次，本机会记住）', last || s.name || '') || '').trim();
+  if (!pn) return;
+  s.personId = pn; s.name = pn; s.user = pn;
+  try { localStorage.setItem('ai_training_session', JSON.stringify(s)); localStorage.setItem('aidax_ent_lastname', pn); } catch(e){}
+  S.rebindOwned();
+}
 // v157：学习数据也要按账号分桶。
 // 原来 ai_training_progress / ai_training_quest 是「一台电脑一个键」，同一浏览器换个游客账号登录，
 // 新账号会直接继承上一个人的学习进度 —— 看起来就是「两个人有同一份记录」。
@@ -8406,7 +8448,7 @@ function deviceHasMyRecords(own){
   } catch (e) { return false; }
 }
 function ownedKey(base){
-  var own = currentOwnerKey();
+  var own = personOwnerKey();                  // v163：学习进度按人分桶（企业账号不再全公司一份）
   if (!own) return base;                       // 未登录：保持旧行为，匿名也能用
   try {
     var key = base + '::' + own;
@@ -8427,6 +8469,7 @@ function loadOwnedJSON(base){
 S.rebindOwned = function(){
   S._scopeDone = false;
   S.currentEmployee = null;
+  try { adoptEntLegacy(); } catch (e) {}      // v163：老的企业档案改归属到本人
   try { S.courseProgress = loadOwnedJSON('ai_training_progress'); } catch (e) {}
   try { S.questProg = loadOwnedJSON('ai_training_quest'); } catch (e) {}
 };
@@ -8436,7 +8479,7 @@ function isManagerRole(){ var r = getSessionSafe().role; return r === 'admin' ||
 // 学习端可见档案：管理员=全部；其他账号=仅自己
 function myEmployees(){
   if (getSessionSafe().role === 'admin') return S.employees.slice();
-  var mine = currentOwnerKey();
+  var mine = personOwnerKey();                 // v163：只认自己的档案
   if (!mine) return [];
   return S.employees.filter(function(e){ return empOwnerKey(e) === mine; });
 }
@@ -8507,7 +8550,7 @@ S.doLoginEnt = function(){
   if (!name.trim()) { alert('请填写姓名'); return; }
   if (!/^1[3-9]\d{9}$/.test(phone)) { alert('请输入有效的 11 位手机号'); return; }
   if (!S.verifyCode(phone, code)) { alert('验证码错误或已过期，请重新获取'); return; }
-  var session = { user: name.trim(), name: name.trim(), role:'ent', company: co.name, companyId: co.id, phone: phone, loginType:'ent', verified:true };
+  var session = { user: name.trim(), name: name.trim(), personId: name.trim(), role:'ent', company: co.name, companyId: co.id, phone: phone, loginType:'ent', verified:true }; // v163：个人身份
   localStorage.setItem('ai_training_session', JSON.stringify(session));
   S.rebindOwned();                  // v162：切人就要切断上一个人的进度引用
   recordAccess('login');
@@ -8808,7 +8851,15 @@ S.doLoginAccount = function(){
   // 企业专属账号（管理员生成的 CO-XXXX）
   var co = companyByLoginId(id.trim());
   if (co && co.active && co.pwdHash === adminPwdHash(pwd)) {
-    var se = { user: co.name, name: co.name, role:'ent', company: co.name, companyId: co.id, loginType:'ent', verified:true };
+    // v163：一个 CO-XXXX 往往全公司共用，学习进度必须按人分开 —— 登录时收一个姓名当个人身份
+    var pn = ((document.getElementById('accName') || {}).value || '').trim();
+    if (!pn) {
+      var _last = ''; try { _last = localStorage.getItem('aidax_ent_lastname') || ''; } catch(e){}
+      pn = (prompt('请输入你的姓名（同一企业账号下，学习记录按人分开）', _last) || '').trim();
+    }
+    if (!pn) { alert('企业账号需要填写姓名：同一个 CO 账号可能多人使用，学习记录要按人区分'); return; }
+    try { localStorage.setItem('aidax_ent_lastname', pn); } catch(e){}
+    var se = { user: pn, name: pn, personId: pn, role:'ent', company: co.name, companyId: co.id, loginType:'ent', verified:true };
     localStorage.setItem('ai_training_session', JSON.stringify(se));
     S.mintCloudToken({ type:'ent', loginId: id.trim(), password: pwd, companyId: co.id }); // v75b：企业租户 JWT（带 companyId → 后端 quiz-stats 按企业下钻，否则报"ent has no company"）
     S.rebindOwned(); recordAccess('login'); S.view='admin'; render(); return;
@@ -8929,8 +8980,9 @@ function renderLoginV2(){
   if (mode === 'account') {
     html += '<div class="login-field"><label>账号ID</label><input id="accId" placeholder="企业ID / 注册ID / admin" autocomplete="username"></div>';
     html += '<div class="login-field"><label>密码</label><div class="login-pwd-wrap"><input id="accPwd" type="password" placeholder="请输入密码" autocomplete="current-password"><span class="login-pwd-eye" data-action="togglePwd" data-id="accPwd">👁️</span></div></div>';
+    html += '<div class="login-field"><label>你的姓名 <span style="color:#94a3b8;font-weight:400">（企业账号必填）</span></label><input id="accName" placeholder="同一个企业账号下，每人各自记录学习进度" autocomplete="name"></div>';
     html += '<button class="login-submit" data-action="doLoginAccount">登 录</button>';
-    html += '<div class="login-hint">管理员：ID 填 <b>admin</b> + 管理员密码；企业账号：管理员分配的 CO-XXXX + 密码；注册用户：注册时的 ID + 密码。</div>';
+    html += '<div class="login-hint">管理员：ID 填 <b>admin</b> + 管理员密码；企业账号：管理员分配的 CO-XXXX + 密码 <b>+ 你的姓名</b>（多人共用一个 CO 账号时，学习记录按人分开）；注册用户：注册时的 ID + 密码。</div>';
   } else if (mode === 'guest') {
     html += '<div class="login-field"><label>公司名称</label><input id="guestCompany" placeholder="请输入公司名称"></div>';
     html += '<div class="login-field"><label>个人登录ID</label><input id="guestLoginId" placeholder="3-20位字母/数字/下划线（用于识别您的身份）"></div>';
@@ -15909,7 +15961,7 @@ S.saveAndFinish = function() {
   var _sess = getSessionSafe();
   // v162：只认「当前账号自己的」那份档案。旧写法直接继承 S.currentEmployee 的 id / ownerKey，
   // 只要它还指着上一个人的档案，这次成绩就写进了别人的记录里 —— 两个账号从此共用一条。
-  var _own = (typeof currentOwnerKey === 'function') ? currentOwnerKey() : '';
+  var _own = (typeof personOwnerKey === 'function') ? personOwnerKey() : ((typeof currentOwnerKey === 'function') ? currentOwnerKey() : '');   // v163：档案归属按人
   var _cur = (S.currentEmployee && (!_own || (S.currentEmployee.ownerKey || '') === _own)) ? S.currentEmployee : null;
   const name = prompt('请输入你的姓名（用于管理看板）：', (_cur && _cur.name) || _sess.name || '');
   if (!name) return;
@@ -16588,7 +16640,8 @@ function bindEvents() {
   var _validRole = (_sessRole === 'admin' || _sessRole === 'ent' || _sessRole === 'learner');
   var _needsReLogin = !_validRole
     || ((_sessRole === 'learner' || _sessRole === 'ent') && !session.company)
-    || ((_sessRole === 'ent' || session.loginType === 'guest') && !session.phone)
+    || (session.loginType === 'guest' && !session.phone)
+    || (_sessRole === 'ent' && !session.companyId)   // v163：企业账号认公司，不再强求手机号（CO 登录不收手机号，原来一刷新就被踢回登录页）
     || (session.loginType === 'user' && !session.loginId); // v74：注册账号会话需带 loginId（成绩归属标识）
   S.view = _needsReLogin ? 'login' : ((_sessRole === 'admin' || _sessRole === 'ent') ? 'admin' : 'role');
   window.S = S;  // expose S for inline onclick handlers
@@ -16608,6 +16661,7 @@ function bindEvents() {
 })();
 
 try {
+  ensureEntPerson();   // v163：老的企业账号会话补一个「我是哪位」，否则学习数据仍按公司共享
   render();
 } catch(e) {
   console.error('Render error:', e);
