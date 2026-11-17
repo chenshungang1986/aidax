@@ -2,6 +2,9 @@
 <html lang="zh-CN" data-page-node-id="MDhFd7sC7pQWbGa6kIPs9z">
 <head data-page-node-id="g8PDluD0DE6dA7rMEBHVn3">
 <meta charset="UTF-8" data-page-node-id="uYrXGxinv3OzsKJJNNtq6Q">
+<!-- v166：提前与 jsDelivr 建连，主脚本/音频都在这个域上，省 DNS+TLS 往返 -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 <meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="qcWu9WKuRnmgCR0RSqqUwQ">
 <title>AI达学 AIDAX — 企业AI学习一站式服务</title>
 <style>
@@ -925,10 +928,10 @@ img{max-width:100%;display:block}
 
 <script>
 // Login functions
-function openLogin(){window.location.href='app.html?v=166'} // 直接进入 app.html 统一登录页（无弹窗）
+function openLogin(){window.location.href='app.html?v=167'} // 直接进入 app.html 统一登录页（无弹窗）
 function closeLogin(){document.getElementById('loginOverlay').classList.remove('show')}
 // 登录统一在 app.html 完成（含公司名称 / 手机号验证码校验）
-function goApp(){window.location.replace('app.html?v=166')}
+function goApp(){window.location.replace('app.html?v=167')}
 
 // Customer service toggle
 function toggleCsPanel(){document.getElementById('csPanel').classList.toggle('show')}
