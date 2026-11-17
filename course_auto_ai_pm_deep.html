@@ -448,7 +448,9 @@
 <button id="lf-fab" onclick="openFb()">💬 反馈 / 建议</button>
 <div class="modal" id="lf-modal"><div class="box fm" id="lf-box"></div></div>
 
-<script src="./vendor/supabase-js.umd.js"></script>
+<!-- v165b：由同域改为 CDN 优先（GitHub Pages 国内 55KB 要 3 秒），失败立刻回退同域 -->
+<script src="https://cdn.jsdelivr.net/gh/chenshungang1986/aidax@main/vendor/supabase-js.umd.js"></script>
+<script>if(typeof supabase==='undefined'){document.write('<scr'+'ipt src="./vendor/supabase-js.umd.js"><\/scr'+'ipt>');}</script>
 <!-- v165：主脚本外置到 CDN（GitHub Pages 国内只有 30–60KB/s，jsDelivr 约 600KB/s 且 gzip） -->
 <script src="https://cdn.jsdelivr.net/gh/chenshungang1986/aidax@main/js/course_auto_ai_pm_deep.v165.js"></script>
 <script>if(!(typeof COURSE!=='undefined')){document.write('<scr'+'ipt src="./js/course_auto_ai_pm_deep.v165.js"><\/scr'+'ipt>');}</script>
