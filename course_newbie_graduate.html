@@ -274,7 +274,9 @@
 <button id="lf-fab" onclick="openFb()">💬 反馈 / 建议</button>
 <div class="modal" id="lf-modal"><div class="box fm" id="lf-box"></div></div>
 
-<script src="./vendor/supabase-js.umd.js"></script>
+<!-- v165b：由同域改为 CDN 优先（GitHub Pages 国内 55KB 要 3 秒），失败立刻回退同域 -->
+<script src="https://cdn.jsdelivr.net/gh/chenshungang1986/aidax@main/vendor/supabase-js.umd.js"></script>
+<script>if(typeof supabase==='undefined'){document.write('<scr'+'ipt src="./vendor/supabase-js.umd.js"><\/scr'+'ipt>');}</script>
 
 <script>
 /* ===================== 课程数据（构建时注入） ===================== */
