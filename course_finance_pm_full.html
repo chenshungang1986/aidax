@@ -1671,7 +1671,7 @@ function pickQ(i){
   document.querySelectorAll('#quiz-box .op').forEach(el=>el.classList.remove('right','wrong'));
   document.getElementById('op'+i).classList.add(i===cur.a?'right':'wrong');
   const tip=document.getElementById('qz-tip'); tip.style.display='block';
-  tip.innerHTML=(i===cur.a?'\u2705 正确。':'\u274C 正确答案：'+esc(sub(cur.opts[cur.a]))+'\u3000')+esc(sub(cur.tip));
+  tip.innerHTML=(i===cur.a?'\u2705 正确。':'\u274C 正确答案：'+esc(sub(cur.opts[cur.a]))+'\u3000')+esc(sub(cur.tip||cur.why));   /* v169：题库字段是 why，渲染读 tip 导致解析空白 */
 }
 function nextQ(){
   const qs=QUIZ[qzState.mid];
