@@ -88,11 +88,108 @@
   .vwrap{position:relative}
   .vp{position:relative;background:#0c1430;border-radius:14px;overflow:hidden;aspect-ratio:16/9}
   /* 底部留出字幕条的高度：字幕是「占位」而不是「盖住」PPT 最后一行 */
-  .vp .stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px 16px 60px;pointer-events:none}
-  .slide{display:none;width:100%;height:100%;align-items:center;justify-content:center;flex-direction:column;text-align:center;color:#eaf0ff}
+  .vp .stage{position:absolute;inset:0;overflow:hidden;background:#eef2f7;pointer-events:none;--k:1}
+  /* ===== v161 吉利式 PPT 版式：1600×900 画布，所有尺寸乘 --k 等比缩放 ===== */
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;text-align:left;color:#1a2430;
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif}
   .slide.on{display:flex}
-  .slide h4{font-size:16px;margin:0 0 6px;color:#fff;flex:none}
-  .slide svg{width:100%;height:100%;max-width:100%;max-height:100%;min-height:0}
+  /* ---- 内页：白底 + 顶栏色条 + 左上定位 + 大标题 + 画面 + 右下署名 ---- */
+  .slide.sl{background:#fff;padding:calc(52px*var(--k)) calc(74px*var(--k)) calc(92px*var(--k))}
+  .slide.sl:before{content:'';position:absolute;left:0;top:0;right:0;height:calc(6px*var(--k));
+    background:linear-gradient(90deg,#0a3d91,#3b7bff 62%,rgba(59,123,255,0))}
+  .sl-kick{flex:none;font-size:calc(19px*var(--k));letter-spacing:.14em;color:#4c6d99;font-weight:600}
+  .sl-h{flex:none;margin:calc(14px*var(--k)) 0 0;font-size:calc(42px*var(--k));line-height:1.3;
+    font-weight:800;color:#0a3d91;letter-spacing:.01em;max-width:calc(1420px*var(--k))}
+  .sl-h b{position:relative;z-index:0;font-weight:800}
+  .sl-h b:after{content:'';position:absolute;left:-3px;right:-3px;bottom:calc(4px*var(--k));
+    height:calc(12px*var(--k));background:rgba(120,175,235,.40);z-index:-1}
+  .sl-band{flex:none;margin-top:calc(18px*var(--k));background:#eef4fb;
+    border-left:calc(5px*var(--k)) solid #0a3d91;padding:calc(13px*var(--k)) calc(20px*var(--k));
+    font-size:calc(25px*var(--k));font-weight:600;color:#12406f;line-height:1.5;
+    border-radius:0 calc(8px*var(--k)) calc(8px*var(--k)) 0;max-width:calc(1452px*var(--k))}
+  .sl-body{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;
+    margin-top:calc(10px*var(--k))}
+  .sl-body svg{width:100%;height:100%;max-width:100%;max-height:100%;min-height:0}
+  .sl-tag{position:absolute;right:calc(74px*var(--k));bottom:calc(100px*var(--k));background:#0a3d91;color:#fff;
+    font-size:calc(15px*var(--k));letter-spacing:.04em;padding:calc(5px*var(--k)) calc(13px*var(--k));
+    border-radius:calc(3px*var(--k))}
+  /* ---- 封面 / 结束页：深蓝渐变 + 右下圆环 ---- */
+  .slide.cv{background:linear-gradient(122deg,#07182b 0%,#0d2c4e 46%,#1a4b84 100%);color:#fff;overflow:hidden;
+    justify-content:flex-start;padding:calc(104px*var(--k)) calc(100px*var(--k)) calc(96px*var(--k))}
+  .slide.cv:after{content:'';position:absolute;right:calc(-190px*var(--k));top:calc(150px*var(--k));
+    width:calc(780px*var(--k));height:calc(780px*var(--k));border:1px solid rgba(255,255,255,.10);
+    border-radius:50%;pointer-events:none}
+  .cv-main{position:relative;z-index:1;display:flex;flex-direction:column;align-items:flex-start;width:100%}
+  .cv-kick{flex:none;display:flex;align-items:center;font-size:calc(21px*var(--k));font-weight:600;
+    letter-spacing:.06em;color:#9dc4ee}
+  .cv-kick i{display:block;width:calc(34px*var(--k));height:calc(2px*var(--k));
+    background:rgba(157,196,238,.55);margin:0 calc(16px*var(--k))}
+  .cv-h{flex:none;margin:calc(26px*var(--k)) 0 0;font-weight:800;line-height:1.26;letter-spacing:.01em;
+    color:#fff;max-width:calc(1300px*var(--k))}
+  .cv-h b{font-weight:800;color:#8ec5ff}
+  .cv-sub{flex:none;margin:calc(26px*var(--k)) 0 0;font-size:calc(25px*var(--k));
+    color:rgba(255,255,255,.74);font-weight:500;line-height:1.6;max-width:calc(1180px*var(--k))}
+  .cv-pts{flex:none;margin-top:calc(46px*var(--k));display:grid;grid-template-columns:repeat(3,1fr);
+    gap:calc(18px*var(--k));width:100%;max-width:calc(1400px*var(--k))}
+  .cv-pt{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);
+    border-radius:calc(10px*var(--k));padding:calc(20px*var(--k)) calc(22px*var(--k));
+    display:flex;gap:calc(14px*var(--k));align-items:flex-start}
+  .cv-pt b{font-size:calc(20px*var(--k));font-weight:800;color:#7db8f2;line-height:1.5;flex:0 0 auto}
+  .cv-pt span{font-size:calc(21px*var(--k));font-weight:600;color:rgba(255,255,255,.92);line-height:1.5}
+  /* 封面左下署名块：补住下半部留白，与吉利封面同位置同信息量 */
+  .cv-note{position:absolute;left:calc(100px*var(--k));bottom:calc(150px*var(--k));z-index:1;
+    font-size:calc(17px*var(--k));line-height:1.75;color:rgba(255,255,255,.55);letter-spacing:.04em}
+  .cv-note i{display:block;font-style:normal;color:rgba(255,255,255,.8);font-weight:600;
+    letter-spacing:.12em;margin-bottom:calc(8px*var(--k))}
+  .cv-note div{display:flex;gap:calc(16px*var(--k))}
+  .cv-note b{font-weight:600;color:rgba(255,255,255,.42);min-width:calc(74px*var(--k))}
+  .cv-note span{color:rgba(255,255,255,.7)}
+  .cv-foot{position:absolute;left:calc(100px*var(--k));right:calc(100px*var(--k));bottom:calc(70px*var(--k));
+    z-index:2;display:flex;align-items:center;justify-content:space-between;
+    padding-top:calc(18px*var(--k));border-top:1px solid rgba(255,255,255,.14)}
+  .cv-credit{font-size:calc(17px*var(--k));color:rgba(255,255,255,.68);letter-spacing:.06em}
+  .cv-no{margin-left:auto;font-size:calc(32px*var(--k));font-weight:800;color:rgba(255,255,255,.9);letter-spacing:.04em}
+  .cv-no em{font-size:calc(17px*var(--k));font-style:normal;font-weight:600;
+    color:rgba(255,255,255,.45);margin-left:calc(7px*var(--k))}
+  /* ---- 结束页 ---- */
+  .ce-mark{flex:none;display:flex;align-items:center;font-size:calc(21px*var(--k));
+    font-weight:700;letter-spacing:.14em;color:#8ec5ff}
+  .ce-mark:before{content:'';width:calc(46px*var(--k));height:calc(2px*var(--k));
+    background:#8ec5ff;margin-right:calc(16px*var(--k))}
+  .cv-end .cv-h{margin-top:calc(18px*var(--k))}
+  .ce-pts{flex:none;margin-top:calc(28px*var(--k));width:calc(940px*var(--k))}
+  .ce-lab{font-size:calc(18px*var(--k));font-weight:600;color:rgba(255,255,255,.45);
+    letter-spacing:.14em;margin-bottom:calc(10px*var(--k))}
+  .ce-pt{display:flex;gap:calc(16px*var(--k));align-items:flex-start;padding:calc(12px*var(--k)) 0;
+    border-bottom:1px solid rgba(255,255,255,.09)}
+  .ce-pt b{font-size:calc(19px*var(--k));font-weight:800;color:#7db8f2;flex:0 0 auto;line-height:1.6}
+  .ce-pt span{font-size:calc(24px*var(--k));font-weight:600;color:rgba(255,255,255,.94);line-height:1.5}
+  .ce-nx{flex:none;margin-top:calc(26px*var(--k));display:inline-flex;align-items:center;
+    gap:calc(14px*var(--k));max-width:calc(1240px*var(--k))}
+  .ce-nx i{font-style:normal;background:rgba(142,197,255,.18);color:#8ec5ff;font-size:calc(17px*var(--k));
+    font-weight:700;padding:calc(6px*var(--k)) calc(14px*var(--k));border-radius:calc(4px*var(--k));flex:0 0 auto}
+  .ce-nx-t{min-width:0}
+  .ce-nx-t b{display:block;font-size:calc(22px*var(--k));color:rgba(255,255,255,.9);font-weight:600;line-height:1.45}
+  .ce-wm{position:absolute;right:calc(64px*var(--k));bottom:calc(150px*var(--k));z-index:0;
+    font-size:calc(300px*var(--k));font-weight:800;line-height:1;letter-spacing:-.05em;
+    color:rgba(255,255,255,.055);pointer-events:none}
+  /* 窄屏：1600 画布缩到手机上字会糊，这里把字号放大、次要元素让位 */
+  @media (max-width:620px){
+    .cv-pts,.cv-note,.sl-tag{display:none}
+    .cv-kick,.sl-kick{font-size:calc(30px*var(--k))}
+    .cv-sub{font-size:calc(34px*var(--k))}
+    .cv-h{font-size:calc(104px*var(--k))!important}
+    .sl-h{font-size:calc(52px*var(--k))}
+    .sl-band{font-size:calc(34px*var(--k));padding:calc(16px*var(--k)) calc(24px*var(--k))}
+    .ce-pts{width:100%}
+    .ce-pt span{font-size:calc(34px*var(--k))}
+    .ce-nx-t b{font-size:calc(32px*var(--k))}
+    .ce-wm{font-size:calc(420px*var(--k))}
+    .cv-foot{bottom:calc(58px*var(--k))}
+    .cv-credit,.cv-no em{font-size:calc(24px*var(--k))}
+    .cv-no{font-size:calc(42px*var(--k))}
+  }
+  /* ---- 段圆点：加深色胶囊底，深色封面和白底内页上都看得见 ---- */
   @keyframes pulse{0%,100%{filter:none}50%{filter:drop-shadow(0 0 11px #ffd84d)}}
   .pulse{animation:pulse .78s ease-in-out 3 both}
   /* 高亮跟讲解走：未讲到的条目压暗，讲到的那一项亮起（.k-on 由播放器逐项切换） */
@@ -103,7 +200,7 @@
   @keyframes capin{from{opacity:.25;transform:translateY(3px)}to{opacity:1;transform:none}}
   .cap.swap{animation:capin .16s ease-out}
   @media (max-width:620px){
-    .vp .stage{padding:8px 8px 46px}
+    .vp .stage{padding:0}
     .cap{font-size:13.5px;padding:8px 10px 6px;letter-spacing:0}
     .vbar{gap:7px}.play{padding:7px 12px;font-size:12.5px}.time{font-size:11.5px}
     /* 答案行在窄屏上改成自然折行：flex 会把「→ 标准答案」整体挤到下一行，读起来断得莫名其妙 */
@@ -111,7 +208,7 @@
     .anshit{margin-left:0;display:block;margin-top:3px}
     .opb{margin-right:5px}
   }
-  .dots{position:absolute;top:9px;left:12px;display:flex;gap:5px;justify-content:flex-start}
+  .dots{position:absolute;top:calc(11px*var(--k));left:calc(14px*var(--k));display:flex;gap:calc(5px*var(--k));justify-content:flex-start;z-index:5;padding:calc(5px*var(--k)) calc(9px*var(--k));background:rgba(8,16,40,.42);border-radius:99px}
   /* 缓冲反馈：点播放后立刻给「在加载」的确定感，别让人以为按钮坏了。
      配音约 200–350KB，慢网下要 2–18 秒才能出第一声。 */
   .pbuf{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:none;align-items:center;gap:9px;
@@ -122,7 +219,7 @@
           animation:pbspin .8s linear infinite;flex:none}
   @keyframes pbspin{to{transform:rotate(360deg)}}
   @media (max-width:620px){.pbuf{font-size:12px;padding:8px 13px;gap:7px}}
-  .dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.35)}
+  .dots i{width:calc(7px*var(--k));height:calc(7px*var(--k));border-radius:50%;background:rgba(255,255,255,.38)}
   .dots i.on{background:#fff}
   .vbar{display:flex;align-items:center;gap:10px;margin-top:9px;flex-wrap:wrap}
   .play{background:var(--blue);color:#fff;border:none;padding:8px 17px;border-radius:9px;font-size:13.5px;cursor:pointer;font-weight:600;white-space:nowrap}
@@ -452,8 +549,8 @@
 <script src="https://cdn.jsdelivr.net/gh/chenshungang1986/aidax@main/vendor/supabase-js.umd.js"></script>
 <script>if(typeof supabase==='undefined'){document.write('<scr'+'ipt src="./vendor/supabase-js.umd.js"><\/scr'+'ipt>');}</script>
 <!-- v165：主脚本外置到 CDN（GitHub Pages 国内只有 30–60KB/s，jsDelivr 约 600KB/s 且 gzip） -->
-<script src="https://cdn.jsdelivr.net/gh/chenshungang1986/aidax@main/js/course_auto_ai_pm_deep.v165.js"></script>
-<script>if(!(typeof COURSE!=='undefined')){document.write('<scr'+'ipt src="./js/course_auto_ai_pm_deep.v165.js"><\/scr'+'ipt>');}</script>
+<script src="https://cdn.jsdelivr.net/gh/chenshungang1986/aidax@main/js/course_auto_ai_pm_deep.v169.js"></script>
+<script>if(!(typeof COURSE!=='undefined')){document.write('<scr'+'ipt src="./js/course_auto_ai_pm_deep.v169.js"><\/scr'+'ipt>');}</script>
 
 
 
