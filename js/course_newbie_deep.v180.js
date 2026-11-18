@@ -10,7 +10,7 @@ const AUDIO  = {"M0U1": ["audio/newbie_deep/M0U1_0.m4a", "audio/newbie_deep/M0U1
    任何一段拉不下来，audio.onerror 会按 audLocal() 回落到站内相对路径，不会断音。 */
 const AUDIO_CDN = 'https://cdn.jsdelivr.net/gh/chenshungang1986/aidax@main/';
 /* ⚠️ 重新生成/替换配音后必须改这个版本号，否则 CDN 可能继续命中旧文件（换了音色还是老声音） */
-const AUDIO_VER = '202611161500';
+const AUDIO_VER = '202611181739';
 function audUrl(p){
   if(!p) return '';
   if(/^https?:/i.test(p)) return p;
