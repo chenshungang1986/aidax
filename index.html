@@ -213,23 +213,51 @@ tbody td.rec{background:#F2F7FF;font-weight:800;color:var(--blue-d)}
   section,.path-card,.tier,.pc{break-inside:avoid}
   body{background:#fff}
 }
-</style>
-</head>
-<body>
 
+/* ===== v3 新增：实力背书 STRENGTH ===== */
+.strength{background:#fff}
+.str-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.sc{background:linear-gradient(160deg,#F2F7FF,#fff);border:1px solid #E1EBFB;border-radius:16px;padding:24px 18px;text-align:center;transition:.25s}
+.sc:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:#BFD3FF}
+.sc b{display:block;font-size:34px;font-weight:900;color:var(--blue);letter-spacing:-1px;line-height:1.15}
+.sc b small{font-size:15px;color:var(--navy)}
+.sc span{display:block;font-size:13px;color:var(--ink2);margin-top:8px;line-height:1.5}
+.sc.hi{background:linear-gradient(160deg,var(--navy),#123A78);border-color:transparent}
+.sc.hi b,.sc.hi b small{color:#fff}
+.sc.hi span{color:#C8D8F0}
+
+/* ===== v3 新增：科学测评 + 实景陪练 SCIENCE ===== */
+.sci{background:var(--bg)}
+.sci-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.sci-card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:30px;box-shadow:var(--shadow)}
+.sci-card.hl{border:2px solid var(--blue);background:linear-gradient(180deg,#F5F9FF,#fff)}
+.sci-card .ico{width:54px;height:54px;border-radius:14px;background:#EAF1FF;display:flex;align-items:center;justify-content:center;font-size:27px;margin-bottom:16px}
+.sci-card.hl .ico{background:linear-gradient(135deg,var(--blue),var(--cyan))}
+.sci-card h3{font-size:20px;color:var(--navy);font-weight:850;margin-bottom:6px}
+.sci-card .sub{font-size:13px;color:var(--ink3);margin-bottom:18px}
+.sci-card ul{list-style:none}
+.sci-card li{font-size:14px;color:var(--ink2);padding:9px 0 9px 28px;position:relative;border-top:1px solid #F0F4FA;line-height:1.55}
+.sci-card li::before{content:'';position:absolute;left:2px;top:16px;width:13px;height:13px;border-radius:50%;background:var(--blue);box-shadow:inset 0 0 0 3px #fff}
+.sci-card li b{color:var(--blue-d);font-weight:800}
+
+@media(max-width:900px){.str-grid{grid-template-columns:repeat(2,1fr)}.sci-grid{grid-template-columns:1fr}}
+@media(max-width:620px){.str-grid{grid-template-columns:repeat(2,1fr)}.sci-grid{grid-template-columns:1fr}}
+
+</style>
+<body>
 <!-- NAV -->
 <nav class="nav">
   <div class="nav-in">
     <div class="logo"><span class="mk">A</span>AI达学 <small>AIDAX</small></div>
     <ul class="nav-links">
-      <li><a href="#path">如何开始</a></li>
-      <li><a href="#flow">学习闭环</a></li>
+      <li><a href="#path">三类账号</a></li>
+      <li><a href="#science">科学测评与陪练</a></li>
+      <li><a href="#strength">实力背书</a></li>
       <li><a href="#coverage">行业与岗位</a></li>
-      <li><a href="#proof">效果证据</a></li>
       <li><a href="#price">版本与定价</a></li>
     </ul>
     <div class="nav-cta">
-      <a href="app.html?v=183" class="btn btn-o btn-sm">免费测评</a>
+      <a href="app.html?v=184" class="btn btn-o btn-sm">免费测评</a>
       <a href="#contact" class="btn btn-b btn-sm">预约试点</a>
     </div>
   </div>
@@ -239,19 +267,19 @@ tbody td.rec{background:#F2F7FF;font-weight:800;color:var(--blue-d)}
 <header class="hero" id="top">
   <div class="wrap hero-in">
     <div>
-      <span class="hero-tag"><span class="d"></span>企业 AI 能力测评与学习平台</span>
+      <span class="hero-tag"><span class="d"></span>企业 AI 能力测评与 AI 陪练平台</span>
       <h1>让每个岗位，都有<br><span class="g">看得见的 AI 能力</span></h1>
-      <p class="desc">从 8 维自适应测评定位短板，到千人千面的学习地图，再到行业实景课程与 AI 陪练 —— 用客观前后测数据，把"培训投入"变成"可验证的能力提升"。</p>
+      <p class="desc">8 维自适应测评定位能力短板，AI 实景陪练把知识练成岗位交付物 —— 用前测后测的客观数据，把"培训投入"变成"看得见的能力提升"。</p>
       <div class="hero-btns">
-        <a href="app.html?v=183" class="btn btn-b">免费开始测评 →</a>
-        <a href="#price" class="btn btn-o">查看版本与定价</a>
+        <a href="app.html?v=184" class="btn btn-b">免费开始测评 →</a>
+        <a href="#price" class="btn btn-o">查看三类账号</a>
       </div>
-      <p class="hero-note">无需注册即可体验测评 · 企业版支持数据隔离与专属看板</p>
+      <p class="hero-note">体验版全免费 · 一次完整测评，看清能力再决定投入</p>
       <div class="hero-stats">
-        <div class="st"><b>7<span style="font-size:14px"> 行业</span></b><span>覆盖重点产业场景</span></div>
-        <div class="st"><b>6<span style="font-size:14px"> 岗位</span></b><span>按角色定制学习路径</span></div>
-        <div class="st"><b>8<span style="font-size:14px"> 维度</span></b><span>AI 能力全景画像</span></div>
-        <div class="st"><b>320<span style="font-size:14px"> 段</span></b><span>行业深版实景课程</span></div>
+        <div class="st"><b>12<small style="font-size:14px"> 年</small></b><span>起点课堂培训深耕</span></div>
+        <div class="st"><b>3000<small style="font-size:14px">+</small></b><span>企业培训项目交付</span></div>
+        <div class="st"><b>10000<small style="font-size:14px">+</small></b><span>岗位测评题库训练</span></div>
+        <div class="st"><b>7×6</b><span>行业 × 岗位能力模型</span></div>
       </div>
     </div>
     <div class="dash">
@@ -274,12 +302,12 @@ tbody td.rec{background:#F2F7FF;font-weight:800;color:var(--blue-d)}
             <circle cx="160" cy="214" r="3.5"/><circle cx="78" cy="176" r="3.5"/><circle cx="70" cy="110" r="3.5"/>
           </g>
           <g font-size="11" fill="#4A5B7A" font-weight="600" text-anchor="middle">
-            <text x="160" y="20">提示词</text><text x="300" y="96">工具</text><text x="300" y="205">数据</text>
-            <text x="160" y="262">内容创作</text><text x="22" y="205">工作流</text><text x="22" y="96">安全合规</text>
+            <text x="160" y="20">任务拆解</text><text x="300" y="96">工具应用</text><text x="300" y="205">数据分析</text>
+            <text x="160" y="262">内容生成</text><text x="22" y="205">流程协同</text><text x="22" y="96">安全合规</text>
           </g>
         </svg>
       </div>
-      <div class="dim-row"><span class="nm">数据素养</span><div class="tr"><div class="fl" style="width:86%"></div></div><span class="vl">86</span></div>
+      <div class="dim-row"><span class="nm">数据分析</span><div class="tr"><div class="fl" style="width:86%"></div></div><span class="vl">86</span></div>
       <div class="dim-row"><span class="nm">工具应用</span><div class="tr"><div class="fl" style="width:74%"></div></div><span class="vl">74</span></div>
       <div class="dim-row"><span class="nm">安全合规</span><div class="tr"><div class="fl" style="width:52%"></div></div><span class="vl">52</span></div>
       <div class="dash-foot"><span class="av">学</span>系统已为你生成专属学习地图，优先补强 <b>安全合规</b> 短板</div>
@@ -287,74 +315,130 @@ tbody td.rec{background:#F2F7FF;font-weight:800;color:var(--blue-d)}
   </div>
 </header>
 
-<!-- PATH 三种进入方式 -->
+<!-- STRENGTH 实力背书 -->
+<section class="sec strength" id="strength">
+  <div class="wrap">
+    <div class="center">
+      <span class="eyebrow">实力背书</span>
+      <h2 class="h2">不是从零开始，<span class="hl">是 12 年沉淀</span></h2>
+      <p class="lead">起点课堂深耕企业培训，把真实项目经验蒸馏成可测、可练、可验证的 AI 能力体系。</p>
+    </div>
+    <div class="str-grid">
+      <div class="sc hi"><b>12<small> 年</small></b><span>起点课堂企业培训深耕</span></div>
+      <div class="sc"><b>3000<small>+</small></b><span>企业培训项目交付经验</span></div>
+      <div class="sc"><b>200<small>+</small></b><span>业务场景案例沉淀</span></div>
+      <div class="sc"><b>80<small>+</small></b><span>企业 AI 陪练真实项目萃取</span></div>
+      <div class="sc"><b>60<small> 位</small></b><span>实战专家共创</span></div>
+      <div class="sc"><b>2000<small>+</small></b><span>门 AI 课程蒸馏</span></div>
+      <div class="sc hi"><b>10000<small>+</small></b><span>岗位测评题库训练</span></div>
+      <div class="sc hi"><b>7×6</b><span>行业 × 岗位能力模型训练</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- PATH 三类账号 -->
 <section class="sec path" id="path">
   <div class="wrap">
     <div class="center">
-      <span class="eyebrow">如何开始</span>
-      <h2 class="h2">三条路径，<span class="hl">按需进入</span></h2>
-      <p class="lead">无论你是想先看看、想摸清自己的水平，还是要系统培养一支队伍 —— 都有对应的进入方式，逐级递进，不吃亏、不浪费。</p>
+      <span class="eyebrow">三类账号</span>
+      <h2 class="h2">三类角色，<span class="hl">按需进入</span></h2>
+      <p class="lead">个人想先看看、企业想系统培养一支队伍、或者需要贴身定制 —— 都有对应的一类，逐级递进，不吃亏、不浪费。</p>
     </div>
     <div class="path-grid">
       <div class="path-card">
-        <div class="path-ico">👀</div>
-        <h3>游客试用</h3>
-        <div class="price">免费 · 无需注册</div>
+        <div class="path-ico">🧭</div>
+        <h3>体验版</h3>
+        <div class="price">全免费 · 企业 / 个人均可</div>
         <ul>
-          <li>浏览全部课程介绍与行业方案</li>
-          <li>开放部分单元的免费试学</li>
-          <li>免费简版测评，先看清能力大致水平</li>
-          <li>学习记录仅存本地、不长期保留</li>
+          <li>完整体验 1 次 8 维能力测评</li>
+          <li>测评后查看个人学习计划</li>
+          <li>课程第一章节全部内容免费试听</li>
+          <li>先看清能力，再决定是否投入</li>
         </ul>
-        <a href="app.html?v=183" class="btn btn-o">免登录逛一逛</a>
+        <a href="app.html?v=184" class="btn btn-o">免费开始测评</a>
       </div>
       <div class="path-card hot">
-        <span class="tag">最受欢迎</span>
-        <div class="path-ico">🧭</div>
-        <h3>体验测评</h3>
-        <div class="price">免费 · 手机号即可</div>
+        <span class="tag">企业主推</span>
+        <div class="path-ico">🏢</div>
+        <h3>专业版</h3>
+        <div class="price">¥699 / 账号 · ¥7800 / 岗位</div>
         <ul>
-          <li>手机号注册，解锁完整 8 维测评与报告</li>
-          <li>获得个人能力画像与短板定位</li>
-          <li>匹配专属学习地图与推荐课程</li>
-          <li>AI 多角色陪练免费体验 1 次</li>
+          <li>1 个行业 × 1 个岗位全量测评与课程</li>
+          <li>全部功能开放，AI 陪练不限次</li>
+          <li>不限账号数量，企业内使用 1 年</li>
+          <li>前后测报告 + 企业数据隔离</li>
         </ul>
-        <a href="app.html?v=183" class="btn btn-b">免费开始测评</a>
+        <a href="#contact" class="btn btn-b">预约开通</a>
       </div>
       <div class="path-card">
-        <div class="path-ico">🏢</div>
-        <h3>企业课程账号</h3>
-        <div class="price">按席位 · 企业开通</div>
+        <div class="path-ico">🎯</div>
+        <h3>定制版</h3>
+        <div class="price">按需定制 · 价格面聊</div>
         <ul>
-          <li>解锁全部通用课与行业深版课</li>
-          <li>完整四步闭环 + 作业批改 + 学习证书</li>
-          <li>企业看板：能力分布 / 进度 / 达标率</li>
-          <li>数据隔离、专属题库与定制服务</li>
+          <li>按企业需求定制测评与题库</li>
+          <li>定制课程内容与 AI 陪练角色</li>
+          <li>可叠加线下课程与陪练内容</li>
+          <li>专属服务与交付体系</li>
         </ul>
-        <a href="#contact" class="btn btn-o">申请企业试点</a>
+        <a href="#contact" class="btn btn-o">联系定制</a>
       </div>
     </div>
   </div>
 </section>
 
-<!-- FLOW -->
+<!-- SCIENCE 科学测评 + 实景陪练 -->
+<section class="sec sci" id="science">
+  <div class="wrap">
+    <div class="center">
+      <span class="eyebrow">为什么有效</span>
+      <h2 class="h2">科学测评 <span class="hl">+</span> 实景陪练</h2>
+      <p class="lead">我们不做"看完就算学会"。用科学的测评看清差距，用真实的岗位场景把能力练出来 —— 每一步都有依据、可验证。</p>
+    </div>
+    <div class="sci-grid">
+      <div class="sci-card">
+        <div class="ico">📊</div>
+        <h3>AI 能力测评：科学在哪里</h3>
+        <div class="sub">不是一套题给所有人，而是按行业岗位加权、自适应出题</div>
+        <ul>
+          <li><b>8 维能力模型</b> × 7 行业 6 岗位差异化权重</li>
+          <li><b>10000+ 岗位题库</b>训练，每维 3 级难度自适应出题</li>
+          <li>同维最多 3 题，双对升级 / 一稳一不稳回落，动态校准</li>
+          <li>前测定位短板，后测量化提升，效果用数据说话</li>
+        </ul>
+      </div>
+      <div class="sci-card hl">
+        <div class="ico">🎙️</div>
+        <h3>AI 陪练：有效在哪里</h3>
+        <div class="sub">从 80+ 企业真实项目萃取场景，练的就是岗位上的事</div>
+        <ul>
+          <li><b>真实项目萃取</b>：80+ 企业 AI 陪练场景沉淀</li>
+          <li>AI 扮演评审 / 用户 / 高管多角色，反复对话演练</li>
+          <li>按行业岗位任务设计，练的是真实工作交付物</li>
+          <li>练完即产出可交付成果，能力当场可见</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FLOW 学习闭环 -->
 <section class="sec flow" id="flow">
   <div class="wrap">
     <div class="center">
       <span class="eyebrow">学习闭环</span>
       <h2 class="h2">不是"看完视频"，<span class="hl">是学会用</span></h2>
-      <p class="lead">每个单元都按四步走完，从理解到动手，把一个 AI 知识点真正变成岗位上的交付物。</p>
+      <p class="lead">每个单元都按四步走完，从理解到动手，把一个 AI 能力点真正变成岗位上的交付物。</p>
     </div>
     <div class="flow-steps">
-      <div class="flow-step"><div class="ic">📖</div><h4>理解</h4><p>真人配音行业实景课，把概念讲成一个个真实工作场景。</p></div>
-      <div class="flow-step"><div class="ic">🛠️</div><h4>演示</h4><p>WorkBuddy 场景实操演示，看清每一步怎么操作、产出什么。</p></div>
+      <div class="flow-step"><div class="ic">📖</div><h4>理解</h4><p>真人配音行业实景课，把方法讲成一个个真实工作场景。</p></div>
+      <div class="flow-step"><div class="ic">🛠️</div><h4>演示</h4><p>场景实操演示，看清每一步怎么操作、产出什么。</p></div>
       <div class="flow-step"><div class="ic">✍️</div><h4>我要做</h4><p>带着清晰步骤与交付物示范自己上手，写下真实收获。</p></div>
       <div class="flow-step"><div class="ic">💬</div><h4>陪练</h4><p>AI 扮演评审 / 用户 / 高管多角色，反复练到会为止。</p></div>
     </div>
   </div>
 </section>
 
-<!-- COVERAGE -->
+<!-- COVERAGE 行业与岗位 -->
 <section class="sec cov" id="coverage">
   <div class="wrap">
     <div class="center">
@@ -394,8 +478,8 @@ tbody td.rec{background:#F2F7FF;font-weight:800;color:var(--blue-d)}
           <span class="chip">通用 / 管理者</span>
         </div>
         <div class="course-hl">
-          <div class="ch"><b>8 维能力测评</b><span>提示词 · 工具 · 数据 · 内容</span></div>
-          <div class="ch"><b>自适应出题</b><span>工作流 · 安全 · 战略思维</span></div>
+          <div class="ch"><b>8 维能力测评</b><span>行业岗位加权 · 自适应出题</span></div>
+          <div class="ch"><b>AI 实景陪练</b><span>80+ 真实项目萃取场景</span></div>
           <div class="ch"><b>前后测对比</b><span>量化能力提升幅度</span></div>
         </div>
       </div>
@@ -403,7 +487,7 @@ tbody td.rec{background:#F2F7FF;font-weight:800;color:var(--blue-d)}
   </div>
 </section>
 
-<!-- PROOF -->
+<!-- PROOF 效果证据 -->
 <section class="sec proof" id="proof">
   <div class="wrap">
     <div class="center">
@@ -420,57 +504,52 @@ tbody td.rec{background:#F2F7FF;font-weight:800;color:var(--blue-d)}
   </div>
 </section>
 
-<!-- PRICING -->
+<!-- PRICING 三类账号定价 -->
 <section class="sec price" id="price">
   <div class="wrap">
     <div class="price-head">
       <span class="eyebrow">版本与定价</span>
-      <h2 class="h2">四档版本，<span class="hl">按需要选</span></h2>
-      <p class="lead" style="margin-bottom:0">从免费体验到企业定制，逐级解锁。企业试点另有专属方案与支持。</p>
+      <h2 class="h2">三类账号，<span class="hl">按需要选</span></h2>
+      <p class="lead" style="margin-bottom:0">从全免费体验到按岗位买断，再到企业定制，清晰三档、逐级解锁。</p>
     </div>
     <div class="tiers">
-      <div class="tier"><h4>体验版</h4><div class="p">¥0 <small>/ 人</small></div><div class="who">个人体验 · 先试再决定</div></div>
-      <div class="tier"><h4>标准版</h4><div class="p">¥399 <small>/ 人 / 年</small></div><div class="who">通用能力普及 · 广覆盖</div></div>
-      <div class="tier rec"><span class="flag">主力推荐</span><h4>行业专业版</h4><div class="p">¥699 <small>/ 人 / 年</small></div><div class="who">行业深版课 + AI 陪练 · 效果优先</div></div>
-      <div class="tier"><h4>企业定制版</h4><div class="p">按需 <small>/ 询价</small></div><div class="who">专属题库课程 · 看板认证 · 大客户</div></div>
+      <div class="tier"><h4>体验版</h4><div class="p">¥0 <small>/ 免费</small></div><div class="who">个人 / 企业均可 · 先看清水位</div></div>
+      <div class="tier rec"><span class="flag">企业主推</span><h4>专业版</h4><div class="p">¥699 <small>/ 账号 / 年</small></div><div class="who">或 ¥7800 / 岗位 / 年，不限账号数量</div></div>
+      <div class="tier"><h4>定制版</h4><div class="p">面聊 <small>/ 按需报价</small></div><div class="who">定制测评、内容、陪练 + 线下</div></div>
     </div>
     <div class="cmp">
       <table>
-        <thead><tr><th>功能对比</th><th>体验版</th><th>标准版</th><th class="rec">行业专业版</th><th>企业定制版</th></tr></thead>
+        <thead><tr><th>功能对比</th><th>体验版</th><th class="rec">专业版</th><th>定制版</th></tr></thead>
         <tbody>
-          <tr><td>8 维 AI 能力测评</td><td class="y">✓</td><td class="y">✓</td><td class="rec y">✓</td><td class="y">✓</td></tr>
-          <tr><td>个人能力画像与报告</td><td class="y">✓</td><td class="y">✓</td><td class="rec y">✓</td><td class="y">✓</td></tr>
-          <tr><td>专属学习地图</td><td class="part">基础版</td><td class="y">✓</td><td class="rec y">✓</td><td class="y">✓</td></tr>
-          <tr><td>通用课程（全量）</td><td class="n">—</td><td class="y">✓</td><td class="rec y">✓</td><td class="y">✓</td></tr>
-          <tr><td>行业深版实景课程</td><td class="n">—</td><td class="n">—</td><td class="rec y">✓</td><td class="y">✓</td></tr>
-          <tr><td>WorkBuddy 场景实操</td><td class="n">—</td><td class="part">部分</td><td class="rec y">✓</td><td class="y">✓</td></tr>
-          <tr><td>AI 多角色陪练</td><td class="part">体验 1 次</td><td class="n">—</td><td class="rec y">✓</td><td class="y">✓</td></tr>
-          <tr><td>作业批改与写收获</td><td class="n">—</td><td class="y">✓</td><td class="rec y">✓</td><td class="y">✓</td></tr>
-          <tr><td>学习证书</td><td class="n">—</td><td class="y">✓</td><td class="rec y">✓</td><td class="y">✓</td></tr>
-          <tr><td>前后测效果对比报告</td><td class="n">—</td><td class="part">个人</td><td class="rec part">个人 + 团队</td><td class="y">完整</td></tr>
-          <tr><td>企业管理看板</td><td class="n">—</td><td class="n">—</td><td class="rec part">基础</td><td class="y">完整</td></tr>
-          <tr><td>企业数据隔离</td><td class="n">—</td><td class="n">—</td><td class="rec y">✓</td><td class="y">✓</td></tr>
-          <tr><td>专属题库 / 课程定制</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="y">✓</td></tr>
-          <tr><td>专属服务与认证体系</td><td class="n">—</td><td class="n">—</td><td class="n">—</td><td class="y">✓</td></tr>
+          <tr><td>8 维 AI 能力测评</td><td class="y">完整 1 次</td><td class="rec y">不限次</td><td class="y">定制题库</td></tr>
+          <tr><td>个人能力画像与学习计划</td><td class="y">✓</td><td class="rec y">✓</td><td class="y">定制维度</td></tr>
+          <tr><td>课程第一章节试听</td><td class="y">✓</td><td class="rec y">✓</td><td class="y">✓</td></tr>
+          <tr><td>1 行业 × 1 岗位全量课程</td><td class="n">—</td><td class="rec y">✓</td><td class="y">定制内容</td></tr>
+          <tr><td>AI 实景陪练</td><td class="n">—</td><td class="rec y">不限次</td><td class="y">定制角色</td></tr>
+          <tr><td>前后测效果对比报告</td><td class="n">—</td><td class="rec y">个人 + 团队</td><td class="y">完整</td></tr>
+          <tr><td>企业数据隔离</td><td class="n">—</td><td class="rec y">✓</td><td class="y">✓</td></tr>
+          <tr><td>不限账号数量（1 年）</td><td class="n">—</td><td class="rec y">✓</td><td class="y">✓</td></tr>
+          <tr><td>线下课程与陪练内容</td><td class="n">—</td><td class="n">—</td><td class="y">✓</td></tr>
+          <tr><td>专属服务与交付体系</td><td class="n">—</td><td class="part">常规支持</td><td class="y">✓</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="cmp-note">价格为参考报价，最终以合作合同为准 · 企业采购支持对公签约与按席位开通</p>
+    <p class="cmp-note">专业版 ¥699 / 账号 / 年，或 ¥7800 / 岗位 / 年（不限账号数量）· 定制版价格面聊 · 企业采购支持对公签约</p>
   </div>
 </section>
 
-<!-- PILOT -->
+<!-- PILOT 采购方式 -->
 <section class="sec pilot" id="pilot">
   <div class="wrap">
     <div class="center">
-      <span class="eyebrow">企业试点</span>
-      <h2 class="h2">先小范围跑通，<span class="hl">再规模化推广</span></h2>
-      <p class="lead">我们不建议一上来就全员铺开。以 50 席位为例，用一支小队跑出真实的前后测数据，再决定是否放大。</p>
+      <span class="eyebrow">企业采购</span>
+      <h2 class="h2">先体验，<span class="hl">再规模化</span></h2>
+      <p class="lead">专业版支持按账号或按岗位两种买法。想先跑通效果，可从单账号起步；团队共用就按岗位买断，不限账号数量更划算。</p>
     </div>
     <div class="pilot-grid">
-      <div class="pc"><div class="lb">种子合作 · 限前 3 家</div><div class="amt">¥9,800</div><div class="per">50 席位 · 约 ¥196 / 人</div><div class="desc">面向愿意共创案例的先行企业，需签署案例授权并推荐 1 家同业。</div></div>
-      <div class="pc main"><div class="lb">试点合作 · 主推</div><div class="amt">¥19,800</div><div class="per">50 席位 · 约 ¥396 / 人</div><div class="desc">完整交付 + 前后测 + 效果复盘，适合希望稳妥验证效果的团队。</div></div>
-      <div class="pc"><div class="lb">标准采购</div><div class="amt">¥34,950</div><div class="per">50 席位 · ¥699 / 人</div><div class="desc">按行业专业版标准价采购，含全部功能与常规服务支持。</div></div>
+      <div class="pc"><div class="lb">先体验 · 零成本</div><div class="amt">¥0</div><div class="per">体验版 · 完整测评 1 次</div><div class="desc">个人与企业均可，做一次完整测评、看清学习计划，第一章节全部内容免费试听。</div></div>
+      <div class="pc main"><div class="lb">按账号 · 灵活起步</div><div class="amt">¥699</div><div class="per">/ 账号 / 年</div><div class="desc">适合单人深度使用，1 个行业 × 1 个岗位全量测评、课程与功能，含 AI 陪练。</div></div>
+      <div class="pc"><div class="lb">按岗位 · 团队共用</div><div class="amt">¥7800</div><div class="per">/ 岗位 / 年 · 不限账号</div><div class="desc">一个岗位买断，企业内不限账号数量使用 1 年 —— 团队规模化培养最划算。</div></div>
     </div>
     <div class="swap">
       <div class="ic">🤝</div>
@@ -487,12 +566,12 @@ tbody td.rec{background:#F2F7FF;font-weight:800;color:var(--blue-d)}
       <h2 class="h2">你可能想知道</h2>
     </div>
     <div class="faq-grid">
-      <div class="q"><h4>Q：零基础完全不懂 AI，能用吗？</h4><p>A：可以。测评会从零基础起步，学习地图按你的实际水平推荐内容；"应届生 / 新人"通道专门为零经验学员设计，从认知建立到工具上手逐步推进。</p></div>
-      <div class="q"><h4>Q：免费的测评和付费课程有什么区别？</h4><p>A：免费测评帮你"看清现状"——拿到能力画像、短板定位和学习地图；付费课程帮你"真正提升"——解锁完整课程、行业实操、AI 陪练与效果验证。建议先做免费测评再决定。</p></div>
-      <div class="q"><h4>Q：企业购买后，员工数据会互相看到吗？</h4><p>A：不会。企业版按企业维度做数据隔离，管理员只能看到本企业的团队数据；专属题库与课程也只在授权企业内可见。</p></div>
-      <div class="q"><h4>Q：试点为什么要收一笔钱，不免费送？</h4><p>A：免费试用很难换来真实承诺——学员不认真用、不配合前后测，就得不出可信的效果数据。一笔"肉疼但不痛"的投入，能让双方都认真对待，最终换来对你有价值的效果报告。</p></div>
-      <div class="q"><h4>Q：怎么付款、怎么开通？</h4><p>A：企业采购走线下合同与对公付款，按席位开通账号，不涉及在线支付。具体的席位数量、周期与价格以合作合同为准。</p></div>
-      <div class="q"><h4>Q：我们行业不在列表里，能做吗？</h4><p>A：可以。企业定制版支持专属题库、行业案例与课程定制。已有金融、智能汽车、零售三套成熟深版课可快速平移，其他行业可按需共建。</p></div>
+      <div class="q"><h4>Q：零基础完全不懂 AI，能用吗？</h4><p>A：可以。测评会从零基础起步，学习地图按你的实际水平推荐内容；"应届生 / 新人"通道专门为零经验学员设计，从认知建立到场景上手逐步推进。</p></div>
+      <div class="q"><h4>Q：体验版和专业版有什么区别？</h4><p>A：体验版全免费，可完整体验 1 次测评、看学习计划、试听课程第一章节；专业版解锁 1 个行业 × 1 个岗位的全量测评、课程与所有功能，AI 陪练不限次，并含前后测报告与企业数据隔离。</p></div>
+      <div class="q"><h4>Q：专业版"不限账号数量"怎么理解？</h4><p>A：按岗位买断（¥7800 / 岗位 / 年）后，该岗位下企业内不限账号数量使用 1 年，适合团队规模化培养；如只需单人使用，也可按账号购买（¥699 / 账号 / 年）。</p></div>
+      <div class="q"><h4>Q：定制版都包含什么？</h4><p>A：定制版按企业实际需求定制测评与题库、课程内容与 AI 陪练角色，并可叠加线下课程与陪练内容，配备专属服务与交付体系。价格面聊。</p></div>
+      <div class="q"><h4>Q：企业购买后，员工数据会互相看到吗？</h4><p>A：不会。企业版按企业维度做数据隔离，管理员只能看到本企业的团队数据；测评记录与学习进度按账号归属保存。</p></div>
+      <div class="q"><h4>Q：怎么付款、怎么开通？</h4><p>A：企业采购走线下合同与对公付款，按账号或按岗位开通，不涉及在线支付。具体的岗位数量、周期与价格以合作合同为准。</p></div>
     </div>
   </div>
 </section>
@@ -504,7 +583,7 @@ tbody td.rec{background:#F2F7FF;font-weight:800;color:var(--blue-d)}
       <h2>先看清能力，再决定投入</h2>
       <p>花几分钟做一次免费测评，或直接扫码联系我们，告诉我们你的行业与团队规模，我们给你一份针对性的建议方案。</p>
       <div class="btns">
-        <a href="app.html?v=183" class="btn btn-b">免费开始测评 →</a>
+        <a href="app.html?v=184" class="btn btn-b">免费开始测评 →</a>
         <a href="mailto:tony@wohsipm.com" class="btn btn-g">邮件咨询</a>
       </div>
       <div class="mail">邮箱：<a href="mailto:tony@wohsipm.com">tony@wohsipm.com</a></div>
@@ -517,7 +596,7 @@ tbody td.rec{background:#F2F7FF;font-weight:800;color:var(--blue-d)}
   </div>
 </section>
 <footer class="foot">
-  <div class="wrap">AI达学 AIDAX · 企业 AI 能力测评与学习平台 &nbsp;|&nbsp; 让能力可测、学习可验、投入可证</div>
+  <div class="wrap">AI达学 AIDAX · 企业 AI 能力测评与学习平台 &nbsp;|&nbsp; 起点课堂出品 · 让能力可测、学习可验、投入可证</div>
 </footer>
 
 </body>
