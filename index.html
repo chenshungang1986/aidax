@@ -507,7 +507,13 @@ img{max-width:100%;display:block}
         </ul>
       </li>
       <li><a href="#assess">测评</a></li>
-      <li><a href="#courses">课程</a></li>
+      <li class="nav-drop">
+        <a href="#strength">产品 ▾</a>
+        <ul class="drop-menu">
+          <li><a href="#strength">实力背书</a></li>
+          <li><a href="#science">科学可信</a></li>
+        </ul>
+      </li>
       <li><a href="#price">版本与定价</a></li>
     </ul>
     <div class="nav-cta" data-page-node-id="NRd3Zlm2Fv8vrAx5GcCwE6"><button class="btn btn-primary" onclick="openLogin()" data-page-node-id="ErDZijjBEhcwacdd5XW9FX">立即体验</button></div>
@@ -773,9 +779,6 @@ img{max-width:100%;display:block}
 <!-- ===== COURSES ===== -->
 <section class="courses section" id="courses">
   <div class="container">
-    <div class="section-tag">Courses</div>
-    <h2 class="section-title">真实课程，<span class="hl">先看再决定</span></h2>
-    <p class="section-sub">不用注册也能打开一节真课——看得见内容深度，再谈合作</p>
     <div class="course-grid">
 
       <a class="course-card featured" href="course_finance_pm_deep.html">
@@ -880,36 +883,7 @@ img{max-width:100%;display:block}
   </div>
 </section>
 
-<!-- ===== ENTERPRISE BAND ===== -->
-<section class="ent section" id="enterprise" data-page-node-id="ENT1">
-  <div class="container" data-page-node-id="ENT2">
-    <div class="ent-grid" data-page-node-id="ENT3">
-      <div data-page-node-id="ENT4">
-        <h2 data-page-node-id="ENT5">企业版：让培训效果看得见、管得住</h2>
-        <p data-page-node-id="ENT6">从单点学习走向组织级管理——管理员看板、行业/公司维度测评分析、学员实时反馈汇聚成产品迭代需求，一套系统打通"学、练、管、改"。</p>
-        <ul class="ent-feats" data-page-node-id="ENT7">
-          <li data-page-node-id="EF1">管理员 / 企业管理员双角色，查看访问与考试进度</li>
-          <li data-page-node-id="EF2">按行业、按公司汇总员工测评水平与能力短板</li>
-          <li data-page-node-id="EF3">操作中小气泡实时提交 bug（文字/图/音/视频）</li>
-          <li data-page-node-id="EF4">反馈由AI聚合成产品功能优化迭代需求</li>
-          <li data-page-node-id="EF5">按行业+测评+学习生成培训与陪跑方案</li>
-        </ul>
-        <div class="ent-cta" data-page-node-id="ENT8">
-          <button class="btn btn-primary" onclick="openLogin()" data-page-node-id="EC1">申请企业试用 →</button>
-          <button class="btn btn-outline" onclick="toggleCsPanel()" data-page-node-id="EC2">联系顾问</button>
-        </div>
-      </div>
-      <div class="ent-visual" data-page-node-id="ENT9">
-        <div class="sv-header" data-page-node-id="ENT10"><div class="sv-dot g"></div><span style="font-size:.82rem;color:#a5b4fc">企业培训数据看板（示意）</span></div>
-        <div class="ent-row" data-page-node-id="ER1"><span class="e-lbl">测评完成率</span><div class="e-track"><div class="e-fill" style="width:88%"></div></div><span class="e-val">88%</span></div>
-        <div class="ent-row" data-page-node-id="ER2"><span class="e-lbl">平均综合分</span><div class="e-track"><div class="e-fill" style="width:74%"></div></div><span class="e-val">74</span></div>
-        <div class="ent-row" data-page-node-id="ER3"><span class="e-lbl">必修完成率</span><div class="e-track"><div class="e-fill" style="width:81%"></div></div><span class="e-val">81%</span></div>
-        <div class="ent-row" data-page-node-id="ER4"><span class="e-lbl">反馈处理率</span><div class="e-track"><div class="e-fill" style="width:67%"></div></div><span class="e-val">67%</span></div>
-        <div class="ent-row" data-page-node-id="ER5"><span class="e-lbl">能力提升率</span><div class="e-track"><div class="e-fill" style="width:92%"></div></div><span class="e-val">92%</span></div>
-      </div>
-    </div>
-  </div>
-</section>
+
 
 <!-- ===== v186 实力背书 + 科学性 ===== -->
 <section class="section sec-rise" id="strength">
@@ -978,7 +952,7 @@ img{max-width:100%;display:block}
           <li>测评后查看个人学习计划</li>
           <li>课程第一章节全部试听</li>
         </ul>
-        <a href="app.html?v=186" class="pbtn">免费开始体验</a>
+        <a href="app.html?v=187" class="pbtn">免费开始体验</a>
       </div>
       <div class="plan rec">
         <div class="badge">企业最常用</div>
@@ -1118,10 +1092,10 @@ img{max-width:100%;display:block}
 
 <script>
 // Login functions
-function openLogin(){window.location.href='app.html?v=186'} // 直接进入 app.html 统一登录页（无弹窗）
+function openLogin(){window.location.href='app.html?v=187'} // 直接进入 app.html 统一登录页（无弹窗）
 function closeLogin(){document.getElementById('loginOverlay').classList.remove('show')}
 // 登录统一在 app.html 完成（含公司名称 / 手机号验证码校验）
-function goApp(){window.location.replace('app.html?v=186')}
+function goApp(){window.location.replace('app.html?v=187')}
 
 // Customer service toggle
 function toggleCsPanel(){document.getElementById('csPanel').classList.toggle('show')}
