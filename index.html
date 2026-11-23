@@ -47,7 +47,8 @@ img{max-width:100%;display:block}
   color:var(--c-text);margin-bottom:16px;letter-spacing:-.5px;line-height:1.2;
 }
 .section-title .hl{color:var(--c-primary)}
-.section-sub{font-size:1.1rem;color:var(--c-text2);text-align:center;max-width:640px;margin:0 auto 72px}
+.section-tag{display:flex;width:fit-content;margin-left:auto;margin-right:auto}
+.section-sub{font-size:1.1rem;color:var(--c-text2);text-align:center;max-width:740px;margin:0 auto 72px}
 
 .btn{display:inline-flex;align-items:center;gap:8px;padding:13px 30px;border-radius:50px;font-size:.92rem;font-weight:600;border:none;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
 .btn-primary{background:linear-gradient(135deg,#6366f1,#7c3aed);color:#fff;box-shadow:0 4px 20px rgba(99,102,241,.3)}
@@ -171,7 +172,7 @@ img{max-width:100%;display:block}
 .pain-icon-wrap{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;background:#fef2f2}
 .pain-icon-wrap svg{width:24px;height:24px;stroke:#ef4444}
 .pain-card h3{font-size:1.05rem;font-weight:700;margin-bottom:10px;color:var(--c-text)}
-.pain-card p{font-size:.9rem;color:var(--c-text2);line-height:1.7}
+.pain-card p{font-size:.9rem;color:var(--c-text2);line-height:1.7;text-wrap:pretty}
 .pain-badge{display:inline-flex;margin-top:14px;padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:600;background:#fef2f2;color:#f87171;border:1px solid #fee2e2}
 
 /* ===== Solution ===== */
@@ -286,7 +287,7 @@ img{max-width:100%;display:block}
 .cta::before{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.1) 1px,transparent 1px);background-size:40px 40px}
 .cta .container{position:relative;z-index:1}
 .cta h2{font-size:2.4rem;font-weight:800;color:#fff;margin-bottom:16px;letter-spacing:-.5px}
-.cta p{color:rgba(255,255,255,.75);font-size:1.1rem;margin-bottom:36px;max-width:500px;margin-left:auto;margin-right:auto}
+.cta p{color:rgba(255,255,255,.75);font-size:1.1rem;margin-bottom:36px;max-width:680px;margin-left:auto;margin-right:auto}
 .cta .btn-primary{background:#fff;color:#6366f1;box-shadow:0 4px 24px rgba(0,0,0,.15)}
 .cta .btn-primary:hover{background:#f0f0ff;transform:translateY(-2px)}
 .cta .btn-outline{color:rgba(255,255,255,.8);border-color:rgba(255,255,255,.25)}
@@ -473,6 +474,44 @@ img{max-width:100%;display:block}
 
 @media(max-width:900px){.rise-grid{grid-template-columns:repeat(2,1fr)}.sci-grid,.plans{grid-template-columns:1fr}}
 
+
+/* ===== v191 内容重构新增 ===== */
+.pain-note{display:flex;align-items:center;gap:12px;margin-top:32px;padding:22px 28px;border-radius:16px;background:linear-gradient(94deg,rgba(99,102,241,.07),rgba(139,92,246,.03));border-left:4px solid var(--c-primary);font-size:1rem;color:var(--c-text2);line-height:1.7}
+.pain-note b{color:var(--c-primary-dark);font-weight:800}
+.model-card .m-ico.m-num{font-size:.95rem;font-weight:900;letter-spacing:.5px}
+.sci-principles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:20px}
+.sp-item{background:rgba(99,102,241,.05);border:1px solid rgba(99,102,241,.12);border-radius:14px;padding:18px}
+.sp-item b{display:block;font-size:.92rem;color:var(--c-primary-dark);font-weight:800;margin-bottom:6px}
+.sp-item span{font-size:.8rem;color:var(--c-text3);line-height:1.6}
+.sv-row .track-wrap{position:relative;flex:1}
+.sv-row .track-wrap .track{width:100%}
+.pre-mark{position:absolute;top:50%;transform:translateY(-50%);width:2px;height:16px;background:#94a3b8;border-radius:2px}
+.sv-row .pct{width:70px;text-align:right}
+.sv-foot{margin-top:18px;padding-top:14px;border-top:1px solid var(--c-border);font-size:.75rem;color:var(--c-text3)}
+.cov-sub{margin:46px 0 18px;font-size:.92rem;font-weight:800;color:var(--c-text2);letter-spacing:.5px;display:flex;align-items:center;gap:10px}
+.cov-sub::before{content:'';width:4px;height:16px;border-radius:2px;background:linear-gradient(180deg,var(--c-primary),#8b5cf6)}
+.cov-sub+.ind-grid+.cov-sub{margin-top:52px}
+#strength{background:linear-gradient(180deg,#f8fafc,#fdfdfe);border-top:1px solid var(--c-border);border-bottom:1px solid var(--c-border)}
+.coach-sec{background:linear-gradient(155deg,#141834 0%,#1e1b4b 52%,#2e2670 100%);color:#fff;padding:88px 0;position:relative;overflow:hidden}
+.coach-sec::before{content:'';position:absolute;width:620px;height:620px;right:-240px;top:-280px;border-radius:50%;background:radial-gradient(circle,rgba(99,102,241,.4),transparent 68%)}
+.coach-sec .container{position:relative;z-index:2}
+.coach-sec .c-tag{background:rgba(165,180,252,.14);color:#a5b4fc;border-color:rgba(165,180,252,.28)}
+.coach-sec .c-tag::before{background:#7df3d8}
+.coach-sec .c-title{color:#fff}
+.coach-sec .c-title .hl{color:#a5b4fc}
+.coach-sec .c-sub{color:rgba(255,255,255,.72)}
+.coach-roles{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:8px}
+.coach-role{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:18px;padding:26px 24px;transition:all .3s}
+.coach-role:hover{background:rgba(255,255,255,.1);transform:translateY(-3px)}
+.coach-role .cr-ico{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1rem;color:#151a3a;background:linear-gradient(140deg,#a5b4fc,#7df3d8);margin-bottom:14px}
+.coach-role h4{font-size:1.02rem;font-weight:800;margin-bottom:8px;color:#fff}
+.coach-role p{font-size:.85rem;line-height:1.7;color:rgba(255,255,255,.66);text-wrap:pretty}
+.coach-pts{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:22px}
+.coach-pts>div{font-size:.82rem;line-height:1.7;color:rgba(255,255,255,.68);padding-left:16px;position:relative}
+.coach-pts>div::before{content:'';position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:50%;background:#7df3d8}
+.coach-pts b{display:block;color:#fff;font-weight:800;font-size:.9rem;margin-bottom:2px}
+@media(max-width:900px){.sci-principles,.coach-pts{grid-template-columns:1fr 1fr}.coach-roles{grid-template-columns:1fr}.pain-note{font-size:.9rem;padding:18px 20px}}
+@media(max-width:620px){.sci-principles,.coach-pts{grid-template-columns:1fr}.coach-sec{padding:56px 0}}
 </style>
 </head>
 <body data-page-node-id="4G3nEzExFQVLdzRG8MC9GT">
@@ -513,14 +552,12 @@ img{max-width:100%;display:block}
         <a href="#solution">方案 ▾</a>
         <ul class="drop-menu">
           <li><a href="#solution">四步闭环</a></li>
-          <li><a href="#industries">七大行业</a></li>
-          <li><a href="#roles">六大岗位</a></li>
-          <li><a href="#model">能力模型</a></li>
+          <li><a href="#coverage">行业与岗位</a></li>
           <li><a href="#strength">实力背书</a></li>
         </ul>
       </li>
-      <li><a href="#assess">测评</a></li>
-      <li><a href="#science">陪练</a></li>
+      <li><a href="#science">测评</a></li>
+      <li><a href="#coach">陪练</a></li>
       <li><a href="#price">版本与定价</a></li>
     </ul>
     <div class="nav-cta" data-page-node-id="NRd3Zlm2Fv8vrAx5GcCwE6"><button class="btn btn-primary" onclick="openLogin()" data-page-node-id="ErDZijjBEhcwacdd5XW9FX">立即体验</button></div>
@@ -573,7 +610,7 @@ img{max-width:100%;display:block}
         <div class="hc-cap">
           <div class="hc-cap-title"><span>岗位能力维度表现</span><em>实时更新</em></div>
           <div class="hero-card-bar">
-            <div class="bar-label"><span>任务拆解</span><span>82%</span></div>
+            <div class="bar-label"><span>提示词工程</span><span>82%</span></div>
             <div class="bar-track"><div class="bar-fill" style="width:82%"></div></div>
           </div>
           <div class="hero-card-bar">
@@ -581,7 +618,7 @@ img{max-width:100%;display:block}
             <div class="bar-track"><div class="bar-fill" style="width:67%"></div></div>
           </div>
           <div class="hero-card-bar">
-            <div class="bar-label"><span>流程协同</span><span>91%</span></div>
+            <div class="bar-label"><span>协同工作流</span><span>91%</span></div>
             <div class="bar-track"><div class="bar-fill" style="width:91%"></div></div>
           </div>
         </div>
@@ -597,116 +634,141 @@ img{max-width:100%;display:block}
 
 <!-- ===== PAIN POINTS ===== -->
 <section class="pain section" id="pain" data-page-node-id="Ut6hp28TfxCGvQgzl2E3ua">
-  <div class="container" data-page-node-id="zBpUshKtnosCHkkPg2ZRfl">
-    <div class="section-tag" data-page-node-id="1yCF4sKordsAjVcLT0KLxg">Pain Points</div>
-    <h2 class="section-title" data-page-node-id="9pdMkkHL1eIsTsTOEKdXDb">企业AI培训的<span class="hl" data-page-node-id="EkjIqNJgjctO4TzmiNQwCs">三大痛点</span></h2>
-    <p class="section-sub" data-page-node-id="F7OdNah193TiDbrOYAo8qe">传统的AI培训方式无法满足企业个性化、规模化的需求</p>
-    <div class="pain-grid" data-page-node-id="vZtAxse0AWSdKuJGLEOMHG">
-      <div class="pain-card" data-page-node-id="DOZbGcTyt8M3DWCGsk2r0z">
-        <div class="pain-icon-wrap" data-page-node-id="qHQTvREA4kfb0UHCTQtblp"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="Q4mBw8GhwixgmJhvpNDqAS"><path d="M12 2L2 7l10 5 10-5-10-5z" data-page-node-id="kEOYqQSoCYoAfiNOXJb6C4"/><path d="M2 17l10 5 10-5" data-page-node-id="fKmMoxM76XhhY4odQ4rRSm"/><path d="M2 12l10 5 10-5" data-page-node-id="FAESwZKpWGF8JroQa5DWcH"/></svg></div>
-        <h3 data-page-node-id="IJNC9OdvI9lKAeBp8bXo0U">培训内容一刀切</h3>
-        <p data-page-node-id="Gk3nusaeqqPBsiD2jmkzZB">不同岗位、不同行业对AI的需求截然不同，通用课程无法解决实际业务场景中的具体问题。</p>
-        <div class="pain-badge" data-page-node-id="Xv08vR9SXhubqRZiAFptzU">缺少个性化</div>
+  <div class="container" data-page-node-id="wPAIN1">
+    <div class="section-tag" data-page-node-id="p1">Pain Points</div>
+    <h2 class="section-title" data-page-node-id="p2">企业做 AI 培训，<span class="hl" data-page-node-id="p3">通常卡在这三处</span></h2>
+    <p class="section-sub" data-page-node-id="p4">买了课、发了通知、统计了学时，一年下来却说不清到底带来了什么改变。</p>
+    <div class="pain-grid" data-page-node-id="wPAIN2">
+      <div class="pain-card" data-page-node-id="c1">
+        <div class="pain-icon-wrap" data-page-node-id="i1"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+        <h3 data-page-node-id="h1">内容一刀切</h3>
+        <p data-page-node-id="t1">研发、财务、法务学同一套课，学完跟岗位工作脱节，员工觉得"跟我不相关"。</p>
       </div>
-      <div class="pain-card" data-page-node-id="nBaa0NYlCuBJ8wYchUz9pY">
-        <div class="pain-icon-wrap" data-page-node-id="KBCxUGDC22LQ2ATWMkbrc1"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="8joPDh1FSugeuO7371h97R"><circle cx="12" cy="12" r="10" data-page-node-id="ZuKlW1ejjXiZWedMPMn1Q7"/><path d="M12 6v6l4 2" data-page-node-id="4EYrwLAnN1BdAbVt359IVh"/></svg></div>
-        <h3 data-page-node-id="U549t2xxtMG2qyFKOvL2Uu">学习效果难衡量</h3>
-        <p data-page-node-id="S0fymbxz76SDTE9uhx0RDF">员工学完后是否真正掌握了AI技能？缺少科学的测评体系和实战验证机制，投入产出比不明。</p>
-        <div class="pain-badge" data-page-node-id="dmSJt7oA8IDJhUAgoTgEpA">无法量化</div>
+      <div class="pain-card" data-page-node-id="c2">
+        <div class="pain-icon-wrap" data-page-node-id="i2"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        <h3 data-page-node-id="h2">效果说不清</h3>
+        <p data-page-node-id="t2">只有学时和满意度，没有能力前后对比，投入产出很难向老板交代。</p>
       </div>
-      <div class="pain-card" data-page-node-id="L7DjkYKF7O0TxNMP0x8C5n">
-        <div class="pain-icon-wrap" data-page-node-id="fudAF7PNRoLhD6cMOBjGem"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="uc6CWmDCxBo6VFy5eDURRo"><rect x="2" y="3" width="20" height="14" rx="2" data-page-node-id="d4Jh18YxG5VA85DYLnU02k"/><line x1="8" y1="21" x2="16" y2="21" data-page-node-id="jB57ZIEo4doYTHvKw1SHV1"/><line x1="12" y1="17" x2="12" y2="21" data-page-node-id="GkfpiXoDoXgR3a1seCez3g"/></svg></div>
-        <h3 data-page-node-id="6IiUBRsX5qBk1Pfl4V9dFn">落地转化率低</h3>
-        <p data-page-node-id="wt0Hkv4yU7wNFkkLkST1mW">"学完就忘"是常态，缺乏在实际工作场景中持续练习和反馈的机制，知识难以转化为生产力。</p>
-        <div class="pain-badge" data-page-node-id="13oTg87cjj5OKAiK8aFeZO">学用脱节</div>
+      <div class="pain-card" data-page-node-id="c3">
+        <div class="pain-icon-wrap" data-page-node-id="i3"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+        <h3 data-page-node-id="h3">学了用不上</h3>
+        <p data-page-node-id="t3">知识停在"知道"，没有练习和交付，转不成岗位上看得到的成果。</p>
       </div>
     </div>
-  </div>
-</section>
-
-<!-- ===== 实力背书（v188 移到痛点下方） ===== -->
-<section class="section sec-rise" id="strength">
-  <div class="container">
-    <div class="section-tag">实力背书</div>
-    <h2 class="section-title">不是从零开始，<span class="hl">是 12 年沉淀</span></h2>
-    <p class="section-sub">起点课堂深耕企业培训，把真实项目经验蒸馏成可测、可练、可验证的 AI 能力体系。</p>
-    <div class="rise-grid">
-      <div class="rise-card hi"><div class="num">12<small> 年</small></div><div class="lbl">起点课堂企业培训深耕</div></div>
-      <div class="rise-card"><div class="num">3000<small>+</small></div><div class="lbl">企业培训项目交付经验</div></div>
-      <div class="rise-card"><div class="num">200<small>+</small></div><div class="lbl">业务场景案例沉淀</div></div>
-      <div class="rise-card"><div class="num">80<small>+</small></div><div class="lbl">企业 AI 陪练真实项目萃取</div></div>
-      <div class="rise-card"><div class="num">60<small> 位</small></div><div class="lbl">实战专家共创</div></div>
-      <div class="rise-card"><div class="num">2000<small>+</small></div><div class="lbl">门 AI 课程蒸馏</div></div>
-      <div class="rise-card hi"><div class="num">10000<small>+</small></div><div class="lbl">岗位测评题库训练</div></div>
-      <div class="rise-card hi"><div class="num">7×6</div><div class="lbl">行业 × 岗位能力模型训练</div></div>
-    </div>
+    <div class="pain-note" data-page-node-id="pn">问题往往不在员工不努力，而是培训方式没做对 —— <b>缺定位、缺练习、缺证据</b>。</div>
   </div>
 </section>
 
 <!-- ===== SOLUTION ===== -->
 <section class="solution section" id="solution" data-page-node-id="FNnQPBJTBufakoKN6JyxYm">
   <div class="container" data-page-node-id="RumZieC7UMR6agQGSAzSgc">
-    <div class="section-tag" data-page-node-id="oDgTJolVXefpImoHS2UHas">Solution</div>
-    <h2 class="section-title" data-page-node-id="UxHQT86KfUiz0Qj25yDomo">四步闭环，<span class="hl" data-page-node-id="sWWawl0HKEfsjT8fgAnspE">学以致用</span></h2>
-    <p class="section-sub" data-page-node-id="X1SDFFyWxTd3151gd3SHoB">从诊断到验证，打造企业AI技能提升的完整飞轮</p>
+    <div class="section-tag" data-page-node-id="oDgTJolVXefpImoHS2UHas">How It Works</div>
+    <h2 class="section-title" data-page-node-id="UxHQT86KfUiz0Qj25yDomo">测 → 学 → 练 → 证，<span class="hl" data-page-node-id="sWWawl0HKEfsjT8fgAnspE">一个闭环跑完</span></h2>
+    <p class="section-sub" data-page-node-id="X1SDFFyWxTd3151gd3SHoB">不是把课发下去就结束，而是让能力从"测出来"到"证得住"，全程都有数据。</p>
     <div class="solution-flow" data-page-node-id="gA4z9HZ98ae9gnAAYadFF9">
       <div class="flow-step" data-page-node-id="QmBJWg4IJmC7YOUZmHacjG">
         <div class="step-num" data-page-node-id="RquY2Ei5a24yDxBJ2X9Qst">1</div>
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="iQUsc52S5BGJrO5VOzvPMT"><circle cx="11" cy="11" r="8" data-page-node-id="Bo3pzramncnjX9ra6CUCW7"/><path d="m21 21-4.35-4.35" data-page-node-id="EJU9VGNShiMZQATH4VX5hF"/><path d="M11 8v6" data-page-node-id="Q1mJfGWAiYbWJmSsZKxqy4"/><path d="M8 11h6" data-page-node-id="gT3UwGsHMc0xGw3ru1MrBb"/></svg>
-        <h4 data-page-node-id="CQbSpL7if5eJaGXa5HFFmp">智能测评</h4><p data-page-node-id="qc8YjlwK7Z8F10NvSUopTj">多维度诊断AI能力画像</p>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6"/><path d="M8 11h6"/></svg>
+        <h4 data-page-node-id="CQbSpL7if5eJaGXa5HFFmp">8 维自适应测评</h4><p data-page-node-id="qc8YjlwK7Z8F10NvSUopTj">答对升级、答错回落，逐格定位短板</p>
       </div>
       <div class="flow-arrow" data-page-node-id="MNZIyxPLyPwLvJ1ZsLLUZO">→</div>
       <div class="flow-step" data-page-node-id="iha8HW6IEXlw3lf2OMV6KY">
         <div class="step-num" data-page-node-id="qDoPKMrKVqymhxr5hNcIla">2</div>
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="CbnZNTUcS3DoqDgFZuMkKn"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" data-page-node-id="j4vDQIzRQJIKi2FH0x34dr"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" data-page-node-id="oX0TrnfbM42sMM1YiZdWzg"/></svg>
-        <h4 data-page-node-id="agslbYwRwdboSa4m78dzJn">个性课程</h4><p data-page-node-id="UE0JFOY4dZ7SCH3DxH3P4N">场景×岗位精准匹配</p>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        <h4 data-page-node-id="agslbYwRwdboSa4m78dzJn">个人学习地图</h4><p data-page-node-id="UE0JFOY4dZ7SCH3DxH3P4N">按短板自动排课，只学该学的</p>
       </div>
       <div class="flow-arrow" data-page-node-id="x316ZBEqTCwFfdRRFsoGb8">→</div>
       <div class="flow-step" data-page-node-id="g6RWz4FyJCkS7O1Vo1NnLm">
         <div class="step-num" data-page-node-id="2uDAoksf1Tw6k8mmK5YLFt">3</div>
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="WWQ5N196VrbaGroak717hl"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" data-page-node-id="Ibf4m1hau2ZFH2XlOr2Ud1"/></svg>
-        <h4 data-page-node-id="v9zIc4EOR9QbZCTbI1XeYE">关卡陪练</h4><p data-page-node-id="lSU6YHq4rtpcxjkQOwXqrC">实战任务逐级通关</p>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <h4 data-page-node-id="v9zIc4EOR9QbZCTbI1XeYE">AI 实景陪练</h4><p data-page-node-id="lSU6YHq4rtpcxjkQOwXqrC">真实任务，AI 多轮追问到出成果</p>
       </div>
       <div class="flow-arrow" data-page-node-id="2zPWBfbGuIhllr7wV542fT">→</div>
       <div class="flow-step" data-page-node-id="nv6aBfXob7oEOdbxjj7Goo">
         <div class="step-num" data-page-node-id="l4sq7bTQlkgCUba1yeK8RJ">4</div>
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="4oNaXj3ZyjEnSgFgwPDaj0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" data-page-node-id="tbFuWnaLYVWBrlhQwOtPZK"/><polyline points="22 4 12 14.01 9 11.01" data-page-node-id="sFtt7qmF3PZMuGEu4qzqOz"/></svg>
-        <h4 data-page-node-id="s34vtDAelAyqqSUTebxQaJ">成果验证</h4><p data-page-node-id="JsuRXdIBg39LIlbDQ9rmHz">终期测评量化能力提升</p>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <h4 data-page-node-id="s34vtDAelAyqqSUTebxQaJ">能力档案留痕</h4><p data-page-node-id="JsuRXdIBg39LIlbDQ9rmHz">前测后测对照，提升可量化可追溯</p>
       </div>
     </div>
     <div class="solution-detail" data-page-node-id="4yaAVZQYFLWVEqLuiVPscH">
       <div data-page-node-id="V04lW23SfDS4xnhczTxOYQ">
-        <h3 data-page-node-id="c1o3tdECmDfSMWLNShcUYn">不只是培训，是完整的能力升级方案</h3>
-        <p data-page-node-id="j0LdCfxJKQZ6hg1feISH77">我们为每个学员建立AI能力档案，通过前测-学习-练习-后测的闭环，确保每次培训都有可量化的成果。</p>
-        <ul data-page-node-id="ijaIXdlMQr4D1ei8ZnzZFx">
-          <li data-page-node-id="lG9Wv0Gpjq1lhfAS0InkYb">前测诊断：20题AI能力测评，精准定位薄弱环节</li>
-          <li data-page-node-id="4G9MgjRVzRtpxHWL1oT2CN">场景化学习：匹配行业场景和个人岗位的实战课程</li>
-          <li data-page-node-id="vKwteY8kFdGJ7W4XBmncXn">逐级过关：每课配套练习任务，通过才能解锁下一关</li>
-          <li data-page-node-id="Fv7U1NFE3fwAG0eKuEz5XJ">终期验证：后测对比前测，量化能力提升幅度</li>
-        </ul>
+        <h3 data-page-node-id="c1o3tdECmDfSMWLNShcUYn">前测给起点，后测给证据</h3>
+        <p data-page-node-id="j0LdCfxJKQZ6hg1feISH77">每位学员都有一份 AI 能力档案：入学测一次，知道短板在哪；学完再测一次，看提升了多少。培训结案时，HR 手里是数据，不是一张签到表。</p>
+        <p data-page-node-id="j0b">提升按 8 个维度分别计算，可以细化到"哪个岗位的哪项能力真正练上来了"，也能对照业务结果做复盘。</p>
       </div>
       <div class="solution-visual" data-page-node-id="q06d0ERWvaZRC383YVmmOH">
         <div class="sv-header" data-page-node-id="NWsXm5ULMfneBVog8RcpF1">
           <div class="sv-dot r" data-page-node-id="naSgoWAuOYcV7Ggqs1OLLQ"></div><div class="sv-dot y" data-page-node-id="dYLbttTd7SYqSPC0R6WbES"></div><div class="sv-dot g" data-page-node-id="LXOjBFbnR1qZF3LM8yvQFe"></div>
-          <span style="font-size:.8rem;color:var(--c-text3);margin-left:8px" data-page-node-id="jO2pDDvKdnY4INoGs4egZm">学员能力成长曲线</span>
+          <span style="font-size:.8rem;color:var(--c-text3);margin-left:8px" data-page-node-id="jO2pDDvKdnY4INoGs4egZm">前测 → 后测 · 能力提升对照</span>
         </div>
         <div class="sv-bar" data-page-node-id="aglXKKvW0KRGKUD7f801HC">
-          <div class="sv-row" data-page-node-id="waz19JZucyWmGXGgKWMCgo"><span class="label" data-page-node-id="ktY2DYvFxmFomyXZGqv19q">提示词</span><div class="track" data-page-node-id="JCWFxjTSQW5MTcHfvwpEJC"><div class="fill" style="width:92%;background:linear-gradient(90deg,#6366f1,#8b5cf6)" data-page-node-id="b26ploQfe8sP596yBaJPFC"></div></div><span class="pct" data-page-node-id="ojIviqFyn6TG7m22cqnUTR">92%</span></div>
-          <div class="sv-row" data-page-node-id="bT2dYfsMM8hVgRh3wPGRBw"><span class="label" data-page-node-id="l1m1PRbM0oGyGzCalURiCS">工具使用</span><div class="track" data-page-node-id="rGPCd0Mrg5dIJCyeCwAJXb"><div class="fill" style="width:85%;background:linear-gradient(90deg,#6366f1,#06b6d4)" data-page-node-id="9elAZ6gqPs2BnWBiWRg3hW"></div></div><span class="pct" data-page-node-id="kaMk5qjZP2ENwRl37sT51Z">85%</span></div>
-          <div class="sv-row" data-page-node-id="IaHQwHwaSV2Oe7OXd4bTNi"><span class="label" data-page-node-id="PdbBnyIrr40kxokcIFrID5">场景应用</span><div class="track" data-page-node-id="LwVY87rs3F1ov3zzVHxozA"><div class="fill" style="width:78%;background:linear-gradient(90deg,#6366f1,#10b981)" data-page-node-id="CSqp28Mfj8lQy5hCWpFDBB"></div></div><span class="pct" data-page-node-id="FxWarrvSFZXgu2D0wCqaEu">78%</span></div>
-          <div class="sv-row" data-page-node-id="ehDYDozvYRlQWPxFDdRTCC"><span class="label" data-page-node-id="lNfXUKA09K9q5pVYjsU5WH">安全合规</span><div class="track" data-page-node-id="w5F2VPY8HqLVmvYwu5Qv55"><div class="fill" style="width:70%;background:linear-gradient(90deg,#6366f1,#f59e0b)" data-page-node-id="v0OkdRZtfrsCDBwIlwXK2c"></div></div><span class="pct" data-page-node-id="QiB7Dx0GEtOOt2O6ZWTXyy">70%</span></div>
+          <div class="sv-row" data-page-node-id="r1"><span class="label" data-page-node-id="l1">提示词工程</span><div class="track-wrap"><div class="track" data-page-node-id="t1"><div class="fill" style="width:86%;background:linear-gradient(90deg,#6366f1,#8b5cf6)" data-page-node-id="f1"></div></div><i class="pre-mark" style="left:42%"></i></div><span class="pct" data-page-node-id="p1">42 → 86</span></div>
+          <div class="sv-row" data-page-node-id="r2"><span class="label" data-page-node-id="l2">工具实战</span><div class="track-wrap"><div class="track" data-page-node-id="t2"><div class="fill" style="width:79%;background:linear-gradient(90deg,#6366f1,#06b6d4)" data-page-node-id="f2"></div></div><i class="pre-mark" style="left:38%"></i></div><span class="pct" data-page-node-id="p2">38 → 79</span></div>
+          <div class="sv-row" data-page-node-id="r3"><span class="label" data-page-node-id="l3">数据分析</span><div class="track-wrap"><div class="track" data-page-node-id="t3"><div class="fill" style="width:72%;background:linear-gradient(90deg,#6366f1,#10b981)" data-page-node-id="f3"></div></div><i class="pre-mark" style="left:45%"></i></div><span class="pct" data-page-node-id="p3">45 → 72</span></div>
+          <div class="sv-row" data-page-node-id="r4"><span class="label" data-page-node-id="l4">协同工作流</span><div class="track-wrap"><div class="track" data-page-node-id="t4"><div class="fill" style="width:88%;background:linear-gradient(90deg,#6366f1,#f59e0b)" data-page-node-id="f4"></div></div><i class="pre-mark" style="left:51%"></i></div><span class="pct" data-page-node-id="p4">51 → 88</span></div>
         </div>
+        <div class="sv-foot">竖线为前测位置 · 条形为后测水平</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ===== INDUSTRIES ===== -->
-<section class="industries section" id="industries" data-page-node-id="nBmXBVxaqtGhSwRDNRGNPx">
+<!-- ===== SCIENCE：8 维科学测评（v191 吸收原 model + assess + science 测评部分） ===== -->
+<section class="model section" id="science" data-page-node-id="MOD1">
+  <div class="container">
+    <div class="section-tag">Scientific Assessment</div>
+    <h2 class="section-title">8 维自适应测评，<span class="hl">先测准再谈学什么</span></h2>
+    <p class="section-sub">一张卷子测所有人，测出来的只是平均分。我们要定位的是每个人真实的短板位置。</p>
+    <div class="model-grid">
+      <div class="model-card"><div class="m-ico m-num" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">01</div><h4>提示词工程</h4><p>结构化表达，让 AI 精准理解需求</p></div>
+      <div class="model-card"><div class="m-ico m-num" style="background:linear-gradient(135deg,#06b6d4,#3b82f6)">02</div><h4>工具实战</h4><p>主流 AI 工具深度使用与工作流集成</p></div>
+      <div class="model-card"><div class="m-ico m-num" style="background:linear-gradient(135deg,#10b981,#059669)">03</div><h4>数据分析</h4><p>用 AI 做清洗、归因与可视化洞察</p></div>
+      <div class="model-card"><div class="m-ico m-num" style="background:linear-gradient(135deg,#f59e0b,#f97316)">04</div><h4>内容创作</h4><p>文案、设计、视频脚本一站生成</p></div>
+      <div class="model-card"><div class="m-ico m-num" style="background:linear-gradient(135deg,#8b5cf6,#a855f7)">05</div><h4>辅助开发</h4><p>代码生成、审查、调试自动化</p></div>
+      <div class="model-card"><div class="m-ico m-num" style="background:linear-gradient(135deg,#ec4899,#db2777)">06</div><h4>协同工作流</h4><p>人机协作与跨部门协作规范</p></div>
+      <div class="model-card"><div class="m-ico m-num" style="background:linear-gradient(135deg,#ef4444,#dc2626)">07</div><h4>安全合规</h4><p>数据隐私保护与 AI 治理规范</p></div>
+      <div class="model-card"><div class="m-ico m-num" style="background:linear-gradient(135deg,#14b8a6,#0d9488)">08</div><h4>战略应用</h4><p>用 AI 驱动业务决策与增长</p></div>
+    </div>
+    <div class="sci-principles">
+      <div class="sp-item"><b>8 维 × 3 级</b><span>24 个能力格逐格出题，难度随答题自适应升降</span></div>
+      <div class="sp-item"><b>情境化题干</b><span>考真实岗位判断，不考死记硬背的概念</span></div>
+      <div class="sp-item"><b>岗位加权</b><span>按行业与岗位加权抽题，同岗位不同卷</span></div>
+      <div class="sp-item"><b>前后测对照</b><span>同一套维度复测，提升看数据不看感觉</span></div>
+    </div>
+    <div class="assess-cta" style="margin-top:40px">
+      <button class="btn btn-primary" onclick="openLogin()">免费开始测评 →</button>
+      <span class="as-note">约 10 分钟 · 测完即得个人能力报告</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== COACH：AI 实景陪练（v191 新增独立深色区） ===== -->
+<section class="coach-sec" id="coach">
+  <div class="container">
+    <div class="section-tag c-tag">AI Coaching</div>
+    <h2 class="section-title c-title">AI 实景陪练，<span class="hl">把知识练成能交差的成果</span></h2>
+    <p class="section-sub c-sub">80+ 真实项目萃取的实战任务，AI 扮演评审、用户、高管多轮追问到出成果。</p>
+    <div class="coach-roles">
+      <div class="coach-role"><div class="cr-ico">评</div><h4>AI 扮演评审</h4><p>挑方案漏洞、追问数据来源，逼你把结论讲清楚。</p></div>
+      <div class="coach-role"><div class="cr-ico">客</div><h4>AI 扮演用户</h4><p>用真实客户的语气提异议，练需求澄清与临场应对。</p></div>
+      <div class="coach-role"><div class="cr-ico">管</div><h4>AI 扮演高管</h4><p>只给三分钟，要你把投入产出讲成一句话。</p></div>
+    </div>
+    <div class="coach-pts">
+      <div><b>真实角色设定</b>多轮追问，逼近真实工作沟通场景</div>
+      <div><b>任务驱动</b>每轮对应一个明确的交付物与评判标准</div>
+      <div><b>即时反馈</b>指出盲区与改进点，可以反复演练</div>
+      <div><b>过程留痕</b>对话与成果可回溯，纳入能力档案</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== COVERAGE（v191 合并原「七大行业」+「六大岗位」两区） ===== -->
+<section class="industries section" id="coverage" data-page-node-id="nBmXBVxaqtGhSwRDNRGNPx">
   <div class="container" data-page-node-id="woEGMdmKiez9yeoWlkuGV5">
-    <div class="section-tag" data-page-node-id="sy1ALODsQ5l3rNwPShV1Ew">Industries</div>
-    <h2 class="section-title" data-page-node-id="w9EPgYXKr8pmhhTavbHUWw">覆盖<span class="hl" data-page-node-id="Gpu6BlWCNH4DcDOssopNGC">七大行业</span>场景</h2>
-    <p class="section-sub" data-page-node-id="5IaZb9Al7nEBMjhrefjqRg">每个行业有专属的AI应用场景和实战案例，确保学完即用</p>
+    <div class="section-tag" data-page-node-id="sy1ALODsQ5l3rNwPShV1Ew">Coverage</div>
+    <h2 class="section-title" data-page-node-id="w9EPgYXKr8pmhhTavbHUWw">7 大行业 × 6 大岗位，<span class="hl" data-page-node-id="Gpu6BlWCNH4DcDOssopNGC">都有专属内容</span></h2>
+    <p class="section-sub" data-page-node-id="5IaZb9Al7nEBMjhrefjqRg">同一个 AI 能力，落在不同行业、不同岗位，要解决的问题完全不同。</p>
+    <div class="cov-sub" data-page-node-id="cs1">覆盖七大行业场景</div>
     <div class="ind-grid" data-page-node-id="z165f6tSPEWJbtak8aSGG3">
       <div class="ind-card" data-page-node-id="NbAdsIHHoCgXqo8VHPtC6o">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="uH5HWRl7aDFsGX5JLyCB0B"><rect x="2" y="4" width="20" height="16" rx="2" data-page-node-id="E79vkCyJyg1yrgWhRvXTJD"/><line x1="6" y1="8" x2="10" y2="8" data-page-node-id="hSGLono2sHFI4QN2HaOqAJ"/><line x1="6" y1="12" x2="14" y2="12" data-page-node-id="CxqGqtzoUGrtRvzKj1FZBD"/><line x1="18" y1="12" x2="18.01" y2="12" data-page-node-id="RvGHv49NulF41amkhk1X6u"/><line x1="6" y1="16" x2="10" y2="16" data-page-node-id="DpXr6Jjq13XvQVqufPg7NR"/></svg>
@@ -738,15 +800,7 @@ img{max-width:100%;display:block}
         <span style="display:inline-block;margin-top:6px;font-size:10px;line-height:1.5;padding:1px 7px;border-radius:20px;background:#f1f5f9;color:#94a3b8;border:1px solid #e2e8f0;">课程筹备中</span>
       </div>
     </div>
-  </div>
-</section>
-
-<!-- ===== ROLES ===== -->
-<section class="roles section" id="roles" data-page-node-id="xmod4E9X9zGCdeZmPFXSCx">
-  <div class="container" data-page-node-id="tIG2rXbcKA1m9LrOdDTJOp">
-    <div class="section-tag" data-page-node-id="a5Jg6IYk4CsHUyGrGwENTm">Roles</div>
-    <h2 class="section-title" data-page-node-id="uDCM1X9dOcOD4ZecNOkzyf">适配<span class="hl" data-page-node-id="0XzZDh4hJHDqCUw060plcE">六大岗位</span>需求</h2>
-    <p class="section-sub" data-page-node-id="AdPSm14oHN7GZifeQfu7IF">每个岗位有专属的AI课程体系和实战任务</p>
+    <div class="cov-sub" data-page-node-id="cs2">适配六大岗位需求</div>
     <div class="role-grid" data-page-node-id="desTlA6j6m57prrheNZCoE">
       <div class="role-card-wrap" data-page-node-id="DX38WAdVIrPvty7pY8V8Kk">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="SLcpVaf81MdWV9wEtCdAk9"><polyline points="16 18 22 12 16 6" data-page-node-id="5URQg5FCXUpN9x3GwqClY1"/><polyline points="8 6 2 12 8 18" data-page-node-id="MdRZE1EaRomtAPRMtDFTtE"/></svg>
@@ -776,91 +830,21 @@ img{max-width:100%;display:block}
   </div>
 </section>
 
-<!-- ===== CAPABILITY MODEL (8-dim) ===== -->
-<section class="model section" id="model" data-page-node-id="MOD1">
-  <div class="container" data-page-node-id="MOD2">
-    <div class="section-tag" data-page-node-id="MOD3">AI Capability Model</div>
-    <h2 class="section-title" data-page-node-id="MOD4">科学量化的<span class="hl" data-page-node-id="MOD5">八大AI能力维度</span></h2>
-    <p class="section-sub" data-page-node-id="MOD6">基于企业实际岗位场景定义的能力模型，前测定位短板、学习补全、后测验证，全程数据驱动</p>
-    <div class="model-grid" data-page-node-id="MOD7">
-      <div class="model-card" data-page-node-id="M1"><div class="m-ico" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">💬</div><h4 data-page-node-id="M1a">提示词工程</h4><p data-page-node-id="M1b">结构化表达，让AI精准理解需求</p></div>
-      <div class="model-card" data-page-node-id="M2"><div class="m-ico" style="background:linear-gradient(135deg,#06b6d4,#3b82f6)">🛠️</div><h4 data-page-node-id="M2a">工具实战</h4><p data-page-node-id="M2b">主流AI工具深度使用与工作流集成</p></div>
-      <div class="model-card" data-page-node-id="M3"><div class="m-ico" style="background:linear-gradient(135deg,#10b981,#059669)">📊</div><h4 data-page-node-id="M3a">数据分析</h4><p data-page-node-id="M3b">用AI做清洗、归因与可视化洞察</p></div>
-      <div class="model-card" data-page-node-id="M4"><div class="m-ico" style="background:linear-gradient(135deg,#f59e0b,#f97316)">✍️</div><h4 data-page-node-id="M4a">内容创作</h4><p data-page-node-id="M4b">文案、设计、视频脚本一站生成</p></div>
-      <div class="model-card" data-page-node-id="M5"><div class="m-ico" style="background:linear-gradient(135deg,#8b5cf6,#a855f7)">💻</div><h4 data-page-node-id="M5a">辅助开发</h4><p data-page-node-id="M5b">代码生成、审查、调试自动化</p></div>
-      <div class="model-card" data-page-node-id="M6"><div class="m-ico" style="background:linear-gradient(135deg,#ec4899,#db2777)">🔄</div><h4 data-page-node-id="M6a">协同工作流</h4><p data-page-node-id="M6b">人机协作与人跨部门规范</p></div>
-      <div class="model-card" data-page-node-id="M7"><div class="m-ico" style="background:linear-gradient(135deg,#ef4444,#dc2626)">🛡️</div><h4 data-page-node-id="M7a">安全合规</h4><p data-page-node-id="M7b">数据隐私保护与AI治理规范</p></div>
-      <div class="model-card" data-page-node-id="M8"><div class="m-ico" style="background:linear-gradient(135deg,#14b8a6,#0d9488)">🎯</div><h4 data-page-node-id="M8a">战略应用</h4><p data-page-node-id="M8b">用AI驱动业务决策与增长</p></div>
-    </div>
-  </div>
-</section>
-
-<!-- ===== ASSESSMENT ===== -->
-<section class="assess section" id="assess">
+<!-- ===== 实力背书（v188 移到痛点下方） ===== -->
+<section class="section sec-rise" id="strength">
   <div class="container">
-    <div class="section-tag">Assessment</div>
-    <h2 class="section-title">先测评定位短板，<span class="hl">再千人千面学习</span></h2>
-    <p class="section-sub">三段式测评为每位学员生成专属学习地图——前测定位、学习中自适应、后测验证提升</p>
-    <div class="assess-grid">
-      <div class="assess-card">
-        <div class="as-num">01</div>
-        <div class="as-ico">🧭</div>
-        <h3>AI 基础素养测评</h3>
-        <p>通用 AI 认知与素养摸底，判断每位员工的起点，避免「一刀切」式培训。</p>
-      </div>
-      <div class="assess-card">
-        <div class="as-num">02</div>
-        <div class="as-ico">🎯</div>
-        <h3>岗位自适应双测评</h3>
-        <p>按「行业 × 岗位」自适应出题，答对升级、答错降级，快速定位真实水平。</p>
-      </div>
-      <div class="assess-card">
-        <div class="as-num">03</div>
-        <div class="as-ico">📊</div>
-        <h3>八维能力画像</h3>
-        <p>生成提示词工程、工具实战等八大维度能力画像，自动匹配必修与选修课程。</p>
-      </div>
-    </div>
-    <div class="assess-cta">
-      <button class="btn btn-primary" onclick="openLogin()">免费开始测评 →</button>
-      <span class="as-note">约 10 分钟 · 测完即得个人能力报告</span>
-    </div>
-  </div>
-</section>
-
-
-
-
-
-<!-- ===== 科学可信 ===== -->
-
-
-<section class="section" id="science" style="background:#f8fafc">
-  <div class="container">
-    <div class="section-tag">科学可信</div>
-    <h2 class="section-title">测得出准，<span class="hl">练得成事</span></h2>
-    <p class="section-sub">用测量学的标准做测评，用真实业务场景做陪练——每一项能力都可量化、可追溯、可验证。</p>
-    <div class="sci-grid">
-      <div class="sci-card">
-        <h3><span class="ic">◎</span>AI 能力测评 · 科学有效</h3>
-        <p class="lead">基于 8 维能力模型与 10000+ 岗位题库，自适应出题、按级定位，避免"一卷测所有人"的粗放。</p>
-        <ul>
-          <li><b>8 维 × 3 级题库</b>：每格足量题，难度随答自适应升降</li>
-          <li><b>情境化题干</b>：考真实岗位判断，不考死记概念</li>
-          <li><b>前后测对照</b>：用客观数据量化培训前后的能力变化</li>
-          <li><b>岗位加权</b>：按行业与角色给出差异化能力画像</li>
-        </ul>
-      </div>
-      <div class="sci-card">
-        <h3><span class="ic">◈</span>AI 实景陪练 · 练出交付物</h3>
-        <p class="lead">从 80+ 真实项目萃取任务，AI 扮演评审、用户、高管等角色，把知识练成能交差的成果。</p>
-        <ul>
-          <li><b>真实角色设定</b>：多轮追问，逼近真实工作沟通场景</li>
-          <li><b>任务驱动</b>：每轮陪练对应一个明确交付物与评判标准</li>
-          <li><b>即时反馈</b>：指出盲区与改进点，可反复演练</li>
-          <li><b>过程留痕</b>：对话与成果可回溯，纳入能力档案</li>
-        </ul>
-      </div>
+    <div class="section-tag">实力背书</div>
+    <h2 class="section-title">12 年沉淀，<span class="hl">不是从零开始的团队</span></h2>
+    <p class="section-sub">起点课堂深耕企业培训，把真实项目经验蒸馏成可测、可练、可验证的 AI 能力体系。</p>
+    <div class="rise-grid">
+      <div class="rise-card hi"><div class="num">12<small> 年</small></div><div class="lbl">起点课堂企业培训深耕</div></div>
+      <div class="rise-card"><div class="num">3000<small>+</small></div><div class="lbl">企业培训项目交付经验</div></div>
+      <div class="rise-card"><div class="num">200<small>+</small></div><div class="lbl">业务场景案例沉淀</div></div>
+      <div class="rise-card"><div class="num">80<small>+</small></div><div class="lbl">企业 AI 陪练真实项目萃取</div></div>
+      <div class="rise-card"><div class="num">60<small> 位</small></div><div class="lbl">实战专家共创</div></div>
+      <div class="rise-card"><div class="num">2000<small>+</small></div><div class="lbl">门 AI 课程蒸馏</div></div>
+      <div class="rise-card"><div class="num">10000<small>+</small></div><div class="lbl">岗位测评题库训练</div></div>
+      <div class="rise-card"><div class="num">7×6</div><div class="lbl">行业 × 岗位能力模型训练</div></div>
     </div>
   </div>
 </section>
@@ -883,7 +867,7 @@ img{max-width:100%;display:block}
           <li>测评后查看个人学习计划</li>
           <li>课程第一章节全部试听</li>
         </ul>
-        <a href="app.html?v=190" class="pbtn">免费开始体验</a>
+        <a href="app.html?v=191" class="pbtn">免费开始体验</a>
       </div>
       <div class="plan rec">
         <div class="badge">企业最常用</div>
@@ -895,7 +879,7 @@ img{max-width:100%;display:block}
         <ul class="pl-list">
           <li>所在行业 1 个岗位的全量测评</li>
           <li>全量行业实景课程与题库</li>
-          <li>AI 陪练、学习地图与全部功能</li>
+          <li>AI 实景陪练、学习地图与全部功能</li>
           <li>企业内不限账号数量使用 1 年</li>
         </ul>
         <a href="#contact" class="pbtn">预约试点</a>
@@ -933,10 +917,10 @@ img{max-width:100%;display:block}
 </section>
 
 <!-- ===== CTA ===== -->
-<section class="cta" data-page-node-id="1fQu4t1hT3rHNIg72qz0I7">
+<section class="cta" id="contact" data-page-node-id="1fQu4t1hT3rHNIg72qz0I7">
   <div class="container" data-page-node-id="dGE2GaG0bK0mo4Hfz7TyLy">
-    <h2 data-page-node-id="hE1GCFXUD08tCcMsnnO3rc">准备好让团队成为AI高手了吗？</h2>
-    <p data-page-node-id="CBN3rJQJdf57SLXf9jRG0j">立即开始AI能力测评，获取个性化培训方案，见证团队能力的质变。</p>
+    <h2 data-page-node-id="hE1GCFXUD08tCcMsnnO3rc">先免费测一次，<br>看报告准不准，再谈合作</h2>
+    <p data-page-node-id="CBN3rJQJdf57SLXf9jRG0j">不需要先讲方案，也不用先比价格。让人真正测一遍，报告会写清楚短板在哪。</p>
     <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap" data-page-node-id="d2D68irojUb0Q1FxQEuand">
       <button class="btn btn-primary" onclick="openLogin()" data-page-node-id="0ETd4cITJKvhYHoryNLvRS">免费开始测评</button>
       <button class="btn btn-outline" onclick="openLogin()" data-page-node-id="rS6QNBD4sj9y3ptLk82Pbb">预约演示</button>
@@ -969,11 +953,11 @@ img{max-width:100%;display:block}
           <text x="68" y="28" font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif" font-weight="800" font-size="22" fill="#fff" letter-spacing="-.5" data-page-node-id="9KGZ0jWVPnEXYVnd2evxoE">AI达学</text>
           <text x="68" y="46" font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif" font-weight="500" font-size="10.5" fill="#94a3b8" letter-spacing="1.5" data-page-node-id="jE3tFSCbWMnEdR1pW90fn9">AIDAX · 企业AI学习一站式服务</text>
         </svg>
-        <p style="margin-top:12px;font-size:.85rem" data-page-node-id="vSAP4phcAfEKBowWd7HVwH">AI达学AIDAX为企业提供从能力诊断、个性化课程、场景化陪练到成果验证的完整AI技能培训闭环。</p>
+        <p style="margin-top:12px;font-size:.85rem" data-page-node-id="vSAP4phcAfEKBowWd7HVwH">8 维能力测评 + AI 实景陪练，让每个岗位都有看得见的 AI 能力。</p>
       </div>
-      <div data-page-node-id="Z5n9AWDaNGsFWCaGP8vB0j"><h3 data-page-node-id="uxWi9dqgJblI3MzjGeoyGH">产品</h3><a href="#model" data-page-node-id="zTGv2RbQLfyi1RCKtlXaGl">AI能力模型</a><a href="#" data-page-node-id="B8biAjPGYCRCmAVaamVini">关卡陪练</a><a href="#enterprise" data-page-node-id="SB0vYShkvFXl9HJxeYAkey">企业版 / 管理后台</a></div>
-      <div data-page-node-id="QPew437z1kwkC4dZ4yeWhG"><h3 data-page-node-id="qJ3GqARpHk96FVoBTv0B7Q">资源</h3><a href="#" data-page-node-id="4YWrke2CRSP06Ub9fbSYWf">行业案例</a><a href="#science" data-page-node-id="qq7Z6K55e0HF59UUKmJFLf">科学可信</a><a href="#" data-page-node-id="HwJAaC32FfubetCkKv6clU">帮助中心</a><a href="#" data-page-node-id="ONUIdD5Xe1cHoNKQEtxAgX">API文档</a></div>
-      <div data-page-node-id="vCSQupZEpGbKxlEASBDDHA"><h3 data-page-node-id="s6FYNrhaJc9atIx30y4sss">联系</h3><a href="#" data-page-node-id="X5Aay3tOqZ9uodvqD6KSAI">预约演示</a><a href="#" data-page-node-id="y46ayhiSaeTjzma1r7smPv">企业合作</a><a href="#" data-page-node-id="CjbJtGt6qAH9ofmc6sN0Ah">人才招聘</a></div>
+      <div data-page-node-id="Z5n9AWDaNGsFWCaGP8vB0j"><h3 data-page-node-id="uxWi9dqgJblI3MzjGeoyGH">产品</h3><a href="#science" data-page-node-id="zTGv2RbQLfyi1RCKtlXaGl">AI 能力测评</a><a href="#coach" data-page-node-id="B8biAjPGYCRCmAVaamVini">AI 实景陪练</a><a href="#solution" data-page-node-id="SB0vYShkvFXl9HJxeYAkey">AI 能力档案</a></div>
+      <div data-page-node-id="QPew437z1kwkC4dZ4yeWhG"><h3 data-page-node-id="qJ3GqARpHk96FVoBTv0B7Q">资源</h3><a href="#coverage" data-page-node-id="4YWrke2CRSP06Ub9fbSYWf">行业与岗位</a><a href="#science" data-page-node-id="qq7Z6K55e0HF59UUKmJFLf">科学测评</a><a href="#" data-page-node-id="HwJAaC32FfubetCkKv6clU">帮助中心</a><a href="#" data-page-node-id="ONUIdD5Xe1cHoNKQEtxAgX">API文档</a></div>
+      <div data-page-node-id="vCSQupZEpGbKxlEASBDDHA"><h3 data-page-node-id="s6FYNrhaJc9atIx30y4sss">联系</h3><a href="#contact" data-page-node-id="X5Aay3tOqZ9uodvqD6KSAI">预约演示</a><a href="#" data-page-node-id="y46ayhiSaeTjzma1r7smPv">企业合作</a><a href="#" data-page-node-id="CjbJtGt6qAH9ofmc6sN0Ah">人才招聘</a></div>
     </div>
     <div class="footer-bottom" data-page-node-id="tEZWSP9MDjHpj6zSqdgD1T">
       <span data-page-node-id="ieHeYlfnXUoKzutFGRSC0D">© 2026 AI达学 AIDAX — 企业AI学习一站式服务</span>
@@ -1023,10 +1007,10 @@ img{max-width:100%;display:block}
 
 <script>
 // Login functions
-function openLogin(){window.location.href='app.html?v=190'} // 直接进入 app.html 统一登录页（无弹窗）
+function openLogin(){window.location.href='app.html?v=191'} // 直接进入 app.html 统一登录页（无弹窗）
 function closeLogin(){document.getElementById('loginOverlay').classList.remove('show')}
 // 登录统一在 app.html 完成（含公司名称 / 手机号验证码校验）
-function goApp(){window.location.replace('app.html?v=190')}
+function goApp(){window.location.replace('app.html?v=191')}
 
 // Customer service toggle
 function toggleCsPanel(){document.getElementById('csPanel').classList.toggle('show')}
