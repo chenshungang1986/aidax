@@ -304,6 +304,9 @@ img{max-width:100%;display:block}
 .footer-bottom a{color:#c4b5fd}
 /* Footer logo fix */
 .footer .nav-logo{color:#fff}
+.brand-affil{display:inline-flex;align-items:center;gap:8px;margin-top:2px;padding:6px 13px;border-radius:9px;background:rgba(129,140,248,.1);border:1px solid rgba(129,140,248,.26);font-size:.78rem;font-weight:600;color:#c4b5fd;letter-spacing:.2px;line-height:1.3}
+.brand-affil::before{content:'';width:5px;height:5px;border-radius:50%;background:#818cf8;flex:none;box-shadow:0 0 0 3px rgba(129,140,248,.16)}
+.footer-bottom .fb-sep{margin:0 10px;opacity:.45}
 
 /* ===== Login Modal ===== */
 .login-overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:2000;justify-content:center;align-items:center;backdrop-filter:blur(4px)}
@@ -867,7 +870,7 @@ img{max-width:100%;display:block}
           <li>测评后查看个人学习计划</li>
           <li>课程第一章节全部试听</li>
         </ul>
-        <a href="app.html?v=191" class="pbtn">免费开始体验</a>
+        <a href="app.html?v=192" class="pbtn">免费开始体验</a>
       </div>
       <div class="plan rec">
         <div class="badge">企业最常用</div>
@@ -953,6 +956,7 @@ img{max-width:100%;display:block}
           <text x="68" y="28" font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif" font-weight="800" font-size="22" fill="#fff" letter-spacing="-.5" data-page-node-id="9KGZ0jWVPnEXYVnd2evxoE">AI达学</text>
           <text x="68" y="46" font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif" font-weight="500" font-size="10.5" fill="#94a3b8" letter-spacing="1.5" data-page-node-id="jE3tFSCbWMnEdR1pW90fn9">AIDAX · 企业AI学习一站式服务</text>
         </svg>
+        <div class="brand-affil" data-page-node-id="brandAffil">人人都是产品经理 &amp; 起点课堂 旗下网站</div>
         <p style="margin-top:12px;font-size:.85rem" data-page-node-id="vSAP4phcAfEKBowWd7HVwH">8 维能力测评 + AI 实景陪练，让每个岗位都有看得见的 AI 能力。</p>
       </div>
       <div data-page-node-id="Z5n9AWDaNGsFWCaGP8vB0j"><h3 data-page-node-id="uxWi9dqgJblI3MzjGeoyGH">产品</h3><a href="#science" data-page-node-id="zTGv2RbQLfyi1RCKtlXaGl">AI 能力测评</a><a href="#coach" data-page-node-id="B8biAjPGYCRCmAVaamVini">AI 实景陪练</a><a href="#solution" data-page-node-id="SB0vYShkvFXl9HJxeYAkey">AI 能力档案</a></div>
@@ -961,6 +965,8 @@ img{max-width:100%;display:block}
     </div>
     <div class="footer-bottom" data-page-node-id="tEZWSP9MDjHpj6zSqdgD1T">
       <span data-page-node-id="ieHeYlfnXUoKzutFGRSC0D">© 2026 AI达学 AIDAX — 企业AI学习一站式服务</span>
+      <span class="fb-sep">·</span>
+      <span>人人都是产品经理 &amp; 起点课堂 旗下网站</span>
     </div>
   </div>
 </footer>
@@ -1007,10 +1013,10 @@ img{max-width:100%;display:block}
 
 <script>
 // Login functions
-function openLogin(){window.location.href='app.html?v=191'} // 直接进入 app.html 统一登录页（无弹窗）
+function openLogin(){window.location.href='app.html?v=192'} // 直接进入 app.html 统一登录页（无弹窗）
 function closeLogin(){document.getElementById('loginOverlay').classList.remove('show')}
 // 登录统一在 app.html 完成（含公司名称 / 手机号验证码校验）
-function goApp(){window.location.replace('app.html?v=191')}
+function goApp(){window.location.replace('app.html?v=192')}
 
 // Customer service toggle
 function toggleCsPanel(){document.getElementById('csPanel').classList.toggle('show')}
