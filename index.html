@@ -287,7 +287,7 @@ img{max-width:100%;display:block}
 .solo{padding:88px 0;background:#fff}
 .solo .section-sub{margin-bottom:52px;max-width:620px}
 .solo-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
-.solo-card{position:relative;background:#fff;border:1px solid var(--c-border);border-radius:18px;padding:30px 30px 26px;transition:transform .25s,box-shadow .25s,border-color .25s;overflow:hidden}
+.solo-card{display:block;position:relative;background:#fff;border:1px solid var(--c-border);border-radius:18px;padding:30px 30px 26px;transition:transform .25s,box-shadow .25s,border-color .25s;overflow:hidden;color:inherit;text-decoration:none;cursor:pointer}
 .solo-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#6366f1,#a78bfa)}
 .solo-card:hover{transform:translateY(-4px);box-shadow:0 20px 48px rgba(15,23,42,.1);border-color:rgba(99,102,241,.34)}
 .solo-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
@@ -301,11 +301,14 @@ img{max-width:100%;display:block}
 .solo-list{list-style:none;margin:0;padding:0;display:grid;gap:9px}
 .solo-list li{position:relative;padding-left:19px;font-size:.86rem;color:var(--c-text2);line-height:1.68;text-wrap:pretty}
 .solo-list li::before{content:'';position:absolute;left:3px;top:9px;width:5px;height:5px;border-radius:50%;background:var(--c-primary);opacity:.72}
-.solo-who{margin-top:18px;padding-top:14px;border-top:1px dashed var(--c-border);font-size:.78rem;color:var(--c-text3);line-height:1.65}
+.solo-end{margin-top:18px;padding-top:14px;border-top:1px dashed var(--c-border);display:flex;align-items:flex-end;justify-content:space-between;gap:14px}
+.solo-who{font-size:.78rem;color:var(--c-text3);line-height:1.65;min-width:0}
 .solo-who b{color:var(--c-text2);font-weight:700}
+.solo-go{flex:none;font-size:.82rem;font-weight:800;color:var(--c-primary);white-space:nowrap;transition:transform .22s}
+.solo-card:hover .solo-go{transform:translateX(3px)}
 .solo-foot{margin-top:26px;font-size:.8rem;color:var(--c-text3);text-align:center;line-height:1.7}
 @media(max-width:900px){.solo{padding:70px 0}.solo-grid{grid-template-columns:1fr;gap:18px}.solo-card{padding:24px 22px 22px}.solo .section-sub{margin-bottom:36px}}
-@media(max-width:480px){.solo-tagline{padding-left:0}.solo-meta{font-size:.7rem}}
+@media(max-width:480px){.solo-tagline{padding-left:0}.solo-meta{font-size:.7rem}.solo-end{flex-direction:column;align-items:flex-start;gap:10px}}
 
 /* ===== CTA v196：左侧需求三问 / 右侧三种开始方式 ===== */
 .cta{background:linear-gradient(128deg,#5b5ee8 0%,#7c4fe0 58%,#8b5cf6 100%);padding:86px 0;position:relative;overflow:hidden}
@@ -883,7 +886,7 @@ img{max-width:100%;display:block}
     <h2 class="section-title">有两门课，<span class="hl">不挂行业</span></h2>
     <p class="section-sub">它们不解决「某个行业的问题」，只解决「某一类人从哪开始」。</p>
     <div class="solo-grid">
-      <div class="solo-card">
+      <a class="solo-card" href="course_newbie_deep.html" target="_blank" rel="noopener">
         <div class="solo-top">
           <span class="solo-badge">无行业属性 · 新人通道</span>
           <span class="solo-meta">8 模块 / 64 单元</span>
@@ -899,9 +902,12 @@ img{max-width:100%;display:block}
           <li>文档、PPT、表格、图文视频，四类产出各跑通一件</li>
           <li>公司数据红线与合规底线，不用等出事才补课</li>
         </ul>
-        <div class="solo-who"><b>适合</b>：应届生 · 转行新人 · 尚未定岗</div>
-      </div>
-      <div class="solo-card">
+        <div class="solo-end">
+          <div class="solo-who"><b>适合</b>：应届生 · 转行新人 · 尚未定岗</div>
+          <span class="solo-go">进入课程 →</span>
+        </div>
+      </a>
+      <a class="solo-card" href="course_fde_deep.html" target="_blank" rel="noopener">
         <div class="solo-top">
           <span class="solo-badge">无行业属性 · 交付通道</span>
           <span class="solo-meta">8 模块 / 48 单元</span>
@@ -917,10 +923,13 @@ img{max-width:100%;display:block}
           <li>工程基本功：Prompt、上下文管理、Harness、Loop、MCP 调用</li>
           <li>进场访谈、场景排序、PEV 交付、L0–L4 验收与资产沉淀</li>
         </ul>
-        <div class="solo-who"><b>适合</b>：AI 落地工程师 · 解决方案与交付 · 业务侧 AI 负责人</div>
-      </div>
+        <div class="solo-end">
+          <div class="solo-who"><b>适合</b>：AI 落地工程师 · 解决方案与交付 · 业务侧 AI 负责人</div>
+          <span class="solo-go">进入课程 →</span>
+        </div>
+      </a>
     </div>
-    <p class="solo-foot">两门课都不含行业属性，按岗位独立开通；学完同样进 8 维测评，走前测 → 学 → 练 → 后测的闭环。</p>
+    <p class="solo-foot">两门课都不含行业属性，按岗位独立开通；每单元配练手任务与随堂测验，学完交的是能验收的交付物。</p>
   </div>
 </section>
 
