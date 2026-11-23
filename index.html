@@ -119,6 +119,17 @@ img{max-width:100%;display:block}
 .hero-desc{font-size:1.08rem;color:var(--c-text2);margin-bottom:36px;line-height:1.8;max-width:480px}
 .hero-btns{display:flex;gap:14px;flex-wrap:wrap}
 .hero-note{font-size:.9rem;color:var(--c-text3);margin:14px 0 0}
+.hc-trio{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.hc-trio-item{background:linear-gradient(155deg,#f8fafc,#eef2ff);border:1px solid var(--c-border);border-radius:12px;padding:13px 8px;text-align:center}
+.hc-trio-item .hc-ico{font-size:1rem;color:var(--c-primary);line-height:1;margin-bottom:4px}
+.hc-trio-item .hc-num{font-size:1.55rem;font-weight:800;color:var(--c-primary);letter-spacing:-.5px;line-height:1.15}
+.hc-trio-item .hc-num span{font-size:.8rem;font-weight:600}
+.hc-trio-item .hc-name{font-size:.8rem;font-weight:700;color:var(--c-text);margin-top:3px}
+.hc-trio-item .hc-sub{font-size:.68rem;color:var(--c-text3);margin-top:2px}
+.hc-cap{padding-top:2px}
+.hc-cap-title{display:flex;justify-content:space-between;align-items:center;font-size:.82rem;font-weight:700;color:var(--c-text);margin-bottom:10px}
+.hc-cap-title em{font-style:normal;font-size:.7rem;font-weight:400;color:var(--c-green)}
+.hc-cap .hero-card-bar{margin-top:11px}
 .hero-stats{display:flex;gap:36px;margin-top:32px;padding-top:30px;border-top:1px solid var(--c-border)}
 .hero-stat{text-align:left}
 .hero-stat strong{display:block;font-size:2.2rem;color:var(--c-primary);font-weight:800;letter-spacing:-1px}
@@ -526,34 +537,58 @@ img{max-width:100%;display:block}
       <p class="hero-desc">8 维自适应测评定位能力短板，AI 实景陪练把知识练成岗位交付物 —— 用前测后测的客观数据，把"培训投入"变成"看得见的能力提升"。</p>
       <div class="hero-btns">
         <button class="btn btn-primary" onclick="openLogin()">免费开始测评 →</button>
-        <a class="btn btn-outline" href="#price" style="text-decoration:none">查看三类账号</a>
       </div>
       <p class="hero-note">体验版全免费 · 一次完整测评，看清能力再决定投入</p>
-      <div class="hero-stats">
-        <div class="hero-stat"><strong>12<small> 年</small></strong><span>起点课堂培训深耕</span></div>
-        <div class="hero-stat"><strong>3000+</strong><span>企业培训项目交付</span></div>
-        <div class="hero-stat"><strong>10000+</strong><span>岗位测评题库训练</span></div>
-        <div class="hero-stat"><strong>7×6</strong><span>行业 × 岗位能力模型</span></div>
-      </div>
+
     </div>
     <div class="hero-visual" data-page-node-id="OJGIGCqr0sTyYXaudXEU54">
       <div class="hero-card" data-page-node-id="iYq0ToVoBxvJeUnmzmFvjh">
-        <div class="hero-card-header" data-page-node-id="aYqBTcfEGOrj3zpAu00unH">
-          <div class="hero-card-avatar" data-page-node-id="KifaBz438E70munD1phbRE">AI</div>
-          <div data-page-node-id="BDCL2r3L5n5iIcBfDQW3H1"><h4 data-page-node-id="xsLukaMZP9IhG8LmnbvGOQ">AI能力诊断中...</h4><p data-page-node-id="UAB6tbJPmLWsV9LfkH5dwx">正在分析能力画像</p></div>
+        <div class="hero-card-header">
+          <div class="hero-card-avatar">AI</div>
+          <div>
+            <h4>AI 能力画像已生成</h4>
+            <p>基于 8 维模型 · 10000+ 岗位题库实时诊断</p>
+          </div>
         </div>
-        <div class="hero-card-metrics" data-page-node-id="MjywoVtJCF7MSGLKf5J2pl">
-          <div class="metric-item" data-page-node-id="KhklHC5zAAVR2u7oRBPSFE"><div class="val" data-page-node-id="YBYmtjIXItaEVBib2xJ5Qb">78</div><div class="lbl" data-page-node-id="W80Owp72cvKByWFRNnPUFD">综合评分</div></div>
-          <div class="metric-item" data-page-node-id="klPtGIMqIk7TGfcnj2I1Cf"><div class="val" data-page-node-id="7r5k2yZyk6UH14gR3hkJrk">85%</div><div class="lbl" data-page-node-id="usUIWpVEEO48obJK7cxSVp">学习匹配度</div></div>
+        <div class="hc-trio">
+          <div class="hc-trio-item assess">
+            <div class="hc-ico">◎</div>
+            <div class="hc-num">78<span> 分</span></div>
+            <div class="hc-name">能力测评</div>
+            <div class="hc-sub">8 维精准定位</div>
+          </div>
+          <div class="hc-trio-item course">
+            <div class="hc-ico">▤</div>
+            <div class="hc-num">85<span>%</span></div>
+            <div class="hc-name">课程匹配</div>
+            <div class="hc-sub">个性化学习计划</div>
+          </div>
+          <div class="hc-trio-item coach">
+            <div class="hc-ico">◈</div>
+            <div class="hc-num">4/6</div>
+            <div class="hc-name">AI 陪练</div>
+            <div class="hc-sub">任务交付完成</div>
+          </div>
         </div>
-        <div class="hero-card-bar" data-page-node-id="om9kNLWtKGyfdcjuIhjFaZ">
-          <div class="bar-label" data-page-node-id="AgRI1k01y2y6A24T1mTedr"><span data-page-node-id="EPZXN7HGTW1KkATh3fxZMk">提示词工程</span><span data-page-node-id="lZZPgKYlAYPgGSSExZPjp7">82%</span></div>
-          <div class="bar-track" data-page-node-id="MUtMoo3BheKJu2pdikaebd"><div class="bar-fill" style="width:82%" data-page-node-id="sxMBttDGVCbkmBKM6FWkUC"></div></div>
+        <div class="hc-cap">
+          <div class="hc-cap-title"><span>岗位能力维度表现</span><em>实时更新</em></div>
+          <div class="hero-card-bar">
+            <div class="bar-label"><span>任务拆解</span><span>82%</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width:82%"></div></div>
+          </div>
+          <div class="hero-card-bar">
+            <div class="bar-label"><span>数据分析</span><span>67%</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width:67%"></div></div>
+          </div>
+          <div class="hero-card-bar">
+            <div class="bar-label"><span>流程协同</span><span>91%</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width:91%"></div></div>
+          </div>
         </div>
-        <div class="hero-card-roles" data-page-node-id="1FB0dL2Ge4fZY2WoMguJ5Q">
-          <span class="role-tag" data-page-node-id="HD03HgKav78MmZeUtzowd4">金融数字化</span>
-          <span class="role-tag" data-page-node-id="1BxpiQvibm7osELdKEaFLp">产品经理</span>
-          <span class="role-tag" data-page-node-id="zJgYqA3kv1ZGxzimXrsA2A">中级</span>
+        <div class="hero-card-roles">
+          <span class="role-tag">金融数字化</span>
+          <span class="role-tag">产品经理</span>
+          <span class="role-tag">中级</span>
         </div>
       </div>
     </div>
@@ -848,7 +883,7 @@ img{max-width:100%;display:block}
           <li>测评后查看个人学习计划</li>
           <li>课程第一章节全部试听</li>
         </ul>
-        <a href="app.html?v=189" class="pbtn">免费开始体验</a>
+        <a href="app.html?v=190" class="pbtn">免费开始体验</a>
       </div>
       <div class="plan rec">
         <div class="badge">企业最常用</div>
@@ -988,10 +1023,10 @@ img{max-width:100%;display:block}
 
 <script>
 // Login functions
-function openLogin(){window.location.href='app.html?v=189'} // 直接进入 app.html 统一登录页（无弹窗）
+function openLogin(){window.location.href='app.html?v=190'} // 直接进入 app.html 统一登录页（无弹窗）
 function closeLogin(){document.getElementById('loginOverlay').classList.remove('show')}
 // 登录统一在 app.html 完成（含公司名称 / 手机号验证码校验）
-function goApp(){window.location.replace('app.html?v=189')}
+function goApp(){window.location.replace('app.html?v=190')}
 
 // Customer service toggle
 function toggleCsPanel(){document.getElementById('csPanel').classList.toggle('show')}
