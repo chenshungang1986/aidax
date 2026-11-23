@@ -93,6 +93,15 @@
   .nb-step span { font-size:11.5px; color:var(--text2); line-height:1.55; }
   .nb-actions { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
   .nb-note { font-size:11px; color:var(--text3); margin-top:10px; }
+  /* ===== v199 FDE 通道：与新人通道同构，改用品牌蓝区分（绿=新人 / 蓝=FDE）===== */
+  .newbie-lane.fde-lane { border-color:#c7d2fe; background:linear-gradient(100deg, var(--blue-bg), var(--card) 70%); }
+  .newbie-lane.fde-lane:hover { border-color:var(--blue); }
+  .newbie-lane.fde-lane.on { border:1.5px solid var(--blue); box-shadow:0 0 0 3px rgba(99,102,241,.10); }
+  .newbie-lane.fde-lane .nl-ico { background:#e0e7ff; }
+  .newbie-lane.fde-lane .nl-ico svg { stroke:#4f46e5; }
+  .newbie-lane.fde-lane .nl-go { color:#4f46e5; }
+  .nb-panel.fde-panel { border-color:var(--blue); background:linear-gradient(150deg, var(--blue-bg), var(--card) 55%); }
+  .nb-panel.fde-panel .nb-step b { color:#4f46e5; }
   .pick-lock-note { display:flex; align-items:center; gap:8px; flex-wrap:wrap; background:var(--blue-bg); border:1px solid rgba(99,102,241,.22); border-radius:10px; padding:10px 12px; margin:0 0 14px; font-size:12.5px; line-height:1.6; color:var(--text2); }
   .pick-lock-note b { color:var(--blue); font-weight:600; }
   .pick-lock-note .pick-unlock { margin-left:auto; flex:0 0 auto; cursor:pointer; background:#fff; border:1px solid rgba(99,102,241,.45); color:var(--blue); border-radius:8px; padding:4px 10px; font-size:12px; font-weight:600; }
@@ -908,8 +917,8 @@
 <div class="app" id="app" data-page-node-id="iVtQgw6qKgLzQxdvwF5oCC"><div class="card text-center" style="padding:60px 20px" data-page-node-id="d5xSIRIQrO2LUB7EdYduS8"><p style="color:var(--text2);font-size:14px" data-page-node-id="xgoCTH1RiURl1B80TiSVoJ">正在加载 AI达学...</p></div></div>
 
 <!-- v165：主脚本外置到 CDN（GitHub Pages 国内只有 30–60KB/s，jsDelivr 约 600KB/s 且 gzip） -->
-<script src="https://cdn.jsdelivr.net/gh/chenshungang1986/aidax@main/js/app.v184.js"></script>
-<script>if(!(typeof S!=='undefined')){document.write('<scr'+'ipt src="./js/app.v184.js"><\/scr'+'ipt>');}</script>
+<script src="https://cdn.jsdelivr.net/gh/chenshungang1986/aidax@main/js/app.v185.js"></script>
+<script>if(!(typeof S!=='undefined')){document.write('<scr'+'ipt src="./js/app.v185.js"><\/scr'+'ipt>');}</script>
 
 <!-- ===== FEEDBACK BUBBLE (#2 实时提交 bug：文字/截图/语音/录屏) ===== -->
 <button class="fb-fab" onclick="S.fbOpen()" title="提交问题反馈">
