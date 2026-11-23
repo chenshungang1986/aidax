@@ -283,6 +283,30 @@ img{max-width:100%;display:block}
   .hero-stats{gap:20px;flex-wrap:wrap;margin-top:36px;padding-top:24px}
   .hero-visual{margin:0 auto;max-width:360px}
 }
+/* ===== v198 独立课程（应届生 / FDE，不含行业属性） ===== */
+.solo{padding:88px 0;background:#fff}
+.solo .section-sub{margin-bottom:52px;max-width:620px}
+.solo-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.solo-card{position:relative;background:#fff;border:1px solid var(--c-border);border-radius:18px;padding:30px 30px 26px;transition:transform .25s,box-shadow .25s,border-color .25s;overflow:hidden}
+.solo-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#6366f1,#a78bfa)}
+.solo-card:hover{transform:translateY(-4px);box-shadow:0 20px 48px rgba(15,23,42,.1);border-color:rgba(99,102,241,.34)}
+.solo-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.solo-badge{font-size:.68rem;font-weight:800;letter-spacing:1.1px;color:var(--c-primary);background:rgba(99,102,241,.09);border-radius:6px;padding:4px 9px}
+.solo-meta{font-size:.74rem;color:var(--c-text3);font-weight:700;letter-spacing:.3px}
+.solo-head{display:flex;align-items:center;gap:11px;margin-bottom:8px}
+.solo-ico{width:38px;height:38px;flex:none;border-radius:11px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(99,102,241,.12),rgba(167,139,250,.16))}
+.solo-ico svg{width:20px;height:20px;stroke:var(--c-primary);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.solo-card h3{font-size:1.22rem;font-weight:800;color:var(--c-text);letter-spacing:-.3px;margin:0;line-height:1.4}
+.solo-tagline{font-size:.88rem;color:var(--c-text2);line-height:1.7;margin:0 0 18px;padding-left:49px;text-wrap:pretty}
+.solo-list{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.solo-list li{position:relative;padding-left:19px;font-size:.86rem;color:var(--c-text2);line-height:1.68;text-wrap:pretty}
+.solo-list li::before{content:'';position:absolute;left:3px;top:9px;width:5px;height:5px;border-radius:50%;background:var(--c-primary);opacity:.72}
+.solo-who{margin-top:18px;padding-top:14px;border-top:1px dashed var(--c-border);font-size:.78rem;color:var(--c-text3);line-height:1.65}
+.solo-who b{color:var(--c-text2);font-weight:700}
+.solo-foot{margin-top:26px;font-size:.8rem;color:var(--c-text3);text-align:center;line-height:1.7}
+@media(max-width:900px){.solo{padding:70px 0}.solo-grid{grid-template-columns:1fr;gap:18px}.solo-card{padding:24px 22px 22px}.solo .section-sub{margin-bottom:36px}}
+@media(max-width:480px){.solo-tagline{padding-left:0}.solo-meta{font-size:.7rem}}
+
 /* ===== CTA v196：左侧需求三问 / 右侧三种开始方式 ===== */
 .cta{background:linear-gradient(128deg,#5b5ee8 0%,#7c4fe0 58%,#8b5cf6 100%);padding:86px 0;position:relative;overflow:hidden}
 .cta::before{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.1) 1px,transparent 1px);background-size:40px 40px}
@@ -574,6 +598,7 @@ img{max-width:100%;display:block}
         <ul class="drop-menu">
           <li><a href="#solution">四步闭环</a></li>
           <li><a href="#coverage">行业与岗位</a></li>
+          <li><a href="#solo">独立课程（应届生 / FDE）</a></li>
           <li><a href="#strength">实力背书</a></li>
         </ul>
       </li>
@@ -848,6 +873,54 @@ img{max-width:100%;display:block}
         <h4 data-page-node-id="MfeLwBcsgLmglhUndwsECO">法务与合规</h4><p data-page-node-id="l5tQbWQpZ7f8nkfO0ynUMv">AI合同审查与合规管理</p>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ===== v198 独立课程：应届生 / FDE（不含行业属性） ===== -->
+<section class="section solo" id="solo">
+  <div class="container">
+    <div class="section-tag">独立课程</div>
+    <h2 class="section-title">有两门课，<span class="hl">不挂行业</span></h2>
+    <p class="section-sub">它们不解决「某个行业的问题」，只解决「某一类人从哪开始」。</p>
+    <div class="solo-grid">
+      <div class="solo-card">
+        <div class="solo-top">
+          <span class="solo-badge">无行业属性 · 新人通道</span>
+          <span class="solo-meta">8 模块 / 64 单元</span>
+        </div>
+        <div class="solo-head">
+          <span class="solo-ico"><svg viewBox="0 0 24 24"><path d="M22 10v6"/><path d="M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1 2.5 2 6 2s6-1 6-2v-5"/></svg></span>
+          <h3>应届生 · 职场新人 AI 上手</h3>
+        </div>
+        <p class="solo-tagline">从「AI 能做什么」到「交得出活儿」，第一周就立住正确预期。</p>
+        <ul class="solo-list">
+          <li>任务三分法：哪些能整段交、哪些只能打草稿、哪些碰都不能碰</li>
+          <li>提示词四要素模板，写出第一句真能用的指令</li>
+          <li>文档、PPT、表格、图文视频，四类产出各跑通一件</li>
+          <li>公司数据红线与合规底线，不用等出事才补课</li>
+        </ul>
+        <div class="solo-who"><b>适合</b>：应届生 · 转行新人 · 尚未定岗</div>
+      </div>
+      <div class="solo-card">
+        <div class="solo-top">
+          <span class="solo-badge">无行业属性 · 交付通道</span>
+          <span class="solo-meta">8 模块 / 48 单元</span>
+        </div>
+        <div class="solo-head">
+          <span class="solo-ico"><svg viewBox="0 0 24 24"><path d="M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span>
+          <h3>FDE · 前沿部署工程师</h3>
+        </div>
+        <p class="solo-tagline">从「进场挖需求」到「交付验收 + 经验沉淀」，把 AI 真正落进业务现场。</p>
+        <ul class="solo-list">
+          <li>FDE 是谁：真假 FDE 的试金石、三种能力侧与三个常见陷阱</li>
+          <li>WorkBuddy 与工具矩阵：Skill、专属专家、连接器、自动化任务</li>
+          <li>工程基本功：Prompt、上下文管理、Harness、Loop、MCP 调用</li>
+          <li>进场访谈、场景排序、PEV 交付、L0–L4 验收与资产沉淀</li>
+        </ul>
+        <div class="solo-who"><b>适合</b>：AI 落地工程师 · 解决方案与交付 · 业务侧 AI 负责人</div>
+      </div>
+    </div>
+    <p class="solo-foot">两门课都不含行业属性，按岗位独立开通；学完同样进 8 维测评，走前测 → 学 → 练 → 后测的闭环。</p>
   </div>
 </section>
 
