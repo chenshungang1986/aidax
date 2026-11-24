@@ -550,8 +550,8 @@
 <script src="https://cdn.jsdelivr.net/gh/chenshungang1986/aidax@main/vendor/supabase-js.umd.js"></script>
 <script>if(typeof supabase==='undefined'){document.write('<scr'+'ipt src="./vendor/supabase-js.umd.js"><\/scr'+'ipt>');}</script>
 
-<!-- v165：主脚本外置到 CDN（GitHub Pages 国内只有 30–60KB/s，jsDelivr 约 600KB/s 且 gzip） -->
-<script src="https://gcore.jsdelivr.net/gh/chenshungang1986/aidax@main/js/course_fde_deep.v6.js"></script>
+<!-- v206：脚本与配音一律用 commit sha 锁定（@main 是强缓存，仓库更新后仍回旧文件，实测踩过） -->
+<script src="https://gcore.jsdelivr.net/gh/chenshungang1986/aidax@360da341fb20b8e1b1179ae75552b87c3c3d1a99/js/course_fde_deep.v6.js"></script>
 <script>if(!(typeof COURSE!=='undefined')){document.write('<scr'+'ipt src="./js/course_fde_deep.v6.js"><\/scr'+'ipt>');}</script>
 
 
