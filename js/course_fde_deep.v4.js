@@ -12,9 +12,13 @@ const AUDIO  = {"M0U1": ["audio/fde_deep/M0U1_0.m4a", "audio/fde_deep/M0U1_1.m4a
    （M0U1 2.5s / M6U7 10.9s / M3U5 18.6s），用户体感就是「点了没反应」。
    同一文件走 jsDelivr 实测 120KB/s，且国内可直连。
    任何一段拉不下来，audio.onerror 会按 audLocal() 回落到站内相对路径，不会断音。 */
-const AUDIO_CDN = 'https://cdn.jsdelivr.net/gh/chenshungang1986/aidax@main/';
+/* ⚠️ 2026-11-24：cdn.jsdelivr.net 对该仓库报「Package size exceeded the configured limit
+   of 50 MB」，新文件一律 403（老文件靠边缘缓存还能出）。gcore.jsdelivr.net 是同一套
+   jsDelivr 的备用节点，实测本仓库全部音频 200 且 ~70–97KB/s，故改走它。
+   两个节点都拉不到时，audio.onerror 仍按 audLocal() 回落站内相对路径。 */
+const AUDIO_CDN = 'https://gcore.jsdelivr.net/gh/chenshungang1986/aidax@main/';
 /* ⚠️ 重新生成/替换配音后必须改这个版本号，否则 CDN 可能继续命中旧文件（换了音色还是老声音） */
-const AUDIO_VER = '202611241356';
+const AUDIO_VER = '202611241410';
 function audUrl(p){
   if(!p) return '';
   if(/^https?:/i.test(p)) return p;
