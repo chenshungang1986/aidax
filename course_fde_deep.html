@@ -137,13 +137,13 @@
   .cv-pt b{font-size:calc(20px*var(--k));font-weight:800;color:#7db8f2;line-height:1.5;flex:0 0 auto}
   .cv-pt span{font-size:calc(21px*var(--k));font-weight:600;color:rgba(255,255,255,.92);line-height:1.5}
   /* 封面左下署名块：补住下半部留白，与吉利封面同位置同信息量 */
-  .cv-note{position:absolute;left:calc(100px*var(--k));bottom:calc(150px*var(--k));z-index:1;
+  .cv-note{position:absolute;left:calc(100px*var(--k));bottom:calc(150px*var(--k));z-index:1;width:calc(520px*var(--k));
     font-size:calc(17px*var(--k));line-height:1.75;color:rgba(255,255,255,.55);letter-spacing:.04em}
   .cv-note i{display:block;font-style:normal;color:rgba(255,255,255,.8);font-weight:600;
     letter-spacing:.12em;margin-bottom:calc(8px*var(--k))}
   .cv-note div{display:flex;gap:calc(16px*var(--k))}
   .cv-note b{font-weight:600;color:rgba(255,255,255,.42);min-width:calc(74px*var(--k))}
-  .cv-note span{color:rgba(255,255,255,.7)}
+  .cv-note span{color:rgba(255,255,255,.7);white-space:nowrap}
   .cv-foot{position:absolute;left:calc(100px*var(--k));right:calc(100px*var(--k));bottom:calc(70px*var(--k));
     z-index:2;display:flex;align-items:center;justify-content:space-between;
     padding-top:calc(18px*var(--k));border-top:1px solid rgba(255,255,255,.14)}
@@ -551,8 +551,8 @@
 <script>if(typeof supabase==='undefined'){document.write('<scr'+'ipt src="./vendor/supabase-js.umd.js"><\/scr'+'ipt>');}</script>
 
 <!-- v206：脚本与配音一律用 commit sha 锁定（@main 是强缓存，仓库更新后仍回旧文件，实测踩过） -->
-<script src="https://gcore.jsdelivr.net/gh/chenshungang1986/aidax@main/js/course_fde_deep.v8.js"></script>
-<script>if(!(typeof COURSE!=='undefined')){document.write('<scr'+'ipt src="./js/course_fde_deep.v8.js"><\/scr'+'ipt>');}</script>
+<script src="https://gcore.jsdelivr.net/gh/chenshungang1986/aidax@main/js/course_fde_deep.v9.js"></script>
+<script>if(!(typeof COURSE!=='undefined')){document.write('<scr'+'ipt src="./js/course_fde_deep.v9.js"><\/scr'+'ipt>');}</script>
 
 
 
