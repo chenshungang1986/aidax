@@ -1377,14 +1377,17 @@ function makePlayer(uid, slides, aud){
     audio.onerror=function(){
       if(mode!=='audio'||audioIdx!==cur) return;
       const full0=audio.dataset.full||'';
-      const alt=audAlt(full0);
-      if(alt && audio.dataset.alt!=='1'){
-        /* 先换 CDN 节点重试一次，成功就不用退到站内 */
-        audio.dataset.alt='1';
-        audio.src=alt;
-        bufOn('正在切换线路…');
-        try{ const pr=audio.play(); if(pr&&pr.catch) pr.catch(function(){}); }catch(e){}
-        return;
+      const tries=Number(audio.dataset.alt||0);
+      if(tries<2){
+        /* jsDelivr 对新文件偶发 403，先轮换 CDN 节点再退站内 */
+        const alt=audAlt(audio.currentSrc||audio.src||full0);
+        if(alt){
+          audio.dataset.alt=String(tries+1);
+          audio.src=alt;
+          bufOn('正在切换线路…');
+          try{ const pr=audio.play(); if(pr&&pr.catch) pr.catch(function(){}); }catch(e){}
+          return;
+        }
       }
       const loc=localOf(full0);
       if(loc && audio.dataset.fb!==loc){
