@@ -489,9 +489,10 @@ img{max-width:100%;display:block}
 .sci-card li b{color:var(--c-primary-dark);font-weight:700}
 .sci-card li::before{content:'✓';flex:none;width:19px;height:19px;border-radius:50%;background:#eef2ff;color:#6366f1;font-size:.72rem;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:2px}
 
-/* 三类定价 */
+/* 四类定价（v216：体验¥199 / 标准¥699 / 专业¥12999 / 定制面议） */
 .price{background:#fff}
-.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:8px;align-items:stretch}
+.plans{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:8px;align-items:stretch}
+@media(max-width:1200px){.plans{grid-template-columns:repeat(2,1fr)}}
 .plan{background:#fff;border:1.5px solid var(--c-border);border-radius:var(--radius);padding:30px 26px;position:relative;box-shadow:var(--shadow);display:flex;flex-direction:column}
 .plan.rec{border-color:#6366f1;background:linear-gradient(180deg,#f5f3ff 0%,#fff 42%);box-shadow:0 12px 40px rgba(99,102,241,.16)}
 .plan .badge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#6366f1,#7c3aed);color:#fff;font-size:.72rem;font-weight:700;padding:5px 16px;border-radius:50px;white-space:nowrap}
@@ -521,6 +522,11 @@ img{max-width:100%;display:block}
 
 
 @media(max-width:900px){.rise-grid{grid-template-columns:repeat(2,1fr)}.sci-grid,.plans{grid-template-columns:1fr}}
+/* v216 推荐码提示条 */
+.price-note{display:flex;align-items:center;gap:10px;background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:13px 18px;margin:22px 0 4px;font-size:.88rem;color:#7c2d12;line-height:1.6}
+.price-note b{color:#c2410c}
+.price-note .pn-ico{flex:none;width:22px;height:22px;border-radius:50%;background:#f97316;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:13px}
+.price-note a{color:#c2410c;font-weight:700;text-decoration:none;white-space:nowrap}
 
 
 /* ===== v191 内容重构新增 ===== */
@@ -624,7 +630,7 @@ img{max-width:100%;display:block}
       <div class="hero-btns">
         <button class="btn btn-primary" onclick="openLogin()">免费开始测评 →</button>
       </div>
-      <p class="hero-note">体验版全免费 · 一次完整测评，看清能力再决定投入</p>
+      <p class="hero-note">AI 能力测评永久免费 · 看清能力再决定投入（看课程需推荐码）</p>
 
     </div>
     <div class="hero-visual" data-page-node-id="OJGIGCqr0sTyYXaudXEU54">
@@ -953,38 +959,52 @@ img{max-width:100%;display:block}
   </div>
 </section>
 
-<!-- ===== v186 三类账号定价 ===== -->
+<!-- ===== v216 四类账号定价 ===== -->
 <section class="section price" id="price">
   <div class="container">
     <div class="section-tag">版本与定价</div>
-    <h2 class="section-title">三类账号，<span class="hl">按需选择</span></h2>
-    <p class="section-sub">从免费体验到岗位通享再到量身定制，路径清晰，投入可控。</p>
+    <h2 class="section-title">四类版本，<span class="hl">按需选择</span></h2>
+    <p class="section-sub">AI 能力测评永久免费开放；观看课程需先激活试用或正式开通，路径清晰，投入可控。</p>
     <div class="plans">
       <div class="plan">
         <div class="pname">体验版</div>
-        <div class="pwho">企业 / 个人均可 · 全免费</div>
-        <div class="pprice free">¥0</div>
-        <div class="punit">永久免费</div>
-        <p class="pdesc">先看清能力，再决定投入。</p>
+        <div class="pwho">个人 / 企业 · 14 天试用</div>
+        <div class="pprice">¥199<small> / 14 天</small></div>
+        <div class="punit">凭体验版推荐码免费试用</div>
+        <p class="pdesc">先看一章课程，判断值不值得投入。</p>
         <ul class="pl-list">
           <li>完整体验 1 次 AI 能力测评</li>
           <li>测评后查看个人学习计划</li>
           <li>课程第一章节全部试听</li>
         </ul>
-        <a href="app.html?v=201" class="pbtn">免费开始体验</a>
+        <a href="app.html?v=202" class="pbtn">免费测评</a>
       </div>
       <div class="plan rec">
         <div class="badge">企业最常用</div>
-        <div class="pname">专业版</div>
-        <div class="pwho">1 个行业 × 1 个岗位 · 不限账号</div>
+        <div class="pname">标准版</div>
+        <div class="pwho">1 个行业 × 1 个岗位 · 按账号</div>
         <div class="pprice">¥699<small> / 账号 / 年</small></div>
-        <div class="punit">或 ¥7800 / 岗位 / 年 · 不限账号数量 · 使用 1 年</div>
-        <p class="pdesc">团队系统学，按岗位全员通享。</p>
+        <div class="punit">凭标准版推荐码试用 14 天</div>
+        <p class="pdesc">按岗位系统学，一人一账号。</p>
         <ul class="pl-list">
           <li>所在行业 1 个岗位的全量测评</li>
           <li>全量行业实景课程与题库</li>
           <li>AI 实景陪练、学习地图与全部功能</li>
-          <li>企业内不限账号数量使用 1 年</li>
+          <li>1 个账号使用 1 年</li>
+        </ul>
+        <a href="#contact" class="pbtn">预约试点</a>
+      </div>
+      <div class="plan">
+        <div class="pname">专业版</div>
+        <div class="pwho">1 个行业 × 1 个岗位 · 不限账号</div>
+        <div class="pprice">¥12999<small> / 年</small></div>
+        <div class="punit">不限账号数量 · 使用 1 年</div>
+        <p class="pdesc">团队全员通享，配企业管理能力。</p>
+        <ul class="pl-list">
+          <li>标准版全部课程、题库与陪练</li>
+          <li>企业内不限账号数量使用</li>
+          <li>企业管理看板与数据导出</li>
+          <li>前后测效果对比与数据隔离</li>
         </ul>
         <a href="#contact" class="pbtn">预约试点</a>
       </div>
@@ -1003,17 +1023,22 @@ img{max-width:100%;display:block}
         <a href="#contact" class="pbtn">联系定制</a>
       </div>
     </div>
+    <div class="price-note">
+      <span class="pn-ico">i</span>
+      <div><b>关于试用：</b>测评永久免费，无需任何码；观看课程请先找客服获取推荐码（体验版 / 标准版），激活后限时 14 天。没有推荐码？<a href="tel:18682011582">联系客服 18682011582 获取 →</a></div>
+    </div>
     <div class="cmp-wrap">
       <table class="cmp">
-        <thead><tr><th>功能对比</th><th>体验版</th><th class="rec">专业版</th><th>定制版</th></tr></thead>
+        <thead><tr><th>功能对比</th><th>体验版</th><th class="rec">标准版</th><th>专业版</th><th>定制版</th></tr></thead>
         <tbody>
-          <tr><td>AI 能力测评</td><td>完整 1 次</td><td class="rec">全量不限次</td><td>定制维度</td></tr>
-          <tr><td>个人学习计划</td><td class="yes">✓</td><td class="rec yes">✓</td><td class="yes">✓</td></tr>
-          <tr><td>课程试听</td><td>第一章节</td><td class="rec">全量课程</td><td>定制课程</td></tr>
-          <tr><td>AI 实景陪练</td><td class="no">—</td><td class="rec yes">✓</td><td>定制陪练</td></tr>
-          <tr><td>企业账号数量</td><td class="no">—</td><td class="rec">不限</td><td>按需</td></tr>
-          <tr><td>定制 / 线下内容</td><td class="no">—</td><td class="rec no">—</td><td class="yes">✓</td></tr>
-          <tr><td>价格</td><td>免费</td><td class="rec">¥699 / 账号 / 年</td><td>面聊</td></tr>
+          <tr><td>AI 能力测评</td><td>免费 1 次</td><td class="rec">全量不限次</td><td>全量不限次</td><td>定制维度</td></tr>
+          <tr><td>个人学习计划</td><td class="yes">✓</td><td class="rec yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+          <tr><td>课程试听</td><td>第一章节</td><td class="rec">全量课程</td><td>全量课程</td><td>定制课程</td></tr>
+          <tr><td>AI 实景陪练</td><td class="no">—</td><td class="rec yes">✓</td><td class="yes">✓</td><td>定制陪练</td></tr>
+          <tr><td>企业账号数量</td><td class="no">—</td><td class="rec">1 个</td><td>不限</td><td>按需</td></tr>
+          <tr><td>企业看板 / 数据导出</td><td class="no">—</td><td class="rec no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+          <tr><td>定制 / 线下内容</td><td class="no">—</td><td class="rec no">—</td><td class="no">—</td><td class="yes">✓</td></tr>
+          <tr><td>价格</td><td>¥199 / 14 天</td><td class="rec">¥699 / 账号 / 年</td><td>¥12999 / 年</td><td>面聊</td></tr>
         </tbody>
       </table>
     </div>
@@ -1043,7 +1068,7 @@ img{max-width:100%;display:block}
         </button>
         <button class="cw-item" type="button" onclick="openLogin()">
           <span class="cw-num">02</span>
-          <span class="cw-body"><b>免费体验课程</b><em>直达行业岗位选择 · 注册登录即可看</em></span>
+          <span class="cw-body"><b>免费体验课程</b><em>凭推荐码激活 14 天试用 · 找客服获取推荐码</em></span>
           <svg class="cw-arrow" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </button>
         <div class="cw-item" role="button" tabindex="0" onclick="event.stopPropagation();toggleCsPanel()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();toggleCsPanel()}">
@@ -1051,7 +1076,7 @@ img{max-width:100%;display:block}
           <span class="cw-body"><b>预约演示定制</b><em>30 分钟线上演示 · 按岗位定制</em><a class="cw-tel" href="tel:18682011582" onclick="event.stopPropagation()">18682011582</a></span>
           <span class="cw-qr"><img class="cw-qr-img" alt="客服微信二维码"></span>
         </div>
-        <div class="cw-foot">体验版全免费 · 不用先谈采购，测完再决定</div>
+        <div class="cw-foot">测评永久免费 · 看课程凭推荐码试用 14 天 · <a href="tel:18682011582" style="color:#c2410c;font-weight:700;text-decoration:none">找客服要码 18682011582</a></div>
       </div>
     </div>
   </div>
@@ -1125,10 +1150,10 @@ img{max-width:100%;display:block}
 
 <script>
 // Login functions
-function openLogin(){window.location.href='app.html?v=201'} // 直接进入 app.html 统一登录页（无弹窗）
+function openLogin(){window.location.href='app.html?v=202'} // 直接进入 app.html 统一登录页（无弹窗）
 function closeLogin(){document.getElementById('loginOverlay').classList.remove('show')}
 // 登录统一在 app.html 完成（含公司名称 / 手机号验证码校验）
-function goApp(){window.location.replace('app.html?v=201')}
+function goApp(){window.location.replace('app.html?v=202')}
 
 // Customer service toggle
 function toggleCsPanel(){document.getElementById('csPanel').classList.toggle('show')}
