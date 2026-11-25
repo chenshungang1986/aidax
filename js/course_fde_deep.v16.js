@@ -32,9 +32,9 @@ const AUDIO  = {"M00U1":["audio/fde_deep/M00U1_r0.m4a","audio/fde_deep/M00U1_p1.
    of 50 MB」，新文件一律 403（老文件靠边缘缓存还能出）。gcore.jsdelivr.net 是同一套
    jsDelivr 的备用节点，实测本仓库全部音频 200 且 ~70–97KB/s，故改走它。
    两个节点都拉不到时，audio.onerror 仍按 audLocal() 回落站内相对路径。 */
-const AUDIO_CDN = 'https://gcore.jsdelivr.net/gh/chenshungang1986/aidax@2ed60b384e65ae4391c2031d0d455e842b8004eb/';
+const AUDIO_CDN = 'https://gcore.jsdelivr.net/gh/chenshungang1986/aidax-audio@4a315ee77cbd14b58ed59316f9734d3998b9f26e/';
 /* ⚠️ 重新生成/替换配音后必须改这个版本号，否则 CDN 可能继续命中旧文件（换了音色还是老声音） */
-const AUDIO_VER = '202611251200';
+const AUDIO_VER = '202611251600';
 function audUrl(p){
   if(!p) return '';
   if(/^https?:/i.test(p)) return p;

@@ -12,9 +12,9 @@ const AUDIO  = {"MTU1":["audio/teachers/intro_chenguan.m4a"],"M0U1":["audio/patc
    （M0U1 2.5s / M6U7 10.9s / M3U5 18.6s），用户体感就是「点了没反应」。
    同一文件走 jsDelivr 实测 120KB/s，且国内可直连。
    任何一段拉不下来，audio.onerror 会按 audLocal() 回落到站内相对路径，不会断音。 */
-const AUDIO_CDN = 'https://gcore.jsdelivr.net/gh/chenshungang1986/aidax@ea2149986aac3f329c5628dbe1b4e2050a1f415c/';
+const AUDIO_CDN = 'https://gcore.jsdelivr.net/gh/chenshungang1986/aidax-audio@4a315ee77cbd14b58ed59316f9734d3998b9f26e/';
 /* ⚠️ 重新生成/替换配音后必须改这个版本号，否则 CDN 可能继续命中旧文件（换了音色还是老声音） */
-const AUDIO_VER = '202611251200';
+const AUDIO_VER = '202611251600';
 function audUrl(p){
   if(!p) return '';
   if(/^https?:/i.test(p)) return p;
