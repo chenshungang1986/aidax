@@ -15494,6 +15494,7 @@ S.loadEmployee = function(ref) {
   if (!e) { showToast('该测评记录不属于当前账号，无法查看'); return; }
   S.currentEmployee = e;
   S.role = e.role;
+  S.industry = e.industry || null;   // v226: 补齐行业回放——历史档案只恢复岗位会用当前行业+旧岗位取课，导致画像/推荐错位
   S.quizScores = e.quizScores;
   S.courseProgress = e.courseProgress;
   S.questProg = e.questProg || JSON.parse(localStorage.getItem('ai_training_quest') || '{}');
@@ -16172,7 +16173,7 @@ try {
 /* ---------- 1. 能力项常量（key 稳定，业务代码只引用 key） ---------- */
 const FEATURES = {
   BROWSE:        'browse',         // 浏览首页/课程介绍
-  TRIAL_UNIT:    'trialUnit',      // 课程试听（体验版=第一章节全部）
+  TRIAL_UNIT:    'trialUnit',      // 课程试听（体验版=14 天完整体验）
   ASSESS:        'assess',         // 8 维自适应测评
   PROFILE:       'profile',        // 个人能力画像与报告
   LEARN_MAP:     'learnMap',       // 测评后学习计划
@@ -16235,7 +16236,7 @@ const TIER_MATRIX = {
   },
   trial: {
     [FEATURES.BROWSE]: FULL,
-    [FEATURES.TRIAL_UNIT]: PARTIAL('第一章节全部内容'),
+    [FEATURES.TRIAL_UNIT]: PARTIAL('14 天完整体验'),
     [FEATURES.ASSESS]: LIMITED('完整体验 1 次', 1),
     [FEATURES.PROFILE]: FULL,                          // 测评后看画像
     [FEATURES.LEARN_MAP]: FULL,                        // 测评后看学习计划
@@ -16332,7 +16333,7 @@ const MODE = { FULL:'full', READONLY:'readonly', LOCKED:'locked' };
 /* ---------- 5. 受限提示 ---------- */
 const GATE_HINT = {
   [FEATURES.ASSESS]:         '免费体验 1 次测评',
-  [FEATURES.TRIAL_UNIT]:     '输入体验版推荐码，解锁第一章试听',
+  [FEATURES.TRIAL_UNIT]:     '输入体验版推荐码，解锁 14 天完整体验',
   [FEATURES.GENERAL_COURSE]: '输入标准版推荐码，解锁全量课程',
   [FEATURES.INDUSTRY_DEEP]:  '输入标准版推荐码，解锁 1 行业 × 1 岗位全量课程',
   [FEATURES.AI_COACH]:       '输入标准版推荐码，解锁 AI 实景陪练',
@@ -16471,7 +16472,7 @@ if (typeof window !== 'undefined'){
     var on = c ? ' on' : '';
     var name = c ? ((window.AIDAX_ACL.TIER_META[c.tier] || {}).name || c.tier) : '未激活';
     var text = c
-      ? '<b>' + name + '</b> 试用中 · 剩余 <b>' + days + ' 天</b> · 已解锁' + (c.tier === 'standard' ? '全量课程' : '第一章试听')
+      ? '<b>' + name + '</b> 试用中 · 剩余 <b>' + days + ' 天</b> · 已解锁' + (c.tier === 'standard' ? '全量课程' : '14 天完整体验')
       : '测评免费开放 · <b>观看课程需先输入推荐码</b>（体验版 / 标准版）';
     return '<div class="redeem-banner' + on + '">'
       + '<div class="rb-ico">' + (c ? '✓' : '!') + '</div>'
@@ -16493,7 +16494,7 @@ if (typeof window !== 'undefined'){
       + '<div class="redeem-card">'
       + '<button class="redeem-x" onclick="S.closeRedeemModal()">×</button>'
       + '<div class="redeem-h">输入推荐码</div>'
-      + '<p class="redeem-p">测评免费，无需推荐码；<b>观看课程需要先激活试用</b>。体验版推荐码解锁第一章试听，标准版推荐码解锁全量课程，有效期 14 天。</p>'
+      + '<p class="redeem-p">测评免费，无需推荐码；<b>观看课程需要先激活试用</b>。体验版推荐码解锁 14 天完整体验，标准版推荐码解锁全量课程，有效期 14 天。</p>'
       + '<div class="redeem-cur">当前版本：<b>' + name + '</b>' + (c ? ' · 剩余 ' + days + ' 天' : ' · 未激活') + '</div>'
       + '<input id="redeemInput" class="redeem-input" placeholder="请输入推荐码，如 ADX-T-XXXX-XXXX" autocomplete="off">'
       + '<div id="redeemMsg" class="redeem-msg"></div>'
@@ -16526,7 +16527,12 @@ if (typeof window !== 'undefined'){
       var acl = (typeof S !== 'undefined' && S.acl) || (typeof window !== 'undefined' && window.AIDAX_ACL);
       if (!acl || typeof acl.gate !== 'function') return true;
       var sess = (typeof getSessionSafe === 'function') ? getSessionSafe() : {};
-      var r = acl.gate(feature || acl.FEATURES.INDUSTRY_DEEP, sess, null);
+      // v226: 体验版(trial)的 INDUSTRY_DEEP=NONE，但 TRIAL_UNIT=PARTIAL 是放行的——
+      // 原实现写死 INDUSTRY_DEEP 导致体验版推荐码激活后仍打不开任何课程（承诺"第一章试听"落空）。
+      // 课程页本身无章节锁（全链接入即全量可见），故按方案 A 让体验版走 TRIAL_UNIT 闸门 = 可进全课。
+      var picked = feature;
+      if (!picked && acl.accountTier && acl.accountTier(sess) === 'trial') picked = acl.FEATURES.TRIAL_UNIT;
+      var r = acl.gate(picked || acl.FEATURES.INDUSTRY_DEEP, sess, null);
       if (r && r.allow === false) {
         showToast(r.why || '当前版本不含此课程');
         try { S.openRedeemModal(); } catch(e){}
