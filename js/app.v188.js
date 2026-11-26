@@ -8894,7 +8894,16 @@ S.entryEnterCourse = function() {
   var idx = afCourseIdx(key, list);
   if (idx < 0) { showToast('该课程即将上线，先选另一门试试'); return; }
   S.courseIdx = idx; S.courseTaskIdx = 0; S.pptCurrentSlide = 0; S.voicePlaying = false;
-  S._flow = 'entry'; S.view = 'course'; render();
+  S._flow = 'entry';
+  // v229 hotfix：深版课（金融/汽车/零售 PM、新人、FDE）没有内嵌 c.tasks，
+  // 不能在 app.html 里走 renderCourseDetail()，必须沿用 S.openCourse() 的新标签深链逻辑。
+  var deep = (S.industry === 'finance' && S.role === 'pm') ||
+             (S.industry === 'auto' && S.role === 'pm') ||
+             (S.industry === 'retail' && S.role === 'pm') ||
+             (S.industry === 'newbie' && S.role === 'graduate') ||
+             (S.industry === 'fde' && S.role === 'fde');
+  if (deep) { S.openCourse(idx); showToast('课程已在新标签页打开'); return; }
+  S.view = 'course'; render();
 };
 // 兼容旧入口（历史深链/测试脚本仍可能调用）
 S.startQuizPreview = function(){ S._flow='entry'; try{ S.startQuiz(); }catch(e){ console.error('startQuizPreview',e); } };
