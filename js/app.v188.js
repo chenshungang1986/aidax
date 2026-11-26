@@ -7405,6 +7405,8 @@ function cleanOpt(o) {
 const S = {
   view:'role', // role|quiz|results|dashboard|course|task|final|admin|map|schedule
   industry:null, role:null,
+  // v229：登录后的自适应入口子状态（entry|pickJob|pickRole|pickCourse|pickScene）
+  _flow:'entry', _entryJob:null, _entryRole:null, _entryCourse:null, _entryIndustry:null, _entryPosition:null,
   quizIdx:0, quizAnswers:{}, quizScores:null,
   _quizDone:{}, _quizLog:{}, _quizPlan:[], _quizSelectedStep:{}, _quizStartAt:{}, _quizTiming:{}, _quizAllDone:false,
   courseIdx:null, courseTaskIdx:0, courseProgress: loadOwnedJSON('ai_training_progress'), // v157 按账号分桶
@@ -7904,7 +7906,7 @@ S.doLoginPersonal = function(){
   localStorage.setItem('ai_training_session', JSON.stringify(session));
   S.rebindOwned();                  // v162：切人就要切断上一个人的进度引用
   recordAccess('login');
-  S.view = 'role'; render();
+  S.view = 'role'; S._flow = 'entry'; render();
 };
 S.doLoginEnt = function(){
   var loginId = (document.getElementById('entLoginId')||{}).value || '';
@@ -7922,7 +7924,7 @@ S.doLoginEnt = function(){
   localStorage.setItem('ai_training_session', JSON.stringify(session));
   S.rebindOwned();                  // v162：切人就要切断上一个人的进度引用
   recordAccess('login');
-  S.view = 'role'; render();
+  S.view = 'role'; S._flow = 'entry'; render();
 };
 S.doLoginAdmin = function(){
   var pwd = (document.getElementById('adminPwd')||{}).value || '';
@@ -8293,7 +8295,7 @@ S.doLoginAccount = function(){
     var su = { user: u.company || id.trim(), name: u.company || id.trim(), role:'learner', company: u.company || '', phone:'', loginId: u.id, loginType:'user', verified:true };
     localStorage.setItem('ai_training_session', JSON.stringify(su));
     S.mintCloudToken({ type:'user', loginId: id.trim(), password: pwd }); // v75b：注册用户租户 JWT
-    S.rebindOwned(); recordAccess('login'); S.view='role'; render(); return;
+    S.rebindOwned(); recordAccess('login'); S.view='role'; S._flow='entry'; render(); return;
   }
   alert('账号或密码错误');
 };
@@ -8307,7 +8309,7 @@ S.doLoginGuest = function(){
   var s = { user: company.trim(), name: company.trim(), role:'learner', company: company.trim(), phone: phone, loginId: loginId.trim(), loginType:'guest', verified:true };
   localStorage.setItem('ai_training_session', JSON.stringify(s));
   S.mintCloudToken({ type:'guest', company: company.trim(), phone: phone, loginId: loginId.trim() }); // v75b：游客租户 JWT（无密码，限本人 ownerKey）
-  S.rebindOwned(); recordAccess('login'); S.view='role'; render();
+  S.rebindOwned(); recordAccess('login'); S.view='role'; S._flow='entry'; render();
 };
 S.doRegister = function(){
   var company = (document.getElementById('regCompany')||{}).value || '';
@@ -8341,7 +8343,7 @@ S.doRegister = function(){
   if (inviteCompany) s.companyId = inviteCompany.id;
   localStorage.setItem('ai_training_session', JSON.stringify(s));
   S.mintCloudToken({ type:'user', loginId: id.trim(), password: pwd, companyId: inviteCompany ? inviteCompany.id : '' }); // v75b：注册用户租户 JWT（带企业归属→tenant 写入 quiz_score_log）
-  S.rebindOwned(); recordAccess('login'); showToast(inviteCompany ? ('注册成功，已绑定「'+compName+'」企业席位') : '注册成功，已自动登录'); S.view='role'; render();
+  S.rebindOwned(); recordAccess('login'); showToast(inviteCompany ? ('注册成功，已绑定「'+compName+'」企业席位') : '注册成功，已自动登录'); S.view='role'; S._flow='entry'; render();
 };
 function renderLoginV2(){
   var mode = S._loginMode || 'account';
@@ -8572,7 +8574,7 @@ function render() {
     case 'admin': {
       // v74：管理面板仅管理员/企业账号可进（普通学员无入口，且此处二次校验防越权）
       var _role = getSessionSafe().role;
-      if (_role !== 'admin' && _role !== 'ent') { S.view = 'role'; app.innerHTML = renderRoleSelection(); break; }
+      if (_role !== 'admin' && _role !== 'ent') { S.view = 'role'; S._flow = 'entry'; app.innerHTML = renderRoleSelection(); break; }
       if (S.adminTab === 'companies' && _role !== 'admin') S.adminTab = 'overview';
       app.innerHTML = renderAdmin(); break;
     }
@@ -8660,150 +8662,244 @@ function renderFdePanel() {
     </div>`;
 }
 
-// ---- ROLE SELECTION ----
+// ==================== v229：登录后自适应入口 ====================
+// 职业 = 职能大类（对应现有 8 个 ROLE）；岗位 = 细分方向。
+// 产品经理按行业分题库，所以产品大类下的岗位自带行业；其他大类细分暂共用一个题库。
+const ENTRY_JOBS = [
+  {id:'tech', name:'技术研发', ico:'💻', desc:'写代码、做架构、管质量', roles:[
+    {n:'后端开发', role:'dev', ind:null, bank:'DEV_QUIZ_V2', focus:'AI 编程助手 · 代码审查',
+     d:'后端 / 架构', k:'dev'},
+    {n:'前端 / 全栈', role:'dev', ind:null, bank:'DEV_QUIZ_V2', focus:'界面生成 · 前后端联调',
+     d:'前端 / 全栈', k:'dev'},
+    {n:'测试 / 运维', role:'dev', ind:null, bank:'DEV_QUIZ_V2', focus:'自动化测试 · 故障定位',
+     d:'测试 / 运维', k:'dev'}
+  ]},
+  {id:'prod', name:'产品', ico:'🧩', desc:'需求、用户、产品策略', roles:[
+    {n:'产品经理 · 制造', role:'pm', ind:'mfg', bank:'MFG_PM_QUIZ', focus:'场景调研 · PRD 产出', d:'智能制造', k:'pm'},
+    {n:'产品经理 · 金融', role:'pm', ind:'finance', bank:'FIN_PM_QUIZ', focus:'风控合规 · 财富场景', d:'金融', k:'pm'},
+    {n:'产品经理 · 汽车', role:'pm', ind:'auto', bank:'AUTO_PM_QUIZ', focus:'智能座舱 · 智驾场景', d:'智能汽车', k:'pm'},
+    {n:'产品经理 · 零售', role:'pm', ind:'retail', bank:'RETAIL_PM_QUIZ', focus:'会员增长 · 大促场景', d:'零售与消费', k:'pm'},
+    {n:'产品经理 · 互联网', role:'pm', ind:'internet', bank:'INTERNET_PM_QUIZ', focus:'A/B 实验 · 用户增长', d:'互联网', k:'pm'}
+  ]},
+  {id:'mkt', name:'市场运营', ico:'📣', desc:'内容、增长、客户转化', roles:[
+    {n:'内容运营', role:'mkt', ind:null, bank:'OPS_QUIZ_V2', focus:'选题 · 文案 · 分发', d:'内容运营', k:'mkt'},
+    {n:'增长投放', role:'mkt', ind:null, bank:'SALES_QUIZ_V2', focus:'投放优化 · 数据复盘', d:'增长投放', k:'mkt'},
+    {n:'销售转化', role:'mkt', ind:null, bank:'SALES_QUIZ_V2', focus:'客户画像 · 话术跟进', d:'销售转化', k:'mkt'}
+  ]},
+  {id:'hr', name:'人资行政', ico:'👥', desc:'招聘、培训、组织效能', roles:[
+    {n:'招聘配置', role:'hr', ind:null, bank:'HR_QUIZ_V2', focus:'JD · 简历筛选 · 面试', d:'招聘配置', k:'hr'},
+    {n:'培训发展', role:'hr', ind:null, bank:'HR_QUIZ_V2', focus:'课程设计 · 人才盘点', d:'培训发展', k:'hr'}
+  ]},
+  {id:'fc', name:'财务采购', ico:'📊', desc:'预算、核算、供应商', roles:[
+    {n:'财务分析', role:'fc', ind:null, bank:'FIN_QUIZ_V2', focus:'预算预测 · 经营分析', d:'财务分析', k:'fc'},
+    {n:'采购寻源', role:'fc', ind:null, bank:'PO_QUIZ_V2', focus:'比价 · 供应商评估', d:'采购寻源', k:'fc'}
+  ]},
+  {id:'legal', name:'法务合规', ico:'⚖️', desc:'合同、合规、风险', roles:[
+    {n:'合同审查', role:'legal', ind:null, bank:'LEGAL_QUIZ_V2', focus:'条款比对 · 风险提示', d:'合同审查', k:'legal'},
+    {n:'合规管理', role:'legal', ind:null, bank:'LEGAL_QUIZ_V2', focus:'制度检索 · 审计留痕', d:'合规管理', k:'legal'}
+  ]},
+  {id:'new', name:'职场新人', ico:'🌱', desc:'应届生 / 转行 / 未定岗', roles:[
+    {n:'AI 通识 · 从零到能用', role:'graduate', ind:'newbie', bank:'NEWBIE_QUIZ', focus:'六项基本功 · 一周工作流', d:'新人通道', k:'newbie'}
+  ]},
+  {id:'fde', name:'FDE 交付', ico:'🚀', desc:'客户现场 AI 落地', roles:[
+    {n:'前沿部署工程师', role:'fde', ind:'fde', bank:'FDE_QUIZ', focus:'进场访谈 · PEV 验收', d:'FDE 通道', k:'fde'}
+  ]}
+];
+const ENTRY_COURSES = [
+  {k:'dev', n:'AI Coding 实战', s:'从需求到交付', d:'研发', c:'#3b82f6'},
+  {k:'pm', n:'AI 产品实战', s:'从需求到产品实现', d:'产品', c:'#8b5cf6'},
+  {k:'mkt', n:'AI 营销实战', s:'从内容到转化增长', d:'市场运营', c:'#ec4899'},
+  {k:'hr', n:'AI 人资实战', s:'从 JD 到人才发展', d:'人资', c:'#14b8a6'},
+  {k:'fc', n:'AI 财务实战', s:'从预算到经营分析', d:'财务采购', c:'#f59e0b'},
+  {k:'legal', n:'AI 法务实战', s:'从审查到合规管理', d:'法务', c:'#f97316'},
+  {k:'newbie', n:'AI 通识实战', s:'从工具到一周工作流', d:'职场新人', c:'#10b981'},
+  {k:'fde', n:'FDE 实战', s:'从进场到交付验收', d:'FDE', c:'#6366f1'}
+];
+const ENTRY_ROLE_OF = {newbie:'graduate', fde:'fde'};
+function afSteps(names, cur) {
+  return '<div class="af-steps">' + names.map(function(x,i){
+    return '<div class="af-step '+(i<cur?'done':i===cur?'on':'')+'"><span class="af-n">'+(i<cur?'✓':(i+1))+'</span>'+x+'</div>' + (i<names.length-1?'<div class="af-line"></div>':'');
+  }).join('') + '</div>';
+}
+function afCourseIdx(k, list) {
+  var pat;
+  if (k === 'newbie') pat = /^newbie_grad/;
+  else if (k === 'fde') pat = /^fde_m/;
+  else if (k === 'pm' && ['finance','auto','retail'].indexOf(S.industry) >= 0) pat = /^(fin|auto|retail)_pm_m/;
+  else pat = new RegExp('^' + k);
+  for (var i=0;i<list.length;i++) if (pat.test(list[i].id || '')) return i;
+  return -1;
+}
+
+// v229：登录后只保留「测一测 / 直接上课」两个入口；行业与岗位后置到各自路径里。
 function renderRoleSelection() {
-  // 预览版 v226：测评优先。行业/岗位不再是前置关卡，降级为「画像设置」可选项。
-  // 用户点「开始测评」时若未选画像，自动填通用默认（mfg/pm），保证题库与权重能跑。
-  normalizeScenePair();
-  const COURSE_CARDS = [
-    {n:'AI Coding 实战', s:'从需求到交付',   d:'研发', c:'c-blue',   a:'goCourseByKey', k:'dev'},
-    {n:'AI 产品实战',   s:'从需求到产品实现', d:'产品', c:'c-purple', a:'goCourseByKey', k:'pm'},
-    {n:'AI 营销实战',   s:'从内容到转化增长', d:'市场运营', c:'c-pink', a:'goCourseByKey', k:'mkt'},
-    {n:'AI 人资实战',   s:'从 JD 到人才发展', d:'人资', c:'c-teal',   a:'goCourseByKey', k:'hr'},
-    {n:'AI 财务实战',   s:'从预算到经营分析', d:'财务采购', c:'c-amber', a:'goCourseByKey', k:'fc'},
-    {n:'AI 法务实战',   s:'从审查到合规管理', d:'法务', c:'c-coral', a:'goCourseByKey', k:'legal'},
-  ];
-  const indTags = IND_VISIBLE.map(id=>{
-    const ind=INDUSTRIES[id];
-    return '<span class="pv-chip'+(S.industry===id?' on':'')+'" data-action="selectIndustry" data-id="'+id+'">'+ind.icon+' '+ind.name+'</span>';
-  }).join('');
-  const roleTags = Object.keys(ROLES).filter(id=>id!=='graduate'&&id!=='fde').map(id=>{
-    const r=ROLES[id];
-    return '<span class="pv-chip'+(S.role===id?' on':'')+'" data-action="selectRole" data-id="'+id+'">'+r.name+'</span>';
-  }).join('');
-  const hasPick = S.industry && S.role && S.industry!=='newbie' && S.industry!=='fde';
+  var flow = S._flow || 'entry';
+  var html = `<style>
+  .af-wrap{max-width:1000px;margin:0 auto;padding:16px 4px 40px;}
+  .af-hero{background:linear-gradient(150deg,#eef2ff,#faf5ff 55%,#f0fdf4);border:1.5px solid #c7d2fe;border-radius:22px;padding:56px 30px;text-align:center;box-shadow:var(--shadow);}
+  .af-kicker{font-size:13px;color:#6366f1;font-weight:700;letter-spacing:.08em;}
+  .af-hero h1{font-size:32px;line-height:1.35;margin:12px 0;color:#1e1b4b;font-weight:800;}
+  .af-hero h1 .g{background:linear-gradient(90deg,#6366f1,#a855f7);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .af-hero p{color:#64748b;font-size:14px;margin-bottom:34px;}
+  .af-cta{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;}
+  .af-big{width:250px;min-height:116px;border-radius:18px;border:1.5px solid var(--border);background:var(--card);cursor:pointer;padding:20px;text-align:left;transition:all .18s;box-shadow:var(--shadow);}
+  .af-big:hover{transform:translateY(-4px);box-shadow:0 14px 32px rgba(99,102,241,.16);border-color:#a5b4fc;}
+  .af-big.primary{border-color:#c7d2fe;background:linear-gradient(150deg,#fff,#f5f3ff);}
+  .af-big .af-ico{font-size:25px;line-height:1;}
+  .af-big b{display:block;font-size:18px;margin:9px 0 4px;color:#1e1b4b;}
+  .af-big span{display:block;font-size:12px;color:#64748b;line-height:1.55;}
+  .af-note{font-size:12px;color:#94a3b8;margin-top:28px;}
+  .af-panel{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:26px 28px;box-shadow:var(--shadow);}
+  .af-panel h2{font-size:21px;margin-bottom:6px;color:#1e1b4b;}
+  .af-sub{font-size:13px;color:#64748b;margin-bottom:22px;line-height:1.7;}
+  .af-steps{display:flex;align-items:center;gap:8px;justify-content:center;margin:2px 0 24px;flex-wrap:wrap;}
+  .af-step{display:flex;align-items:center;gap:7px;font-size:12px;color:#94a3b8;}
+  .af-step .af-n{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:#fff;}
+  .af-step.on{color:#6366f1;font-weight:700;}
+  .af-step.on .af-n{background:#6366f1;border-color:#6366f1;color:#fff;}
+  .af-step.done{color:#10b981;}
+  .af-step.done .af-n{background:#d1fae5;border-color:#10b981;color:#047857;}
+  .af-line{width:26px;height:1px;background:var(--border);}
+  .af-back{background:none;border:none;color:#94a3b8;font-size:12px;cursor:pointer;margin-bottom:12px;padding:0;}
+  .af-back:hover{color:#6366f1;}
+  .af-lbl{font-size:12px;font-weight:700;color:#475569;margin:16px 0 10px;}
+  .af-grid{display:grid;gap:12px;}
+  .af-g4{grid-template-columns:repeat(4,1fr);}
+  .af-g3{grid-template-columns:repeat(3,1fr);}
+  .af-opt{border:1.5px solid var(--border);border-radius:13px;padding:15px 13px;cursor:pointer;transition:all .16s;background:var(--card);min-height:88px;}
+  .af-opt:hover{border-color:#a5b4fc;transform:translateY(-2px);}
+  .af-opt .af-oi{font-size:20px;line-height:1;}
+  .af-opt b{display:block;font-size:14px;margin:7px 0 3px;color:var(--text);}
+  .af-opt small{display:block;font-size:11px;color:#94a3b8;line-height:1.5;}
+  .af-course{border:1.5px solid var(--border);border-radius:14px;padding:17px 16px;cursor:pointer;transition:all .16s;background:var(--card);position:relative;overflow:hidden;}
+  .af-course:hover{border-color:#818cf8;transform:translateY(-3px);box-shadow:0 10px 24px rgba(99,102,241,.10);}
+  .af-course .af-bar{position:absolute;left:0;top:0;bottom:0;width:4px;}
+  .af-course .af-role{font-size:10px;color:#94a3b8;background:var(--bg2);border-radius:20px;padding:2px 8px;display:inline-block;margin-bottom:8px;}
+  .af-course b{display:block;font-size:14px;color:var(--text);line-height:1.45;}
+  .af-course small{display:block;font-size:11.5px;color:#7c3aed;margin-top:4px;}
+  .af-chip{display:inline-block;font-size:12px;padding:7px 13px;margin:0 7px 8px 0;border-radius:20px;border:1.5px solid var(--border);background:var(--card);color:#475569;cursor:pointer;transition:all .15s;}
+  .af-chip:hover{border-color:#a5b4fc;}
+  .af-chip.on{border-color:#6366f1;background:#eef2ff;color:#4338ca;font-weight:700;}
+  .af-chip svg{width:14px;height:14px;vertical-align:-2px;stroke:#6366f1;}
+  .af-auto{font-size:12px;color:#0f766e;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;padding:10px 13px;margin-top:14px;line-height:1.6;}
+  .af-hint{font-size:11.5px;color:#94a3b8;line-height:1.6;}
+  .af-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:24px;flex-wrap:wrap;}
+  @media(max-width:700px){.af-g4,.af-g3{grid-template-columns:repeat(2,1fr);}.af-hero{padding:40px 18px;}.af-hero h1{font-size:25px;}.af-big{width:100%;}.af-panel{padding:20px 17px;}}
+  </style><div class="af-wrap">`;
 
-  let html = `
-  <style>
-  .pv-wrap{max-width:1000px;margin:0 auto;padding:16px 4px 40px;}
-  .pv-hero{background:linear-gradient(135deg,#eef2ff,#faf5ff 60%,#f0fdf4);border:1.5px solid #c7d2fe;border-radius:20px;padding:34px 36px;text-align:center;margin-bottom:22px;}
-  .pv-hero h1{font-size:26px;line-height:1.35;margin:10px 0 10px;color:#1e1b4b;font-weight:700;}
-  .pv-hero h1 .g{background:linear-gradient(90deg,#6366f1,#a855f7);-webkit-background-clip:text;background-clip:text;color:transparent;}
-  .pv-hero p{color:#64748b;font-size:14px;line-height:1.7;margin-bottom:22px;}
-  .pv-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;}
-  .pv-cta .btn{font-size:15px;padding:13px 30px;}
-  .pv-note{font-size:12px;color:#94a3b8;}
-  .pv-sec{font-size:16px;font-weight:700;color:#1e293b;margin:26px 0 4px;display:flex;align-items:center;gap:9px;}
-  .pv-sec .pv-num{display:inline-flex;width:24px;height:24px;border-radius:50%;background:#6366f1;color:#fff;font-size:13px;align-items:center;justify-content:center;}
-  .pv-sec-sub{font-size:12.5px;color:#94a3b8;margin:0 0 16px 33px;}
-  .pv-courses{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
-  .pv-course{border:1.5px solid var(--border);border-radius:14px;padding:18px 16px;background:var(--card);cursor:pointer;transition:all .18s;position:relative;overflow:hidden;}
-  .pv-course:hover{border-color:#818cf8;transform:translateY(-3px);box-shadow:0 8px 24px rgba(99,102,241,.12);}
-  .pv-course .pv-bar{position:absolute;left:0;top:0;bottom:0;width:4px;}
-  .pv-course .pv-role{font-size:10.5px;color:#64748b;background:#f1f5f9;border-radius:20px;padding:2px 9px;display:inline-block;margin-bottom:9px;}
-  .pv-course h4{font-size:15px;color:#0f172a;margin:0 0 5px;font-weight:700;}
-  .pv-course .pv-sub{font-size:12px;color:#7c3aed;font-weight:600;}
-  .pv-profile{border:1.5px dashed var(--border-active);border-radius:14px;padding:16px 18px;background:var(--card);margin-top:8px;}
-  .pv-profile summary{font-size:13.5px;font-weight:600;color:#4f46e5;cursor:pointer;list-style:none;display:flex;align-items:center;gap:7px;}
-  .pv-profile summary::-webkit-details-marker{display:none;}
-  .pv-profile summary::before{content:'▸';display:inline-block;transition:transform .18s;}
-  .pv-profile[open] summary::before{transform:rotate(90deg);}
-  .pv-profile .pv-inner{padding-top:14px;}
-  .pv-lbl{font-size:12px;color:#64748b;font-weight:600;margin:12px 0 7px;}
-  .pv-chip{display:inline-block;font-size:12px;padding:5px 12px;margin:0 6px 7px 0;border-radius:20px;border:1.5px solid var(--border);background:var(--card);color:var(--text2);cursor:pointer;transition:all .15s;}
-  .pv-chip:hover{border-color:#818cf8;}
-  .pv-chip.on{border-color:#6366f1;background:#eef2ff;color:#4338ca;font-weight:600;}
-  .pv-auto{font-size:12px;color:#0f766e;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;padding:9px 13px;margin-top:10px;}
-  @media(max-width:700px){.pv-courses{grid-template-columns:1fr 1fr;}.pv-hero{padding:24px 18px;}.pv-hero h1{font-size:21px;}}
-  </style>
-  <div class="pv-wrap">
-    <div style="margin-bottom:14px;"><a href="index.html" class="btn btn-outline btn-sm" style="font-size:12px;">← 返回主页</a></div>
-    <div class="pv-hero">
-      <svg viewBox="0 0 240 56" style="height:42px;width:auto;margin-bottom:6px"><defs><linearGradient id="pvg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6366f1"/><stop offset="50%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#a855f7"/></linearGradient></defs><circle cx="16" cy="18" r="6" fill="url(#pvg1)"/><circle cx="32" cy="6" r="6" fill="url(#pvg1)"/><circle cx="48" cy="18" r="6" fill="url(#pvg1)"/><circle cx="32" cy="30" r="6" fill="url(#pvg1)"/><circle cx="32" cy="42" r="5" fill="#818cf8"/><line x1="16" y1="18" x2="32" y2="6" stroke="#818cf8" stroke-width="1.8" stroke-linecap="round"/><line x1="32" y1="6" x2="48" y2="18" stroke="#818cf8" stroke-width="1.8" stroke-linecap="round"/><line x1="16" y1="18" x2="32" y2="30" stroke="#818cf8" stroke-width="1.8" stroke-linecap="round"/><line x1="48" y1="18" x2="32" y2="30" stroke="#818cf8" stroke-width="1.8" stroke-linecap="round"/><line x1="32" y1="30" x2="32" y2="42" stroke="#818cf8" stroke-width="1.8" stroke-linecap="round"/><text x="68" y="28" font-family="-apple-system,sans-serif" font-size="17" font-weight="700" fill="#4338ca">AI 达学</text></svg>
-      <p style="margin-bottom:2px;color:#6366f1;font-weight:600;">企业 AI 能力测评与实战陪练</p>
-      <h1>先测出你的 AI 能力短板，<br><span class="g">再学真正用得上的</span></h1>
-      <p>8 维自适应测评，约 3 分钟看清个人能力画像。<br>测完自动按短板推荐课程 —— 8 门岗位实战课，学完就交得出活。</p>
-      <div class="pv-cta">
-        <button class="btn btn-primary" data-action="startQuizPreview" onclick="if(typeof S!=='undefined'){S.startQuizPreview()}">免费开始 8 维测评 →</button>
-        <button class="btn btn-outline" data-action="goCourses" onclick="if(typeof S!=='undefined'){S.goCoursesPreview&&S.goCoursesPreview()}">先看看 8 门课 ↓</button>
+  if (flow === 'entry') {
+    html += `<div style="margin-bottom:14px;"><a href="index.html" class="btn btn-outline btn-sm" style="font-size:12px;">← 返回主页</a></div>
+    <div class="af-hero">
+      <div class="af-kicker">企业 AI 能力测评与实战陪练</div>
+      <h1>先看清能力，<span class="g">再学真正用得上的</span></h1>
+      <p>登录后只需要做一次选择：测出短板，或直接开始一门课。</p>
+      <div class="af-cta">
+        <button class="af-big primary" data-action="entryPath" data-id="quiz"><span class="af-ico">🧭</span><b>测一测</b><span>按职业与岗位出题，看清 8 维短板，自动推荐该学的课</span></button>
+        <button class="af-big" data-action="entryPath" data-id="course"><span class="af-ico">📚</span><b>直接上课</b><span>先看 8 门岗位实战课，选课后按行业与岗位适配</span></button>
       </div>
-      <div class="pv-note">测评永久免费 · 不需要推荐码 · 看清能力再决定投入</div>
-    </div>
-
-    <div class="pv-sec"><span class="pv-num">1</span>先测短板，再按短板补课</div>
-    <p class="pv-sec-sub">测评自动算出最弱的 2–3 个维度，从下面 8 门课里精准挑出你该学的，不学用不上的。</p>
-    <details class="pv-profile" id="pvProfile" ${S._pvOpen ? 'open' : ''} ontoggle="if(typeof S!=='undefined'){S._pvOpen=this.open}">
-      <summary>测评前先告诉我行业和岗位（可选，让题目和推荐更贴合你的工作）</summary>
-      <div class="pv-inner">
-        <div class="pv-lbl">你所在的行业</div>
-        <div>${indTags}</div>
-        <div class="pv-lbl">你的岗位</div>
-        <div>${roleTags}</div>
-        <div class="pv-auto" id="pvAuto">${hasPick ? '已选择：'+industryLabel(S.industry)+' · '+(ROLES[S.role]?.name||'')+' —— 测评将按此画像出题。' : '不选也没关系 —— 直接用通用画像开始，测完仍可按短板推课。'}</div>
-      </div>
-    </details>
-
-    <div class="pv-sec"><span class="pv-num">2</span>8 门岗位实战课，学完交得出活</div>
-    <p class="pv-sec-sub">每门按能力命名、64 单元、四步链路（理解 → 演示 → 我要做 → 陪练），行业案例在课内切换。</p>
-    <div class="pv-courses">
-      ${COURSE_CARDS.map(c=>`
-      <div class="pv-course" data-action="goCourseByKey" data-id="${c.k}">
-        <div class="pv-bar" style="background:${c.c==='c-blue'?'#3b82f6':c.c==='c-purple'?'#8b5cf6':c.c==='c-pink'?'#ec4899':c.c==='c-teal'?'#14b8a6':c.c==='c-amber'?'#f59e0b':'#f97316'}"></div>
-        <span class="pv-role">${c.d}</span>
-        <h4>${c.n}</h4>
-        <div class="pv-sub">${c.s}</div>
-      </div>`).join('')}
-    </div>
-
-    <div class="newbie-lane${S.industry==='newbie'?' on':''}" data-action="enterNewbieLane" style="margin-top:24px;">
-      <div class="nl-ico">${INDUSTRIES.newbie.icon}</div>
-      <div class="nl-main"><div class="nl-t">职场新人 / 应届生？走「新人通道」</div><div class="nl-d">不按行业出题，8 个模块 64 单元，从第一句提示词到一周 AI 工作流，按「从零到能用」排。</div></div>
-      <div class="nl-go">${S.industry==='newbie'?'已进入 ✓':'进入 →'}</div>
-    </div>
-    <div class="newbie-lane fde-lane${S.industry==='fde'?' on':''}" data-action="enterFdeLane">
-      <div class="nl-ico">${INDUSTRIES.fde.icon}</div>
-      <div class="nl-main"><div class="nl-t">做 AI 落地交付？走「FDE 通道」</div><div class="nl-d">前沿部署工程师专属，8 维 72 题测评，按「一次真实交付」的顺序排，把 AI 真正落进业务现场。</div></div>
-      <div class="nl-go">${S.industry==='fde'?'已进入 ✓':'进入 →'}</div>
+      <div class="af-note">测评永久免费 · 不需要推荐码 · 8 门课均为 64 单元 / 四步链路</div>
     </div>`;
-
-  const _visEmps = myEmployees();
-  if (_visEmps.length > 0) {
-    const _recTitle = getSessionSafe().role === 'admin' ? '最近测评记录' : '我的测评记录';
-    html += `<div class="card mt-3"><p style="font-weight:600;font-size:14px;margin-bottom:12px;">${_recTitle}</p>`;
-    _visEmps.forEach((e) => {
-      const r = ROLES[e.role];
-      html += `<div class="emp-row" data-action="loadEmployee" data-emp="${e.id}" style="cursor:pointer;">
-        <div class="emp-avatar">${e.name[0]}</div>
-        <div class="emp-info"><div class="emp-name">${e.name}</div><div class="emp-meta">${r ? r.icon+' '+r.name : e.role} · ${e.date}</div></div>
-        <div class="emp-score" style="color:${e.finalScore>=80?'var(--green)':e.finalScore>=60?'var(--amber)':'var(--red)'}">${e.finalScore!=null?e.finalScore+'分':'测评中'}</div>
-      </div>`;
-    });
-    html += `</div>`;
+  } else if (flow === 'pickJob') {
+    html += `<div class="af-panel">${afSteps(['选职业','选岗位','开始测评','看推荐'],0)}
+      <button class="af-back" data-action="entryBack">← 返回</button>
+      <h2>你从事哪一类工作？</h2>
+      <p class="af-sub">先选职业大类，下一步再选具体岗位。测评题目与课程推荐都会按你的选择自适应。</p>
+      <div class="af-grid af-g4">${ENTRY_JOBS.map(function(j,i){return '<div class="af-opt" data-action="entryJob" data-id="'+i+'"><span class="af-oi">'+j.ico+'</span><b>'+j.name+'</b><small>'+j.desc+'</small></div>';}).join('')}</div>
+    </div>`;
+  } else if (flow === 'pickRole') {
+    var job = ENTRY_JOBS[parseInt(S._entryJob || 0)] || ENTRY_JOBS[0];
+    html += `<div class="af-panel">${afSteps(['选职业','选岗位','开始测评','看推荐'],1)}
+      <button class="af-back" data-action="entryBack">← 返回职业</button>
+      <h2>${job.ico} ${job.name} · 你具体做什么？</h2>
+      <p class="af-sub">岗位决定用哪套题库和权重。${job.id==='prod' ? '产品经理按行业分题库，所以细分里带了行业。' : '同一职业下的细分暂共用题库，后续可按岗补题。'}</p>
+      <div class="af-grid af-g3">${job.roles.map(function(r,i){return '<div class="af-opt" data-action="entryRole" data-id="'+i+'"><span class="af-oi">🎯</span><b>'+r.n+'</b><small>'+r.focus+'</small><small style="color:#7c3aed;margin-top:5px;">题库 '+r.bank+'</small></div>';}).join('')}</div>
+      <div class="af-auto">选定岗位后，进入与之对应的 8 维自适应测评（基础卷 + 场景卷 + 自评）。</div>
+    </div>`;
+  } else if (flow === 'pickCourse') {
+    html += `<div class="af-panel">${afSteps(['选课程','选行业与岗位','进入适配课程'],0)}
+      <button class="af-back" data-action="entryBack">← 返回</button>
+      <h2>想先学哪一门？</h2>
+      <p class="af-sub">按岗位能力命名，8 门课都是 64 单元、学完交得出活。选完课再告诉你行业和岗位，课内案例会跟着变。</p>
+      <div class="af-grid af-g3">${ENTRY_COURSES.map(function(c){return '<div class="af-course" data-action="entryCourse" data-id="'+c.k+'"><span class="af-bar" style="background:'+c.c+'"></span><span class="af-role">'+c.d+'</span><b>'+c.n+'</b><small>'+c.s+'</small></div>';}).join('')}</div>
+    </div>`;
+  } else if (flow === 'pickScene') {
+    var ck = S._entryCourse || 'pm';
+    var chosen = ENTRY_COURSES.filter(function(c){return c.k===ck;})[0] || ENTRY_COURSES[1];
+    var indTags = IND_VISIBLE.map(function(id){
+      var x = INDUSTRIES[id];
+      return '<span class="af-chip'+(S._entryIndustry===id?' on':'')+'" data-action="entryInd" data-id="'+id+'">'+x.icon+' '+industryLabel(id)+(x.comingSoon?' · 筹备中':'')+'</span>';
+    }).join('');
+    var posIds = Object.keys(ROLES).filter(function(id){return id!=='graduate'&&id!=='fde';}).concat(['graduate','fde']);
+    var posTags = posIds.map(function(id){
+      return '<span class="af-chip'+(S._entryPosition===id?' on':'')+'" data-action="entryPos" data-id="'+id+'">'+roleLabel(id)+'</span>';
+    }).join('');
+    var effRole = ENTRY_ROLE_OF[ck] || ck;
+    var autoTxt = (S._entryIndustry && S._entryPosition)
+      ? '已选择：'+industryLabel(S._entryIndustry)+' × '+roleLabel(S._entryPosition)+' → 将进入按该场景适配的课程。'
+      : '行业和岗位都选好后进入课程；不选也能进，将使用通用版。';
+    html += `<div class="af-panel">${afSteps(['选课程','选行业与岗位','进入适配课程'],1)}
+      <button class="af-back" data-action="entryBack">← 返回课程</button>
+      <h2>为 «${chosen.n}» 设置你的场景</h2>
+      <p class="af-sub">行业决定课内案例包，岗位决定练习的交付物与最终课程。${S._entryPosition!==effRole ? '你选的岗位与先选课程不同，将按岗位切到对应课程。' : ''}</p>
+      <div class="af-lbl">你所在的行业</div><div>${indTags}</div>
+      <div class="af-lbl">你的岗位</div><div>${posTags}</div>
+      <div class="af-auto">${autoTxt}</div>
+      <div class="af-actions"><button class="btn" data-action="entryBack">换一门课</button><button class="btn btn-primary" data-action="entryEnter">进入我的课程 →</button></div>
+    </div>`;
   }
-  html += `</div>`;
+  html += '</div>';
   return html;
 }
 
-// 预览版：测评优先的入口——未选画像时自动填通用默认，保证题库能命中
-S.startQuizPreview = function(){
-  try{
-    if(!S.industry || S.industry==='newbie' || S.industry==='fde'){ S.industry='mfg'; }
-    var validRole = !!(S.role && ROLES[S.role] && S.role!=='graduate' && S.role!=='fde');
-    if(!validRole){ S.role='pm'; }
-  }catch(e){ S.industry='mfg'; S.role='pm'; }
-  try{ S.startQuiz(); }catch(e){ console.error('startQuizPreview',e); }
+// v229：入口路径动作
+S.entryChoosePath = function(p) {
+  S._flow = (p === 'quiz') ? 'pickJob' : 'pickCourse';
+  S._entryJob = null; S._entryRole = null; S._entryCourse = null;
+  S._entryIndustry = null; S._entryPosition = null;
+  render();
 };
-S.goCoursesPreview = function(){
-  document.getElementById('pvProfile') && document.getElementById('pvProfile').setAttribute('open','open');
-  var el=document.querySelector('.pv-sec'); el && el.scrollIntoView({behavior:'smooth',block:'start'});
+S.entryPickJob = function(i) { S._entryJob = i; S._entryRole = null; S._flow = 'pickRole'; render(); };
+S.entryPickRole = function(i) {
+  var job = ENTRY_JOBS[parseInt(S._entryJob || 0)] || ENTRY_JOBS[0];
+  var r = job.roles[parseInt(i)] || job.roles[0];
+  S._entryRole = r;
+  S.role = r.role;
+  S.industry = r.ind || S.industry || 'mfg';
+  S._flow = 'entry';
+  try { S.startQuiz(); } catch(e) { console.error('entryPickRole', e); }
 };
-S.goCourseByKeyPreview = function(k){
-  try{
-    var list = courseListFor(k, S.industry);
-    if(list && list.length){ S.courseIdx=0; S.view='course'; render(); }
-    else { showToast('该课程即将上线'); }
-  }catch(e){ showToast('该课程即将上线'); }
+S.entryPickCourse = function(k) {
+  S._entryCourse = k;
+  S._entryPosition = ENTRY_ROLE_OF[k] || k;
+  S._entryIndustry = null;
+  S._flow = 'pickScene'; render();
 };
+S.entrySetIndustry = function(id) { S._entryIndustry = id; render(); };
+S.entrySetPosition = function(id) { S._entryPosition = id; render(); };
+S.entryBack = function() {
+  if (S._flow === 'pickRole') S._flow = 'pickJob';
+  else if (S._flow === 'pickScene') S._flow = 'pickCourse';
+  else S._flow = 'entry';
+  render();
+};
+S.entryEnterCourse = function() {
+  var k = S._entryCourse || 'pm';
+  var role = S._entryPosition || (ENTRY_ROLE_OF[k] || k);
+  var ind = S._entryIndustry;
+  if (role === 'graduate') ind = 'newbie';
+  if (role === 'fde') ind = 'fde';
+  S.role = role; S.industry = ind || 'mfg';
+  var list = courseListFor(S.role, S.industry) || [];
+  var key = ENTRY_ROLE_OF[role] || role;
+  var idx = afCourseIdx(key, list);
+  if (idx < 0) { showToast('该课程即将上线，先选另一门试试'); return; }
+  S.courseIdx = idx; S.courseTaskIdx = 0; S.pptCurrentSlide = 0; S.voicePlaying = false;
+  S._flow = 'entry'; S.view = 'course'; render();
+};
+// 兼容旧入口（历史深链/测试脚本仍可能调用）
+S.startQuizPreview = function(){ S._flow='entry'; try{ S.startQuiz(); }catch(e){ console.error('startQuizPreview',e); } };
+S.goCoursesPreview = function(){ S._flow='pickCourse'; render(); };
+S.goCourseByKeyPreview = function(k){ S.entryPickCourse(k); };
 
 // ===== v51: AI 基础素养卷（独立于 8 维岗位自适应；先答基础卷 → 再进岗位卷；不计入综合分）=====
 // 题库 AI_BASE_QUIZ = 6 主题 × 7 题；卷面分层抽 10 题 = 每主题至少 1 题 + 随机补抽 4 题
@@ -15551,7 +15647,7 @@ S.saveAndFinish = function() {
   cloudPushEmployee(emp);
   alert('数据已保存！');
 };
-S.reset = function() { stopVoice(); S.industry=null; S.role=null; S.view='role'; S.quizIdx=0; S._basePhase=null; S._baseResult=null; S._basePlan=null; S._baseIdx=0; S._baseAnswers=[]; S._baseFeedback=null; S._baseSkipped=false; S._selfPhase=null; S._selfResult=null; S._selfPlan=null; S._selfIdx=0; S._selfAnswers=[]; S._selfSel={}; S._selfOtherText={}; S._selfSkipped=false; S.quizAnswers={}; S._quizDims=null; S._quizByDim=null; S._quizWeights=null; S._quizResult=null; S.quizScores=null; S._quizDone={}; S._quizLog={}; S._quizPlan=[]; S._quizSelectedStep={}; S._quizStartAt={}; S._quizTiming={}; S._quizAllDone=false; S.courseIdx=null; S.courseTaskIdx=0; S.courseProgress={}; S.questProg={}; S.quest=null; S.combo=0; S.finalAnswers=[]; S.finalSubjAnswers={}; S.finalScore=null; S.finalSubmitted=false; S.finalShowHint={}; S.currentEmployee=null; render(); };
+S.reset = function() { stopVoice(); S.industry=null; S.role=null; S.view='role'; S._flow='entry'; S._entryJob=null; S._entryRole=null; S._entryCourse=null; S._entryIndustry=null; S._entryPosition=null; S.quizIdx=0; S._basePhase=null; S._baseResult=null; S._basePlan=null; S._baseIdx=0; S._baseAnswers=[]; S._baseFeedback=null; S._baseSkipped=false; S._selfPhase=null; S._selfResult=null; S._selfPlan=null; S._selfIdx=0; S._selfAnswers=[]; S._selfSel={}; S._selfOtherText={}; S._selfSkipped=false; S.quizAnswers={}; S._quizDims=null; S._quizByDim=null; S._quizWeights=null; S._quizResult=null; S.quizScores=null; S._quizDone={}; S._quizLog={}; S._quizPlan=[]; S._quizSelectedStep={}; S._quizStartAt={}; S._quizTiming={}; S._quizAllDone=false; S.courseIdx=null; S.courseTaskIdx=0; S.courseProgress={}; S.questProg={}; S.quest=null; S.combo=0; S.finalAnswers=[]; S.finalSubjAnswers={}; S.finalScore=null; S.finalSubmitted=false; S.finalShowHint={}; S.currentEmployee=null; render(); };
 S.goAdmin = function() {
   S.view='admin';
   if (sbClient()) { DB.hydrate(function(){ render(); }); } // 进入后台即从云端拉取最新反馈/需求，确保看到游客（含其他设备）提交的
@@ -15601,10 +15697,10 @@ S.goBack = function() {
   stopVoice();
   if (S.view === 'quiz') {
     if (confirm('返回将丢失当前测评进度，确定返回？')) {
-      S.view='role';
+      S.view='role'; S._flow='entry';
     } else { return; }
   }
-  else if (S.view === 'results') { S.view='role'; }
+  else if (S.view === 'results') { S.view='role'; S._flow='entry'; }
   else if (S.view === 'final') { S.goDashboard(); return; }
   else if (S.view === 'quest') { S.quest = null; S.view = 'questmap'; }
   else if (S.view === 'questmap') { S.view = 'dashboard'; }
@@ -16033,6 +16129,15 @@ function bindEvents() {
             case 'resetScenePair': S.resetScenePair(); break;
             case 'startQuiz': S.startQuiz(); break;
             case 'goCourseByKey': S.goCourseByKeyPreview(id); break;
+            // v229：登录后自适应入口
+            case 'entryPath': S.entryChoosePath(id); break;
+            case 'entryJob': S.entryPickJob(parseInt(id)); break;
+            case 'entryRole': S.entryPickRole(parseInt(id)); break;
+            case 'entryCourse': S.entryPickCourse(id); break;
+            case 'entryInd': S.entrySetIndustry(id); break;
+            case 'entryPos': S.entrySetPosition(id); break;
+            case 'entryEnter': S.entryEnterCourse(); break;
+            case 'entryBack': S.entryBack(); break;
             case 'answerQuiz': S.answerQuiz(idx); break;
             case 'selectBaseOption': S.selectBaseOption(idx); break;
             case 'submitBaseOption': S.submitBaseOption(); break;
