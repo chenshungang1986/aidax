@@ -8602,7 +8602,7 @@ function headerHtml(title, sub, showBack, compact) {
         ${roleText ? '<span class="tag tag-purple">'+roleText+'</span>' : ''}
         <span style="font-size:12px;color:var(--text3);">👤 ${userName}</span>
         ${S.view!=='admin'&&(session.role==='admin'||session.role==='ent')?'<button class="btn btn-sm btn-outline" data-action="goAdmin">管理面板</button>':''}
-        ${session.role==='learner'?'<button class="btn btn-sm btn-outline" data-action="openRedeem" style="color:#6366f1;border-color:#c7d2fe;">推荐码/权益</button>':''}
+        ${session.role==='learner'?'<button class="btn btn-sm btn-outline" data-action="openRedeem" style="color:#6366f1;border-color:#c7d2fe;">邀请码/权益</button>':''}
         ${S.view!=='role' ? '<button class="btn btn-sm btn-outline" data-action="reset">切换场景/岗位</button>' : ''}
         <button class="btn btn-sm btn-outline" data-action="logout" style="color:#ef4444;border-color:#ef4444;">退出</button>
       </div>
@@ -8797,7 +8797,7 @@ function renderRoleSelection() {
         <button class="af-big primary" data-action="entryPath" data-id="quiz"><span class="af-ico">🧭</span><b>测一测</b><span>按职业与岗位出题，看清 8 维短板，自动推荐该学的课</span></button>
         <button class="af-big" data-action="entryPath" data-id="course"><span class="af-ico">📚</span><b>直接上课</b><span>先看 8 门岗位实战课，选课后按行业与岗位适配</span></button>
       </div>
-      <div class="af-note">测评永久免费 · 不需要推荐码 · 8 门课均为 64 单元 / 四步链路</div>
+      <div class="af-note">测评永久免费 · 不需要邀请码 · 8 门课均为 64 单元 / 四步链路</div>
     </div>`;
   } else if (flow === 'pickJob') {
     html += `<div class="af-panel">${afSteps(['选职业','选岗位','开始测评','看推荐'],0)}
@@ -12688,10 +12688,10 @@ var ADMIN_NAV = [
   { g:'分析', ico:'📈', tabs:[['industry','行业分析'],['company','企业分析'],['quiz','测评分析']] },
   { g:'客户', ico:'🎯', tabs:[['leads','商机线索'],['cases','案例库'],['sales','销售方案']] },
   { g:'运营', ico:'🛠️', tabs:[['feedback','反馈汇总'],['logs','访问日志'],['report','企业报告'],['roi','ROI 报告']] },
-  { g:'设置', ico:'⚙️', tabs:[['companies','企业管理'],['subscription','订阅/席位'],['bank','企业题库']] }
+  { g:'设置', ico:'⚙️', tabs:[['companies','企业管理'],['subscription','订阅/席位'],['invites','邀请码'],['bank','企业题库']] }
 ];
 // 仅平台管理员可见的页（企业管理员看会空/越权）
-var ADMIN_ONLY_TABS = { companies:1, quiz:1, leads:1, cases:1 };
+var ADMIN_ONLY_TABS = { companies:1, quiz:1, leads:1, cases:1, invites:1 };
 
 function adminIsAdmin(){ try { return getSessionSafe().role === 'admin'; } catch(e) { return false; } }
 function adminNavVisible(isAdmin){
@@ -12935,6 +12935,7 @@ if (S.adminTab === 'industry') html += renderAdminIndustry();
   else if (S.adminTab === 'subscription') html += renderAdminSubscription();
   else if (S.adminTab === 'leads') html += renderAdminLeads();
   else if (S.adminTab === 'cases') html += renderAdminCases();
+  else if (S.adminTab === 'invites') html += renderAdminInvites();
   else if (S.adminTab === 'bank') html += renderAdminBank();
   else if (S.adminTab === 'roi') html += renderAdminRoi();
   else if (S.adminTab === 'report') html += renderAdminReport();
@@ -14659,6 +14660,128 @@ function cbValidate(arr){
   return { items: items, errors: errors };
 }
 
+/* ===== v230: 邀请码后台（仅平台管理员） =====
+   发码走服务端 RPC admin_gen_invites（SECURITY DEFINER + aidax_app_role()='admin'），
+   前端只带管理员 JWT，不再暴露 service token。列表/停用/启用同理。 */
+function inviteRpc(name, body, cb){
+  cb = cb || function(){};
+  try {
+    var c = (typeof cloudConfig === 'function') ? cloudConfig() : null;
+    if (!c || !c.supabaseUrl) { cb(null, {msg:'云端配置缺失，请先在后台配置 Supabase'}); return; }
+    if (!S._cloudJwt) { cb(null, {msg:'管理员凭证已过期，请重新用管理员账号登录'}); return; }
+    var url = c.supabaseUrl.replace(/\/$/, '') + '/rest/v1/rpc/' + name;
+    fetch(url, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'apikey':c.supabaseAnonKey, 'Authorization':'Bearer ' + S._cloudJwt },
+      body: JSON.stringify(body || {})
+    }).then(function(r){ return r.json().then(function(j){ return {status:r.status, json:j}; }); })
+      .then(function(res){
+        if (res.status >= 400 || (res.json && res.json.error))
+          cb(null, { msg: (res.json && (res.json.message || res.json.error)) || ('RPC 失败（HTTP '+res.status+'）') });
+        else cb(res.json, null);
+      }).catch(function(e){ cb(null, {msg:'网络错误：'+(e && e.message || '未知')}); });
+  } catch(e){ cb(null, {msg:String(e && e.message || e)}); }
+}
+S.inviteGen = function(){
+  var tier = (document.getElementById('ivTier')||{}).value || 'trial';
+  var cnt = parseInt((document.getElementById('ivCount')||{}).value, 10) || 10;
+  var days = parseInt((document.getElementById('ivDays')||{}).value, 10) || 14;
+  var note = ((document.getElementById('ivNote')||{}).value || '').trim();
+  S._ivMsg = '正在生成…'; S._ivMsgBad = false; render();
+  inviteRpc('admin_gen_invites', { p_tier:tier, p_count:cnt, p_days:days, p_note:note }, function(j, err){
+    if (err) { S._ivMsg = err.msg; S._ivMsgBad = true; }
+    else if (j && j.ok) {
+      S._ivLast = j.codes || [];
+      S._ivMsg = '已生成 ' + S._ivLast.length + ' 个' + (tier==='trial'?'体验版':'标准版') + '邀请码，请复制下方码发给学员';
+      S._ivMsgBad = false;
+      S.inviteLoad();
+      return;
+    } else { S._ivMsg = (j && j.msg) || '生成失败'; S._ivMsgBad = true; }
+    render();
+  });
+};
+S.inviteLoad = function(){
+  S._ivLoading = true; render();
+  inviteRpc('admin_list_invites', { p_limit:200 }, function(j, err){
+    S._ivLoading = false;
+    if (err) { S._ivRows = []; S._ivMsg = err.msg; S._ivMsgBad = true; }
+    else if (j && j.ok) { S._ivRows = j.rows || []; }
+    render();
+  });
+};
+S.inviteToggle = function(code, active){
+  inviteRpc('admin_toggle_invite', { p_code:code, p_active:!!active }, function(j, err){
+    if (err) { S._ivMsg = err.msg; S._ivMsgBad = true; }
+    else if (j && j.ok) { S._ivMsg = '已' + (active?'启用':'停用') + ' ' + code; S._ivMsgBad = false; }
+    else { S._ivMsg = (j && j.msg) || '操作失败'; S._ivMsgBad = true; }
+    S.inviteLoad();
+  });
+};
+S.inviteCopy = function(){
+  var codes = S._ivLast || [];
+  if (!codes.length) { showToast('还没有可复制的邀请码'); return; }
+  var text = codes.join('\n');
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text);
+    else { var ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); }
+    showToast('已复制 ' + codes.length + ' 个邀请码');
+  } catch(e){ showToast('复制失败，请手动选中'); }
+};
+function renderAdminInvites(){
+  if (!S._ivRows && !S._ivLoading && !S._ivMsg) S.inviteLoad();
+  var h = '<div class="card slide-up">';
+  h += '<div class="section-title"><span class="st-ico">🎟️</span>邀请码管理（平台管理员）</div>';
+  h += '<p style="font-size:12.5px;color:var(--text2);margin-bottom:14px">生成后把码发给学员，学员在「邀请码/权益」入口输入即可激活。'
+     + '每个码默认<b>限用 1 次</b>，绑定首次激活的账号；体验版 14 天、标准版有效期按下方天数。'
+     + '发码权限由服务端校验管理员身份，普通账号无法调用。</p>';
+
+  // 生成表单
+  h += '<div style="border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:14px;background:var(--card2,#f8fafc)">';
+  h += '<div style="font-size:12.5px;font-weight:700;margin-bottom:10px">生成邀请码</div>';
+  h += '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">';
+  h += '<label style="font-size:12px;color:var(--text2)">类型<br><select id="ivTier" style="margin-top:4px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px">'
+     + '<option value="trial">体验版 ADX-T（14 天完整体验）</option>'
+     + '<option value="standard">标准版 ADX-S（全量课程+陪练）</option></select></label>';
+  h += '<label style="font-size:12px;color:var(--text2)">数量<br><input id="ivCount" type="number" min="1" max="200" value="10" style="margin-top:4px;width:90px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px"></label>';
+  h += '<label style="font-size:12px;color:var(--text2)">有效天数<br><input id="ivDays" type="number" min="1" max="365" value="14" style="margin-top:4px;width:90px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px"></label>';
+  h += '<label style="font-size:12px;color:var(--text2);flex:1;min-width:160px">备注<br><input id="ivNote" placeholder="如：3月企业参训" style="margin-top:4px;width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px"></label>';
+  h += '<button class="btn btn-sm btn-primary" data-action="inviteGen">生成</button>';
+  h += '<button class="btn btn-sm btn-outline" data-action="inviteLoad">刷新列表</button>';
+  h += '</div>';
+  if (S._ivMsg) h += '<div style="margin-top:10px;font-size:12.5px;color:'+(S._ivMsgBad?'#c0392b':'#2e9e5b')+'">'+escapeHtml(S._ivMsg)+'</div>';
+  h += '</div>';
+
+  // 本批结果
+  if (S._ivLast && S._ivLast.length) {
+    h += '<div style="border:1px solid #bbf7d0;background:#f0fdf4;border-radius:10px;padding:12px;margin-bottom:14px">';
+    h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><b style="font-size:12.5px;color:#166534">本批生成的邀请码（'+S._ivLast.length+' 个）</b>'
+       + '<button class="btn btn-sm btn-outline" data-action="inviteCopy" style="margin-left:auto">一键复制</button></div>';
+    h += '<div style="font-family:ui-monospace,Menlo,monospace;font-size:12.5px;line-height:1.9;color:#065f46;user-select:all">'+S._ivLast.map(escapeHtml).join('<br>')+'</div>';
+    h += '</div>';
+  }
+
+  // 历史列表
+  var rows = S._ivRows || [];
+  h += '<div style="font-size:12.5px;font-weight:700;margin-bottom:8px">已发放邀请码' + (S._ivLoading?'（加载中…）':'（'+rows.length+'）') + '</div>';
+  if (!rows.length && !S._ivLoading) {
+    h += '<p style="text-align:center;color:var(--text3);padding:18px">还没有邀请码。用上方表单生成第一批。</p>';
+  } else {
+    h += '<div style="overflow-x:auto"><table class="log-table"><thead><tr><th>邀请码</th><th>类型</th><th>天数</th><th>使用</th><th>状态</th><th>备注</th><th>操作</th></tr></thead><tbody>';
+    rows.forEach(function(r){
+      var used = (r.usedCount||0), max = (r.maxUses||0);
+      h += '<tr><td style="font-family:ui-monospace,Menlo,monospace;font-size:12px">'+escapeHtml(r.code)+'</td>'
+        + '<td>'+(r.tier==='trial'?'体验版':'标准版')+'</td><td>'+(r.days||'')+'</td>'
+        + '<td>'+used+'/'+(max||'∞')+'</td>'
+        + '<td>'+(r.active ? '<span style="color:#2e9e5b">启用</span>' : '<span style="color:#c0392b">停用</span>')+'</td>'
+        + '<td>'+escapeHtml(r.note||'')+'</td>'
+        + '<td><button class="btn btn-sm btn-outline" data-action="inviteToggle" data-id="'+escapeHtml(r.code)+'" data-val="'+(r.active?'0':'1')+'">'+(r.active?'停用':'启用')+'</button></td></tr>';
+    });
+    h += '</tbody></table></div>';
+  }
+  h += '</div>';
+  return h;
+}
+
 function renderAdminBank(){
   var isAdmin = cbIsAdmin();
   var co = cbMyCompany();
@@ -15460,7 +15583,7 @@ function canOpenIndustryDeep(){
   } catch(e){ return true; }  // 闸门异常一律放行，绝不因权限逻辑挡住正常上课
 }
 S.openCourse = function(idx) {
-  if (!S.canOpenCourse()) return;   // v216: 课程全锁，须凭推荐码激活（内嵌通用课）
+  if (!S.canOpenCourse()) return;   // v216: 课程全锁，须凭邀请码激活（内嵌通用课）
   const courses = getRoleCourses();
   const c = courses[idx];
   // 金融×产品经理：直接进入深版 64 单元课程（course_finance_pm_deep.html，2026-11-18 起，
@@ -15497,7 +15620,7 @@ S.openCourse = function(idx) {
   }
   // v201 FDE 通道：进入深版 64 单元课程（course_fde_deep.html），
   // 带 ?m=Mx 深链定位模块、&weak= 弱维做个性化高亮；管理员会话自动带 admin=1。
-  // v216: FDE 课同样受课程闸门约束（无推荐码不可看）
+  // v216: FDE 课同样受课程闸门约束（无邀请码不可看）
   if (S.industry === 'fde' && S.role === 'fde') {
     if (!S.canOpenCourse()) return;
     const mparam = (c && c.id && /fde_m(\d+)/.test(c.id)) ? ('?m=M' + c.id.match(/fde_m(\d+)/)[1]) : '';
@@ -16147,6 +16270,11 @@ function bindEvents() {
             case 'entryPos': S.entrySetPosition(id); break;
             case 'entryEnter': S.entryEnterCourse(); break;
             case 'entryBack': S.entryBack(); break;
+            // v230：邀请码后台
+            case 'inviteGen': S.inviteGen(); break;
+            case 'inviteLoad': S.inviteLoad(); break;
+            case 'inviteToggle': S.inviteToggle(id, el.getAttribute('data-val') === '1'); break;
+            case 'inviteCopy': S.inviteCopy(); break;
             case 'answerQuiz': S.answerQuiz(idx); break;
             case 'selectBaseOption': S.selectBaseOption(idx); break;
             case 'submitBaseOption': S.submitBaseOption(); break;
@@ -16317,7 +16445,7 @@ function bindEvents() {
     || (session.loginType === 'user' && !session.loginId); // v74：注册账号会话需带 loginId（成绩归属标识）
   S.view = _needsReLogin ? 'login' : ((_sessRole === 'admin' || _sessRole === 'ent') ? 'admin' : 'role');
   window.S = S;  // expose S for inline onclick handlers
-  // v216: 推荐码 UI 样式（一次性注入，不动主样式表）
+  // v216: 邀请码 UI 样式（一次性注入，不动主样式表）
   try {
     if (!document.getElementById('aidaxRedeemCss')) {
       var st = document.createElement('style'); st.id = 'aidaxRedeemCss';
@@ -16343,7 +16471,7 @@ function bindEvents() {
     }
   } catch(e){}
   bootCloud();
-  // v216: 登录后从云端复核推荐码激活态（跨设备一致、到期自动失效）
+  // v216: 登录后从云端复核邀请码激活态（跨设备一致、到期自动失效）
   try {
     if (_sessRole === 'learner' || _sessRole === 'ent') {
       setTimeout(function(){ try { if (S.refreshRedeem) S.refreshRedeem(function(){ if (S.view === 'role' || S.view === 'admin') render(); }); } catch(e){} }, 1200);
@@ -16415,7 +16543,7 @@ const TIER_ORDER = ['visitor','trial','standard','pro','custom'];
 
 /* ---------- 3. 权限矩阵（三类 × 20 项能力） ---------- */
 const TIER_MATRIX = {
-  // v216: 未激活访客 —— 测评免费，课程全锁（注册后默认态，须凭推荐码解锁）
+  // v216: 未激活访客 —— 测评免费，课程全锁（注册后默认态，须凭邀请码解锁）
   visitor: {
     [FEATURES.BROWSE]: FULL,
     [FEATURES.TRIAL_UNIT]: NONE,
@@ -16537,10 +16665,10 @@ const MODE = { FULL:'full', READONLY:'readonly', LOCKED:'locked' };
 /* ---------- 5. 受限提示 ---------- */
 const GATE_HINT = {
   [FEATURES.ASSESS]:         '免费体验 1 次测评',
-  [FEATURES.TRIAL_UNIT]:     '输入体验版推荐码，解锁 14 天完整体验',
-  [FEATURES.GENERAL_COURSE]: '输入标准版推荐码，解锁全量课程',
-  [FEATURES.INDUSTRY_DEEP]:  '输入标准版推荐码，解锁 1 行业 × 1 岗位全量课程',
-  [FEATURES.AI_COACH]:       '输入标准版推荐码，解锁 AI 实景陪练',
+  [FEATURES.TRIAL_UNIT]:     '输入体验版邀请码，解锁 14 天完整体验',
+  [FEATURES.GENERAL_COURSE]: '输入标准版邀请码，解锁全量课程',
+  [FEATURES.INDUSTRY_DEEP]:  '输入标准版邀请码，解锁 1 行业 × 1 岗位全量课程',
+  [FEATURES.AI_COACH]:       '输入标准版邀请码，解锁 AI 实景陪练',
   [FEATURES.ENT_DASHBOARD]:  '升级专业版解锁企业管理看板',
   [FEATURES.SEAT_ADD]:       '升级专业版解锁不限账号',
   [FEATURES.DATA_EXPORT]:    '升级专业版解锁数据导出',
@@ -16553,7 +16681,7 @@ const GATE_HINT = {
  * 会话 → 三类档位。
  * 缺省放大：任何识别不出的账号按 pro（专业版）放行，绝不因权限逻辑误伤学员。
  */
-// v216: 有效推荐码（本地缓存，云端为真相源；owner 必须与当前会话一致且未过期）
+// v216: 有效邀请码（本地缓存，云端为真相源；owner 必须与当前会话一致且未过期）
 function validRedeemTier(){
   try {
     var o = (typeof currentOwnerKey === 'function') ? currentOwnerKey() : '';
@@ -16572,7 +16700,7 @@ function accountTier(ctx){
   if (ctx.plan === 'custom' || ctx.tier === 'custom') return 'custom';
   if (ctx.loginType === 'ent') return (ctx.plan === 'standard') ? 'standard' : 'pro';
   if (ctx.loginType === 'user' || ctx.loginType === 'guest' || !ctx.loginType) {
-    return validRedeemTier() || 'visitor';   // v216: 注册默认仅测评，课程须凭推荐码
+    return validRedeemTier() || 'visitor';   // v216: 注册默认仅测评，课程须凭邀请码
   }
   return 'pro';                              // 缺省放大（未知账号不误伤）
 }
@@ -16615,7 +16743,7 @@ if (typeof window !== 'undefined'){
 
 })();
 
-/* ===== v216: 推荐码试用模块（云端发码 / 限时14天 / 测评免费只锁课程） ===== */
+/* ===== v216: 邀请码试用模块（云端发码 / 限时14天 / 测评免费只锁课程） ===== */
 (function(){
   var CACHE = 'aidax_redeem';
   function cfg(){ return (typeof cloudConfig === 'function') ? cloudConfig() : null; }
@@ -16646,11 +16774,11 @@ if (typeof window !== 'undefined'){
       cb(j);
     });
   };
-  // 兑换推荐码 → 写本地缓存 → 刷新界面
+  // 兑换邀请码 → 写本地缓存 → 刷新界面
   S.redeemSubmit = function(code, cb){
     cb = cb || function(){};
     var owner = (typeof currentOwnerKey === 'function') ? currentOwnerKey() : '';
-    if (!owner) { cb({ ok:false, msg:'请先登录后再输入推荐码' }); return; }
+    if (!owner) { cb({ ok:false, msg:'请先登录后再输入邀请码' }); return; }
     rpc('redeem_code', { p_code: String(code||'').trim().toUpperCase(), p_owner: owner }, function(j){
       if (j && j.ok && j.tier) {
         try { localStorage.setItem(CACHE, JSON.stringify({ owner: owner, tier: j.tier, expiresAt: j.expiresAt, days: j.days, code: String(code||'').trim().toUpperCase() })); } catch(e){}
@@ -16677,15 +16805,15 @@ if (typeof window !== 'undefined'){
     var name = c ? ((window.AIDAX_ACL.TIER_META[c.tier] || {}).name || c.tier) : '未激活';
     var text = c
       ? '<b>' + name + '</b> 试用中 · 剩余 <b>' + days + ' 天</b> · 已解锁' + (c.tier === 'standard' ? '全量课程' : '14 天完整体验')
-      : '测评免费开放 · <b>观看课程需先输入推荐码</b>（体验版 / 标准版）';
+      : '测评免费开放 · <b>观看课程需先输入邀请码</b>（体验版 / 标准版）';
     return '<div class="redeem-banner' + on + '">'
       + '<div class="rb-ico">' + (c ? '✓' : '!') + '</div>'
       + '<div class="rb-body"><div class="rb-t">' + text + '</div>'
-      + '<div class="rb-s">' + (c ? '课程权益已激活，到期后可联系客服续期或签约正式版' : '找客服获取推荐码，激活后限时体验课程（14 天）') + '</div></div>'
-      + '<button class="btn btn-sm ' + (c ? 'btn-outline' : 'btn-primary') + '" data-action="openRedeem">' + (c ? '管理权益' : '输入推荐码') + '</button>'
+      + '<div class="rb-s">' + (c ? '课程权益已激活，到期后可联系客服续期或签约正式版' : '找客服获取邀请码，激活后限时体验课程（14 天）') + '</div></div>'
+      + '<button class="btn btn-sm ' + (c ? 'btn-outline' : 'btn-primary') + '" data-action="openRedeem">' + (c ? '管理权益' : '输入邀请码') + '</button>'
       + '</div>';
   };
-  // 推荐码弹窗
+  // 邀请码弹窗
   S.openRedeemModal = function(){
     var old = document.getElementById('redeemModal'); if (old) old.parentNode.removeChild(old);
     var c = cached();
@@ -16697,13 +16825,13 @@ if (typeof window !== 'undefined'){
       + '<div class="redeem-mask" onclick="S.closeRedeemModal()"></div>'
       + '<div class="redeem-card">'
       + '<button class="redeem-x" onclick="S.closeRedeemModal()">×</button>'
-      + '<div class="redeem-h">输入推荐码</div>'
-      + '<p class="redeem-p">测评免费，无需推荐码；<b>观看课程需要先激活试用</b>。体验版推荐码解锁 14 天完整体验，标准版推荐码解锁全量课程，有效期 14 天。</p>'
+      + '<div class="redeem-h">输入邀请码</div>'
+      + '<p class="redeem-p">测评免费，无需邀请码；<b>观看课程需要先激活试用</b>。体验版邀请码解锁 14 天完整体验，标准版邀请码解锁全量课程，有效期 14 天。</p>'
       + '<div class="redeem-cur">当前版本：<b>' + name + '</b>' + (c ? ' · 剩余 ' + days + ' 天' : ' · 未激活') + '</div>'
-      + '<input id="redeemInput" class="redeem-input" placeholder="请输入推荐码，如 ADX-T-XXXX-XXXX" autocomplete="off">'
+      + '<input id="redeemInput" class="redeem-input" placeholder="请输入邀请码，如 ADX-T-XXXX-XXXX" autocomplete="off">'
       + '<div id="redeemMsg" class="redeem-msg"></div>'
       + '<button class="btn btn-primary redeem-ok" onclick="S.doRedeem()">激活并解锁课程</button>'
-      + '<div class="redeem-foot">没有推荐码？<a href="tel:18682011582">联系客服 18682011582 获取</a></div>'
+      + '<div class="redeem-foot">没有邀请码？<a href="tel:18682011582">联系客服 18682011582 获取</a></div>'
       + '</div>';
     document.body.appendChild(div);
     setTimeout(function(){ var el = document.getElementById('redeemInput'); if (el) el.focus(); }, 60);
@@ -16714,7 +16842,7 @@ if (typeof window !== 'undefined'){
   S.doRedeem = function(){
     var el = document.getElementById('redeemInput'); var code = el ? el.value.trim() : '';
     var msg = document.getElementById('redeemMsg');
-    if (!code) { if (msg) { msg.textContent = '请输入推荐码'; msg.className = 'redeem-msg err'; } return; }
+    if (!code) { if (msg) { msg.textContent = '请输入邀请码'; msg.className = 'redeem-msg err'; } return; }
     if (msg) { msg.textContent = '正在校验…'; msg.className = 'redeem-msg'; }
     S.redeemSubmit(code, function(j){
       if (j && j.ok) {
@@ -16725,14 +16853,14 @@ if (typeof window !== 'undefined'){
       }
     });
   };
-  // 课程闸门：无权限时 toast + 弹推荐码窗（配置异常一律放行，绝不误伤）
+  // 课程闸门：无权限时 toast + 弹邀请码窗（配置异常一律放行，绝不误伤）
   S.canOpenCourse = function(feature){
     try {
       var acl = (typeof S !== 'undefined' && S.acl) || (typeof window !== 'undefined' && window.AIDAX_ACL);
       if (!acl || typeof acl.gate !== 'function') return true;
       var sess = (typeof getSessionSafe === 'function') ? getSessionSafe() : {};
       // v226: 体验版(trial)的 INDUSTRY_DEEP=NONE，但 TRIAL_UNIT=PARTIAL 是放行的——
-      // 原实现写死 INDUSTRY_DEEP 导致体验版推荐码激活后仍打不开任何课程（承诺"第一章试听"落空）。
+      // 原实现写死 INDUSTRY_DEEP 导致体验版邀请码激活后仍打不开任何课程（承诺"第一章试听"落空）。
       // 课程页本身无章节锁（全链接入即全量可见），故按方案 A 让体验版走 TRIAL_UNIT 闸门 = 可进全课。
       var picked = feature;
       if (!picked && acl.accountTier && acl.accountTier(sess) === 'trial') picked = acl.FEATURES.TRIAL_UNIT;
