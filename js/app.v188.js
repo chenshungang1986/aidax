@@ -8611,92 +8611,110 @@ function renderFdePanel() {
 
 // ---- ROLE SELECTION ----
 function renderRoleSelection() {
-  // v140：进入选择页先把旧状态收敛成合法配对（防历史残留的「新人小白 × 产品」错位组合）
+  // 预览版 v226：测评优先。行业/岗位不再是前置关卡，降级为「画像设置」可选项。
+  // 用户点「开始测评」时若未选画像，自动填通用默认（mfg/pm），保证题库与权重能跑。
   normalizeScenePair();
+  const COURSE_CARDS = [
+    {n:'AI Coding 实战', s:'从需求到交付',   d:'研发', c:'c-blue',   a:'goCourseByKey', k:'dev'},
+    {n:'AI 产品实战',   s:'从需求到产品实现', d:'产品', c:'c-purple', a:'goCourseByKey', k:'pm'},
+    {n:'AI 营销实战',   s:'从内容到转化增长', d:'市场运营', c:'c-pink', a:'goCourseByKey', k:'mkt'},
+    {n:'AI 人资实战',   s:'从 JD 到人才发展', d:'人资', c:'c-teal',   a:'goCourseByKey', k:'hr'},
+    {n:'AI 财务实战',   s:'从预算到经营分析', d:'财务采购', c:'c-amber', a:'goCourseByKey', k:'fc'},
+    {n:'AI 法务实战',   s:'从审查到合规管理', d:'法务', c:'c-coral', a:'goCourseByKey', k:'legal'},
+  ];
+  const indTags = IND_VISIBLE.map(id=>{
+    const ind=INDUSTRIES[id];
+    return '<span class="pv-chip'+(S.industry===id?' on':'')+'" data-action="selectIndustry" data-id="'+id+'">'+ind.icon+' '+ind.name+'</span>';
+  }).join('');
+  const roleTags = Object.keys(ROLES).filter(id=>id!=='graduate'&&id!=='fde').map(id=>{
+    const r=ROLES[id];
+    return '<span class="pv-chip'+(S.role===id?' on':'')+'" data-action="selectRole" data-id="'+id+'">'+r.name+'</span>';
+  }).join('');
+  const hasPick = S.industry && S.role && S.industry!=='newbie' && S.industry!=='fde';
+
   let html = `
-    <h2 class="sr-only">选择行业场景与岗位开始AI技能测评</h2>
-    <div style="padding:20px 0;">
-      <div style="margin-bottom:20px;">
-        <a href="index.html" class="btn btn-outline btn-sm" style="font-size:12px;">← 返回主页</a>
+  <style>
+  .pv-wrap{max-width:1000px;margin:0 auto;padding:16px 4px 40px;}
+  .pv-hero{background:linear-gradient(135deg,#eef2ff,#faf5ff 60%,#f0fdf4);border:1.5px solid #c7d2fe;border-radius:20px;padding:34px 36px;text-align:center;margin-bottom:22px;}
+  .pv-hero h1{font-size:26px;line-height:1.35;margin:10px 0 10px;color:#1e1b4b;font-weight:700;}
+  .pv-hero h1 .g{background:linear-gradient(90deg,#6366f1,#a855f7);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .pv-hero p{color:#64748b;font-size:14px;line-height:1.7;margin-bottom:22px;}
+  .pv-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;}
+  .pv-cta .btn{font-size:15px;padding:13px 30px;}
+  .pv-note{font-size:12px;color:#94a3b8;}
+  .pv-sec{font-size:16px;font-weight:700;color:#1e293b;margin:26px 0 4px;display:flex;align-items:center;gap:9px;}
+  .pv-sec .pv-num{display:inline-flex;width:24px;height:24px;border-radius:50%;background:#6366f1;color:#fff;font-size:13px;align-items:center;justify-content:center;}
+  .pv-sec-sub{font-size:12.5px;color:#94a3b8;margin:0 0 16px 33px;}
+  .pv-courses{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .pv-course{border:1.5px solid var(--border);border-radius:14px;padding:18px 16px;background:var(--card);cursor:pointer;transition:all .18s;position:relative;overflow:hidden;}
+  .pv-course:hover{border-color:#818cf8;transform:translateY(-3px);box-shadow:0 8px 24px rgba(99,102,241,.12);}
+  .pv-course .pv-bar{position:absolute;left:0;top:0;bottom:0;width:4px;}
+  .pv-course .pv-role{font-size:10.5px;color:#64748b;background:#f1f5f9;border-radius:20px;padding:2px 9px;display:inline-block;margin-bottom:9px;}
+  .pv-course h4{font-size:15px;color:#0f172a;margin:0 0 5px;font-weight:700;}
+  .pv-course .pv-sub{font-size:12px;color:#7c3aed;font-weight:600;}
+  .pv-profile{border:1.5px dashed var(--border-active);border-radius:14px;padding:16px 18px;background:var(--card);margin-top:8px;}
+  .pv-profile summary{font-size:13.5px;font-weight:600;color:#4f46e5;cursor:pointer;list-style:none;display:flex;align-items:center;gap:7px;}
+  .pv-profile summary::-webkit-details-marker{display:none;}
+  .pv-profile summary::before{content:'▸';display:inline-block;transition:transform .18s;}
+  .pv-profile[open] summary::before{transform:rotate(90deg);}
+  .pv-profile .pv-inner{padding-top:14px;}
+  .pv-lbl{font-size:12px;color:#64748b;font-weight:600;margin:12px 0 7px;}
+  .pv-chip{display:inline-block;font-size:12px;padding:5px 12px;margin:0 6px 7px 0;border-radius:20px;border:1.5px solid var(--border);background:var(--card);color:var(--text2);cursor:pointer;transition:all .15s;}
+  .pv-chip:hover{border-color:#818cf8;}
+  .pv-chip.on{border-color:#6366f1;background:#eef2ff;color:#4338ca;font-weight:600;}
+  .pv-auto{font-size:12px;color:#0f766e;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;padding:9px 13px;margin-top:10px;}
+  @media(max-width:700px){.pv-courses{grid-template-columns:1fr 1fr;}.pv-hero{padding:24px 18px;}.pv-hero h1{font-size:21px;}}
+  </style>
+  <div class="pv-wrap">
+    <div style="margin-bottom:14px;"><a href="index.html" class="btn btn-outline btn-sm" style="font-size:12px;">← 返回主页</a></div>
+    <div class="pv-hero">
+      <svg viewBox="0 0 240 56" style="height:42px;width:auto;margin-bottom:6px"><defs><linearGradient id="pvg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6366f1"/><stop offset="50%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#a855f7"/></linearGradient></defs><circle cx="16" cy="18" r="6" fill="url(#pvg1)"/><circle cx="32" cy="6" r="6" fill="url(#pvg1)"/><circle cx="48" cy="18" r="6" fill="url(#pvg1)"/><circle cx="32" cy="30" r="6" fill="url(#pvg1)"/><circle cx="32" cy="42" r="5" fill="#818cf8"/><line x1="16" y1="18" x2="32" y2="6" stroke="#818cf8" stroke-width="1.8" stroke-linecap="round"/><line x1="32" y1="6" x2="48" y2="18" stroke="#818cf8" stroke-width="1.8" stroke-linecap="round"/><line x1="16" y1="18" x2="32" y2="30" stroke="#818cf8" stroke-width="1.8" stroke-linecap="round"/><line x1="48" y1="18" x2="32" y2="30" stroke="#818cf8" stroke-width="1.8" stroke-linecap="round"/><line x1="32" y1="30" x2="32" y2="42" stroke="#818cf8" stroke-width="1.8" stroke-linecap="round"/><text x="68" y="28" font-family="-apple-system,sans-serif" font-size="17" font-weight="700" fill="#4338ca">AI 达学</text></svg>
+      <p style="margin-bottom:2px;color:#6366f1;font-weight:600;">企业 AI 能力测评与实战陪练</p>
+      <h1>先测出你的 AI 能力短板，<br><span class="g">再学真正用得上的</span></h1>
+      <p>8 维自适应测评，约 3 分钟看清个人能力画像。<br>测完自动按短板推荐课程 —— 8 门岗位实战课，学完就交得出活。</p>
+      <div class="pv-cta">
+        <button class="btn btn-primary" data-action="startQuizPreview" onclick="if(typeof S!=='undefined'){S.startQuizPreview()}">免费开始 8 维测评 →</button>
+        <button class="btn btn-outline" data-action="goCourses" onclick="if(typeof S!=='undefined'){S.goCoursesPreview&&S.goCoursesPreview()}">先看看 8 门课 ↓</button>
       </div>
-      <div class="text-center mb-4">
-        <svg viewBox="0 0 240 56" style="height:48px;width:auto;margin-bottom:10px"><defs><linearGradient id="ng1a" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6366f1"/><stop offset="50%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#a855f7"/></linearGradient><linearGradient id="ng2a" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#818cf8"/><stop offset="100%" stop-color="#6366f1"/></linearGradient></defs><circle cx="16" cy="18" r="6" fill="url(#ng1a)"/><circle cx="32" cy="6" r="6" fill="url(#ng1a)"/><circle cx="48" cy="18" r="6" fill="url(#ng1a)"/><circle cx="32" cy="30" r="6" fill="url(#ng1a)"/><circle cx="32" cy="42" r="5" fill="url(#ng2a)"/><line x1="16" y1="18" x2="32" y2="6" stroke="url(#ng2a)" stroke-width="1.8" stroke-linecap="round" opacity=".7"/><line x1="32" y1="6" x2="48" y2="18" stroke="url(#ng2a)" stroke-width="1.8" stroke-linecap="round" opacity=".7"/><line x1="16" y1="18" x2="32" y2="30" stroke="url(#ng2a)" stroke-width="1.8" stroke-linecap="round" opacity=".7"/><line x1="48" y1="18" x2="32" y2="30" stroke="url(#ng2a)" stroke-width="1.8" stroke-linecap="round" opacity=".7"/><line x1="32" y1="30" x2="32" y2="42" stroke="url(#ng2a)" stroke-width="1.8" stroke-linecap="round" opacity=".7"/><circle cx="32" cy="18" r="21" fill="none" stroke="#818cf8" stroke-width=".8" stroke-dasharray="4 8" opacity=".3"/><circle cx="8" cy="8" r="3" fill="#c4b5fd" opacity=".6"/><circle cx="56" cy="8" r="3" fill="#c4b5fd" opacity=".6"/><circle cx="56" cy="28" r="2.5" fill="#c4b5fd" opacity=".5"/><circle cx="8" cy="28" r="2.5" fill="#c4b5fd" opacity=".5"/><circle cx="32" cy="50" r="2" fill="#ddd6fe" opacity=".4"/><line x1="16" y1="18" x2="8" y2="8" stroke="#c4b5fd" stroke-width="1" opacity=".35"/><line x1="48" y1="18" x2="56" y2="8" stroke="#c4b5fd" stroke-width="1" opacity=".35"/><line x1="32" y1="42" x2="32" y2="50" stroke="#ddd6fe" stroke-width="1" opacity=".3"/><text x="68" y="28" font-family="-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif" font-weight="800" font-size="22" fill="#1e293b" letter-spacing="-.5">AI达学</text></svg>
-        <p style="color:var(--text2);font-size:13px;margin-bottom:10px;">企业AI学习一站式服务</p>
-        <p style="color:var(--text2);font-size:14px;">测评诊断 → 个性化课程 → 关卡陪练 → 成果验证</p>
+      <div class="pv-note">测评永久免费 · 不需要推荐码 · 看清能力再决定投入</div>
+    </div>
+
+    <div class="pv-sec"><span class="pv-num">1</span>先测短板，再按短板补课</div>
+    <p class="pv-sec-sub">测评自动算出最弱的 2–3 个维度，从下面 8 门课里精准挑出你该学的，不学用不上的。</p>
+    <details class="pv-profile" id="pvProfile" ${S._pvOpen ? 'open' : ''} ontoggle="if(typeof S!=='undefined'){S._pvOpen=this.open}">
+      <summary>测评前先告诉我行业和岗位（可选，让题目和推荐更贴合你的工作）</summary>
+      <div class="pv-inner">
+        <div class="pv-lbl">你所在的行业</div>
+        <div>${indTags}</div>
+        <div class="pv-lbl">你的岗位</div>
+        <div>${roleTags}</div>
+        <div class="pv-auto" id="pvAuto">${hasPick ? '已选择：'+industryLabel(S.industry)+' · '+(ROLES[S.role]?.name||'')+' —— 测评将按此画像出题。' : '不选也没关系 —— 直接用通用画像开始，测完仍可按短板推课。'}</div>
       </div>
-      <div class="card mb-3">
-        <p style="font-weight:600;font-size:15px;margin-bottom:16px;">Step 1: 选择行业场景</p>
-        <div class="industry-grid">`;
-  // v154：只渲染 7 个行业（hidden 的 elec / cpg / newbie 不进网格）
-  for (const id of IND_VISIBLE) {
-    const ind = INDUSTRIES[id];
-    const subs = ind.subs ? ind.subs.map(s => `<span class="tag tag-blue" style="font-size:10px;padding:1px 7px;margin:2px 2px 0;">${s}</span>`).join('') : '';
-    // v154：行业卡不再灰化。新人通道已移出网格，唯一的配对约束（应届生 ↔ 新人通道）
-    // 由 selectIndustry 的「点别的行业即解绑岗位」处理；灰化只会让人误以为点不动。
-    html += `
-          <div class="industry-card${S.industry===id?' selected':''}" data-action="selectIndustry" data-id="${id}">
-            <div class="industry-icon">${ind.icon}</div>
-            <div class="industry-name">${ind.name}</div>
-            <div class="industry-desc">${ind.desc}</div>
-            ${subs ? `<div style="margin-top:6px;">${subs}</div>` : ''}
-            ${ind.comingSoon ? '<div class="ind-flag">课程筹备中</div>' : ''}
-          </div>`;
-  }
-  // v154：新人通道 —— 它不属于任何行业，所以不占行业格子，单独一条通栏入口。
-  // 放在网格下方而不是顶部：先给「有行业的人」走主路径，找不到自己行业的再往下走这一步。
-  html += `
-        </div>
-        <div class="newbie-lane${S.industry==='newbie'?' on':''}" data-action="enterNewbieLane">
-          <div class="nl-ico">${INDUSTRIES.newbie.icon}</div>
-          <div class="nl-main">
-            <div class="nl-t">不在上面这些行业里？走「新人通道」</div>
-            <div class="nl-d">应届生、转行新人、还没定岗 —— 不用先选行业和岗位。8 个模块 64 单元，从第一句提示词到一周 AI 工作流，按「从零到能用」排。</div>
-          </div>
-          <div class="nl-go">${S.industry==='newbie'?'已进入 ✓':'进入 →'}</div>
-        </div>
-        <div class="newbie-lane fde-lane${S.industry==='fde'?' on':''}" data-action="enterFdeLane">
-          <div class="nl-ico">${INDUSTRIES.fde.icon}</div>
-          <div class="nl-main">
-            <div class="nl-t">做 AI 落地交付？走「FDE 通道」</div>
-            <div class="nl-d">前沿部署工程师、解决方案与实施、业务侧 AI 负责人 —— 同样不用先选行业和岗位。8 个模块 48 单元，从看懂工具箱到一次完整交付，按「把 AI 在客户现场跑起来」排。</div>
-          </div>
-          <div class="nl-go">${S.industry==='fde'?'已进入 ✓':'进入 →'}</div>
-        </div>
-      </div>`;
+    </details>
 
-  if (S.industry === 'newbie') {
-    // 新人通道：跳过「选岗位」。它不是 8 个岗位之一，硬塞进岗位网格只会让另外 7 张卡灰掉。
-    html += renderNewbiePanel();
-  } else if (S.industry === 'fde') {
-    // v199：FDE 通道同样跳过「选岗位」—— 它不对应任何行业，也不提供测评入口，
-    // 面板里直接给「进课 / 看模块」，避免学员在没建好的题库上卡住。
-    html += renderFdePanel();
-  } else {
-    html += `<div class="card${!S.industry?'':' selected'}">
-        <p style="font-weight:600;font-size:15px;margin-bottom:16px;">Step 2: 选择你的岗位</p>
-        <div class="role-grid">`;
-    // v155：岗位网格只列 6 个「在岗」岗位，「应届生」不再出现在这里。
-    // 它不是岗位（没有对应职能），且卡片点下去会反向改掉 Step 1 的行业选择 ——
-    // 唯一行为不一致的卡；选普通行业时它还永远是灰卡，等于在问「我选金融就不能是应届生？」。
-    // 应届生 / 转行新人 / 未定岗统一由上方「新人通道」承载（一键 newbie × graduate）。
-    for (const id of Object.keys(ROLES)) {
-      // v199：fde 与 graduate 一样不进岗位网格 —— 它们只作为「通道」入口存在（见上方两条通栏），
-      // 混进网格会让「金融 × FDE」这类无意义组合变得可选。
-      if (id === 'graduate' || id === 'fde') continue;
-      const r = ROLES[id];
-      html += `
-          <div class="role-card${S.role===id?' selected':''}" data-action="selectRole" data-id="${id}">
-            <div class="role-icon">${r.icon}</div>
-            <div class="role-name">${r.name}</div>
-            <div class="role-desc">${r.desc}</div>
-          </div>`;
-    }
-    html += `</div>
-        <div class="text-center mt-4"><button class="btn btn-primary" data-action="startQuiz" ${!S.industry||!S.role?'disabled':''} onclick="if(typeof S!=='undefined'){S.startQuiz()}">测一测AI能力</button></div>
-      </div>`;
-  }
+    <div class="pv-sec"><span class="pv-num">2</span>8 门岗位实战课，学完交得出活</div>
+    <p class="pv-sec-sub">每门按能力命名、64 单元、四步链路（理解 → 演示 → 我要做 → 陪练），行业案例在课内切换。</p>
+    <div class="pv-courses">
+      ${COURSE_CARDS.map(c=>`
+      <div class="pv-course" data-action="goCourseByKey" data-id="${c.k}">
+        <div class="pv-bar" style="background:${c.c==='c-blue'?'#3b82f6':c.c==='c-purple'?'#8b5cf6':c.c==='c-pink'?'#ec4899':c.c==='c-teal'?'#14b8a6':c.c==='c-amber'?'#f59e0b':'#f97316'}"></div>
+        <span class="pv-role">${c.d}</span>
+        <h4>${c.n}</h4>
+        <div class="pv-sub">${c.s}</div>
+      </div>`).join('')}
+    </div>
 
-  // 可见测评记录（v74：管理员=全部；企业账号=本企业；其他账号=仅自己）
+    <div class="newbie-lane${S.industry==='newbie'?' on':''}" data-action="enterNewbieLane" style="margin-top:24px;">
+      <div class="nl-ico">${INDUSTRIES.newbie.icon}</div>
+      <div class="nl-main"><div class="nl-t">职场新人 / 应届生？走「新人通道」</div><div class="nl-d">不按行业出题，8 个模块 64 单元，从第一句提示词到一周 AI 工作流，按「从零到能用」排。</div></div>
+      <div class="nl-go">${S.industry==='newbie'?'已进入 ✓':'进入 →'}</div>
+    </div>
+    <div class="newbie-lane fde-lane${S.industry==='fde'?' on':''}" data-action="enterFdeLane">
+      <div class="nl-ico">${INDUSTRIES.fde.icon}</div>
+      <div class="nl-main"><div class="nl-t">做 AI 落地交付？走「FDE 通道」</div><div class="nl-d">前沿部署工程师专属，8 维 72 题测评，按「一次真实交付」的顺序排，把 AI 真正落进业务现场。</div></div>
+      <div class="nl-go">${S.industry==='fde'?'已进入 ✓':'进入 →'}</div>
+    </div>`;
+
   const _visEmps = myEmployees();
   if (_visEmps.length > 0) {
     const _recTitle = getSessionSafe().role === 'admin' ? '最近测评记录' : '我的测评记录';
@@ -8711,10 +8729,30 @@ function renderRoleSelection() {
     });
     html += `</div>`;
   }
-
   html += `</div>`;
   return html;
 }
+
+// 预览版：测评优先的入口——未选画像时自动填通用默认，保证题库能命中
+S.startQuizPreview = function(){
+  try{
+    if(!S.industry || S.industry==='newbie' || S.industry==='fde'){ S.industry='mfg'; }
+    var validRole = !!(S.role && ROLES[S.role] && S.role!=='graduate' && S.role!=='fde');
+    if(!validRole){ S.role='pm'; }
+  }catch(e){ S.industry='mfg'; S.role='pm'; }
+  try{ S.startQuiz(); }catch(e){ console.error('startQuizPreview',e); }
+};
+S.goCoursesPreview = function(){
+  document.getElementById('pvProfile') && document.getElementById('pvProfile').setAttribute('open','open');
+  var el=document.querySelector('.pv-sec'); el && el.scrollIntoView({behavior:'smooth',block:'start'});
+};
+S.goCourseByKeyPreview = function(k){
+  try{
+    var list = courseListFor(k, S.industry);
+    if(list && list.length){ S.courseIdx=0; S.view='course'; render(); }
+    else { showToast('该课程即将上线'); }
+  }catch(e){ showToast('该课程即将上线'); }
+};
 
 // ===== v51: AI 基础素养卷（独立于 8 维岗位自适应；先答基础卷 → 再进岗位卷；不计入综合分）=====
 // 题库 AI_BASE_QUIZ = 6 主题 × 7 题；卷面分层抽 10 题 = 每主题至少 1 题 + 随机补抽 4 题
@@ -15943,6 +15981,7 @@ function bindEvents() {
             case 'selectRole': S.selectRole(id); break;
             case 'resetScenePair': S.resetScenePair(); break;
             case 'startQuiz': S.startQuiz(); break;
+            case 'goCourseByKey': S.goCourseByKeyPreview(id); break;
             case 'answerQuiz': S.answerQuiz(idx); break;
             case 'selectBaseOption': S.selectBaseOption(idx); break;
             case 'submitBaseOption': S.submitBaseOption(); break;
