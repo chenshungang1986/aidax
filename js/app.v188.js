@@ -5110,7 +5110,7 @@ const COURSES = {
     {id:'fde_m4', title:'M4 方案与搭建：把场景做成能跑的东西', desc:'三图选型、4 小时最小可用深度演示、RAG 切片溯源、人机分工三色（含 2 场陪练）', type:'video', dur:'8 单元', dims:['dev','data','workflow'], requires:['fde_m0']},
     {id:'fde_m5', title:'M5 交付：做成，且验得动', desc:'PEV 闭环、验收会全过程、成熟度 L0–L4、范围控制四纪律（含 2 场陪练）', type:'video', dur:'8 单元', dims:['workflow','strategy','content'], requires:['fde_m4']},
     {id:'fde_m6', title:'M6 沉淀：把经验变成组织资产', desc:'双向蒸馏、项目收尾蒸出 3 个 Skill、三态溯源与红线、成本曲线（含 2 场陪练）', type:'video', dur:'8 单元', dims:['content','strategy','workflow'], requires:['fde_m0']},
-    {id:'fde_m7', title:'M7 安全治理与 12 周养成', desc:'三层约束与数据边界、三类护栏、结算审核端到端复盘、12 周四道 Gate（含 2 场陪练）', type:'video', dur:'8 单元', dims:['security','workflow','strategy'], requires:['fde_m2','fde_m4']}
+    {id:'fde_m7', title:'M7 安全治理与 12 周养成', desc:'三层约束与数据边界、三类护栏、结算审核端到端复盘、12 周四道 Gate（含 2 场陪练）', type:'video', dur:'8 单元', dims:['prompt','tools','data','content','dev','workflow','security','strategy'], requires:['fde_m2','fde_m4']}
   ],
   auto_pm: [
     {id:'auto_pm_m0', title:'M0 导论：AI 产品经理在车企的位置', desc:'三重身份（场景翻译官/需求守门人/签字人）、战略图拆需求清单、机会—红线对照表与 90 天路线', type:'video', dur:'8 单元', dims:['security','workflow'], requires:[]},
@@ -5333,6 +5333,26 @@ const COURSES = {
   ]
 };
 
+// v228 新策略：课程对外按能力命名（AI XX 实战 · …）。
+// ⚠️ 不改 c.title —— 深版课 title 必须与 course_*.js 内 COURSE.modules[i].title 逐字一致，
+// 否则学习地图深链 ?m=Mx 会错位。对齐方式：保留 title，仅新增 displayTitle 供列表展示。
+(function(){
+  var COURSE_BRAND = {
+    mfg_pm:'AI 产品实战 · 制造进阶', finance_pm:'AI 产品实战 · 金融进阶',
+    retail_pm:'AI 产品实战 · 零售进阶', auto_pm:'AI 产品实战 · 汽车进阶',
+    cpg_pm:'AI 产品实战 · 快消进阶', newbie_graduate:'AI 通识实战', fde:'FDE 实战'
+  };
+  Object.keys(COURSE_BRAND).forEach(function(g){
+    (COURSES[g] || []).forEach(function(c){
+      if (!c.displayTitle) {
+        var mm = String(c.id || '').match(/_m(\d+)$/);
+        c.displayTitle = COURSE_BRAND[g] + ' · ' + (mm ? 'M' + mm[1] + ' ' : '') + String(c.title || '').replace(/^M\d+\s*/, '');
+      }
+    });
+  });
+})();
+function courseTitle(c) { return (c && c.displayTitle) || (c && c.title) || ''; }
+
 // Industry-aware course getter — tries role_industry key first, falls back to role
 // 按 岗位×行业 取课程集合（学习地图 / 课程列表 / 学习计划 / 后台统计共用同一口径）
 function courseListFor(roleId, industryId) {
@@ -5397,7 +5417,9 @@ function getCourseCompositeScore(course) {
   const result = S._quizResult;
   const dks = courseDimKeys(course);
   if (dks) {
-    // 新体系：取覆盖维度中的「最弱分」——任一弱维即可触发必修，确保短板必须补齐
+    // v228：原取 min 会让「覆盖维度越多越容易拿低分」→ 8 维综合课永久排第一，
+    // 与「先专项后综合」的学习顺序相反。改为短板为主 + 均值校正：弱维仍能触发必修，
+    // 但不会因覆盖面广被误判为最紧急。
     let vals = [];
     dks.forEach(dk => {
       let v = 0;
@@ -5405,7 +5427,10 @@ function getCourseCompositeScore(course) {
       else if (S.quizScores && S.quizScores[dk] !== undefined) v = S.quizScores[dk];
       vals.push(v);
     });
-    return vals.length ? Math.min.apply(null, vals) : 0;
+    if (!vals.length) return 0;
+    const lo = Math.min.apply(null, vals);
+    const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+    return Math.round((0.55 * lo + 0.45 * avg) * 100) / 100;
   }
   // legacy path（不破坏既有 PM/研发/运营等课程行为）
   const role = ROLES[S.role];
@@ -5432,10 +5457,14 @@ function getCoursePriority(course) {
 
   // Industry dimension multiplier: higher weight dims get more urgency when weak
   const weights = S._quizResult ? (S._quizResult.weights || getWeights(S.industry, S.role)) : getWeights(S.industry, S.role);
-  const dimKey = courseDimKey(course);
-  let indBoost = 1.0;
-  if (dimKey && weights && weights[dimKey] !== undefined) {
-    indBoost = 0.7 + (weights[dimKey] / 100) * 0.6; // 0.7 ~ 1.3 range
+  // v228：多 dims 课程原先只按首维加权，行业权重错配。改为全维平均。
+  const allDks = courseDimKeys(course) || [];
+  let indBoost = 1.0, _wHit = 0, _wSum = 0;
+  if (weights) {
+    allDks.forEach(function(dk){
+      if (weights[dk] !== undefined) { _wSum += 0.7 + (weights[dk] / 100) * 0.6; _wHit++; }
+    });
+    if (_wHit) indBoost = _wSum / _wHit;
   }
 
   // Prerequisite urgency: if prereq not done, boost this course
@@ -5448,16 +5477,11 @@ function getCoursePriority(course) {
   // v55: 自评加权重（想学 / 短板对应的维度优先推荐）
   let selfBoost = 1.0;
   const sd = selfDimKeys();
-  if (sd.size) {
-    const dk = courseDimKey(course);
-    if (dk && sd.has(dk)) selfBoost = 1.3;
-  }
-  // 修复：compScore 取覆盖维度的 min，覆盖越多越容易命中弱维 → 8 维全覆的综合实战课永久排第一。
-  // 按覆盖数做归一化惩罚，让「综合课靠后、专项课靠前」符合学习顺序。
-  const covCount = (courseDimKeys(course) || []).length;
-  const covPenalty = covCount > 1 ? 1 / (1 + 0.18 * (covCount - 1)) : 1;
-  // Combine: base priority × industry urgency × prereq factor × self factor × coverage
-  return Math.round(basePriority * indBoost * prereqBoost * selfBoost * covPenalty * 100) / 100;
+  if (sd.size && allDks.some(function(dk){ return sd.has(dk); })) selfBoost = 1.3;
+  // v228：compScore 已改为「短板+均值」，不再天然偏袒多维课，
+  // 故移除 covCount 反向惩罚（它把 M7 结业实战课压到末位，惩罚强度随覆盖数指数上升）。
+  // Combine: base priority × industry urgency × prereq factor × self factor
+  return Math.round(basePriority * indBoost * prereqBoost * selfBoost * 100) / 100;
 }
 
 // Check if all prerequisites for a course are met
@@ -5497,6 +5521,17 @@ function courseDimKey(course) {
   if (!role) return null;
   const skillIdx = getPrimarySkillIdx(course);
   return (role.dimKeys && role.dimKeys[skillIdx]) || null;
+}
+
+// v228：课程维度标签统一入口——深版课用 8 维中文名，浅课走 role.skills 兜底。
+// 原两处直接用 role.skills[getPrimarySkillIdx(c)]，深版课无 skills 会恒取岗位第一个技能名。
+function courseDimLabel(c) {
+  const dks = courseDimKeys(c);
+  if (dks && dks.length) {
+    return dks.map(function(dk){ return (AI_DIMS[dk] && (AI_DIMS[dk].shortCn || AI_DIMS[dk].short)) || dk; }).join('·');
+  }
+  const role = ROLES[S.role];
+  return (role && role.skills && role.skills[getPrimarySkillIdx(c)]) || '';
 }
 
 // 课程真实投入分钟数：64 单元课的 dur 形如「8 单元」，不能直接 parseInt
@@ -6663,15 +6698,31 @@ const COURSE_SKILL_MAP = {
   fin1:'data', fin2:'tools', fin3:'data', fin4:'security', fin5:'workflow',
   po1:'data', po2:'data', po3:'content', po4:'security', po5:'workflow',
   legal1:'content', legal2:'prompt', legal3:'security', legal4:'data', legal5:'strategy',
+  // v228: 补齐营销/财务岗位（原 32 key 漏掉 mkt/fc，自适应难度恒为 general）
+  mkt1:'content', mkt2:'data', mkt3:'data', mkt4:'content', mkt5:'prompt', mkt6:'workflow',
+  fc1:'data', fc2:'tools', fc3:'data', fc4:'data', fc5:'security', fc6:'strategy',
   // v37: AI工具指南系列
   tool1:'tools', tool2:'prompt', tool3:'workflow', tool4:'content', tool5:'dev'
 };
 
 function getAdaptationLevel(courseId) {
   if (!S.quizScores) return {level:'intermediate', score:60, skill:'general'};
-  // PM industry courses: extract base course id (e.g., mfg_pm1 -> pm1)
-  const baseId = courseId.includes('_') ? courseId.split('_').pop() : courseId;
-  const skill = COURSE_SKILL_MAP[baseId] || COURSE_SKILL_MAP[courseId] || 'general';
+  // v228：深版课（*_m0~m7）原先 split('_').pop() 得到无意义的 'm0'，自适应恒为 general。
+  // 改为优先按 COURSES 中该模块的 dims 首维取；行业浅课保留 baseId 回退。
+  let skill = COURSE_SKILL_MAP[courseId] || 'general';
+  if (!COURSE_SKILL_MAP[courseId]) {
+    let _hit = null;
+    for (const _g in COURSES) {
+      _hit = (COURSES[_g] || []).find(function(cc){ return cc.id === courseId; });
+      if (_hit) break;
+    }
+    const _dks = _hit && courseDimKeys(_hit);
+    if (_dks && _dks.length) skill = _dks[0];
+    else {
+      const baseId = courseId.includes('_') ? courseId.split('_').pop() : courseId;
+      skill = COURSE_SKILL_MAP[baseId] || 'general';
+    }
+  }
   const score = S.quizScores[skill] || S._quizResult?.overall || 60;
   let level = 'intermediate';
   if (score < 45) level = 'beginner';
@@ -9344,13 +9395,13 @@ function exportReport() {
   })).sort((a, b) => b.priority - a.priority).slice(0, 8);
   const courseRows = ordered.map((c, i) => {
     const skillIdx = getPrimarySkillIdx(c);
-    const skillName = role.skills[skillIdx] || '';
+    const skillName = courseDimLabel(c);
     let pct = Math.round(c.compScore / 4 * 100);
     if (pct === 0 && result.dimScores && role.dimKeys && role.dimKeys[skillIdx] && result.dimScores[role.dimKeys[skillIdx]] !== undefined) {
       pct = Math.round(result.dimScores[role.dimKeys[skillIdx]] / 4 * 100);
     }
     const urgency = pct < 40 ? '🔴 急需提升' : pct < 70 ? '🟡 建议学习' : '🟢 进阶提升';
-    return `<tr><td>${i + 1}</td><td>${escHtml(c.title)}</td><td>${escHtml(skillName)}</td><td>${urgency}</td></tr>`;
+    return `<tr><td>${i + 1}</td><td>${escHtml(courseTitle(c))}</td><td>${escHtml(skillName)}</td><td>${urgency}</td></tr>`;
   }).join('');
 
   // Quiz quality
@@ -9854,7 +9905,7 @@ function renderResults() {
   ordered.forEach((c, i) => {
     const tagCls = c.type==='video' ? 'tag-blue' : 'tag-purple';
     const skillIdx = getPrimarySkillIdx(c);
-    const skillName = role.skills[skillIdx] || '';
+    const skillName = courseDimLabel(c);
     const dimKey = (role.dimKeys && role.dimKeys[skillIdx]) || null;
     let pct = Math.round(c.compScore / 4 * 100);
     if (pct === 0) {
@@ -9870,7 +9921,7 @@ function renderResults() {
     html += `<div class="course-card${S.courseProgress[c.id]?.done?' completed':''}" data-action="openCourse" data-idx="${c.origIdx}" style="animation:slideUp ${0.3 + i*0.05}s ease both;cursor:pointer;">
       <div class="course-num">${i+1}</div>
       <div style="flex:1;min-width:0;">
-        <div class="course-title">${c.title}${multiTag}</div>
+        <div class="course-title">${courseTitle(c)}${multiTag}</div>
         <div class="course-meta">${c.dur} · ${urgency}${prereqUnmet?' · 建议先学前置':''}</div>
         <span class="map-skill-tag">${skillName}</span>
       </div>
@@ -10026,7 +10077,7 @@ function mapNodeHtml(c, opts) {
   const cDims = courseDimKeys(c);
   var skillName, skillPct;
   if (cDims && cDims.length) {
-    skillName = cDims.map(function (dk) { return (AI_DIMS[dk] && (AI_DIMS[dk].shortCn || AI_DIMS[dk].short)) || dk; }).join('·');
+    skillName = courseDimLabel(c);
     skillPct = getCourseDimPct(c);
   } else {
     const skillIdx = getPrimarySkillIdx(c);
@@ -10167,7 +10218,7 @@ function renderLearningMap() {
       html += `<div class="map-node done" data-action="openCourse" data-idx="${c.origIdx}" style="cursor:pointer;opacity:.85;">
         <div class="map-node-icon" style="background:var(--green);color:#fff;">✓</div>
         <div class="map-node-body">
-          <div class="map-node-title">${c.title}</div>
+          <div class="map-node-title">${courseTitle(c)}</div>
           <div class="map-node-meta">${c.dur} · 已达标免修</div>
         </div>
         <span class="map-node-badge done-badge">免修</span>
@@ -10368,7 +10419,7 @@ function renderSchedule() {
       html += `<div class="schedule-item ${priorityCls}" data-action="openCourse" data-idx="${c.origIdx}" style="cursor:pointer;">
         <div class="schedule-day">${day}</div>
         <div class="schedule-course">
-          <div class="schedule-course-name">${c.title}</div>
+          <div class="schedule-course-name">${courseTitle(c)}</div>
           <div class="schedule-course-dur">${c.dur} · 约 ${dur} 分钟（含演示/练习/陪练） · <span class="tag ${tagCls}" style="font-size:10px;padding:1px 6px;">${c.type==='video'?'视频':'图文'}</span>${prereqUnmet?' · <span style="color:var(--amber);font-size:11px;">建议先学前置</span>':''}</div>
         </div>
       </div>`;
@@ -10470,7 +10521,7 @@ function renderDashboard() {
 
     html += `<div class="course-card ${cls}" data-action="openCourse" data-idx="${c.origIdx}" style="cursor:pointer;">
       <div class="course-num">${i+1}</div>
-      <div style="flex:1;min-width:0;"><div class="course-title">${c.title}${quizBadge}</div><div class="course-meta">${c.dur}${c.requires?.length?' · 前置：'+c.requires.map(r=>getRoleCourses().find(rc=>rc.id===r)?.title||r).join('+ '):''}</div></div>
+      <div style="flex:1;min-width:0;"><div class="course-title">${courseTitle(c)}${quizBadge}</div><div class="course-meta">${c.dur}${c.requires?.length?' · 前置：'+c.requires.map(r=>courseTitle(getRoleCourses().find(rc=>rc.id===r))||r).join('+ '):''}</div></div>
       ${courseTierBadge(c)}
       <span style="font-size:12px;margin-left:8px;">${statusLabel}</span>
     </div>`;
@@ -10489,7 +10540,7 @@ function renderDashboard() {
     needReview.forEach(c => {
       const stats = getTotalQuizStats(c.id);
       html += `<div style="padding:8px 12px;background:var(--bg);border-radius:8px;margin-bottom:6px;display:flex;align-items:center;gap:10px;cursor:pointer;" data-action="openCourse" data-idx="${ordered.indexOf(c)}">
-        <span style="font-weight:600;font-size:13px;flex:1;">${c.title}</span>
+        <span style="font-weight:600;font-size:13px;flex:1;">${courseTitle(c)}</span>
         <span style="font-size:12px;color:var(--red);">${stats.correct}/${stats.total} 正确 (${stats.rate}%)</span>
         <span style="font-size:11px;color:var(--blue);">→ 重新学习</span>
       </div>`;
@@ -10604,7 +10655,7 @@ function renderCourseDetail() {
     // Full content below PPT (only show if transcript is hidden)
     html += `<div class="mt-4" id="courseFullContent">${buildContentHTML(content, c)}</div>`;
   } else if (c.type === 'video') {
-    html += `<div class="video-placeholder"><div class="play-btn">▶</div><p style="font-weight:600;font-size:16px;">${c.title}</p><p style="font-size:13px;opacity:0.8;">课程PPT视频演示</p></div>`;
+    html += `<div class="video-placeholder"><div class="play-btn">▶</div><p style="font-weight:600;font-size:16px;">${courseTitle(c)}</p><p style="font-size:13px;opacity:0.8;">课程PPT视频演示</p></div>`;
   } else {
     if (content) { html += buildContentHTML(content, c); }
     else { html += `<div style="background:var(--bg);border-radius:var(--radius);padding:20px;"><p style="font-size:13px;color:var(--text2);text-align:center;">课程内容加载中…</p></div>`; }
