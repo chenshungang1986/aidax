@@ -6,7 +6,7 @@
 <!-- 配音走 CDN：提前建连，省掉首段 100–300ms 的 DNS/TLS 时间 -->
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-<title>FDE 前沿部署工程师 · 完整学习课程（M0–M7 · 64 单元）</title>
+<title>FDE 前线部署工程师 · 完整学习课程（M0–M7 · 64 单元）</title>
 <style>
   :root{--blue:#1a5cff;--blue-d:#0e3aa8;--blue-bg:#eff4ff;--line:#e3e9f5;--card:#fff;--txt:#16213f;--mut:#6b7891;--bg:#f6f8fd;--green:#16a34a;--green-bg:#ecfdf5;--amber:#d97706;--red:#e11d48;}
   *{box-sizing:border-box;margin:0;padding:0}
@@ -544,11 +544,13 @@
     .shref{padding:10px 10px}
   }
 </style>
+<script src="https://gcore.jsdelivr.net/gh/chenshungang1986/aidax@1fd1bdfda410da70e77c8e5dfdb353d8288e380d/js/course_gate.js"></script>
+<script>if(typeof window.AX_GATE==='undefined'){document.write('<scr'+ 'ipt src="./js/course_gate.js"><\/scr'+'ipt>');}</script>
 </head>
 <body>
 <header>
   <a class="lc-home" href="app.html" title="返回学习中心：学习地图 · 测评成绩 · 学习计划"><span class="lc-ar">←</span><span class="lc-tx">学习中心</span></a>
-  <h1>FDE 前沿部署工程师<span>完整学习课程 M0–M7 · 8 模块 64 单元</span></h1>
+  <h1>FDE 前线部署工程师<span>完整学习课程 M0–M7 · 8 模块 64 单元</span></h1>
   <div class="hp" title="学习进度"><i id="prog-bar"></i></div>
   <button class="sb-btn" onclick="toggleSb()" title="课程目录">☰ 目录</button>
   <button class="gear" onclick="openCfg()" title="设置">⚙</button>
@@ -574,7 +576,7 @@
 <script>if(typeof supabase==='undefined'){document.write('<scr'+'ipt src="./vendor/supabase-js.umd.js"><\/scr'+'ipt>');}</script>
 
 <!-- v206：脚本与配音一律用 commit sha 锁定（@main 是强缓存，仓库更新后仍回旧文件，实测踩过） -->
-<script src="https://gcore.jsdelivr.net/gh/chenshungang1986/aidax@692b7a4926c956447359d07fa6266844fb1f092a/js/course_fde_deep.v18.js"></script>
+<script src="https://gcore.jsdelivr.net/gh/chenshungang1986/aidax@1fd1bdfda410da70e77c8e5dfdb353d8288e380d/js/course_fde_deep.v18.js"></script>
 <script>if(!(typeof COURSE!=='undefined')){document.write('<scr'+'ipt src="./js/course_fde_deep.v18.js"><\/scr'+'ipt>');}</script>
 
 
@@ -643,7 +645,7 @@ header h1{min-width:0;overflow:hidden;text-overflow:ellipsis}
 /* 学习中心抽屉：数据一律读主站写在同源的 localStorage，不新建第二套账本 */
 (function(){
   var DIM={prompt:'提示词表达',tools:'工具使用',data:'数据与分析',content:'内容生成',dev:'产品与技术',workflow:'工作流自动化',security:'安全合规',strategy:'战略与规划'};
-  var ROLE={pm:'产品经理',dev:'研发',mkt:'市场营销',hr:'人资与组织',fc:'财务与采购',legal:'法务与合规',graduate:'应届生',fde:'FDE 前沿部署工程师'};
+  var ROLE={pm:'产品经理',dev:'研发',mkt:'市场营销',hr:'人资与组织',fc:'财务与采购',legal:'法务与合规',graduate:'应届生',fde:'FDE 前线部署工程师'};
   /* 岗位能力项（与主站 ROLES[role].skills 逐项对齐；quizScores 的下标就是它） */
   var SKILL={
     pm:['AI需求分析','用户研究','数据分析与决策','原型设计辅助','竞品分析','产品策略评估'],
