@@ -885,7 +885,7 @@
 <script>if(typeof supabase==='undefined'){document.write('<scr'+'ipt src="./vendor/supabase-js.umd.js"><\/scr'+'ipt>');}</script>
 <script id="aidaxCloudFallback">
   // 主用同源自托管：避免 jsdelivr 国内不可达导致 window.supabase 缺失，
-  // 进而 sbClient() 恒为 null、反馈/访问日志/企业账号等全部无法同步云端（管理员收不到）。
+  // 进而 sbClient() 恒为 null、反���/访问日志/企业账号等全部无法同步云端（管理员收不到）。
   // 自托管文件缺失时回退备用 CDN；任一就绪后初始化客户端并补推 outbox、拉取云端。
   window.__aidaxCloudReady = function(){
     if (typeof window.supabase === 'undefined') return false;
@@ -917,7 +917,7 @@
 <div class="app" id="app" data-page-node-id="iVtQgw6qKgLzQxdvwF5oCC"><div class="card text-center" style="padding:60px 20px" data-page-node-id="d5xSIRIQrO2LUB7EdYduS8"><p style="color:var(--text2);font-size:14px" data-page-node-id="xgoCTH1RiURl1B80TiSVoJ">正在加载 AI达学...</p></div></div>
 
 <!-- v165：主脚本外置到 CDN（GitHub Pages 国内只有 30–60KB/s，jsDelivr 约 600KB/s 且 gzip） -->
-<script src="https://gcore.jsdelivr.net/gh/chenshungang1986/aidax@b545271f263748193ece8b86710d0d8c20df733f/js/app.v188.js"></script>
+<script src="https://gcore.jsdelivr.net/gh/chenshungang1986/aidax@e55827c3b23e682d4135ce39f4c4bc8955191027/js/app.v188.js"></script>
 <script>if(!(typeof S!=='undefined')){document.write('<scr'+'ipt src="./js/app.v188.js"><\/scr'+'ipt>');}</script>
 
 <!-- ===== FEEDBACK BUBBLE (#2 实时提交 bug：文字/截图/语音/录屏) ===== -->
