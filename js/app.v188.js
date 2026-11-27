@@ -62,7 +62,7 @@ const INDUSTRIES = {
   newbie:   {id:'newbie', name:'新人通道', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V11"/><path d="M12 11C12 8 9 6 5 6c0 4 3 6 7 5"/><path d="M12 13c0-3 3-5 7-5 0 4-3 6-7 5"/></svg>', desc:'应届生 · 转行新人 · 未定岗', color:'green', hidden:true, channel:true},
   // v199：FDE 通道 —— 与新人通道同构（hidden 不进行业网格、channel 表示它是「不选行业的一条路」）。
   // 它天然没有行业属性：FDE 面对的是客户现场，不是某个行业的标准流程。
-  fde:      {id:'fde', name:'FDE 通道', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><polyline points="6 9 9 12 6 15"/><line x1="12.5" y1="15" x2="17.5" y2="15"/></svg>', desc:'前沿部署工程师 · 交付与实施', color:'blue', hidden:true, channel:true}
+  fde:      {id:'fde', name:'FDE 通道', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><polyline points="6 9 9 12 6 15"/><line x1="12.5" y1="15" x2="17.5" y2="15"/></svg>', desc:'前线部署工程师 · 交付与实施', color:'blue', hidden:true, channel:true}
 };
 
 // 行业卡片只渲染「非 hidden」的 7 个；顺序即数组顺序（金融 → 汽车 → 制造 → 互联网 → 零售 → 能源 → 医疗）
@@ -133,11 +133,11 @@ const ROLES = {
     skills:['AI基础与工具入门','AI信息收集','AI工作PPT','AI数据处理','AI会议纪要','AI文生图','AI生视频','AI综合提效'],
     dimKeys:['prompt','data','content','data','content','content','tools','workflow']
   },
-  // v199：FDE（Forward Deployed Engineer，前沿部署工程师）—— 第 7 个岗位，但只在「FDE 通道」里出现，
+  // v199：FDE（Forward Deployed Engineer，前线部署工程师）—— 第 7 个岗位，但只在「FDE 通道」里出现，
   // 不进岗位网格（见 renderRoleSelection 的 skip 判断）。它不是职能条线，是「负责让 AI 在客户现场跑起来」的人。
   // skills 顺序 = 课程 M0–M7 顺序，dimKeys 取每模块的主维（8 维各出现一次，避免权重被单维吃掉）。
   fde: {
-    id:'fde', name:'FDE 前沿部署工程师', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>', color:'blue', desc:'现场交付、方案搭建、客户场景落地',
+    id:'fde', name:'FDE 前线部署工程师', icon:'<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>', color:'blue', desc:'现场交付、方案搭建、客户场景落地',
     skills:['AI 落地边界与角色定位','WorkBuddy 与 AI 产品矩阵','AI 工程基本功（Prompt / Harness / MCP）','进场访谈与场景立项','方案搭建与 RAG 边界','PEV 交付与验收','经验沉淀与资产复用','安全治理与权限审计'],
     dimKeys:['strategy','tools','prompt','workflow','dev','data','content','security']
   }
@@ -1176,7 +1176,7 @@ function getIndustryContext(roleId, industryId) {
   // Provide role+industry context prefix for quiz scenarios
   const ctx = {
     fde: {
-      fde: '你是一名前沿部署工程师（FDE），正在客户现场推进 AI 落地项目。'
+      fde: '你是一名前线部署工程师（FDE），正在客户现场推进 AI 落地项目。'
     },
     dev: {
       mfg: '🏭 你是一家智能制造工厂的研发工程师。',
@@ -8659,7 +8659,7 @@ function renderNewbiePanel() {
 // 而不是按 8 个能力维度排 —— 这条通道的学员要的是「这周上线什么」，不是「我哪一维弱」。
 function renderFdePanel() {
   return `<div class="nb-panel fde-panel">
-      <div class="nb-head">FDE 前沿部署工程师通道
+      <div class="nb-head">FDE 前线部署工程师通道
         <span class="tag tag-blue" style="font-size:10px;">已锁定 · 不选行业</span>
       </div>
       <p class="nb-sub">这条通道不按行业出题 —— FDE 面对的是客户现场，不是某个行业的标准流程。64 个单元按「一次真实交付」的顺序排：先认清自己是谁、手上有什么工具，再进场挖需求、搭方案、验收交付，最后把项目沉淀成能复用的资产，并守住数据与权限的红线。</p>
@@ -8718,7 +8718,7 @@ const ENTRY_JOBS = [
     {n:'AI 通识 · 从零到能用', role:'graduate', ind:'newbie', bank:'NEWBIE_QUIZ', focus:'六项基本功 · 一周工作流', d:'新人通道', k:'newbie'}
   ]},
   {id:'fde', name:'FDE 交付', ico:'🚀', desc:'客户现场 AI 落地', roles:[
-    {n:'前沿部署工程师', role:'fde', ind:'fde', bank:'FDE_QUIZ', focus:'进场访谈 · PEV 验收', d:'FDE 通道', k:'fde'}
+    {n:'前线部署工程师', role:'fde', ind:'fde', bank:'FDE_QUIZ', focus:'进场访谈 · PEV 验收', d:'FDE 通道', k:'fde'}
   ]}
 ];
 const ENTRY_COURSES = [
