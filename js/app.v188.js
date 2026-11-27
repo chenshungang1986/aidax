@@ -8721,15 +8721,17 @@ const ENTRY_JOBS = [
     {n:'前线部署工程师', role:'fde', ind:'fde', bank:'FDE_QUIZ', focus:'进场访谈 · PEV 验收', d:'FDE 通道', k:'fde'}
   ]}
 ];
+// v234：交付状态盘点。ready=true 表示已有独立深版课实体（完整单元 + 真人配音 + 独立课程页），
+// 可直接进入；ready=false 目前只有内嵌轻量课，没有配好的深版课，选课页置灰不可点。
 const ENTRY_COURSES = [
-  {k:'dev', n:'AI Coding 实战', s:'从需求到交付', d:'研发', c:'#3b82f6'},
-  {k:'pm', n:'AI 产品实战', s:'从需求到产品实现', d:'产品', c:'#8b5cf6'},
-  {k:'mkt', n:'AI 营销实战', s:'从内容到转化增长', d:'市场运营', c:'#ec4899'},
-  {k:'hr', n:'AI 人资实战', s:'从 JD 到人才发展', d:'人资', c:'#14b8a6'},
-  {k:'fc', n:'AI 财务实战', s:'从预算到经营分析', d:'财务采购', c:'#f59e0b'},
-  {k:'legal', n:'AI 法务实战', s:'从审查到合规管理', d:'法务', c:'#f97316'},
-  {k:'newbie', n:'AI 通识实战', s:'从工具到一周工作流', d:'职场新人', c:'#10b981'},
-  {k:'fde', n:'FDE 实战', s:'从进场到交付验收', d:'FDE', c:'#6366f1'}
+  {k:'dev',    n:'AI Coding 实战', s:'从需求到交付',     d:'研发',     c:'#3b82f6', ready:true},
+  {k:'pm',     n:'AI 产品实战',    s:'从需求到产品实现', d:'产品',     c:'#8b5cf6', ready:true, note:'金融 / 汽车 / 零售 已上线'},
+  {k:'mkt',    n:'AI 营销实战',    s:'从内容到转化增长', d:'市场运营', c:'#ec4899', ready:false},
+  {k:'hr',     n:'AI 人资实战',    s:'从 JD 到人才发展', d:'人资',     c:'#14b8a6', ready:false},
+  {k:'fc',     n:'AI 财务实战',    s:'从预算到经营分析', d:'财务采购', c:'#f59e0b', ready:false},
+  {k:'legal',  n:'AI 法务实战',    s:'从审查到合规管理', d:'法务',     c:'#f97316', ready:false},
+  {k:'newbie', n:'AI 通识实战',    s:'从工具到一周工作流', d:'职场新人', c:'#10b981', ready:true},
+  {k:'fde',    n:'FDE 实战',       s:'从进场到交付验收', d:'FDE',      c:'#6366f1', ready:true}
 ];
 const ENTRY_ROLE_OF = {newbie:'graduate', fde:'fde'};
 function afSteps(names, cur) {
@@ -8793,6 +8795,11 @@ function renderRoleSelection() {
   .af-course .af-role{font-size:10px;color:#94a3b8;background:var(--bg2);border-radius:20px;padding:2px 8px;display:inline-block;margin-bottom:8px;}
   .af-course b{display:block;font-size:14px;color:var(--text);line-height:1.45;}
   .af-course small{display:block;font-size:11.5px;color:#7c3aed;margin-top:4px;}
+  /* v234：未交付课程置灰——不可点、无 hover 反馈、虚线边框 + 筹备中角标 */
+  .af-course.off{opacity:.45;filter:grayscale(1);cursor:not-allowed;border-style:dashed;}
+  .af-course.off:hover{border-color:var(--border);transform:none;box-shadow:none;}
+  .af-course .af-soon{position:absolute;right:10px;top:10px;font-size:10px;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:20px;padding:2px 7px;line-height:1.5;}
+  .af-course .af-note{color:#0f766e!important;font-size:11px!important;}
   .af-chip{display:inline-block;font-size:12px;padding:7px 13px;margin:0 7px 8px 0;border-radius:20px;border:1.5px solid var(--border);background:var(--card);color:#475569;cursor:pointer;transition:all .15s;}
   .af-chip:hover{border-color:#a5b4fc;}
   .af-chip.on{border-color:#6366f1;background:#eef2ff;color:#4338ca;font-weight:700;}
@@ -8835,8 +8842,16 @@ function renderRoleSelection() {
     html += `<div class="af-panel">${afSteps(['选课程','选行业与岗位','进入适配课程'],0)}
       <button class="af-back" data-action="entryBack">← 返回</button>
       <h2>想先学哪一门？</h2>
-      <p class="af-sub">按岗位能力命名，8 门课都是 64 单元、学完交得出活。选完课再告诉你行业和岗位，课内案例会跟着变。</p>
-      <div class="af-grid af-g3">${ENTRY_COURSES.map(function(c){return '<div class="af-course" data-action="entryCourse" data-id="'+c.k+'"><span class="af-bar" style="background:'+c.c+'"></span><span class="af-role">'+c.d+'</span><b>'+c.n+'</b><small>'+c.s+'</small></div>';}).join('')}</div>
+      <p class="af-sub">按岗位能力命名，每门都是完整单元、学完交得出活。已上线的可直接进入；标注「筹备中」的还在制作，暂不能选。</p>
+      <div class="af-grid af-g3">${ENTRY_COURSES.map(function(c){
+        var off = c.ready === false;
+        return '<div class="af-course'+(off?' off':'')+'" data-action="entryCourse" data-id="'+c.k+'">'
+          + '<span class="af-bar" style="background:'+c.c+'"></span>'
+          + (off?'<span class="af-soon">筹备中</span>':'')
+          + '<span class="af-role">'+c.d+'</span><b>'+c.n+'</b><small>'+c.s+'</small>'
+          + (c.note?'<small class="af-note">'+c.note+'</small>':'')
+          + '</div>';
+      }).join('')}</div>
     </div>`;
   } else if (flow === 'pickScene') {
     var ck = S._entryCourse || 'pm';
@@ -8885,6 +8900,15 @@ S.entryPickRole = function(i) {
   try { S.startQuiz(); } catch(e) { console.error('entryPickRole', e); }
 };
 S.entryPickCourse = function(k) {
+  // v234：未交付课程置灰拦截——即使误触也不进选场景流程
+  var picked = null;
+  for (var i = 0; i < ENTRY_COURSES.length; i++) {
+    if (ENTRY_COURSES[i].k === k) { picked = ENTRY_COURSES[i]; break; }
+  }
+  if (picked && picked.ready === false) {
+    showToast('《' + picked.n + '》正在筹备中，敬请期待');
+    return;
+  }
   S._entryCourse = k;
   S._entryPosition = ENTRY_ROLE_OF[k] || k;
   S._entryIndustry = null;
