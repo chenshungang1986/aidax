@@ -4965,6 +4965,19 @@ const ASSESSMENTS = ADAPTIVE_QUIZ;
 
 // Courses per role
 const COURSES = {
+  // v231：AI Coding 深版课（course_dev_deep.html，9 模块 65 单元 401 屏 · 陈观配音）。
+  // 按新策略「研发按课程名直达」：role=dev 统一进这一门通用研发课，不再按行业分叉。
+  // 8 张正课卡（开刊词 M00 不单列，学完自动进 M0U1）；title 与深版课 COURSE.modules[i].title 逐字一致。
+  dev_deep: [
+    {id:'dev_m0', title:'M0 边界与红线：什么能做、什么绝不能做', desc:'人机分工四条红线、数据不出域、幻觉依赖与质量欠账、AI 工具的选型边界', type:'video', dur:'8 单元', dims:['tools','security'], requires:[]},
+    {id:'dev_m1', title:'M1 需求拆解：把模糊变成可执行', desc:'需求五问、把一句话拆成可验收规格、边界与失败路径、从模糊到可执行', type:'video', dur:'8 单元', dims:['prompt','content'], requires:['dev_m0']},
+    {id:'dev_m2', title:'M2 上下文工程：让 AI 读懂你的代码库', desc:'最小必要上下文、代码库分层、规则文件、会话污染与成本控制', type:'video', dur:'8 单元', dims:['prompt','tools'], requires:['dev_m0']},
+    {id:'dev_m3', title:'M3 生成与补全：从片段到模块', desc:'生成粒度、函数级起步、验证后再组合、把 AI 草稿变成可靠代码', type:'video', dur:'8 单元', dims:['prompt','dev'], requires:['dev_m1','dev_m2']},
+    {id:'dev_m4', title:'M4 代码审查：AI 初审 + 人把关', desc:'AI 初审能查什么、业务规则必须人判、安全模式扫描、审查留痕', type:'video', dur:'8 单元', dims:['security','content'], requires:['dev_m3']},
+    {id:'dev_m5', title:'M5 测试与重构：把 AI 产出变可靠', desc:'规格明确的用例交 AI、业务边界人工补、重构的验证闭环', type:'video', dur:'8 单元', dims:['dev','tools'], requires:['dev_m3']},
+    {id:'dev_m6', title:'M6 交付与协作：从代码到可交接', desc:'代码不等于交付物、测试/文档/变更说明齐全、同事可接手可复核', type:'video', dur:'8 单元', dims:['content','workflow'], requires:['dev_m4','dev_m5']},
+    {id:'dev_m7', title:'M7 结业项目：端到端交付一个真实功能', desc:'从需求到上线的完整闭环：拆解、生成、审查、测试、交付与复盘', type:'video', dur:'8 单元', dims:['strategy','workflow','dev'], requires:['dev_m6']}
+  ],
   dev: [
     {id:'dev1', title:'AI编程助手深度应用', desc:'掌握Copilot/Cursor等工具的核心用法，从代码补全到项目级架构设计', type:'video', dur:'45分钟', skills:[{s:0,w:0.45},{s:1,w:0.35},{s:2,w:0.2}],requires:['dev4'], tasks:[{t:'用AI生成一个REST API接口',h:'尝试用AI编程助手从零生成一个完整的REST API接口（包含路由、控制器、数据模型）。完成后检查代码质量。'},{t:'优化生成的代码',h:'让AI分析你上一步生成的代码，找出性能瓶颈和安全问题，并给出优化方案。'},{t:'用AI编写单元测试',h:'让AI为你的API接口编写完整的单元测试，要求覆盖率>80%。'}], video:'https://player.bilibili.com/player.html?bvid=BV1...'},
     {id:'dev2', title:'AI代码审查最佳实践', desc:'用AI系统性地审查代码质量、安全性和性能', type:'text', dur:'30分钟', skills:[{s:1,w:0.45},{s:3,w:0.25},{s:0,w:0.2},{s:4,w:0.1}],requires:['dev1'], tasks:[{t:'审查一段遗留代码',h:'给定一段遗留代码，用AI分析其中的代码坏味道、安全漏洞和性能问题。'},{t:'生成代码审查报告',h:'基于AI分析结果，生成一份结构化的代码审查报告，包含问题分级和修复建议。'},{t:'制定团队审查规范',h:'结合AI能力，草拟一份团队AI代码审查规范文档。'}] },
@@ -5358,6 +5371,9 @@ function courseTitle(c) { return (c && c.displayTitle) || (c && c.title) || ''; 
 function courseListFor(roleId, industryId) {
   // v154：旧岗位 id 归一（ops→mkt / sales→mkt / fin→fc / po→fc），否则历史深链会拿到空课表
   roleId = resolveRole(roleId);
+  // v231：研发统一按课程名直达 AI Coding 深版课（course_dev_deep.html），不再按行业分叉。
+  // 无论从测评路径（industry=mfg 等）还是直接上课进入，role=dev 都拿到同一组 8 张模块卡。
+  if (roleId === 'dev') return (COURSES.dev_deep || []).slice();
   // 金融 × 产品经理：课程实体 = 64 单元深版课（course_finance_pm_deep.html）的 8 个模块。
   // 学习地图 / 课程列表 / 学习计划必须与该丰富课一一对应（点击带 ?m=Mx 深链定位模块），
   // 否则会出现「地图列通用产品课、点进去却是金融 PM 课」的错位。
@@ -8901,7 +8917,8 @@ S.entryEnterCourse = function() {
              (S.industry === 'auto' && S.role === 'pm') ||
              (S.industry === 'retail' && S.role === 'pm') ||
              (S.industry === 'newbie' && S.role === 'graduate') ||
-             (S.industry === 'fde' && S.role === 'fde');
+             (S.industry === 'fde' && S.role === 'fde') ||
+             (S.role === 'dev');   // v231 AI Coding 深版课
   if (deep) { S.openCourse(idx); showToast('课程已在新标签页打开'); return; }
   S.view = 'course'; render();
 };
@@ -13787,7 +13804,19 @@ S.caseFilter = function(f,v){
 S.openCourseById = function(cid){
   var cur = getRoleCourses();
   for (var i=0;i<cur.length;i++){ if (cur[i].id===cid){ S.openCourse(i); return; } }
-  for (var g in COURSES){ var arr=COURSES[g]||[]; for (var j=0;j<arr.length;j++){ if (arr[j].id===cid){ S.role=g; S.courseIdx=j; S.courseTaskIdx=0; S.pptCurrentSlide=0; S.voicePlaying=false; S.view='course'; render(); return; } } }
+  for (var g in COURSES){ var arr=COURSES[g]||[]; for (var j=0;j<arr.length;j++){ if (arr[j].id===cid){
+    // v231：深版课不能内嵌（无 c.tasks）。第二循环命中深版课模块卡时，
+    // 还原对应 industry/role 后统一走 S.openCourse() 的新标签判定。
+    if (/^dev_m\d+$/.test(cid)){ S.role='dev'; S.openCourse(j); return; }
+    if (/^(fin|auto|retail)_pm_m\d+$/.test(cid)){
+      S.role='pm';
+      S.industry = cid.indexOf('fin_')===0?'finance':(cid.indexOf('auto_')===0?'auto':'retail');
+      S.openCourse(j); return;
+    }
+    if (/^fde_m\d+$/.test(cid)){ S.role='fde'; S.industry='fde'; S.openCourse(j); return; }
+    if (/^newbie_grad_m\d+$/.test(cid)){ S.role='graduate'; S.industry='newbie'; S.openCourse(j); return; }
+    S.role=g; S.courseIdx=j; S.courseTaskIdx=0; S.pptCurrentSlide=0; S.voicePlaying=false; S.view='course'; render(); return;
+  } } }
   showToast('未找到关联课程');
 };
 
@@ -15627,6 +15656,17 @@ S.openCourse = function(idx) {
     const weakF = weakDimList();
     const wparamF = weakF.length ? ((mparam ? '&' : '?') + 'weak=' + encodeURIComponent(weakF.join(','))) : '';
     window.open('course_fde_deep.html' + mparam + wparamF + adminParam(mparam || wparamF), '_blank', 'noopener');
+    return;
+  }
+  // v231 研发通道：进入 AI Coding 深版课（course_dev_deep.html，9 模块 65 单元 · 陈观配音）。
+  // 通用研发场景不带行业属性，role=dev 无论 industry 为何都走这一门；带 ?m=Mx 深链、&weak 弱维高亮、admin=1。
+  // ⚠️ 与 COURSES.dev_deep 的模块卡 id（dev_m0..m7）是原子改动。
+  if (S.role === 'dev') {
+    if (!S.canOpenCourse()) return;   // v216 课程闸门
+    const mparam = (c && c.id && /dev_m(\d+)/.test(c.id)) ? ('?m=M' + c.id.match(/dev_m(\d+)/)[1]) : '';
+    const weakD = weakDimList();
+    const wparamD = weakD.length ? ((mparam ? '&' : '?') + 'weak=' + encodeURIComponent(weakD.join(','))) : '';
+    window.open('course_dev_deep.html' + mparam + wparamD + adminParam(mparam || wparamD), '_blank', 'noopener');
     return;
   }
   // 新人小白 × 应届生：进入深版 64 单元课程（course_newbie_deep.html），
