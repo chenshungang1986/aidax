@@ -49,6 +49,11 @@
   window.AX_GATE = { ok: allowed(), reason: allowed() ? 'ok' : 'no-invite' };
   if (window.AX_GATE.ok) return;
 
+  /* v235：两种拦截状态分开提示 ——
+     未登录：先登录（不提购买，避免访客没账号先被价格劝退）
+     已登录但没激活：购买 或 输入邀请码 */
+  var LOGGED = !!(sess && (sess.loginId || sess.phone || sess.user || sess.name));
+
   // 未授权：立刻锁住页面滚动，等 DOM 就绪后铺遮罩
   var css = document.createElement('style');
   css.textContent = [
@@ -84,22 +89,32 @@
     if (document.getElementById('ax-gate')) return;
     var d = document.createElement('div');
     d.id = 'ax-gate';
-    d.innerHTML =
-      '<div class="ax-card">' +
-      '<div class="ax-ico">🔒</div>' +
-      '<h2>这门课需要开通后观看</h2>' +
-      '<p>课程为付费内容，两种方式都能开通，任选其一：</p>' +
-      '<div class="ax-ways">' +
-      '<div><b>①</b><span>已有邀请码：登录后输入邀请码，立即解锁全部课程</span></div>' +
-      '<div><b>②</b><span>还没有邀请码：查看价格并联系我们开通（含试学）</span></div>' +
-      '</div>' +
-      '<div class="ax-btns">' +
-      '<a class="ax-primary" href="app.html">去登录 / 输入邀请码</a>' +
-      '<a class="ax-ghost" href="index.html#price">查看价格与开通</a>' +
-      '</div>' +
-      '<div class="ax-price">试学 ¥199 / 14 天 · 标准 ¥699 / 账号 / 年 · 企业定制按需报价</div>' +
-      '<div class="ax-tip">8 维能力测评永久免费，可以先测一测再决定 · 已激活却看到此页请确认是同一浏览器、同一账号</div>' +
-      '</div>';
+    d.innerHTML = LOGGED
+      ? '<div class="ax-card">' +
+        '<div class="ax-ico">🔒</div>' +
+        '<h2>这门课需要开通后观看</h2>' +
+        '<p>你已登录，课程还未开通。两种方式任选其一：</p>' +
+        '<div class="ax-ways">' +
+        '<div><b>①</b><span>已有邀请码：输入邀请码，立即解锁全部课程</span></div>' +
+        '<div><b>②</b><span>还没有邀请码：查看价格并联系我们开通（含试学）</span></div>' +
+        '</div>' +
+        '<div class="ax-btns">' +
+        '<a class="ax-primary" href="app.html">输入邀请码</a>' +
+        '<a class="ax-ghost" href="index.html#price">查看价格与开通</a>' +
+        '</div>' +
+        '<div class="ax-price">试学 ¥199 / 14 天 · 标准 ¥699 / 账号 / 年 · 企业定制按需报价</div>' +
+        '<div class="ax-tip">8 维能力测评永久免费，可以先测一测再决定 · 已激活却看到此页请确认是同一浏览器、同一账号</div>' +
+        '</div>'
+      : '<div class="ax-card">' +
+        '<div class="ax-ico">👤</div>' +
+        '<h2>登录后即可开始学习</h2>' +
+        '<p>课程需要登录后开通观看。已有账号请直接登录；还没有账号，登录页可以免费注册，8 维能力测评永久免费。</p>' +
+        '<div class="ax-btns">' +
+        '<a class="ax-primary" href="app.html">去登录 / 注册</a>' +
+        '<a class="ax-ghost" href="index.html">返回首页</a>' +
+        '</div>' +
+        '<div class="ax-tip">登录后可凭邀请码开通，或查看价格联系我们开通</div>' +
+        '</div>';
     (document.body || document.documentElement).appendChild(d);
   }
 

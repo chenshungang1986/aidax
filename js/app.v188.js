@@ -16930,6 +16930,13 @@ if (typeof window !== 'undefined'){
       if (!picked && acl.accountTier && acl.accountTier(sess) === 'trial') picked = acl.FEATURES.TRIAL_UNIT;
       var r = acl.gate(picked || acl.FEATURES.INDUSTRY_DEEP, sess, null);
       if (r && r.allow === false) {
+        // v235：未登录先引导登录，已登录才走「购买 / 输入邀请码」
+        var _lg = !!(sess && (sess.loginId || sess.phone || sess.user || sess.name));
+        if (!_lg) {
+          showToast('请先登录，登录后可用邀请码开通课程');
+          try { S.view = 'login'; render(); } catch(e){}
+          return false;
+        }
         showToast(r.why || '当前版本不含此课程');
         try { S.openRedeemModal(); } catch(e){}
         return false;
