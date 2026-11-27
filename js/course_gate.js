@@ -69,7 +69,13 @@
     '#ax-gate .ax-primary:hover{background:#0e3aa8}',
     '#ax-gate .ax-ghost{background:#fff;color:#1a5cff;border:1px solid #c9d8ff}',
     '#ax-gate .ax-ghost:hover{background:#eff4ff}',
-    '#ax-gate .ax-tip{margin-top:18px;font-size:12px;color:#93a0b8}'
+    '#ax-gate .ax-tip{margin-top:18px;font-size:12px;color:#93a0b8}',
+    '#ax-gate .ax-ways{margin:0 0 22px;text-align:left;background:#f7f9ff;border:1px solid #e6ecfb;',
+    'border-radius:12px;padding:14px 16px}',
+    '#ax-gate .ax-ways div{display:flex;gap:8px;font-size:13px;line-height:1.7;color:#46536b}',
+    '#ax-gate .ax-ways div+div{margin-top:6px}',
+    '#ax-gate .ax-ways b{flex:0 0 auto;color:#1a5cff}',
+    '#ax-gate .ax-price{font-size:12px;color:#8b98b0;margin-top:12px}'
   ].join('');
   (document.head || document.documentElement).appendChild(css);
   document.documentElement.className += ' ax-locked';
@@ -81,13 +87,18 @@
     d.innerHTML =
       '<div class="ax-card">' +
       '<div class="ax-ico">🔒</div>' +
-      '<h2>这门课程需要邀请码解锁</h2>' +
-      '<p>课程为付费内容，请先用邀请码激活账号再观看。<br>8 维能力测评仍然永久免费，可以先测一测再决定。</p>' +
-      '<div class="ax-btns">' +
-      '<a class="ax-primary" href="app.html">去登录 / 激活邀请码</a>' +
-      '<a class="ax-ghost" href="index.html">返回首页</a>' +
+      '<h2>这门课需要开通后观看</h2>' +
+      '<p>课程为付费内容，两种方式都能开通，任选其一：</p>' +
+      '<div class="ax-ways">' +
+      '<div><b>①</b><span>已有邀请码：登录后输入邀请码，立即解锁全部课程</span></div>' +
+      '<div><b>②</b><span>还没有邀请码：查看价格并联系我们开通（含试学）</span></div>' +
       '</div>' +
-      '<div class="ax-tip">已激活却仍看到此页？请确认是同一浏览器、同一账号</div>' +
+      '<div class="ax-btns">' +
+      '<a class="ax-primary" href="app.html">去登录 / 输入邀请码</a>' +
+      '<a class="ax-ghost" href="index.html#price">查看价格与开通</a>' +
+      '</div>' +
+      '<div class="ax-price">试学 ¥199 / 14 天 · 标准 ¥699 / 账号 / 年 · 企业定制按需报价</div>' +
+      '<div class="ax-tip">8 维能力测评永久免费，可以先测一测再决定 · 已激活却看到此页请确认是同一浏览器、同一账号</div>' +
       '</div>';
     (document.body || document.documentElement).appendChild(d);
   }

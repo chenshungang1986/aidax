@@ -16890,12 +16890,12 @@ if (typeof window !== 'undefined'){
       + '<div class="redeem-card">'
       + '<button class="redeem-x" onclick="S.closeRedeemModal()">×</button>'
       + '<div class="redeem-h">输入邀请码</div>'
-      + '<p class="redeem-p">测评免费，无需邀请码；<b>观看课程需要先激活试用</b>。体验版邀请码解锁 14 天完整体验，标准版邀请码解锁全量课程，有效期 14 天。</p>'
+      + '<p class="redeem-p">测评免费，无需邀请码；<b>观看课程需要先开通</b>。已有邀请码直接输入激活；还没有邀请码，可以先看价格、或联系客服开通（试学 ¥199 / 14 天，标准 ¥699 / 账号 / 年）。</p>'
       + '<div class="redeem-cur">当前版本：<b>' + name + '</b>' + (c ? ' · 剩余 ' + days + ' 天' : ' · 未激活') + '</div>'
       + '<input id="redeemInput" class="redeem-input" placeholder="请输入邀请码，如 ADX-T-XXXX-XXXX" autocomplete="off">'
       + '<div id="redeemMsg" class="redeem-msg"></div>'
       + '<button class="btn btn-primary redeem-ok" onclick="S.doRedeem()">激活并解锁课程</button>'
-      + '<div class="redeem-foot">没有邀请码？<a href="tel:18682011582">联系客服 18682011582 获取</a></div>'
+      + '<div class="redeem-foot">没有邀请码？<a href="index.html#price" target="_blank" rel="noopener">查看价格与开通</a> · <a href="tel:18682011582">联系客服 18682011582</a></div>'
       + '</div>';
     document.body.appendChild(div);
     setTimeout(function(){ var el = document.getElementById('redeemInput'); if (el) el.focus(); }, 60);
